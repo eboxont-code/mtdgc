@@ -1,0 +1,15 @@
+{
+  "source": "https://topupmandu.com",
+  "capabilities": [
+    {"capability":"public storefront","source":"Shopify public site","outcome":"recreate","status":"implemented","next_action":"verify preview"},
+    {"capability":"catalog content","source":"Shopify public catalog","outcome":"recreate","status":"implemented","next_action":"connect live inventory if required"},
+    {"capability":"product imagery","source":"Shopify CDN","outcome":"preserve","status":"implemented","next_action":"confirm reuse rights"},
+    {"capability":"cart and checkout","source":"Shopify","outcome":"prototype","status":"pending","next_action":"connect commerce backend"},
+    {"capability":"customer accounts","source":"Shopify","outcome":"defer","status":"pending","next_action":"connect commerce backend"},
+    {"capability":"existing orders and customers","source":"Shopify","outcome":"defer","status":"pending","next_action":"provide an export if migration is desired"},
+    {"capability":"WhatsApp support","source":"public contact link","outcome":"preserve","status":"implemented","next_action":"verify destination"},
+    {"capability":"payments and fulfillment","source":"Shopify checkout","outcome":"defer","status":"pending","next_action":"choose and connect production commerce flow"},
+    {"capability":"cutover","source":"topupmandu.com","outcome":"defer","status":"pending","next_action":"publish and point domain after production verification"},
+    {"capability":"verification","source":"Lovable preview","outcome":"recreate","status":"pending","next_action":"run mobile browser checks"}
+  ]
+}
