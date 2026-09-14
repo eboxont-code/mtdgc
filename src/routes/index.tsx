@@ -14,13 +14,15 @@ import steamImage from "@/assets/steam.jpg.asset.json";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "TopUpMandu | Game Top-Ups & Digital Products" },
-      { name: "description", content: "Shop game top-ups, diamonds, UC, gift cards and digital subscriptions in Nepal." },
-      { property: "og:title", content: "TopUpMandu | Game Top-Ups & Digital Products" },
-      { property: "og:description", content: "Fast, simple game top-ups and digital products for Nepal." },
+      { title: "MTDGC | Nepal's Digital Marketplace" },
+      { name: "description", content: "MTDGC, Modern Tech Digital Goods & Commerce. Game top-ups, gift cards and subscriptions delivered digitally across Nepal." },
+      { property: "og:title", content: "MTDGC | Nepal's Digital Marketplace" },
+      { property: "og:description", content: "Modern Tech Digital Goods & Commerce. Game top-ups, gift cards and subscriptions for Nepal." },
+      { property: "og:url", content: "https://topupmandu-plus.lovable.app/" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "https://topupmandu-plus.lovable.app/" }],
   }),
   component: Index,
 });
