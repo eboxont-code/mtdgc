@@ -74,9 +74,12 @@ function Index() {
 
       <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-1 px-4">
-          <a href="#top" className="mr-auto flex items-center gap-2" aria-label="TopUpMandu home">
-            <span className="grid size-7 place-items-center rounded-md bg-primary font-display text-sm font-semibold text-primary-foreground">T</span>
-            <span className="font-display text-[15px] font-semibold">TopUpMandu</span>
+          <a href="#top" className="mr-auto flex items-center gap-2" aria-label="MTDGC home">
+            <span className="grid size-7 place-items-center rounded-md bg-primary font-display text-sm font-semibold text-primary-foreground">M</span>
+            <span className="flex flex-col leading-none">
+              <span className="font-display text-[15px] font-semibold">MTDGC</span>
+              <span className="hidden text-[9px] uppercase tracking-[0.12em] text-muted-foreground sm:block">Modern Tech Digital Goods &amp; Commerce</span>
+            </span>
           </a>
           <Button variant="ghost" size="icon" aria-label="Search products" onClick={() => setSearchOpen((open) => !open)}><Search className="size-4" /></Button>
           <Button variant="ghost" size="icon" aria-label="Account"><UserRound className="size-4" /></Button>
@@ -92,12 +95,12 @@ function Index() {
         <section className="border-b border-border bg-panel">
           <div className="mx-auto grid max-w-6xl gap-8 px-4 py-7 md:grid-cols-[1fr_0.8fr] md:items-center md:py-14">
             <div>
-              <p className="reveal mb-2 font-display text-[11px] uppercase tracking-[0.16em] text-primary">Nepal&apos;s digital gaming store</p>
-              <h1 className="reveal delay-1 max-w-xl font-display text-[34px] font-medium leading-tight md:text-6xl">Top up in under a minute.</h1>
-              <p className="reveal delay-2 mt-2 max-w-[44ch] text-[15px] text-foreground/70 md:text-lg">Pick a game, choose your package, and place your order without waiting in a queue.</p>
+              <p className="reveal mb-2 font-display text-[11px] uppercase tracking-[0.16em] text-primary">Nepal&apos;s Digital Marketplace</p>
+              <h1 className="reveal delay-1 max-w-xl font-display text-[34px] font-medium leading-tight md:text-6xl">Digital goods, delivered in minutes.</h1>
+              <p className="reveal delay-2 mt-2 max-w-[46ch] text-[15px] text-foreground/70 md:text-lg">MTDGC is a digital commerce company serving Nepal. We start with game top-ups, gift cards and subscriptions, and we keep adding product lines.</p>
               <div className="reveal delay-3 mt-4 flex items-center gap-3">
-                <Button onClick={() => document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" })}>Start a top-up</Button>
-                <span className="font-display text-xs text-muted-foreground">12 popular titles</span>
+                <Button onClick={() => document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" })}>Browse the catalog</Button>
+                <span className="font-display text-xs text-muted-foreground">{products.length} products live</span>
               </div>
             </div>
             <div className="reveal delay-3 rounded-lg bg-background p-3 ring-1 ring-foreground/5">
