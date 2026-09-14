@@ -145,6 +145,23 @@ function Index() {
         <section className="bg-foreground text-background"><div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-6"><span className="grid size-10 shrink-0 place-items-center rounded-md bg-brand-soft"><MessageCircle className="size-5" /></span><div className="min-w-0"><h2 className="font-display text-[15px] font-medium">Questions? We answer fast.</h2><p className="text-xs text-background/60">Chat with the MTDGC team on WhatsApp.</p></div><Button asChild variant="primary" size="sm" className="ml-auto"><a href="https://wa.me/19379307376" target="_blank" rel="noreferrer">Message</a></Button></div></section>
       </main>
 
+      <footer className="border-t border-border bg-panel">
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 md:flex-row md:items-end md:justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="grid size-7 place-items-center rounded-md bg-primary font-display text-sm font-semibold text-primary-foreground">M</span>
+              <span className="font-display text-[15px] font-semibold">MTDGC</span>
+            </div>
+            <p className="mt-2 font-display text-xs uppercase tracking-[0.12em] text-muted-foreground">Modern Tech Digital Goods &amp; Commerce</p>
+            <p className="mt-1 max-w-[48ch] text-xs text-muted-foreground">Nepal&apos;s Digital Marketplace. Game top-ups, gift cards and subscriptions today, with more digital product lines on the way.</p>
+          </div>
+          <div className="text-xs text-muted-foreground">
+            <a href="https://wa.me/19379307376" target="_blank" rel="noreferrer" className="font-display font-medium text-foreground">WhatsApp support</a>
+            <p className="mt-2">© {new Date().getFullYear()} MTDGC</p>
+          </div>
+        </div>
+      </footer>
+
       {cartCount > 0 && <div className="fixed inset-x-0 bottom-0 z-40 border-t border-background/10 bg-foreground text-background"><div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3"><div className="min-w-0"><p className="font-display text-[10px] uppercase tracking-[0.12em] text-background/50">Cart</p><p className="font-display text-[15px] font-semibold">{cartCount} {cartCount === 1 ? "item" : "items"} · Rs {cartTotal}</p></div><Button className="ml-auto" onClick={() => setCartOpen(true)}>View cart</Button></div></div>}
 
       {cartOpen && <div className="fixed inset-0 z-50 bg-foreground/45" role="presentation" onClick={() => setCartOpen(false)}><aside className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-auto rounded-t-lg bg-background p-4 md:left-auto md:top-0 md:w-[420px] md:rounded-none" role="dialog" aria-modal="true" aria-label="Shopping cart" onClick={(event) => event.stopPropagation()}><div className="mb-5 flex items-center justify-between"><h2 className="font-display text-xl font-semibold">Your cart</h2><Button variant="ghost" size="icon" aria-label="Close cart" onClick={() => setCartOpen(false)}><X className="size-5" /></Button></div>{cartItems.length ? <><div className="space-y-3">{cartItems.map((product) => <div key={product.id} className="flex items-center gap-3 border-b border-border pb-3"><img src={product.image} alt="" className="size-12 rounded-md object-cover" /><div className="min-w-0 flex-1"><p className="truncate font-display text-sm font-medium">{product.title}</p><p className="text-xs text-muted-foreground">Rs {product.price} × {cart[product.id]}</p></div><div className="flex items-center gap-1"><Button variant="outline" size="icon" aria-label={`Remove one ${product.title}`} onClick={() => setCart((current) => ({...current, [product.id]: Math.max(0, (current[product.id] ?? 0) - 1)}))}>−</Button><Button variant="outline" size="icon" aria-label={`Add one ${product.title}`} onClick={() => addToCart(product.id)}>+</Button></div></div>)}</div><div className="mt-5 flex items-center justify-between font-display"><span>Total</span><strong>Rs {cartTotal}</strong></div><div className="mt-4 rounded-md bg-secondary p-3 text-xs text-muted-foreground"><Check className="mr-1 inline size-3 text-success" />Demo cart. MTDGC checkout goes live once payment processing is connected.</div><Button className="mt-3 w-full" size="lg" onClick={() => window.open("https://wa.me/19379307376", "_blank")}>Order on WhatsApp</Button></> : <div className="py-16 text-center"><ShoppingBag className="mx-auto size-8 text-muted-foreground" /><p className="mt-3 font-display font-medium">Your cart is empty</p></div>}</aside></div>}
