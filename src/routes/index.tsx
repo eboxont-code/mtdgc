@@ -87,9 +87,9 @@ function Index() {
       <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-1 px-4">
           <a href="#top" className="mr-auto flex items-center gap-2" aria-label="MTDGC home">
-            <span className="grid size-7 place-items-center rounded-md bg-primary font-display text-sm font-semibold text-primary-foreground">M</span>
+            <span aria-hidden="true" className="grid size-7 place-items-center rounded-md bg-primary font-display text-sm font-semibold text-primary-foreground">M</span>
             <span className="flex flex-col leading-none">
-              <span className="font-display text-[15px] font-semibold">MTDGC</span>
+              <span className="font-display text-[15px] font-semibold">TDGC</span>
               <span className="hidden text-[9px] uppercase tracking-[0.12em] text-muted-foreground sm:block">Modern Tech Digital Goods &amp; Commerce</span>
             </span>
           </a>
@@ -160,9 +160,10 @@ function Index() {
       <footer className="border-t border-border bg-panel">
         <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 md:flex-row md:items-end md:justify-between">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="grid size-7 place-items-center rounded-md bg-primary font-display text-sm font-semibold text-primary-foreground">M</span>
-              <span className="font-display text-[15px] font-semibold">MTDGC</span>
+            <div className="flex items-center gap-2" aria-label="MTDGC">
+              <span aria-hidden="true" className="grid size-7 place-items-center rounded-md bg-primary font-display text-sm font-semibold text-primary-foreground">M</span>
+              <span aria-hidden="true" className="font-display text-[15px] font-semibold">TDGC</span>
+              <span className="sr-only">MTDGC</span>
             </div>
             <p className="mt-2 font-display text-xs uppercase tracking-[0.12em] text-muted-foreground">Modern Tech Digital Goods &amp; Commerce</p>
             <p className="mt-1 max-w-[48ch] text-xs text-muted-foreground">Nepal&apos;s Digital Marketplace. Game top-ups, gift cards and subscriptions today, with more digital product lines on the way.</p>
