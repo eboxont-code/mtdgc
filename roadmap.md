@@ -11,3 +11,11 @@
 - [ ] Blocked: real payment integration awaits provider selection/configuration
 - [ ] Blocked: final legal/support copy awaits MTDGC business details
 - [ ] Blocked: public catalog expansion awaits verified offers and fulfilment data
+
+## Current launch pack
+- [ ] Force Lovable project display name to MTDGC and verify
+- [ ] Complete MTDGC identity sweep, favicon, manifest, inner-route metadata
+- [ ] Ship catalog, product detail, persistent cart, honest checkout, account/admin surfaces
+- [ ] Add sitemap.xml and verify HTTP 200
+- [ ] Final mobile, accessibility, asset, metadata, navigation, and brand smoke test
+- [ ] Publish and report shipped, rolled, blockers, commit, URL, and credits
