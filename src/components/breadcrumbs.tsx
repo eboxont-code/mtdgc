@@ -9,7 +9,7 @@ export function Breadcrumbs({ items }: { items: Crumb[] }) {
         {items.map((item, index) => (
           <li key={`${item.label}-${index}`} className="flex items-center gap-1">
             {item.to ? (
-              <Link to={item.to} params={item.params} className="hover:text-primary">
+              <Link to={item.to} {...(item.params ? { params: item.params } : {})} className="hover:text-primary">
                 {item.label}
               </Link>
             ) : (
