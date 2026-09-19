@@ -8,6 +8,13 @@
       "when": 1789695002591,
       "tag": "0000_create_mtdgc_commerce_core",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789781197805,
+      "tag": "0001_seed_mtdgc_catalog",
+      "breakpoints": true
     }
   ]
 }
