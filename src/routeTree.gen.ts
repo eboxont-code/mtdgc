@@ -22,6 +22,10 @@ import { Route as SupportRouteImport } from './routes/support'
 import { Route as TrackOrderRouteImport } from './routes/track-order'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as PoliciesDeliveryRouteImport } from './routes/policies/delivery'
+import { Route as PoliciesPrivacyRouteImport } from './routes/policies/privacy'
+import { Route as PoliciesRefundsRouteImport } from './routes/policies/refunds'
+import { Route as PoliciesTermsRouteImport } from './routes/policies/terms'
 import { Route as ProductsSlugRouteImport } from './routes/products.$slug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -88,6 +92,26 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const PoliciesDeliveryRoute = PoliciesDeliveryRouteImport.update({
+  id: '/policies/delivery',
+  path: '/policies/delivery',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PoliciesPrivacyRoute = PoliciesPrivacyRouteImport.update({
+  id: '/policies/privacy',
+  path: '/policies/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PoliciesRefundsRoute = PoliciesRefundsRouteImport.update({
+  id: '/policies/refunds',
+  path: '/policies/refunds',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PoliciesTermsRoute = PoliciesTermsRouteImport.update({
+  id: '/policies/terms',
+  path: '/policies/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProductsSlugRoute = ProductsSlugRouteImport.update({
   id: '/products/$slug',
   path: '/products/$slug',
@@ -107,6 +131,10 @@ export interface FileRoutesByFullPath {
   '/track-order': typeof TrackOrderRoute
   '/account': typeof AuthenticatedAccountRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/policies/delivery': typeof PoliciesDeliveryRoute
+  '/policies/privacy': typeof PoliciesPrivacyRoute
+  '/policies/refunds': typeof PoliciesRefundsRoute
+  '/policies/terms': typeof PoliciesTermsRoute
   '/products/$slug': typeof ProductsSlugRoute
 }
 export interface FileRoutesByTo {
@@ -122,6 +150,10 @@ export interface FileRoutesByTo {
   '/track-order': typeof TrackOrderRoute
   '/account': typeof AuthenticatedAccountRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/policies/delivery': typeof PoliciesDeliveryRoute
+  '/policies/privacy': typeof PoliciesPrivacyRoute
+  '/policies/refunds': typeof PoliciesRefundsRoute
+  '/policies/terms': typeof PoliciesTermsRoute
   '/products/$slug': typeof ProductsSlugRoute
 }
 export interface FileRoutesById {
@@ -139,6 +171,10 @@ export interface FileRoutesById {
   '/track-order': typeof TrackOrderRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/policies/delivery': typeof PoliciesDeliveryRoute
+  '/policies/privacy': typeof PoliciesPrivacyRoute
+  '/policies/refunds': typeof PoliciesRefundsRoute
+  '/policies/terms': typeof PoliciesTermsRoute
   '/products/$slug': typeof ProductsSlugRoute
 }
 export interface FileRouteTypes {
@@ -156,6 +192,10 @@ export interface FileRouteTypes {
     | '/track-order'
     | '/account'
     | '/admin'
+    | '/policies/delivery'
+    | '/policies/privacy'
+    | '/policies/refunds'
+    | '/policies/terms'
     | '/products/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -171,6 +211,10 @@ export interface FileRouteTypes {
     | '/track-order'
     | '/account'
     | '/admin'
+    | '/policies/delivery'
+    | '/policies/privacy'
+    | '/policies/refunds'
+    | '/policies/terms'
     | '/products/$slug'
   id:
     | '__root__'
@@ -187,6 +231,10 @@ export interface FileRouteTypes {
     | '/track-order'
     | '/_authenticated/account'
     | '/_authenticated/admin'
+    | '/policies/delivery'
+    | '/policies/privacy'
+    | '/policies/refunds'
+    | '/policies/terms'
     | '/products/$slug'
   fileRoutesById: FileRoutesById
 }
@@ -202,6 +250,10 @@ export interface RootRouteChildren {
   HowItWorksRoute: typeof HowItWorksRoute
   SupportRoute: typeof SupportRoute
   TrackOrderRoute: typeof TrackOrderRoute
+  PoliciesDeliveryRoute: typeof PoliciesDeliveryRoute
+  PoliciesPrivacyRoute: typeof PoliciesPrivacyRoute
+  PoliciesRefundsRoute: typeof PoliciesRefundsRoute
+  PoliciesTermsRoute: typeof PoliciesTermsRoute
   ProductsSlugRoute: typeof ProductsSlugRoute
 }
 
@@ -298,6 +350,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/policies/delivery': {
+      id: '/policies/delivery'
+      path: '/policies/delivery'
+      fullPath: '/policies/delivery'
+      preLoaderRoute: typeof PoliciesDeliveryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/policies/privacy': {
+      id: '/policies/privacy'
+      path: '/policies/privacy'
+      fullPath: '/policies/privacy'
+      preLoaderRoute: typeof PoliciesPrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/policies/refunds': {
+      id: '/policies/refunds'
+      path: '/policies/refunds'
+      fullPath: '/policies/refunds'
+      preLoaderRoute: typeof PoliciesRefundsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/policies/terms': {
+      id: '/policies/terms'
+      path: '/policies/terms'
+      fullPath: '/policies/terms'
+      preLoaderRoute: typeof PoliciesTermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/products/$slug': {
       id: '/products/$slug'
       path: '/products/$slug'
@@ -333,6 +413,10 @@ const rootRouteChildren: RootRouteChildren = {
   HowItWorksRoute: HowItWorksRoute,
   SupportRoute: SupportRoute,
   TrackOrderRoute: TrackOrderRoute,
+  PoliciesDeliveryRoute: PoliciesDeliveryRoute,
+  PoliciesPrivacyRoute: PoliciesPrivacyRoute,
+  PoliciesRefundsRoute: PoliciesRefundsRoute,
+  PoliciesTermsRoute: PoliciesTermsRoute,
   ProductsSlugRoute: ProductsSlugRoute,
 }
 export const routeTree = rootRouteImport
