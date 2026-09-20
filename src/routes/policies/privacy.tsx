@@ -1,0 +1,57 @@
+import { createFileRoute } from "@tanstack/react-router";
+
+import { Breadcrumbs } from "@/components/breadcrumbs";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
+import { SITE_URL } from "@/lib/format";
+
+export const Route = createFileRoute("/policies/privacy")({
+  head: () => ({
+    meta: [
+      { title: "Privacy policy | MTDGC" },
+      { name: "description", content: "What information MTDGC collects to fulfil digital orders, and how it is used." },
+      { property: "og:title", content: "MTDGC privacy policy" },
+      { property: "og:description", content: "How MTDGC handles customer information." },
+      { property: "og:url", content: `${SITE_URL}/policies/privacy` },
+      { property: "og:type", content: "website" },
+    ],
+    links: [{ rel: "canonical", href: `${SITE_URL}/policies/privacy` }],
+  }),
+  component: PrivacyPage,
+});
+
+function PrivacyPage() {
+  return (
+    <div className="min-h-screen bg-background font-body text-foreground antialiased">
+      <SiteHeader />
+      <main className="mx-auto max-w-3xl px-4 pb-16 pt-6">
+        <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Privacy policy" }]} />
+        <h1 className="font-display text-[26px] font-medium md:text-4xl">Privacy policy</h1>
+        <div className="mt-6 space-y-4 text-sm text-foreground/80">
+          <p>
+            MTDGC collects only what is needed to fulfil an order: your name, the contact number or email you want us to
+            reply on, and the account details the product requires, such as a player ID or delivery email.
+          </p>
+          <p>
+            If you create an account, we also store your profile details and your order, wishlist and support history so
+            you can see them when you sign in. Your account data is protected by access rules that limit it to you and
+            to MTDGC staff accounts that need it to help you.
+          </p>
+          <p>
+            We will never ask for your password, one-time code or payment PIN, and you should never send them to anyone
+            claiming to represent us.
+          </p>
+          <p>
+            We do not sell customer information. We share details with a supplier only where it is required to deliver
+            the product you ordered.
+          </p>
+          <p>
+            You can ask us to delete your account information at any time through the support page. Records we are
+            required to keep for accounting reasons will be retained for that purpose only.
+          </p>
+        </div>
+      </main>
+      <SiteFooter />
+    </div>
+  );
+}
