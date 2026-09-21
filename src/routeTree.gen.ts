@@ -18,6 +18,7 @@ import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as TrackOrderRouteImport } from './routes/track-order'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
@@ -70,6 +71,11 @@ const FaqRoute = FaqRouteImport.update({
 const HowItWorksRoute = HowItWorksRouteImport.update({
   id: '/how-it-works',
   path: '/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SupportRoute = SupportRouteImport.update({
@@ -127,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/faq': typeof FaqRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/track-order': typeof TrackOrderRoute
   '/account': typeof AuthenticatedAccountRoute
@@ -146,6 +153,7 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/faq': typeof FaqRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/track-order': typeof TrackOrderRoute
   '/account': typeof AuthenticatedAccountRoute
@@ -167,6 +175,7 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/faq': typeof FaqRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/track-order': typeof TrackOrderRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
@@ -188,6 +197,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/faq'
     | '/how-it-works'
+    | '/sitemap.xml'
     | '/support'
     | '/track-order'
     | '/account'
@@ -207,6 +217,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/faq'
     | '/how-it-works'
+    | '/sitemap.xml'
     | '/support'
     | '/track-order'
     | '/account'
@@ -227,6 +238,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/faq'
     | '/how-it-works'
+    | '/sitemap.xml'
     | '/support'
     | '/track-order'
     | '/_authenticated/account'
@@ -248,6 +260,7 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   FaqRoute: typeof FaqRoute
   HowItWorksRoute: typeof HowItWorksRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SupportRoute: typeof SupportRoute
   TrackOrderRoute: typeof TrackOrderRoute
   PoliciesDeliveryRoute: typeof PoliciesDeliveryRoute
@@ -320,6 +333,13 @@ declare module '@tanstack/react-router' {
       path: '/how-it-works'
       fullPath: '/how-it-works'
       preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/support': {
@@ -411,6 +431,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   FaqRoute: FaqRoute,
   HowItWorksRoute: HowItWorksRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   SupportRoute: SupportRoute,
   TrackOrderRoute: TrackOrderRoute,
   PoliciesDeliveryRoute: PoliciesDeliveryRoute,
