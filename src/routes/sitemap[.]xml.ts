@@ -49,7 +49,7 @@ export const Route = createFileRoute("/sitemap.xml")({
             supabase.from("categories").select("slug").eq("is_published", true),
           ]);
           for (const row of categories.data ?? []) {
-            urls.push(entry(`/catalog?category=${row.slug}`, "0.6"));
+            urls.push(entry(`/categories/${row.slug}`, "0.7"));
           }
           for (const row of products.data ?? []) {
             urls.push(entry(`/products/${row.slug}`, "0.8", row.updated_at ?? undefined));
