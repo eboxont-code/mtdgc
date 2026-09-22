@@ -25,6 +25,7 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TrackOrderRouteImport } from './routes/track-order'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as CategoriesSlugRouteImport } from './routes/categories.$slug'
 import { Route as PoliciesDeliveryRouteImport } from './routes/policies/delivery'
 import { Route as PoliciesPrivacyRouteImport } from './routes/policies/privacy'
 import { Route as PoliciesRefundsRouteImport } from './routes/policies/refunds'
@@ -110,6 +111,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const CategoriesSlugRoute = CategoriesSlugRouteImport.update({
+  id: '/categories/$slug',
+  path: '/categories/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PoliciesDeliveryRoute = PoliciesDeliveryRouteImport.update({
   id: '/policies/delivery',
   path: '/policies/delivery',
@@ -152,6 +158,7 @@ export interface FileRoutesByFullPath {
   '/track-order': typeof TrackOrderRoute
   '/account': typeof AuthenticatedAccountRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/categories/$slug': typeof CategoriesSlugRoute
   '/policies/delivery': typeof PoliciesDeliveryRoute
   '/policies/privacy': typeof PoliciesPrivacyRoute
   '/policies/refunds': typeof PoliciesRefundsRoute
@@ -174,6 +181,7 @@ export interface FileRoutesByTo {
   '/track-order': typeof TrackOrderRoute
   '/account': typeof AuthenticatedAccountRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/categories/$slug': typeof CategoriesSlugRoute
   '/policies/delivery': typeof PoliciesDeliveryRoute
   '/policies/privacy': typeof PoliciesPrivacyRoute
   '/policies/refunds': typeof PoliciesRefundsRoute
@@ -198,6 +206,7 @@ export interface FileRoutesById {
   '/track-order': typeof TrackOrderRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/categories/$slug': typeof CategoriesSlugRoute
   '/policies/delivery': typeof PoliciesDeliveryRoute
   '/policies/privacy': typeof PoliciesPrivacyRoute
   '/policies/refunds': typeof PoliciesRefundsRoute
@@ -222,6 +231,7 @@ export interface FileRouteTypes {
     | '/track-order'
     | '/account'
     | '/admin'
+    | '/categories/$slug'
     | '/policies/delivery'
     | '/policies/privacy'
     | '/policies/refunds'
@@ -244,6 +254,7 @@ export interface FileRouteTypes {
     | '/track-order'
     | '/account'
     | '/admin'
+    | '/categories/$slug'
     | '/policies/delivery'
     | '/policies/privacy'
     | '/policies/refunds'
@@ -267,6 +278,7 @@ export interface FileRouteTypes {
     | '/track-order'
     | '/_authenticated/account'
     | '/_authenticated/admin'
+    | '/categories/$slug'
     | '/policies/delivery'
     | '/policies/privacy'
     | '/policies/refunds'
@@ -289,6 +301,7 @@ export interface RootRouteChildren {
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   TrackOrderRoute: typeof TrackOrderRoute
+  CategoriesSlugRoute: typeof CategoriesSlugRoute
   PoliciesDeliveryRoute: typeof PoliciesDeliveryRoute
   PoliciesPrivacyRoute: typeof PoliciesPrivacyRoute
   PoliciesRefundsRoute: typeof PoliciesRefundsRoute
@@ -410,6 +423,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/categories/$slug': {
+      id: '/categories/$slug'
+      path: '/categories/$slug'
+      fullPath: '/categories/$slug'
+      preLoaderRoute: typeof CategoriesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/policies/delivery': {
       id: '/policies/delivery'
       path: '/policies/delivery'
@@ -476,6 +496,7 @@ const rootRouteChildren: RootRouteChildren = {
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   TrackOrderRoute: TrackOrderRoute,
+  CategoriesSlugRoute: CategoriesSlugRoute,
   PoliciesDeliveryRoute: PoliciesDeliveryRoute,
   PoliciesPrivacyRoute: PoliciesPrivacyRoute,
   PoliciesRefundsRoute: PoliciesRefundsRoute,
