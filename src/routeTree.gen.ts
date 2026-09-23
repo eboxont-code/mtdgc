@@ -16,20 +16,24 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as DeliveryRouteImport } from './routes/delivery'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as RefundRouteImport } from './routes/refund'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TrackOrderRouteImport } from './routes/track-order'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as CategoriesIndexRouteImport } from './routes/categories.index'
 import { Route as CategoriesSlugRouteImport } from './routes/categories.$slug'
 import { Route as PoliciesDeliveryRouteImport } from './routes/policies/delivery'
 import { Route as PoliciesPrivacyRouteImport } from './routes/policies/privacy'
 import { Route as PoliciesRefundsRouteImport } from './routes/policies/refunds'
 import { Route as PoliciesTermsRouteImport } from './routes/policies/terms'
+import { Route as ProductsIndexRouteImport } from './routes/products.index'
 import { Route as ProductsSlugRouteImport } from './routes/products.$slug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -66,6 +70,11 @@ const CheckoutRoute = CheckoutRouteImport.update({
   path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DeliveryRoute = DeliveryRouteImport.update({
+  id: '/delivery',
+  path: '/delivery',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
   path: '/faq',
@@ -79,6 +88,11 @@ const HowItWorksRoute = HowItWorksRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RefundRoute = RefundRouteImport.update({
+  id: '/refund',
+  path: '/refund',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -111,6 +125,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const CategoriesIndexRoute = CategoriesIndexRouteImport.update({
+  id: '/categories/',
+  path: '/categories/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CategoriesSlugRoute = CategoriesSlugRouteImport.update({
   id: '/categories/$slug',
   path: '/categories/$slug',
@@ -136,6 +155,11 @@ const PoliciesTermsRoute = PoliciesTermsRouteImport.update({
   path: '/policies/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProductsIndexRoute = ProductsIndexRouteImport.update({
+  id: '/products/',
+  path: '/products/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProductsSlugRoute = ProductsSlugRouteImport.update({
   id: '/products/$slug',
   path: '/products/$slug',
@@ -149,9 +173,11 @@ export interface FileRoutesByFullPath {
   '/cart': typeof CartRoute
   '/catalog': typeof CatalogRoute
   '/checkout': typeof CheckoutRoute
+  '/delivery': typeof DeliveryRoute
   '/faq': typeof FaqRoute
   '/how-it-works': typeof HowItWorksRoute
   '/privacy': typeof PrivacyRoute
+  '/refund': typeof RefundRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
@@ -164,6 +190,8 @@ export interface FileRoutesByFullPath {
   '/policies/refunds': typeof PoliciesRefundsRoute
   '/policies/terms': typeof PoliciesTermsRoute
   '/products/$slug': typeof ProductsSlugRoute
+  '/categories/': typeof CategoriesIndexRoute
+  '/products/': typeof ProductsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -172,9 +200,11 @@ export interface FileRoutesByTo {
   '/cart': typeof CartRoute
   '/catalog': typeof CatalogRoute
   '/checkout': typeof CheckoutRoute
+  '/delivery': typeof DeliveryRoute
   '/faq': typeof FaqRoute
   '/how-it-works': typeof HowItWorksRoute
   '/privacy': typeof PrivacyRoute
+  '/refund': typeof RefundRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
@@ -187,6 +217,8 @@ export interface FileRoutesByTo {
   '/policies/refunds': typeof PoliciesRefundsRoute
   '/policies/terms': typeof PoliciesTermsRoute
   '/products/$slug': typeof ProductsSlugRoute
+  '/categories': typeof CategoriesIndexRoute
+  '/products': typeof ProductsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -197,9 +229,11 @@ export interface FileRoutesById {
   '/cart': typeof CartRoute
   '/catalog': typeof CatalogRoute
   '/checkout': typeof CheckoutRoute
+  '/delivery': typeof DeliveryRoute
   '/faq': typeof FaqRoute
   '/how-it-works': typeof HowItWorksRoute
   '/privacy': typeof PrivacyRoute
+  '/refund': typeof RefundRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
@@ -212,6 +246,8 @@ export interface FileRoutesById {
   '/policies/refunds': typeof PoliciesRefundsRoute
   '/policies/terms': typeof PoliciesTermsRoute
   '/products/$slug': typeof ProductsSlugRoute
+  '/categories/': typeof CategoriesIndexRoute
+  '/products/': typeof ProductsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -222,9 +258,11 @@ export interface FileRouteTypes {
     | '/cart'
     | '/catalog'
     | '/checkout'
+    | '/delivery'
     | '/faq'
     | '/how-it-works'
     | '/privacy'
+    | '/refund'
     | '/sitemap.xml'
     | '/support'
     | '/terms'
@@ -237,6 +275,8 @@ export interface FileRouteTypes {
     | '/policies/refunds'
     | '/policies/terms'
     | '/products/$slug'
+    | '/categories/'
+    | '/products/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -245,9 +285,11 @@ export interface FileRouteTypes {
     | '/cart'
     | '/catalog'
     | '/checkout'
+    | '/delivery'
     | '/faq'
     | '/how-it-works'
     | '/privacy'
+    | '/refund'
     | '/sitemap.xml'
     | '/support'
     | '/terms'
@@ -260,6 +302,8 @@ export interface FileRouteTypes {
     | '/policies/refunds'
     | '/policies/terms'
     | '/products/$slug'
+    | '/categories'
+    | '/products'
   id:
     | '__root__'
     | '/'
@@ -269,9 +313,11 @@ export interface FileRouteTypes {
     | '/cart'
     | '/catalog'
     | '/checkout'
+    | '/delivery'
     | '/faq'
     | '/how-it-works'
     | '/privacy'
+    | '/refund'
     | '/sitemap.xml'
     | '/support'
     | '/terms'
@@ -284,6 +330,8 @@ export interface FileRouteTypes {
     | '/policies/refunds'
     | '/policies/terms'
     | '/products/$slug'
+    | '/categories/'
+    | '/products/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -294,9 +342,11 @@ export interface RootRouteChildren {
   CartRoute: typeof CartRoute
   CatalogRoute: typeof CatalogRoute
   CheckoutRoute: typeof CheckoutRoute
+  DeliveryRoute: typeof DeliveryRoute
   FaqRoute: typeof FaqRoute
   HowItWorksRoute: typeof HowItWorksRoute
   PrivacyRoute: typeof PrivacyRoute
+  RefundRoute: typeof RefundRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
@@ -307,6 +357,8 @@ export interface RootRouteChildren {
   PoliciesRefundsRoute: typeof PoliciesRefundsRoute
   PoliciesTermsRoute: typeof PoliciesTermsRoute
   ProductsSlugRoute: typeof ProductsSlugRoute
+  CategoriesIndexRoute: typeof CategoriesIndexRoute
+  ProductsIndexRoute: typeof ProductsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -360,6 +412,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/delivery': {
+      id: '/delivery'
+      path: '/delivery'
+      fullPath: '/delivery'
+      preLoaderRoute: typeof DeliveryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/faq': {
       id: '/faq'
       path: '/faq'
@@ -379,6 +438,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/refund': {
+      id: '/refund'
+      path: '/refund'
+      fullPath: '/refund'
+      preLoaderRoute: typeof RefundRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -423,6 +489,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/categories/': {
+      id: '/categories/'
+      path: '/categories'
+      fullPath: '/categories/'
+      preLoaderRoute: typeof CategoriesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/categories/$slug': {
       id: '/categories/$slug'
       path: '/categories/$slug'
@@ -458,6 +531,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PoliciesTermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/products/': {
+      id: '/products/'
+      path: '/products'
+      fullPath: '/products/'
+      preLoaderRoute: typeof ProductsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/products/$slug': {
       id: '/products/$slug'
       path: '/products/$slug'
@@ -489,9 +569,11 @@ const rootRouteChildren: RootRouteChildren = {
   CartRoute: CartRoute,
   CatalogRoute: CatalogRoute,
   CheckoutRoute: CheckoutRoute,
+  DeliveryRoute: DeliveryRoute,
   FaqRoute: FaqRoute,
   HowItWorksRoute: HowItWorksRoute,
   PrivacyRoute: PrivacyRoute,
+  RefundRoute: RefundRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
@@ -502,6 +584,8 @@ const rootRouteChildren: RootRouteChildren = {
   PoliciesRefundsRoute: PoliciesRefundsRoute,
   PoliciesTermsRoute: PoliciesTermsRoute,
   ProductsSlugRoute: ProductsSlugRoute,
+  CategoriesIndexRoute: CategoriesIndexRoute,
+  ProductsIndexRoute: ProductsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

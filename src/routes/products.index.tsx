@@ -1,0 +1,71 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+
+import { Breadcrumbs } from "@/components/breadcrumbs";
+import { ProductCard } from "@/components/product-card";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
+import { Button } from "@/components/ui/button";
+import { listCatalog } from "@/lib/catalog.functions";
+import { SITE_URL } from "@/lib/format";
+
+export const Route = createFileRoute("/products/")({
+  loader: () => listCatalog(),
+  head: () => ({
+    meta: [
+      { title: "All products | MTDGC" },
+      {
+        name: "description",
+        content:
+          "Every MTDGC product page in one list, covering game top-ups, gift cards and subscriptions priced in Nepalese rupees.",
+      },
+      { property: "og:title", content: "All MTDGC products" },
+      { property: "og:description", content: "Every MTDGC product page in one list, priced in Nepalese rupees." },
+      { property: "og:url", content: `${SITE_URL}/products` },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+    links: [{ rel: "canonical", href: `${SITE_URL}/products` }],
+  }),
+  component: ProductsIndexPage,
+});
+
+function ProductsIndexPage() {
+  const { products, categories } = Route.useLoaderData();
+
+  return (
+    <div className="min-h-screen bg-background font-body text-foreground antialiased">
+      <SiteHeader />
+      <main className="mx-auto max-w-6xl px-4 pb-16 pt-6">
+        <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Products" }]} />
+        <h1 className="font-display text-[26px] font-medium md:text-4xl">All products</h1>
+        <p className="mt-2 max-w-[62ch] text-sm text-muted-foreground">
+          This is the plain list of every MTDGC product page. If you want to search, filter by category or sort by
+          price, use the catalog instead.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button asChild size="sm"><Link to="/catalog">Search the catalog</Link></Button>
+          {categories.map((category) => (
+            <Button key={category.slug} asChild variant="outline" size="sm">
+              <Link to="/categories/$slug" params={{ slug: category.slug }}>{category.name}</Link>
+            </Button>
+          ))}
+        </div>
+
+        {products.length ? (
+          <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        ) : (
+          <div className="mt-8 rounded-lg border border-border py-14 text-center">
+            <p className="font-display font-medium">No products are listed yet</p>
+            <p className="mt-1 text-sm text-muted-foreground">Check back shortly or message us on WhatsApp.</p>
+            <Button asChild className="mt-4"><Link to="/support">Contact support</Link></Button>
+          </div>
+        )}
+      </main>
+      <SiteFooter />
+    </div>
+  );
+}

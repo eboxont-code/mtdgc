@@ -7,6 +7,8 @@ import { SITE_URL } from "@/lib/format";
 const STATIC_PATHS = [
   { path: "/", priority: "1.0" },
   { path: "/catalog", priority: "0.9" },
+  { path: "/products", priority: "0.8" },
+  { path: "/categories", priority: "0.8" },
   { path: "/about", priority: "0.6" },
   { path: "/how-it-works", priority: "0.6" },
   { path: "/faq", priority: "0.6" },
