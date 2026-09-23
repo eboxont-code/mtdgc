@@ -15,6 +15,10 @@ import { CartDrawer } from "../components/cart-drawer";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
+  useEffect(() => {
+    document.title = "Page not found | MTDGC";
+  }, []);
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4 font-body text-foreground">
       <div className="max-w-md text-center">
