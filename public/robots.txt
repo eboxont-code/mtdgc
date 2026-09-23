@@ -12,5 +12,10 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /account
+Disallow: /auth
+Disallow: /checkout
+Disallow: /cart
 
 Sitemap: https://mtdgc.lovable.app/sitemap.xml
