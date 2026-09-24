@@ -21,12 +21,13 @@ import { Route as FaqRouteImport } from './routes/faq'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RefundRouteImport } from './routes/refund'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TrackOrderRouteImport } from './routes/track-order'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated/orders'
+import { Route as AuthenticatedWishlistRouteImport } from './routes/_authenticated/wishlist'
 import { Route as CategoriesIndexRouteImport } from './routes/categories.index'
 import { Route as CategoriesSlugRouteImport } from './routes/categories.$slug'
 import { Route as PoliciesDeliveryRouteImport } from './routes/policies/delivery'
@@ -95,11 +96,6 @@ const RefundRoute = RefundRouteImport.update({
   path: '/refund',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SupportRoute = SupportRouteImport.update({
   id: '/support',
   path: '/support',
@@ -123,6 +119,16 @@ const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOrdersRoute = AuthenticatedOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedWishlistRoute = AuthenticatedWishlistRouteImport.update({
+  id: '/wishlist',
+  path: '/wishlist',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const CategoriesIndexRoute = CategoriesIndexRouteImport.update({
@@ -178,12 +184,13 @@ export interface FileRoutesByFullPath {
   '/how-it-works': typeof HowItWorksRoute
   '/privacy': typeof PrivacyRoute
   '/refund': typeof RefundRoute
-  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/track-order': typeof TrackOrderRoute
   '/account': typeof AuthenticatedAccountRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/orders': typeof AuthenticatedOrdersRoute
+  '/wishlist': typeof AuthenticatedWishlistRoute
   '/categories/$slug': typeof CategoriesSlugRoute
   '/policies/delivery': typeof PoliciesDeliveryRoute
   '/policies/privacy': typeof PoliciesPrivacyRoute
@@ -205,12 +212,13 @@ export interface FileRoutesByTo {
   '/how-it-works': typeof HowItWorksRoute
   '/privacy': typeof PrivacyRoute
   '/refund': typeof RefundRoute
-  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/track-order': typeof TrackOrderRoute
   '/account': typeof AuthenticatedAccountRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/orders': typeof AuthenticatedOrdersRoute
+  '/wishlist': typeof AuthenticatedWishlistRoute
   '/categories/$slug': typeof CategoriesSlugRoute
   '/policies/delivery': typeof PoliciesDeliveryRoute
   '/policies/privacy': typeof PoliciesPrivacyRoute
@@ -234,12 +242,13 @@ export interface FileRoutesById {
   '/how-it-works': typeof HowItWorksRoute
   '/privacy': typeof PrivacyRoute
   '/refund': typeof RefundRoute
-  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/track-order': typeof TrackOrderRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/orders': typeof AuthenticatedOrdersRoute
+  '/_authenticated/wishlist': typeof AuthenticatedWishlistRoute
   '/categories/$slug': typeof CategoriesSlugRoute
   '/policies/delivery': typeof PoliciesDeliveryRoute
   '/policies/privacy': typeof PoliciesPrivacyRoute
@@ -263,12 +272,13 @@ export interface FileRouteTypes {
     | '/how-it-works'
     | '/privacy'
     | '/refund'
-    | '/sitemap.xml'
     | '/support'
     | '/terms'
     | '/track-order'
     | '/account'
     | '/admin'
+    | '/orders'
+    | '/wishlist'
     | '/categories/$slug'
     | '/policies/delivery'
     | '/policies/privacy'
@@ -290,12 +300,13 @@ export interface FileRouteTypes {
     | '/how-it-works'
     | '/privacy'
     | '/refund'
-    | '/sitemap.xml'
     | '/support'
     | '/terms'
     | '/track-order'
     | '/account'
     | '/admin'
+    | '/orders'
+    | '/wishlist'
     | '/categories/$slug'
     | '/policies/delivery'
     | '/policies/privacy'
@@ -318,12 +329,13 @@ export interface FileRouteTypes {
     | '/how-it-works'
     | '/privacy'
     | '/refund'
-    | '/sitemap.xml'
     | '/support'
     | '/terms'
     | '/track-order'
     | '/_authenticated/account'
     | '/_authenticated/admin'
+    | '/_authenticated/orders'
+    | '/_authenticated/wishlist'
     | '/categories/$slug'
     | '/policies/delivery'
     | '/policies/privacy'
@@ -347,7 +359,6 @@ export interface RootRouteChildren {
   HowItWorksRoute: typeof HowItWorksRoute
   PrivacyRoute: typeof PrivacyRoute
   RefundRoute: typeof RefundRoute
-  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   TrackOrderRoute: typeof TrackOrderRoute
@@ -447,13 +458,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RefundRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/support': {
       id: '/support'
       path: '/support'
@@ -487,6 +491,20 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/orders': {
+      id: '/_authenticated/orders'
+      path: '/orders'
+      fullPath: '/orders'
+      preLoaderRoute: typeof AuthenticatedOrdersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/wishlist': {
+      id: '/_authenticated/wishlist'
+      path: '/wishlist'
+      fullPath: '/wishlist'
+      preLoaderRoute: typeof AuthenticatedWishlistRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/categories/': {
@@ -551,11 +569,15 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedOrdersRoute: typeof AuthenticatedOrdersRoute
+  AuthenticatedWishlistRoute: typeof AuthenticatedWishlistRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccountRoute: AuthenticatedAccountRoute,
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedOrdersRoute: AuthenticatedOrdersRoute,
+  AuthenticatedWishlistRoute: AuthenticatedWishlistRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -574,7 +596,6 @@ const rootRouteChildren: RootRouteChildren = {
   HowItWorksRoute: HowItWorksRoute,
   PrivacyRoute: PrivacyRoute,
   RefundRoute: RefundRoute,
-  SitemapDotxmlRoute: SitemapDotxmlRoute,
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   TrackOrderRoute: TrackOrderRoute,
