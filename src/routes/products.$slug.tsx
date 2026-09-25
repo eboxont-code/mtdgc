@@ -6,6 +6,7 @@ import { ProductCard } from "@/components/product-card";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
+import { WishlistButton } from "@/components/wishlist-button";
 import { getProductBySlug } from "@/lib/catalog.functions";
 import { useCart } from "@/lib/cart";
 import { formatNpr, isOrderable, SITE_URL, STATUS_LABEL } from "@/lib/format";
@@ -198,6 +199,7 @@ function ProductPage() {
                 {orderable ? `Add to cart · ${variant ? formatNpr(variant.price_minor) : ""}` : "Not available yet"}
               </Button>
               <Button asChild variant="outline" size="lg"><Link to="/catalog">Keep browsing</Link></Button>
+              <WishlistButton productId={product.id} />
             </div>
 
             <section className="mt-8">
