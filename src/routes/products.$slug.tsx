@@ -10,6 +10,7 @@ import { WishlistButton } from "@/components/wishlist-button";
 import { getProductBySlug } from "@/lib/catalog.functions";
 import { useCart } from "@/lib/cart";
 import { formatNpr, isOrderable, SITE_URL, STATUS_LABEL } from "@/lib/format";
+import { productFaqs, requirementHelp } from "@/lib/product-help";
 
 export const Route = createFileRoute("/products/$slug")({
   loader: async ({ params }) => {
@@ -176,22 +177,32 @@ function ProductPage() {
             {product.requirements.length > 0 && (
               <div className="mt-6 space-y-3">
                 <h2 className="font-display text-sm font-medium">What we need from you</h2>
-                {product.requirements.map((requirement) => (
-                  <label key={requirement} className="block">
-                    <span className="font-display text-xs text-muted-foreground">{requirement}</span>
-                    <input
-                      value={fields[requirement] ?? ""}
-                      onChange={(event) => setFields((current) => ({ ...current, [requirement]: event.target.value }))}
-                      className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm outline-none focus:border-primary"
-                    />
-                  </label>
-                ))}
+                {product.requirements.map((requirement) => {
+                  const help = requirementHelp(requirement);
+                  const id = `req-${requirement.replace(/\W+/g, "-").toLowerCase()}`;
+                  return (
+                    <div key={requirement}>
+                      <label htmlFor={id} className="font-display text-xs text-muted-foreground">{requirement}</label>
+                      <input
+                        id={id}
+                        aria-describedby={help ? `${id}-help` : undefined}
+                        value={fields[requirement] ?? ""}
+                        onChange={(event) => setFields((current) => ({ ...current, [requirement]: event.target.value }))}
+                        className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm outline-none focus:border-primary"
+                      />
+                      {help && <p id={`${id}-help`} className="mt-1 text-xs text-muted-foreground">{help}</p>}
+                    </div>
+                  );
+                })}
                 <p className="text-xs text-muted-foreground">
                   MTDGC will never ask for your password, OTP or payment PIN.
                 </p>
               </div>
             )}
 
+            {variant?.status === "low_stock" && (
+              <p className="mt-3 text-xs text-muted-foreground">Limited supply on this option. We confirm availability before you pay.</p>
+            )}
             {error && <p role="alert" className="mt-3 text-sm text-destructive">{error}</p>}
 
             <div className="mt-5 flex flex-wrap items-center gap-3">
@@ -213,6 +224,18 @@ function ProductPage() {
               )}
               <h3 className="mt-5 font-display text-sm font-medium">Refund eligibility</h3>
               <p className="mt-1 text-sm text-foreground/80">{product.refund_eligibility}</p>
+            </section>
+
+            <section className="mt-8">
+              <h2 className="font-display text-lg font-medium">Questions about this product</h2>
+              <div className="mt-2 divide-y divide-border rounded-lg border border-border">
+                {productFaqs(product).map((faq) => (
+                  <details key={faq.q} className="p-3">
+                    <summary className="cursor-pointer font-display text-sm font-medium">{faq.q}</summary>
+                    <p className="mt-2 text-sm text-foreground/80">{faq.a}</p>
+                  </details>
+                ))}
+              </div>
             </section>
           </div>
         </div>
