@@ -24,6 +24,15 @@ export const Route = createFileRoute("/checkout")({
   component: CheckoutPage,
 });
 
+function makeReference(): string {
+  const now = new Date();
+  const date = `${String(now.getFullYear()).slice(2)}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let tail = "";
+  for (let i = 0; i < 4; i += 1) tail += alphabet[Math.floor(Math.random() * alphabet.length)];
+  return `MTD-${date}-${tail}`;
+}
+
 function CheckoutPage() {
   const { lines, subtotalMinor } = useCart();
   const [name, setName] = useState("");
@@ -32,31 +41,45 @@ function CheckoutPage() {
   const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
+  const [sentRef, setSentRef] = useState<string | null>(null);
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
     if (sending) return;
-    if (!name.trim() || !contact.trim()) {
-      setError("Please add your name and a WhatsApp number so we can confirm the order.");
+    const digits = contact.replace(/[^\d]/g, "");
+    if (!name.trim()) {
+      setError("Please add your full name.");
+      return;
+    }
+    if (digits.length < 7 || digits.length > 15) {
+      setError("Please enter a WhatsApp number with 7 to 15 digits, including the country code if outside Nepal.");
+      return;
+    }
+    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setError("That email address does not look right. Please check it or leave it empty.");
       return;
     }
     setError(null);
     setSending(true);
+    const reference = sentRef ?? makeReference();
     const extras = [
-      `Name: ${name}`,
-      `WhatsApp: ${contact}`,
-      ...(email.trim() ? [`Delivery email: ${email}`] : []),
+      `Reference: ${reference}`,
+      `Name: ${name.trim().slice(0, 80)}`,
+      `WhatsApp: ${contact.trim().slice(0, 20)}`,
+      ...(email.trim() ? [`Delivery email: ${email.trim().slice(0, 120)}`] : []),
       ...lines.flatMap((line) =>
         Object.entries(line.fields ?? {})
           .filter(([, value]) => value)
           .map(([key, value]) => `${line.productName} - ${key}: ${value}`),
       ),
-      ...(note.trim() ? [`Note: ${note}`] : []),
+      ...(note.trim() ? [`Note: ${note.trim().slice(0, 500)}`] : []),
     ];
     const message = buildOrderMessage(lines, subtotalMinor, extras);
     window.open(whatsappLink(message), "_blank", "noopener,noreferrer");
-    window.setTimeout(() => setSending(false), 1500);
+    setSentRef(reference);
+    window.setTimeout(() => setSending(false), 2500);
   };
+
 
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
@@ -97,8 +120,31 @@ function CheckoutPage() {
                 </label>
               </div>
               {error && <p role="alert" className="mt-3 text-sm text-destructive">{error}</p>}
+              {sentRef && (
+                <div role="status" className="mt-4 rounded-lg border border-border bg-card p-4 text-sm">
+                  <p className="font-display font-medium">Your order reference is {sentRef}</p>
+                  <p className="mt-1 text-muted-foreground">
+                    WhatsApp should now be open with your order filled in. Press send there so our team receives it. We
+                    reply with availability and payment instructions. Nothing has been charged.
+                  </p>
+                  <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+                    {lines.map((line) => (
+                      <li key={line.sku}>
+                        {line.quantity} × {line.productName}, {line.variantName}
+                        {Object.entries(line.fields ?? {})
+                          .filter(([, v]) => v)
+                          .map(([k, v]) => ` · ${k}: ${v}`)
+                          .join("")}
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    WhatsApp did not open? Press the button again, or keep this reference and <Link to="/support" className="underline">contact support</Link>.
+                  </p>
+                </div>
+              )}
               <Button type="submit" size="lg" className="mt-4 w-full" disabled={sending}>
-                {sending ? "Opening WhatsApp" : "Send order for confirmation"}
+                {sending ? "Opening WhatsApp" : sentRef ? "Open WhatsApp again" : "Send order for confirmation"}
               </Button>
               <p className="mt-2 text-xs text-muted-foreground">
                 You can order as a guest. An account is not required.
