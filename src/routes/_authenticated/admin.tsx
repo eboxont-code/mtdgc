@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { formatNpr, STATUS_LABEL } from "@/lib/format";
 
@@ -23,8 +24,13 @@ type ProductRow = {
   slug: string;
   status: string;
   is_published: boolean;
-  product_variants: { sku: string; price_minor: number }[] | null;
+  product_variants: { sku: string; name: string; price_minor: number; stock_quantity: number | null; status: string }[] | null;
 };
+type OrderRow = { id: string; order_number: string; status: string; total_minor: number; created_at: string };
+type TicketRow = { id: string; order_number: string | null; issue_type: string; status: string; created_at: string };
+type ReviewRow = { id: string; rating: number; body: string; created_at: string };
+
+const LOW_STOCK = 5;
 
 function AdminPage() {
   const [allowed, setAllowed] = useState<boolean | null>(null);
@@ -32,6 +38,20 @@ function AdminPage() {
   const [orderCount, setOrderCount] = useState(0);
   const [ticketCount, setTicketCount] = useState(0);
   const [reviewCount, setReviewCount] = useState(0);
+  const [orders, setOrders] = useState<OrderRow[]>([]);
+  const [tickets, setTickets] = useState<TicketRow[]>([]);
+  const [pendingReviews, setPendingReviews] = useState<ReviewRow[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const approveReview = async (id: string) => {
+    const { error } = await supabase.from("reviews").update({ is_approved: true }).eq("id", id);
+    if (error) {
+      setLoadError("Could not approve that review. Please try again.");
+      return;
+    }
+    setPendingReviews((rows) => rows.filter((row) => row.id !== id));
+    setReviewCount((count) => Math.max(0, count - 1));
+  };
 
   useEffect(() => {
     let active = true;
@@ -44,22 +64,51 @@ function AdminPage() {
       setAllowed(Boolean(isAdmin));
       if (!isAdmin) return;
 
-      const [productRows, orders, tickets, reviews] = await Promise.all([
-        supabase.from("products").select("id, name, slug, status, is_published, product_variants(sku, price_minor)"),
-        supabase.from("orders").select("id", { count: "exact", head: true }),
-        supabase.from("support_tickets").select("id", { count: "exact", head: true }),
-        supabase.from("reviews").select("id", { count: "exact", head: true }).eq("is_approved", false),
+      const [productRows, orderRows, ticketRows, reviewRows] = await Promise.all([
+        supabase
+          .from("products")
+          .select("id, name, slug, status, is_published, product_variants(sku, name, price_minor, stock_quantity, status)")
+          .order("name"),
+        supabase
+          .from("orders")
+          .select("id, order_number, status, total_minor, created_at", { count: "exact" })
+          .order("created_at", { ascending: false })
+          .limit(10),
+        supabase
+          .from("support_tickets")
+          .select("id, order_number, issue_type, status, created_at", { count: "exact" })
+          .order("created_at", { ascending: false })
+          .limit(10),
+        supabase
+          .from("reviews")
+          .select("id, rating, body, created_at", { count: "exact" })
+          .eq("is_approved", false)
+          .order("created_at", { ascending: false })
+          .limit(10),
       ]);
       if (!active) return;
+      if (productRows.error || orderRows.error || ticketRows.error || reviewRows.error) {
+        setLoadError("Some admin data could not be loaded. Refresh to try again.");
+      }
       setProducts((productRows.data ?? []) as ProductRow[]);
-      setOrderCount(orders.count ?? 0);
-      setTicketCount(tickets.count ?? 0);
-      setReviewCount(reviews.count ?? 0);
+      setOrders((orderRows.data ?? []) as OrderRow[]);
+      setTickets((ticketRows.data ?? []) as TicketRow[]);
+      setPendingReviews((reviewRows.data ?? []) as ReviewRow[]);
+      setOrderCount(orderRows.count ?? 0);
+      setTicketCount(ticketRows.count ?? 0);
+      setReviewCount(reviewRows.count ?? 0);
     })();
     return () => {
       active = false;
     };
   }, []);
+
+  const lowStock = products.flatMap((product) =>
+    (product.product_variants ?? [])
+      .filter((v) => v.status === "low_stock" || (v.stock_quantity !== null && v.stock_quantity <= LOW_STOCK))
+      .map((v) => ({ product: product.name, ...v })),
+  );
+
 
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
@@ -124,6 +173,79 @@ function AdminPage() {
                   </tbody>
                 </table>
               </div>
+              {products.length === 0 && (
+                <p className="mt-3 text-sm text-muted-foreground">No products are in the catalog yet.</p>
+              )}
+            </section>
+
+            {loadError && <p role="alert" className="mt-6 text-sm text-destructive">{loadError}</p>}
+
+            <section className="mt-8">
+              <h2 className="font-display text-lg font-medium">Low stock</h2>
+              {lowStock.length ? (
+                <ul className="mt-2 divide-y divide-border text-sm">
+                  {lowStock.map((v) => (
+                    <li key={v.sku} className="flex justify-between py-2">
+                      <span>{v.product}, {v.name} <span className="text-xs text-muted-foreground">({v.sku})</span></span>
+                      <span>{v.stock_quantity === null ? "Marked low" : `${v.stock_quantity} left`}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-1 text-sm text-muted-foreground">No options are low on stock or marked low.</p>
+              )}
+            </section>
+
+            <section className="mt-8">
+              <h2 className="font-display text-lg font-medium">Latest orders</h2>
+              {orders.length ? (
+                <ul className="mt-2 divide-y divide-border text-sm">
+                  {orders.map((o) => (
+                    <li key={o.id} className="flex flex-wrap justify-between gap-2 py-2">
+                      <span className="font-display">{o.order_number}</span>
+                      <span>{STATUS_LABEL[o.status] ?? o.status}</span>
+                      <span>{formatNpr(o.total_minor)}</span>
+                      <span className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleDateString()}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-1 text-sm text-muted-foreground">No orders are recorded in the system yet. WhatsApp orders are handled in chat.</p>
+              )}
+            </section>
+
+            <section className="mt-8">
+              <h2 className="font-display text-lg font-medium">Support requests</h2>
+              {tickets.length ? (
+                <ul className="mt-2 divide-y divide-border text-sm">
+                  {tickets.map((t) => (
+                    <li key={t.id} className="flex flex-wrap justify-between gap-2 py-2">
+                      <span>{t.issue_type}</span>
+                      <span className="text-muted-foreground">{t.order_number ?? "No order number"}</span>
+                      <span>{t.status}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-1 text-sm text-muted-foreground">No support requests yet.</p>
+              )}
+            </section>
+
+            <section className="mt-8">
+              <h2 className="font-display text-lg font-medium">Reviews awaiting approval</h2>
+              {pendingReviews.length ? (
+                <ul className="mt-2 space-y-3 text-sm">
+                  {pendingReviews.map((r) => (
+                    <li key={r.id} className="rounded-lg border border-border p-3">
+                      <p className="font-display">{r.rating} out of 5</p>
+                      <p className="mt-1 text-muted-foreground">{r.body}</p>
+                      <Button size="sm" className="mt-2" onClick={() => approveReview(r.id)}>Approve</Button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-1 text-sm text-muted-foreground">Nothing to moderate.</p>
+              )}
             </section>
           </>
         )}
