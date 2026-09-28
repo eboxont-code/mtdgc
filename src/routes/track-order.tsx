@@ -42,13 +42,25 @@ function TrackOrderPage() {
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
-    if (!orderNumber.trim() || !contact.trim()) {
+    const order = orderNumber.trim().toUpperCase();
+    const who = contact.trim();
+    if (!order || !who) {
       setError("Please enter your order number and the email or phone number used on the order.");
+      return;
+    }
+    if (!/^(MTD|MTDGC)-[A-Z0-9-]{4,}$/.test(order)) {
+      setError("That order number does not look right. MTDGC order numbers start with MTD- and appear in your WhatsApp order message.");
+      return;
+    }
+    const digits = who.replace(/\D/g, "");
+    const looksEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(who);
+    if (!looksEmail && (digits.length < 7 || digits.length > 15)) {
+      setError("Please enter a valid email address or a phone number of 7 to 15 digits.");
       return;
     }
     setError(null);
     window.open(
-      whatsappLink(`Hello MTDGC, please check my order ${orderNumber}. Contact on the order: ${contact}.`),
+      whatsappLink(`Hello MTDGC, please check my order ${order}. Contact on the order: ${who}.`),
       "_blank",
       "noopener,noreferrer",
     );
@@ -72,7 +84,8 @@ function TrackOrderPage() {
             <input
               value={orderNumber}
               onChange={(event) => setOrderNumber(event.target.value)}
-              placeholder="MTDGC-000000"
+              placeholder="MTD-000000"
+              autoComplete="off"
               className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm outline-none focus:border-primary"
             />
           </label>

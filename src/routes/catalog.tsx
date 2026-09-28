@@ -37,11 +37,14 @@ const SORTS = [
   { id: "price-desc", label: "Price high to low" },
 ] as const;
 
+const PAGE_SIZE = 12;
+
 function CatalogPage() {
   const { products, categories } = Route.useLoaderData();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("all");
   const [sort, setSort] = useState<(typeof SORTS)[number]["id"]>("popular");
+  const [shown, setShown] = useState(PAGE_SIZE);
 
   const visible = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -129,11 +132,20 @@ function CatalogPage() {
         </div>
 
         {visible.length ? (
-          <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
-            {visible.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          <>
+            <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+              {visible.slice(0, shown).map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+            {visible.length > shown && (
+              <div className="mt-6 text-center">
+                <Button variant="outline" onClick={() => setShown((n) => n + PAGE_SIZE)}>
+                  Show more ({visible.length - shown} left)
+                </Button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="mt-8 rounded-lg border border-border py-14 text-center">
             <p className="font-display font-medium">No products match that search</p>
