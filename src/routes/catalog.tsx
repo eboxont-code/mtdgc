@@ -10,8 +10,8 @@ import { listCatalog } from "@/lib/catalog.functions";
 import { SITE_URL } from "@/lib/format";
 
 export const Route = createFileRoute("/catalog")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    q: typeof search.q === "string" ? search.q : "",
+  validateSearch: (search: Record<string, unknown>): { q?: string } => ({
+    q: typeof search.q === "string" ? search.q : undefined,
   }),
   loader: () => listCatalog(),
   head: () => ({
@@ -45,7 +45,7 @@ const PAGE_SIZE = 12;
 function CatalogPage() {
   const { products, categories } = Route.useLoaderData();
   const { q } = Route.useSearch();
-  const [query, setQuery] = useState(q.slice(0, 100));
+  const [query, setQuery] = useState((q ?? "").slice(0, 100));
   const [category, setCategory] = useState("all");
   const [sort, setSort] = useState<(typeof SORTS)[number]["id"]>("popular");
   const [shown, setShown] = useState(PAGE_SIZE);
