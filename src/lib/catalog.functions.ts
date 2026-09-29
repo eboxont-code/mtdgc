@@ -115,7 +115,7 @@ export const getProductBySlug = createServerFn({ method: "GET" })
       .eq("is_published", true)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    if (!row) return { product: null, related: [] as CatalogProduct[] };
+    if (!row) return { product: null, related: [] as CatalogProduct[], explore: [] as CatalogProduct[] };
 
     const product = shape(row as RawProduct);
     const { data: relatedRows } = await supabase
@@ -124,9 +124,14 @@ export const getProductBySlug = createServerFn({ method: "GET" })
       .eq("is_published", true)
       .neq("slug", data.slug)
       .limit(8);
-    const related = (relatedRows ?? []).map((r) => shape(r as RawProduct));
-    const sameCategory = related.filter((r) => r.category?.slug === product.category?.slug);
-    return { product, related: (sameCategory.length ? sameCategory : related).slice(0, 4) };
+    const others = (relatedRows ?? []).map((r) => shape(r as RawProduct));
+    const sameCategory = others.filter((r) => r.category?.slug === product.category?.slug);
+    const otherCategories = others.filter((r) => r.category?.slug !== product.category?.slug);
+    return {
+      product,
+      related: (sameCategory.length ? sameCategory : others).slice(0, 4),
+      explore: sameCategory.length ? otherCategories.slice(0, 4) : [],
+    };
   });
 
 export const getCategoryBySlug = createServerFn({ method: "GET" })

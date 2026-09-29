@@ -45,17 +45,23 @@ export const Route = createFileRoute("/products/$slug")({
             description: product.summary,
             brand: { "@type": "Brand", name: product.brand },
             category: product.category?.name,
-            offers: product.variants.map((variant) => ({
-              "@type": "Offer",
-              sku: variant.sku,
-              name: variant.name,
-              price: (variant.price_minor / 100).toFixed(2),
-              priceCurrency: variant.currency,
-              availability: isOrderable(variant.status)
-                ? "https://schema.org/InStock"
-                : "https://schema.org/PreOrder",
-              url,
-            })),
+            offers: product.variants
+              .filter((variant) => variant.price_minor > 0 && variant.status !== "archived")
+              .map((variant) => ({
+                "@type": "Offer",
+                sku: variant.sku,
+                name: variant.name,
+                price: (variant.price_minor / 100).toFixed(2),
+                priceCurrency: variant.currency,
+                availability: isOrderable(variant.status)
+                  ? variant.status === "low_stock"
+                    ? "https://schema.org/LimitedAvailability"
+                    : "https://schema.org/InStock"
+                  : variant.status === "coming_soon"
+                    ? "https://schema.org/PreOrder"
+                    : "https://schema.org/OutOfStock",
+                url,
+              })),
           }),
         },
       ],
@@ -65,7 +71,7 @@ export const Route = createFileRoute("/products/$slug")({
 });
 
 function ProductPage() {
-  const { product, related } = Route.useLoaderData();
+  const { product, related, explore } = Route.useLoaderData();
   const { add, setDrawerOpen } = useCart();
   const defaultVariant = product!.variants.find((variant) => variant.is_default) ?? product!.variants[0];
   const [selectedSku, setSelectedSku] = useState(defaultVariant?.sku ?? "");
@@ -241,10 +247,21 @@ function ProductPage() {
         </div>
 
         {related.length > 0 && (
-          <section className="mt-12">
-            <h2 className="mb-4 font-display text-lg font-medium">Related products</h2>
+          <section className="mt-12" aria-labelledby="related-heading">
+            <h2 id="related-heading" className="mb-4 font-display text-lg font-medium">Related products</h2>
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
               {related.map((item) => (
+                <ProductCard key={item.id} product={item} />
+              ))}
+            </div>
+          </section>
+        )}
+        {explore.length > 0 && (
+          <section className="mt-10" aria-labelledby="explore-heading">
+            <h2 id="explore-heading" className="mb-1 font-display text-lg font-medium">Also in the MTDGC catalog</h2>
+            <p className="mb-4 text-sm text-muted-foreground">Products from other categories we currently sell.</p>
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              {explore.map((item) => (
                 <ProductCard key={item.id} product={item} />
               ))}
             </div>
