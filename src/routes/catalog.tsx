@@ -11,7 +11,7 @@ import { SITE_URL } from "@/lib/format";
 
 export const Route = createFileRoute("/catalog")({
   validateSearch: (search: Record<string, unknown>): { q?: string } => ({
-    q: typeof search.q === "string" ? search.q : undefined,
+    q: typeof search["q"] === "string" ? (search["q"] as string) : undefined,
   }),
   loader: () => listCatalog(),
   head: () => ({
