@@ -10,7 +10,7 @@ import { listCatalog } from "@/lib/catalog.functions";
 import { SITE_URL } from "@/lib/format";
 
 export const Route = createFileRoute("/catalog")({
-  validateSearch: (search: Record<string, unknown>): { q?: string } => ({
+  validateSearch: (search: Record<string, unknown>): { q?: string | undefined } => ({
     q: typeof search["q"] === "string" ? (search["q"] as string) : undefined,
   }),
   loader: () => listCatalog(),
