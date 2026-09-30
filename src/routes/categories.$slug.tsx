@@ -46,6 +46,26 @@ export const Route = createFileRoute("/categories/$slug")({
             ],
           }),
         },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            name: category.name,
+            description,
+            url,
+            mainEntity: {
+              "@type": "ItemList",
+              numberOfItems: loaderData.products.length,
+              itemListElement: loaderData.products.map((p, i) => ({
+                "@type": "ListItem",
+                position: i + 1,
+                name: p.name,
+                url: `${SITE_URL}/products/${p.slug}`,
+              })),
+            },
+          }),
+        },
       ],
     };
   },
@@ -103,6 +123,15 @@ function CategoryPage() {
             <Button asChild variant="outline" size="sm"><Link to="/faq">Read the FAQ</Link></Button>
           </div>
         </section>
+
+        <nav aria-label="Other categories" className="mt-8">
+          <h2 className="font-display text-lg font-medium">Other ways to browse</h2>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button asChild variant="outline" size="sm"><Link to="/categories">All categories</Link></Button>
+            <Button asChild variant="outline" size="sm"><Link to="/products">All products</Link></Button>
+            <Button asChild variant="outline" size="sm"><Link to="/support">Ask us on support</Link></Button>
+          </div>
+        </nav>
       </main>
       <SiteFooter />
     </div>
