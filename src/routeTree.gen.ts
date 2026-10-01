@@ -23,6 +23,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RefundRouteImport } from './routes/refund'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as TrackRouteImport } from './routes/track'
 import { Route as TrackOrderRouteImport } from './routes/track-order'
 import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -106,6 +107,11 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrackRoute = TrackRouteImport.update({
+  id: '/track',
+  path: '/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TrackOrderRoute = TrackOrderRouteImport.update({
   id: '/track-order',
   path: '/track-order',
@@ -186,6 +192,7 @@ export interface FileRoutesByFullPath {
   '/refund': typeof RefundRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/track': typeof TrackRoute
   '/track-order': typeof TrackOrderRoute
   '/account': typeof AuthenticatedAccountRoute
   '/admin': typeof AuthenticatedAdminRoute
@@ -214,6 +221,7 @@ export interface FileRoutesByTo {
   '/refund': typeof RefundRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/track': typeof TrackRoute
   '/track-order': typeof TrackOrderRoute
   '/account': typeof AuthenticatedAccountRoute
   '/admin': typeof AuthenticatedAdminRoute
@@ -244,6 +252,7 @@ export interface FileRoutesById {
   '/refund': typeof RefundRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/track': typeof TrackRoute
   '/track-order': typeof TrackOrderRoute
   '/_authenticated/account': typeof AuthenticatedAccountRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
@@ -274,6 +283,7 @@ export interface FileRouteTypes {
     | '/refund'
     | '/support'
     | '/terms'
+    | '/track'
     | '/track-order'
     | '/account'
     | '/admin'
@@ -302,6 +312,7 @@ export interface FileRouteTypes {
     | '/refund'
     | '/support'
     | '/terms'
+    | '/track'
     | '/track-order'
     | '/account'
     | '/admin'
@@ -331,6 +342,7 @@ export interface FileRouteTypes {
     | '/refund'
     | '/support'
     | '/terms'
+    | '/track'
     | '/track-order'
     | '/_authenticated/account'
     | '/_authenticated/admin'
@@ -361,6 +373,7 @@ export interface RootRouteChildren {
   RefundRoute: typeof RefundRoute
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
+  TrackRoute: typeof TrackRoute
   TrackOrderRoute: typeof TrackOrderRoute
   CategoriesSlugRoute: typeof CategoriesSlugRoute
   PoliciesDeliveryRoute: typeof PoliciesDeliveryRoute
@@ -470,6 +483,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/track': {
+      id: '/track'
+      path: '/track'
+      fullPath: '/track'
+      preLoaderRoute: typeof TrackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/track-order': {
@@ -598,6 +618,7 @@ const rootRouteChildren: RootRouteChildren = {
   RefundRoute: RefundRoute,
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
+  TrackRoute: TrackRoute,
   TrackOrderRoute: TrackOrderRoute,
   CategoriesSlugRoute: CategoriesSlugRoute,
   PoliciesDeliveryRoute: PoliciesDeliveryRoute,

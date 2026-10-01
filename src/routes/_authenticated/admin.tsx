@@ -42,6 +42,18 @@ function AdminPage() {
   const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [pendingReviews, setPendingReviews] = useState<ReviewRow[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [orderQuery, setOrderQuery] = useState("");
+  const visibleOrders = orders.filter((o) => o.order_number.toLowerCase().includes(orderQuery.trim().toLowerCase()));
+
+  const updateOrderStatus = async (id: string, status: string) => {
+    const { error } = await supabase.from("orders").update({ status: status as never }).eq("id", id);
+    if (error) {
+      setLoadError("Could not update that order status. Please try again.");
+      return;
+    }
+    setOrders((rows) => rows.map((row) => (row.id === id ? { ...row, status } : row)));
+  };
+
 
   const approveReview = async (id: string) => {
     const { error } = await supabase.from("reviews").update({ is_approved: true }).eq("id", id);
@@ -198,19 +210,41 @@ function AdminPage() {
 
             <section className="mt-8">
               <h2 className="font-display text-lg font-medium">Latest orders</h2>
-              {orders.length ? (
+              <label className="mt-2 block">
+                <span className="sr-only">Search orders by MTD reference</span>
+                <input
+                  value={orderQuery}
+                  onChange={(e) => setOrderQuery(e.target.value)}
+                  placeholder="Search by MTD reference"
+                  className="h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm"
+                />
+              </label>
+              {visibleOrders.length ? (
                 <ul className="mt-2 divide-y divide-border text-sm">
-                  {orders.map((o) => (
-                    <li key={o.id} className="flex flex-wrap justify-between gap-2 py-2">
+                  {visibleOrders.map((o) => (
+                    <li key={o.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
                       <span className="font-display">{o.order_number}</span>
-                      <span>{STATUS_LABEL[o.status] ?? o.status}</span>
+                      <label>
+                        <span className="sr-only">Status for {o.order_number}</span>
+                        <select
+                          value={o.status}
+                          onChange={(e) => updateOrderStatus(o.id, e.target.value)}
+                          className="h-8 rounded-md border border-border bg-card px-2 text-sm"
+                        >
+                          {ORDER_STATUSES.map((s) => (
+                            <option key={s} value={s}>{s}</option>
+                          ))}
+                        </select>
+                      </label>
                       <span>{formatNpr(o.total_minor)}</span>
                       <span className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleDateString()}</span>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="mt-1 text-sm text-muted-foreground">No orders are recorded in the system yet. WhatsApp orders are handled in chat.</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {orders.length ? "No orders match that reference." : "No orders are recorded in the system yet. WhatsApp orders are handled in chat."}
+                </p>
               )}
             </section>
 
