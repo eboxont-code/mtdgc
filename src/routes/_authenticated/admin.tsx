@@ -43,6 +43,7 @@ function AdminPage() {
   const [pendingReviews, setPendingReviews] = useState<ReviewRow[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [orderQuery, setOrderQuery] = useState("");
+  const ORDER_STATUSES = ["pending", "processing", "paid", "failed", "cancelled", "refunded", "completed"];
   const visibleOrders = orders.filter((o) => o.order_number.toLowerCase().includes(orderQuery.trim().toLowerCase()));
 
   const updateOrderStatus = async (id: string, status: string) => {
