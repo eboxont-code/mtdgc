@@ -141,6 +141,7 @@ function ProductPage() {
       priceMinor: variant.price_minor,
       image: product.image_url,
       region: product.region,
+      categorySlug: product.category?.slug,
       fields,
     });
     setDrawerOpen(true);

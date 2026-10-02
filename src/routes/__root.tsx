@@ -98,7 +98,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "author", content: "MTDGC" },
       { property: "og:site_name", content: "MTDGC" },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: "https://mtdgc.lovable.app/og/mtdgc.png" },
+      { property: "og:image:alt", content: "MTDGC, digital goods for Nepal" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "https://mtdgc.lovable.app/og/mtdgc.png" },
+      { name: "twitter:image:alt", content: "MTDGC, digital goods for Nepal" },
     ],
     links: [
       {

@@ -8,6 +8,7 @@ export type CartLine = {
   priceMinor: number;
   image: string | null;
   region?: string;
+  categorySlug?: string;
   quantity: number;
   fields?: Record<string, string>;
 };
