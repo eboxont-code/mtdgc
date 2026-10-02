@@ -30,15 +30,9 @@ export function SiteHeader() {
       <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-1 px-4">
           <Link to="/" className="mr-auto flex items-center gap-2" aria-label="MTDGC home">
-            <span
-              aria-hidden="true"
-              className="grid size-7 place-items-center rounded-md bg-primary font-display text-sm font-semibold text-primary-foreground"
-            >
-              M
-            </span>
+            <span aria-hidden="true" className="size-3 rounded-sm bg-primary" />
             <span className="flex flex-col leading-none">
-              <span aria-hidden="true" className="font-display text-[15px] font-semibold">TDGC</span>
-              <span className="sr-only">MTDGC</span>
+              <span className="font-display text-[15px] font-semibold">MTDGC</span>
               <span className="hidden text-[9px] uppercase tracking-[0.12em] text-muted-foreground sm:block">
                 Modern Tech Digital Goods &amp; Commerce
               </span>

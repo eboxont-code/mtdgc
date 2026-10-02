@@ -22,6 +22,8 @@ export const Route = createFileRoute("/categories/$slug")({
     const url = `${SITE_URL}/categories/${params.slug}`;
     const title = `${category.name} in Nepal | MTDGC`;
     const description = category.description;
+    const shareSlug = ["game-top-ups", "gift-cards", "subscriptions"].includes(category.slug) ? category.slug : "mtdgc";
+    const shareImage = `${SITE_URL}/og/${shareSlug}.png`;
     return {
       meta: [
         { title },
@@ -30,7 +32,11 @@ export const Route = createFileRoute("/categories/$slug")({
         { property: "og:description", content: description },
         { property: "og:url", content: url },
         { property: "og:type", content: "website" },
+        { property: "og:image", content: shareImage },
+        { property: "og:image:alt", content: `${category.name} from MTDGC` },
         { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:image", content: shareImage },
+        { name: "twitter:image:alt", content: `${category.name} from MTDGC` },
       ],
       links: [{ rel: "canonical", href: url }],
       scripts: [

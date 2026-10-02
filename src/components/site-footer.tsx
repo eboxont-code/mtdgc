@@ -39,14 +39,8 @@ export function SiteFooter() {
         <div className="grid gap-8 md:grid-cols-[1.2fr_repeat(3,0.6fr)]">
           <div>
             <div className="flex items-center gap-2">
-              <span
-                aria-hidden="true"
-                className="grid size-7 place-items-center rounded-md bg-primary font-display text-sm font-semibold text-primary-foreground"
-              >
-                M
-              </span>
-              <span aria-hidden="true" className="font-display text-[15px] font-semibold">TDGC</span>
-              <span className="sr-only">MTDGC</span>
+              <span aria-hidden="true" className="size-3 rounded-sm bg-primary" />
+              <span className="font-display text-[15px] font-semibold">MTDGC</span>
             </div>
             <p className="mt-2 font-display text-xs uppercase tracking-[0.12em] text-muted-foreground">
               Modern Tech Digital Goods &amp; Commerce

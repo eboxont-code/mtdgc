@@ -7,6 +7,8 @@ export type CartLine = {
   variantName: string;
   priceMinor: number;
   image: string | null;
+  region?: string;
+  categorySlug?: string;
   quantity: number;
   fields?: Record<string, string>;
 };
@@ -18,6 +20,7 @@ type CartContextValue = {
   add: (line: Omit<CartLine, "quantity">, quantity?: number) => void;
   setQuantity: (sku: string, quantity: number) => void;
   remove: (sku: string) => void;
+  updateFields: (sku: string, fields: Record<string, string>) => void;
   clear: () => void;
   drawerOpen: boolean;
   setDrawerOpen: (open: boolean) => void;
@@ -25,7 +28,7 @@ type CartContextValue = {
 };
 
 const STORAGE_KEY = "mtdgc.cart.v1";
-const MAX_QTY = 20;
+export const MAX_QTY = 10;
 
 const CartContext = createContext<CartContextValue | null>(null);
 
@@ -33,6 +36,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const [announcement, setAnnouncement] = useState("");
 
   useEffect(() => {
     try {
@@ -45,6 +49,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
       // ignore unreadable storage
     }
     setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    const sync = (event: StorageEvent) => {
+      if (event.key !== STORAGE_KEY || !event.newValue) return;
+      try {
+        const parsed: unknown = JSON.parse(event.newValue);
+        if (Array.isArray(parsed)) setLines(parsed as CartLine[]);
+      } catch {
+        // Ignore malformed data written by another tab.
+      }
+    };
+    window.addEventListener("storage", sync);
+    return () => window.removeEventListener("storage", sync);
   }, []);
 
   useEffect(() => {
@@ -68,6 +86,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
       return [...current, { ...line, quantity: Math.min(MAX_QTY, quantity) }];
     });
+    setAnnouncement(`${line.productName} added to your cart.`);
   }, []);
 
   const setQuantity = useCallback((sku: string, quantity: number) => {
@@ -79,7 +98,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const remove = useCallback((sku: string) => {
-    setLines((current) => current.filter((item) => item.sku !== sku));
+    setLines((current) => {
+      const removed = current.find((item) => item.sku === sku);
+      if (removed) setAnnouncement(`${removed.productName} removed from your cart.`);
+      return current.filter((item) => item.sku !== sku);
+    });
+  }, []);
+
+  const updateFields = useCallback((sku: string, fields: Record<string, string>) => {
+    setLines((current) => current.map((item) => (item.sku === sku ? { ...item, fields } : item)));
   }, []);
 
   const clear = useCallback(() => setLines([]), []);
@@ -87,10 +114,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const value = useMemo<CartContextValue>(() => {
     const count = lines.reduce((sum, line) => sum + line.quantity, 0);
     const subtotalMinor = lines.reduce((sum, line) => sum + line.priceMinor * line.quantity, 0);
-    return { lines, count, subtotalMinor, add, setQuantity, remove, clear, drawerOpen, setDrawerOpen, hydrated };
-  }, [lines, add, setQuantity, remove, clear, drawerOpen, hydrated]);
+    return { lines, count, subtotalMinor, add, setQuantity, remove, updateFields, clear, drawerOpen, setDrawerOpen, hydrated };
+  }, [lines, add, setQuantity, remove, updateFields, clear, drawerOpen, hydrated]);
 
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  return (
+    <CartContext.Provider value={value}>
+      {children}
+      <span className="sr-only" aria-live="polite" aria-atomic="true">{announcement}</span>
+    </CartContext.Provider>
+  );
 }
 
 export function useCart(): CartContextValue {

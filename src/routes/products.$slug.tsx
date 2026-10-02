@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { ProductCard } from "@/components/product-card";
@@ -24,6 +24,9 @@ export const Route = createFileRoute("/products/$slug")({
     }
     const product = loaderData.product;
     const url = `${SITE_URL}/products/${product.slug}`;
+    const image = product.image_url ? (product.image_url.startsWith("http") ? product.image_url : `${SITE_URL}${product.image_url}`) : undefined;
+    const prices = product.variants.filter((variant) => variant.price_minor > 0 && variant.status !== "archived").map((variant) => variant.price_minor);
+    const lowestPrice = prices.length ? Math.min(...prices) : 0;
     return {
       meta: [
         { title: product.seo_title },
@@ -31,7 +34,17 @@ export const Route = createFileRoute("/products/$slug")({
         { property: "og:title", content: product.seo_title },
         { property: "og:description", content: product.seo_description },
         { property: "og:url", content: url },
-        { property: "og:type", content: "website" },
+        { property: "og:type", content: "product" },
+        ...(image ? [
+          { property: "og:image", content: image },
+          { property: "og:image:alt", content: `${product.name} from MTDGC` },
+          { property: "og:image:width", content: "640" },
+          { property: "og:image:height", content: "640" },
+          { name: "twitter:image", content: image },
+          { name: "twitter:image:alt", content: `${product.name} from MTDGC` },
+        ] : []),
+        { property: "product:price:amount", content: (lowestPrice / 100).toFixed(2) },
+        { property: "product:price:currency", content: "NPR" },
         { name: "twitter:card", content: "summary_large_image" },
       ],
       links: [{ rel: "canonical", href: url }],
@@ -43,9 +56,13 @@ export const Route = createFileRoute("/products/$slug")({
             "@type": "Product",
             name: product.name,
             description: product.summary,
+            image,
+            url,
+            sku: product.variants[0]?.sku ?? product.slug,
             brand: { "@type": "Brand", name: product.brand },
             category: product.category?.name,
-            offers: product.variants
+            offers: [
+              ...product.variants
               .filter((variant) => variant.price_minor > 0 && variant.status !== "archived")
               .map((variant) => ({
                 "@type": "Offer",
@@ -62,6 +79,27 @@ export const Route = createFileRoute("/products/$slug")({
                     : "https://schema.org/OutOfStock",
                 url,
               })),
+              ...(prices.length ? [{
+                "@type": "AggregateOffer",
+                lowPrice: (Math.min(...prices) / 100).toFixed(2),
+                highPrice: (Math.max(...prices) / 100).toFixed(2),
+                offerCount: prices.length,
+                priceCurrency: "NPR",
+              }] : []),
+            ],
+            seller: { "@type": "Organization", name: "MTDGC", url: SITE_URL },
+          }),
+        },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org", "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+              { "@type": "ListItem", position: 2, name: "Catalog", item: `${SITE_URL}/catalog` },
+              ...(product.category ? [{ "@type": "ListItem", position: 3, name: product.category.name, item: `${SITE_URL}/categories/${product.category.slug}` }] : []),
+              { "@type": "ListItem", position: product.category ? 4 : 3, name: product.name, item: url },
+            ],
           }),
         },
       ],
@@ -77,6 +115,8 @@ function ProductPage() {
   const [selectedSku, setSelectedSku] = useState(defaultVariant?.sku ?? "");
   const [fields, setFields] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
+  const fieldRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const [invalidFields, setInvalidFields] = useState<string[]>([]);
 
   if (!product) return null;
   const variant = product.variants.find((item) => item.sku === selectedSku) ?? defaultVariant;
@@ -87,9 +127,12 @@ function ProductPage() {
     const missing = product.requirements.filter((requirement) => !(fields[requirement] ?? "").trim());
     if (missing.length) {
       setError(`Please fill in: ${missing.join(", ")}.`);
+      setInvalidFields(missing);
+      fieldRefs.current[missing[0] ?? ""]?.focus();
       return;
     }
     setError(null);
+    setInvalidFields([]);
     add({
       sku: variant.sku,
       productSlug: product.slug,
@@ -97,6 +140,8 @@ function ProductPage() {
       variantName: variant.name,
       priceMinor: variant.price_minor,
       image: product.image_url,
+      region: product.region,
+      categorySlug: product.category?.slug,
       fields,
     });
     setDrawerOpen(true);
@@ -110,6 +155,7 @@ function ProductPage() {
           items={[
             { label: "Home", to: "/" },
             { label: "Catalog", to: "/catalog" },
+            ...(product.category ? [{ label: product.category.name, to: "/categories/$slug", params: { slug: product.category.slug } }] : []),
             { label: product.name },
           ]}
         />
@@ -190,13 +236,16 @@ function ProductPage() {
                     <div key={requirement}>
                       <label htmlFor={id} className="font-display text-xs text-muted-foreground">{requirement}</label>
                       <input
+                        ref={(node) => { fieldRefs.current[requirement] = node; }}
                         id={id}
-                        aria-describedby={help ? `${id}-help` : undefined}
+                        aria-invalid={invalidFields.includes(requirement)}
+                        aria-describedby={`${id}-help${invalidFields.includes(requirement) ? ` ${id}-error` : ""}`}
                         value={fields[requirement] ?? ""}
                         onChange={(event) => setFields((current) => ({ ...current, [requirement]: event.target.value }))}
                         className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm outline-none focus:border-primary"
                       />
                       {help && <p id={`${id}-help`} className="mt-1 text-xs text-muted-foreground">{help}</p>}
+                      {invalidFields.includes(requirement) && <p id={`${id}-error`} className="mt-1 text-xs text-destructive">This detail is required.</p>}
                     </div>
                   );
                 })}
