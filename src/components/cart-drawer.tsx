@@ -1,17 +1,48 @@
 import { Link } from "@tanstack/react-router";
 import { ShoppingBag, X } from "lucide-react";
+import { useEffect, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
-import { useCart } from "@/lib/cart";
+import { MAX_QTY, useCart } from "@/lib/cart";
 import { formatNpr } from "@/lib/format";
 
 export function CartDrawer() {
   const { lines, count, subtotalMinor, drawerOpen, setDrawerOpen, setQuantity, remove } = useCart();
   if (!drawerOpen) return null;
 
+  return <OpenCartDrawer />;
+}
+
+function OpenCartDrawer() {
+  const { lines, count, subtotalMinor, setDrawerOpen, setQuantity, remove } = useCart();
+  const dialogRef = useRef<HTMLElement>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    returnFocusRef.current = document.activeElement as HTMLElement | null;
+    const dialog = dialogRef.current;
+    dialog?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setDrawerOpen(false);
+      if (event.key !== "Tab" || !dialog) return;
+      const focusable = Array.from(dialog.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input:not([disabled])'));
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (!first || !last) return;
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      returnFocusRef.current?.focus();
+    };
+  }, [setDrawerOpen]);
+
   return (
     <div className="fixed inset-0 z-50 bg-foreground/45" role="presentation" onClick={() => setDrawerOpen(false)}>
       <aside
+        ref={dialogRef}
+        tabIndex={-1}
         className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-auto rounded-t-lg bg-background p-4 md:left-auto md:top-0 md:h-full md:w-[420px] md:rounded-none"
         role="dialog"
         aria-modal="true"
@@ -19,7 +50,7 @@ export function CartDrawer() {
         onClick={(event) => event.stopPropagation()}
       >
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="font-display text-xl font-semibold">Your cart</h2>
+          <h2 className="font-display text-xl font-semibold">Your cart ({count})</h2>
           <Button variant="ghost" size="icon" aria-label="Close cart" onClick={() => setDrawerOpen(false)}>
             <X className="size-5" />
           </Button>
@@ -40,12 +71,14 @@ export function CartDrawer() {
                     <p className="text-xs text-muted-foreground">
                       {line.variantName} · {formatNpr(line.priceMinor)}
                     </p>
+                    <p className="mt-1 font-display text-xs">Subtotal {formatNpr(line.priceMinor * line.quantity)}</p>
                   </div>
                   <div className="flex items-center gap-1">
                     <Button
                       variant="outline"
                       size="icon"
                       aria-label={`Reduce quantity of ${line.productName}`}
+                      disabled={line.quantity <= 1}
                       onClick={() => setQuantity(line.sku, line.quantity - 1)}
                     >
                       −
@@ -55,6 +88,7 @@ export function CartDrawer() {
                       variant="outline"
                       size="icon"
                       aria-label={`Increase quantity of ${line.productName}`}
+                      disabled={line.quantity >= MAX_QTY}
                       onClick={() => setQuantity(line.sku, line.quantity + 1)}
                     >
                       +
@@ -85,6 +119,9 @@ export function CartDrawer() {
             </Button>
             <Button asChild variant="outline" className="mt-2 w-full" onClick={() => setDrawerOpen(false)}>
               <Link to="/cart">View full cart</Link>
+            </Button>
+            <Button asChild variant="ghost" className="mt-2 w-full" onClick={() => setDrawerOpen(false)}>
+              <Link to="/catalog">Continue shopping</Link>
             </Button>
           </>
         ) : (
