@@ -85,6 +85,13 @@ function Index() {
     alternateName: "Modern Tech Digital Goods & Commerce",
     url: `${SITE_URL}/`,
     description: "Digital commerce company in Nepal selling game top-ups, gift cards and subscriptions.",
+    logo: `${SITE_URL}/og/mtdgc.png`,
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "customer support",
+      url: `${SITE_URL}/support`,
+      availableLanguage: ["English", "Nepali"],
+    },
   };
   const siteJsonLd = {
     "@context": "https://schema.org",
