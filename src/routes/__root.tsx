@@ -15,9 +15,6 @@ import { CartDrawer } from "../components/cart-drawer";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
-  useEffect(() => {
-    document.title = "Page not found | MTDGC";
-  }, []);
 
   return (
     <main id="main-content" tabIndex={-1} className="focus:outline-none flex min-h-screen items-center justify-center bg-background px-4 font-body text-foreground">
@@ -91,9 +88,16 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
+  head: ({ matches }) => ({
     meta: [
       { charSet: "utf-8" },
+      ...(matches.some((m) => m.status === "notFound" || m.globalNotFound)
+        ? [
+            { title: "Page not found | MTDGC" },
+            { name: "robots", content: "noindex" },
+            { name: "description", content: "This MTDGC page could not be found. Browse the catalog or contact support." },
+          ]
+        : []),
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "author", content: "MTDGC" },
       { property: "og:site_name", content: "MTDGC" },
