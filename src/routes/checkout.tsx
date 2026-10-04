@@ -1,5 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
+
+import { supabase } from "@/integrations/supabase/client";
+import { placeOrder } from "@/lib/orders.functions";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { SiteFooter } from "@/components/site-footer";
@@ -42,8 +46,10 @@ function CheckoutPage() {
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [sentRef, setSentRef] = useState<string | null>(null);
+  const [saveFailed, setSaveFailed] = useState(false);
+  const placeOrderFn = useServerFn(placeOrder);
 
-  const submit = (event: React.FormEvent) => {
+  const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (sending) return;
     const digits = contact.replace(/[^\d]/g, "");
@@ -61,7 +67,27 @@ function CheckoutPage() {
     }
     setError(null);
     setSending(true);
-    const reference = sentRef ?? makeReference();
+    let reference = sentRef;
+    if (!reference) {
+      try {
+        const { data: auth } = await supabase.auth.getUser();
+        const result = await placeOrderFn({
+          data: {
+            name: name.trim(),
+            phone: contact.trim(),
+            email: email.trim(),
+            note: note.trim(),
+            userId: auth.user?.id ?? null,
+            lines: lines.map((l) => ({ sku: l.sku, quantity: l.quantity, fields: l.fields ?? {} })),
+          },
+        });
+        reference = result.orderNumber;
+        setSaveFailed(false);
+      } catch {
+        reference = makeReference();
+        setSaveFailed(true);
+      }
+    }
     const extras = [
       `Reference: ${reference}`,
       `Name: ${name.trim().slice(0, 80)}`,
@@ -75,7 +101,8 @@ function CheckoutPage() {
       ...(note.trim() ? [`Note: ${note.trim().slice(0, 500)}`] : []),
     ];
     const message = buildOrderMessage(lines, subtotalMinor, extras);
-    window.open(whatsappLink(message), "_blank", "noopener,noreferrer");
+    const link = whatsappLink(message);
+    if (link) window.open(link, "_blank", "noopener,noreferrer");
     setSentRef(reference);
     window.setTimeout(() => setSending(false), 2500);
   };
@@ -123,6 +150,11 @@ function CheckoutPage() {
               {sentRef && (
                 <div role="status" className="mt-4 rounded-lg border border-border bg-card p-4 text-sm">
                   <p className="font-display font-medium">Your order reference is {sentRef}</p>
+                  {saveFailed && (
+                    <p className="mt-1 text-destructive">
+                      We could not save this order online. Keep this summary; our team will log the order by hand and contact you.
+                    </p>
+                  )}
                   <p className="mt-1 text-muted-foreground">
                     WhatsApp should now be open with your order filled in. Press send there so our team receives it. We
                     reply with availability and payment instructions. Nothing has been charged.
