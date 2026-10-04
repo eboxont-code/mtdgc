@@ -4,6 +4,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { SITE_URL } from "@/lib/format";
+import { breadcrumbLd, pageLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/policies/privacy")({
   head: () => ({
@@ -16,6 +17,10 @@ export const Route = createFileRoute("/policies/privacy")({
       { property: "og:type", content: "website" },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/policies/privacy` }],
+    scripts: [
+      pageLd("WebPage", "MTDGC Privacy policy", "/policies/privacy", "Privacy policy from MTDGC, Nepal's digital marketplace.", { dateModified: "2026-10-04" }),
+      breadcrumbLd([{ name: "Home", path: "/" }, { name: "Privacy policy", path: "/policies/privacy" }]),
+    ],
   }),
   component: PrivacyPage,
 });
@@ -27,6 +32,7 @@ function PrivacyPage() {
       <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-3xl px-4 pb-16 pt-6">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Privacy policy" }]} />
         <h1 className="font-display text-[26px] font-medium md:text-4xl">Privacy policy</h1>
+        <p className="mt-1 text-xs text-muted-foreground">Last updated 4 October 2026</p>
         <div className="mt-6 space-y-4 text-sm text-foreground/80">
           <p>
             MTDGC collects only what is needed to fulfil an order: your name, the contact number or email you want us to

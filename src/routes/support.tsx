@@ -7,6 +7,7 @@ import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { SITE_URL, whatsappLink } from "@/lib/format";
+import { breadcrumbLd, pageLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/support")({
   head: () => ({
@@ -24,6 +25,10 @@ export const Route = createFileRoute("/support")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/support` }],
+    scripts: [
+      pageLd("ContactPage", "MTDGC Support", "/support", "Support from MTDGC, Nepal's digital marketplace.", { contactPoint: { "@type": "ContactPoint", contactType: "customer support", url: `${SITE_URL}/support`, availableLanguage: ["English", "Nepali"] } }),
+      breadcrumbLd([{ name: "Home", path: "/" }, { name: "Support", path: "/support" }]),
+    ],
   }),
   component: SupportPage,
 });

@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { SITE_URL, whatsappLink } from "@/lib/format";
+import { breadcrumbLd, pageLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/track-order")({
   head: () => ({
@@ -23,6 +24,10 @@ export const Route = createFileRoute("/track-order")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/track-order` }],
+    scripts: [
+      pageLd("WebPage", "MTDGC Track order", "/track-order", "Track order from MTDGC, Nepal's digital marketplace."),
+      breadcrumbLd([{ name: "Home", path: "/" }, { name: "Track order", path: "/track-order" }]),
+    ],
   }),
   component: TrackOrderPage,
 });

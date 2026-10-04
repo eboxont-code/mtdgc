@@ -4,6 +4,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { SITE_URL } from "@/lib/format";
+import { breadcrumbLd, pageLd } from "@/lib/seo";
 
 const FAQS: [string, string][] = [
   [
@@ -53,6 +54,7 @@ export const Route = createFileRoute("/faq")({
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/faq` }],
     scripts: [
+      breadcrumbLd([{ name: "Home", path: "/" }, { name: "FAQ", path: "/faq" }]),
       {
         type: "application/ld+json",
         children: JSON.stringify({
