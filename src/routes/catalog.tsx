@@ -8,6 +8,7 @@ import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { listCatalog } from "@/lib/catalog.functions";
 import { SITE_URL } from "@/lib/format";
+import { breadcrumbLd, itemListLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/catalog")({
   validateSearch: (search: Record<string, unknown>): { q?: string | undefined; category?: string | undefined; sort?: string | undefined; availability?: string | undefined; price?: string | undefined } => ({
@@ -18,7 +19,7 @@ export const Route = createFileRoute("/catalog")({
     price: typeof search["price"] === "string" ? search["price"] as string : undefined,
   }),
   loader: () => listCatalog(),
-  head: () => ({
+  head: ({ loaderData }) => ({
     meta: [
       { title: "Catalog | MTDGC digital goods for Nepal" },
       {
@@ -33,6 +34,10 @@ export const Route = createFileRoute("/catalog")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/catalog` }],
+    scripts: [
+      itemListLd("MTDGC Catalog", "/catalog", "Digital goods sold by MTDGC in NPR.", (loaderData?.products ?? []).map((p) => ({ name: p.name, path: `/products/${p.slug}` }))),
+      breadcrumbLd([{ name: "Home", path: "/" }, { name: "Catalog", path: "/catalog" }]),
+    ],
   }),
   component: CatalogPage,
 });

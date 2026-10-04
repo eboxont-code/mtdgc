@@ -6,10 +6,11 @@ import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { listCatalog } from "@/lib/catalog.functions";
 import { SITE_URL } from "@/lib/format";
+import { breadcrumbLd, itemListLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/categories/")({
   loader: () => listCatalog(),
-  head: () => ({
+  head: ({ loaderData }) => ({
     meta: [
       { title: "Product categories | MTDGC" },
       {
@@ -24,6 +25,10 @@ export const Route = createFileRoute("/categories/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/categories` }],
+    scripts: [
+      itemListLd("MTDGC Categories", "/categories", "Digital goods sold by MTDGC in NPR.", (loaderData?.categories ?? []).map((c) => ({ name: c.name, path: `/categories/${c.slug}` }))),
+      breadcrumbLd([{ name: "Home", path: "/" }, { name: "Categories", path: "/categories" }]),
+    ],
   }),
   component: CategoriesIndexPage,
 });

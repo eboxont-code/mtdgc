@@ -7,10 +7,11 @@ import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { listCatalog } from "@/lib/catalog.functions";
 import { SITE_URL } from "@/lib/format";
+import { breadcrumbLd, itemListLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/products/")({
   loader: () => listCatalog(),
-  head: () => ({
+  head: ({ loaderData }) => ({
     meta: [
       { title: "All products | MTDGC" },
       {
@@ -25,6 +26,10 @@ export const Route = createFileRoute("/products/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/products` }],
+    scripts: [
+      itemListLd("MTDGC Products", "/products", "Digital goods sold by MTDGC in NPR.", (loaderData?.products ?? []).map((p) => ({ name: p.name, path: `/products/${p.slug}` }))),
+      breadcrumbLd([{ name: "Home", path: "/" }, { name: "Products", path: "/products" }]),
+    ],
   }),
   component: ProductsIndexPage,
 });
