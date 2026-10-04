@@ -77,7 +77,7 @@ function AuthPage() {
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
       <SiteHeader />
-      <main className="mx-auto max-w-md px-4 pb-20 pt-10">
+      <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-md px-4 pb-20 pt-10">
         <h1 className="font-display text-[26px] font-medium">
           {mode === "signup" ? "Create your MTDGC account" : mode === "reset" ? "Reset your password" : "Sign in to MTDGC"}
         </h1>

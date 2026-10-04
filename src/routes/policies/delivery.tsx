@@ -24,7 +24,7 @@ function DeliveryPage() {
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
       <SiteHeader />
-      <main className="mx-auto max-w-3xl px-4 pb-16 pt-6">
+      <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-3xl px-4 pb-16 pt-6">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Delivery policy" }]} />
         <h1 className="font-display text-[26px] font-medium md:text-4xl">Delivery policy</h1>
         <div className="mt-6 space-y-4 text-sm text-foreground/80">
