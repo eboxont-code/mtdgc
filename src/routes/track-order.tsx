@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { SITE_URL, whatsappLink } from "@/lib/format";
+import { breadcrumbLd, pageLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/track-order")({
   head: () => ({
@@ -23,6 +24,10 @@ export const Route = createFileRoute("/track-order")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/track-order` }],
+    scripts: [
+      pageLd("WebPage", "MTDGC Track order", "/track-order", "Track order from MTDGC, Nepal's digital marketplace."),
+      breadcrumbLd([{ name: "Home", path: "/" }, { name: "Track order", path: "/track-order" }]),
+    ],
   }),
   component: TrackOrderPage,
 });
@@ -69,7 +74,7 @@ function TrackOrderPage() {
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
       <SiteHeader />
-      <main className="mx-auto max-w-4xl px-4 pb-16 pt-6">
+      <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-4xl px-4 pb-16 pt-6">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Track order" }]} />
         <h1 className="font-display text-[26px] font-medium md:text-4xl">Track your order</h1>
         <p className="mt-2 max-w-[62ch] text-sm text-muted-foreground">

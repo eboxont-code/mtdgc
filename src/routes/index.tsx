@@ -111,7 +111,7 @@ function Index() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }} />
       <SiteHeader />
 
-      <main id="top" className="pb-16">
+      <main id="main-content" tabIndex={-1} className="focus:outline-none pb-16">
         <section className="border-b border-border bg-panel">
           <div className="mx-auto grid max-w-6xl gap-8 px-4 py-7 md:grid-cols-[1fr_0.8fr] md:items-center md:py-14">
             <div>

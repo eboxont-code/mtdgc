@@ -7,6 +7,7 @@ import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { SITE_URL, whatsappLink } from "@/lib/format";
+import { breadcrumbLd, pageLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/support")({
   head: () => ({
@@ -24,6 +25,10 @@ export const Route = createFileRoute("/support")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/support` }],
+    scripts: [
+      pageLd("ContactPage", "MTDGC Support", "/support", "Support from MTDGC, Nepal's digital marketplace.", { contactPoint: { "@type": "ContactPoint", contactType: "customer support", url: `${SITE_URL}/support`, availableLanguage: ["English", "Nepali"] } }),
+      breadcrumbLd([{ name: "Home", path: "/" }, { name: "Support", path: "/support" }]),
+    ],
   }),
   component: SupportPage,
 });
@@ -68,7 +73,7 @@ function SupportPage() {
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
       <SiteHeader />
-      <main className="mx-auto max-w-4xl px-4 pb-16 pt-6">
+      <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-4xl px-4 pb-16 pt-6">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Support" }]} />
         <h1 className="font-display text-[26px] font-medium md:text-4xl">Support and order help</h1>
         <p className="mt-2 max-w-[62ch] text-sm text-muted-foreground">

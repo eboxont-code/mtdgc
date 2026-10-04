@@ -6,10 +6,11 @@ import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { listCatalog } from "@/lib/catalog.functions";
 import { SITE_URL } from "@/lib/format";
+import { breadcrumbLd, itemListLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/categories/")({
   loader: () => listCatalog(),
-  head: () => ({
+  head: ({ loaderData }) => ({
     meta: [
       { title: "Product categories | MTDGC" },
       {
@@ -24,6 +25,10 @@ export const Route = createFileRoute("/categories/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/categories` }],
+    scripts: [
+      itemListLd("MTDGC Categories", "/categories", "Digital goods sold by MTDGC in NPR.", (loaderData?.categories ?? []).map((c) => ({ name: c.name, path: `/categories/${c.slug}` }))),
+      breadcrumbLd([{ name: "Home", path: "/" }, { name: "Categories", path: "/categories" }]),
+    ],
   }),
   component: CategoriesIndexPage,
 });
@@ -34,7 +39,7 @@ function CategoriesIndexPage() {
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
       <SiteHeader />
-      <main className="mx-auto max-w-5xl px-4 pb-16 pt-6">
+      <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-5xl px-4 pb-16 pt-6">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Categories" }]} />
         <h1 className="font-display text-[26px] font-medium md:text-4xl">Product categories</h1>
         <p className="mt-2 max-w-[62ch] text-sm text-muted-foreground">

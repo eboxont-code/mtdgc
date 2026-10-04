@@ -150,7 +150,7 @@ function ProductPage() {
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
       <SiteHeader />
-      <main className="mx-auto max-w-6xl px-4 pb-16 pt-6">
+      <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-6xl px-4 pb-16 pt-6">
         <Breadcrumbs
           items={[
             { label: "Home", to: "/" },

@@ -15,12 +15,9 @@ import { CartDrawer } from "../components/cart-drawer";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
-  useEffect(() => {
-    document.title = "Page not found | MTDGC";
-  }, []);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4 font-body text-foreground">
+    <main id="main-content" tabIndex={-1} className="focus:outline-none flex min-h-screen items-center justify-center bg-background px-4 font-body text-foreground">
       <div className="max-w-md text-center">
         <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">MTDGC</p>
         <h1 className="mt-3 font-display text-3xl font-medium">This page is not here</h1>
@@ -91,9 +88,16 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
+  head: ({ matches }) => ({
     meta: [
       { charSet: "utf-8" },
+      ...(matches.some((m) => m.status === "notFound" || m.globalNotFound)
+        ? [
+            { title: "Page not found | MTDGC" },
+            { name: "robots", content: "noindex" },
+            { name: "description", content: "This MTDGC page could not be found. Browse the catalog or contact support." },
+          ]
+        : []),
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "author", content: "MTDGC" },
       { property: "og:site_name", content: "MTDGC" },
@@ -135,6 +139,7 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground">Skip to main content</a>
         {children}
         <Scripts />
       </body>

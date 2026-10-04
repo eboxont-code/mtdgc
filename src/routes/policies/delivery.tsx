@@ -4,6 +4,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { SITE_URL } from "@/lib/format";
+import { breadcrumbLd, pageLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/policies/delivery")({
   head: () => ({
@@ -16,6 +17,10 @@ export const Route = createFileRoute("/policies/delivery")({
       { property: "og:type", content: "website" },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/policies/delivery` }],
+    scripts: [
+      pageLd("WebPage", "MTDGC Delivery policy", "/policies/delivery", "Delivery policy from MTDGC, Nepal's digital marketplace.", { dateModified: "2026-10-04" }),
+      breadcrumbLd([{ name: "Home", path: "/" }, { name: "Delivery policy", path: "/policies/delivery" }]),
+    ],
   }),
   component: DeliveryPage,
 });
@@ -24,9 +29,10 @@ function DeliveryPage() {
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
       <SiteHeader />
-      <main className="mx-auto max-w-3xl px-4 pb-16 pt-6">
+      <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-3xl px-4 pb-16 pt-6">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Delivery policy" }]} />
         <h1 className="font-display text-[26px] font-medium md:text-4xl">Delivery policy</h1>
+        <p className="mt-1 text-xs text-muted-foreground">Last updated 4 October 2026</p>
         <div className="mt-6 space-y-4 text-sm text-foreground/80">
           <p>
             All MTDGC products are digital. Nothing is shipped. Game top-ups are credited to the account identifier you

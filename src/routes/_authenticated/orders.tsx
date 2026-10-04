@@ -35,7 +35,7 @@ function OrdersPage() {
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
       <SiteHeader />
-      <main className="mx-auto max-w-4xl px-4 pb-16 pt-6">
+      <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-4xl px-4 pb-16 pt-6">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Account", to: "/account" }, { label: "Orders" }]} />
         <h1 className="font-display text-[26px] font-medium md:text-4xl">Your orders</h1>
         <p className="mt-2 text-sm text-muted-foreground">

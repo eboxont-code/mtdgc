@@ -4,6 +4,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { SITE_URL } from "@/lib/format";
+import { breadcrumbLd, pageLd } from "@/lib/seo";
 
 const FAQS: [string, string][] = [
   [
@@ -53,6 +54,7 @@ export const Route = createFileRoute("/faq")({
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/faq` }],
     scripts: [
+      breadcrumbLd([{ name: "Home", path: "/" }, { name: "FAQ", path: "/faq" }]),
       {
         type: "application/ld+json",
         children: JSON.stringify({
@@ -74,7 +76,7 @@ function FaqPage() {
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
       <SiteHeader />
-      <main className="mx-auto max-w-3xl px-4 pb-16 pt-6">
+      <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-3xl px-4 pb-16 pt-6">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "FAQ" }]} />
         <h1 className="font-display text-[26px] font-medium md:text-4xl">Frequently asked questions</h1>
         <p className="mt-2 text-sm text-muted-foreground">
