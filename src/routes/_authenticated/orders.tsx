@@ -62,11 +62,15 @@ function OrdersPage() {
                 <span className="rounded bg-secondary px-2 py-0.5 font-display text-[10px] uppercase tracking-[0.1em]">
                   {order.status}
                 </span>
-                <Button asChild variant="outline" size="sm">
-                  <a href={whatsappLink(`Hello MTDGC, I would like to order again: ${order.order_number}`)} target="_blank" rel="noreferrer">
-                    Order again
-                  </a>
-                </Button>
+                {whatsappLink() ? (
+                  <Button asChild variant="outline" size="sm">
+                    <a href={whatsappLink(`Hello MTDGC, I would like to order again: ${order.order_number}`)!} target="_blank" rel="noreferrer">
+                      Order again
+                    </a>
+                  </Button>
+                ) : (
+                  <Button asChild variant="outline" size="sm"><Link to="/catalog">Order again</Link></Button>
+                )}
               </li>
             ))}
           </ul>

@@ -77,16 +77,17 @@ function SupportPage() {
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Support" }]} />
         <h1 className="font-display text-[26px] font-medium md:text-4xl">Support and order help</h1>
         <p className="mt-2 max-w-[62ch] text-sm text-muted-foreground">
-          The fastest way to reach MTDGC is WhatsApp. Send your order number and a short description of the problem and
-          our team will work through it with you.
+          Send your order number and a short description of the problem and our team will work through it with you.
         </p>
 
         <div className="mt-5 flex flex-wrap gap-2">
-          <Button asChild size="lg">
-            <a href={whatsappLink("Hello MTDGC, I need help with an order.")} target="_blank" rel="noreferrer">
-              Message MTDGC on WhatsApp
-            </a>
-          </Button>
+          {whatsappLink() && (
+            <Button asChild size="lg">
+              <a href={whatsappLink("Hello MTDGC, I need help with an order.")!} target="_blank" rel="noreferrer">
+                Message MTDGC on WhatsApp
+              </a>
+            </Button>
+          )}
           <Button asChild variant="outline" size="lg"><Link to="/track-order">Track an order</Link></Button>
         </div>
 

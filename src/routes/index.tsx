@@ -294,12 +294,14 @@ function Index() {
             </span>
             <div className="min-w-0">
               <h2 className="font-display text-[15px] font-medium">Questions before you order?</h2>
-              <p className="text-xs text-background/60">Chat with the MTDGC team on WhatsApp.</p>
+              <p className="text-xs text-background/60">Our support team can help before you place an order.</p>
             </div>
             <Button asChild variant="primary" size="sm" className="ml-auto">
-              <a href={whatsappLink()} target="_blank" rel="noreferrer">
-                Message
-              </a>
+              {whatsappLink() ? (
+                <a href={whatsappLink()!} target="_blank" rel="noreferrer">Message</a>
+              ) : (
+                <Link to="/support">Get help</Link>
+              )}
             </Button>
           </div>
         </section>
