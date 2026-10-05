@@ -72,9 +72,11 @@ export function SiteFooter() {
 
         <div className="mt-8 flex flex-col gap-2 border-t border-border pt-5 text-xs text-muted-foreground md:flex-row md:items-center md:justify-between">
           <p>© {new Date().getFullYear()} MTDGC. Modern Tech Digital Goods &amp; Commerce.</p>
-          <a href={whatsappLink()} target="_blank" rel="noopener noreferrer" aria-label="Message MTDGC on WhatsApp (opens in a new tab)" className="font-display font-medium text-foreground">
-            WhatsApp support
-          </a>
+          {whatsappLink() && (
+            <a href={whatsappLink()!} target="_blank" rel="noopener noreferrer" aria-label="Message MTDGC on WhatsApp (opens in a new tab)" className="font-display font-medium text-foreground">
+              WhatsApp support
+            </a>
+          )}
         </div>
       </div>
     </footer>

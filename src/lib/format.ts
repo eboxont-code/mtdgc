@@ -2,9 +2,11 @@ export function formatNpr(minor: number): string {
   return `Rs ${(minor / 100).toLocaleString("en-NP", { maximumFractionDigits: 0 })}`;
 }
 
-export const WHATSAPP_NUMBER = "19379307376";
+// The only place the WhatsApp number is set. Leave empty until the owner provides a real number.
+export const WHATSAPP_NUMBER: string = "";
 
-export function whatsappLink(message?: string): string {
+export function whatsappLink(message?: string): string | null {
+  if (!WHATSAPP_NUMBER) return null;
   const base = `https://wa.me/${WHATSAPP_NUMBER}`;
   return message ? `${base}?text=${encodeURIComponent(message)}` : base;
 }
