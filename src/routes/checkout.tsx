@@ -33,7 +33,7 @@ function makeReference(): string {
   const date = `${String(now.getFullYear()).slice(2)}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}`;
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let tail = "";
-  for (let i = 0; i < 4; i += 1) tail += alphabet[Math.floor(Math.random() * alphabet.length)];
+  for (let i = 0; i < 6; i += 1) tail += alphabet[Math.floor(Math.random() * alphabet.length)];
   return `MTD-${date}-${tail}`;
 }
 
@@ -47,6 +47,7 @@ function CheckoutPage() {
   const [sending, setSending] = useState(false);
   const [sentRef, setSentRef] = useState<string | null>(null);
   const [saveFailed, setSaveFailed] = useState(false);
+  const [waMessage, setWaMessage] = useState<string | null>(null);
   const placeOrderFn = useServerFn(placeOrder);
 
   const submit = async (event: React.FormEvent) => {
@@ -103,10 +104,12 @@ function CheckoutPage() {
     const message = buildOrderMessage(lines, subtotalMinor, extras);
     const link = whatsappLink(message);
     if (link) window.open(link, "_blank", "noopener,noreferrer");
+    setWaMessage(message);
     setSentRef(reference);
     window.setTimeout(() => setSending(false), 2500);
   };
 
+  const waLink = waMessage ? whatsappLink(waMessage) : null;
 
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
@@ -115,11 +118,41 @@ function CheckoutPage() {
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Cart", to: "/cart" }, { label: "Checkout" }]} />
         <h1 className="font-display text-[26px] font-medium md:text-4xl">Checkout</h1>
         <p className="mt-2 max-w-[60ch] text-sm text-muted-foreground">
-          MTDGC does not take card payments on this site yet. Send your order details and our team confirms availability
-          and payment instructions on WhatsApp before you pay.
+          Nothing is charged on this site. Send your order and our team will contact you to confirm the order and
+          payment, using the contact details you give below.
         </p>
 
-        {lines.length === 0 ? (
+        {sentRef ? (
+          <div role="status" className="mt-6 rounded-lg border border-border bg-card p-5 text-sm md:max-w-xl">
+            <p className="font-display text-lg font-medium">Thanks, we have your order.</p>
+            <p className="mt-1">Our team will contact you to confirm the order and payment.</p>
+            <p className="mt-3 font-display">Order reference: <strong>{sentRef}</strong></p>
+            {saveFailed && (
+              <p className="mt-2 text-destructive">
+                We could not save this order online. Keep this summary; our team will log the order by hand and contact you.
+              </p>
+            )}
+            <ul className="mt-3 space-y-1 text-muted-foreground">
+              {lines.map((line) => (
+                <li key={line.sku}>
+                  {line.quantity} × {line.productName}, {line.variantName} · {formatNpr(line.priceMinor * line.quantity)}
+                  {Object.entries(line.fields ?? {}).filter(([, v]) => v).map(([k, v]) => ` · ${k}: ${v}`).join("")}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-2 font-display">Estimated total: {formatNpr(subtotalMinor)}</p>
+            <p className="mt-3 text-xs text-muted-foreground">
+              Keep your reference to <Link to="/track-order" className="underline">track the order</Link> or{" "}
+              <Link to="/support" className="underline">contact support</Link>.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {waLink && (
+                <Button asChild variant="outline"><a href={waLink} target="_blank" rel="noreferrer">Open WhatsApp again</a></Button>
+              )}
+              <Button asChild><Link to="/catalog">Done</Link></Button>
+            </div>
+          </div>
+        ) : lines.length === 0 ? (
           <div className="mt-8 rounded-lg border border-border py-14 text-center">
             <p className="font-display font-medium">There is nothing to check out</p>
             <Button asChild className="mt-4"><Link to="/catalog">Browse the catalog</Link></Button>
@@ -131,52 +164,24 @@ function CheckoutPage() {
               <div className="mt-3 space-y-3">
                 <label className="block">
                   <span className="font-display text-xs text-muted-foreground">Full name</span>
-                  <input value={name} onChange={(event) => setName(event.target.value)} required className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm outline-none focus:border-primary" />
+                  <input value={name} autoComplete="name" onChange={(event) => setName(event.target.value)} required className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm focus:border-primary" />
                 </label>
                 <label className="block">
-                  <span className="font-display text-xs text-muted-foreground">WhatsApp number</span>
-                  <input value={contact} onChange={(event) => setContact(event.target.value)} required inputMode="tel" className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm outline-none focus:border-primary" />
+                  <span className="font-display text-xs text-muted-foreground">Phone number (WhatsApp if you use it)</span>
+                  <input value={contact} autoComplete="tel" onChange={(event) => setContact(event.target.value)} required inputMode="tel" className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm focus:border-primary" />
                 </label>
                 <label className="block">
-                  <span className="font-display text-xs text-muted-foreground">Delivery email, if the product needs one</span>
-                  <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm outline-none focus:border-primary" />
+                  <span className="font-display text-xs text-muted-foreground">Email, needed for gift cards and subscriptions</span>
+                  <input value={email} autoComplete="email" onChange={(event) => setEmail(event.target.value)} type="email" className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm focus:border-primary" />
                 </label>
                 <label className="block">
                   <span className="font-display text-xs text-muted-foreground">Anything else we should know</span>
-                  <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={3} className="mt-1 w-full rounded-md border border-border bg-card p-3 font-display text-sm outline-none focus:border-primary" />
+                  <textarea value={note} onChange={(event) => setNote(event.target.value)} rows={3} className="mt-1 w-full rounded-md border border-border bg-card p-3 font-display text-sm focus:border-primary" />
                 </label>
               </div>
               {error && <p role="alert" className="mt-3 text-sm text-destructive">{error}</p>}
-              {sentRef && (
-                <div role="status" className="mt-4 rounded-lg border border-border bg-card p-4 text-sm">
-                  <p className="font-display font-medium">Your order reference is {sentRef}</p>
-                  {saveFailed && (
-                    <p className="mt-1 text-destructive">
-                      We could not save this order online. Keep this summary; our team will log the order by hand and contact you.
-                    </p>
-                  )}
-                  <p className="mt-1 text-muted-foreground">
-                    WhatsApp should now be open with your order filled in. Press send there so our team receives it. We
-                    reply with availability and payment instructions. Nothing has been charged.
-                  </p>
-                  <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
-                    {lines.map((line) => (
-                      <li key={line.sku}>
-                        {line.quantity} × {line.productName}, {line.variantName}
-                        {Object.entries(line.fields ?? {})
-                          .filter(([, v]) => v)
-                          .map(([k, v]) => ` · ${k}: ${v}`)
-                          .join("")}
-                      </li>
-                    ))}
-                  </ul>
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    WhatsApp did not open? Press the button again, or keep this reference and <Link to="/support" className="underline">contact support</Link>.
-                  </p>
-                </div>
-              )}
               <Button type="submit" size="lg" className="mt-4 w-full" disabled={sending}>
-                {sending ? "Opening WhatsApp" : sentRef ? "Open WhatsApp again" : "Send order for confirmation"}
+                {sending ? "Sending your order" : "Send order for confirmation"}
               </Button>
               <p className="mt-2 text-xs text-muted-foreground">
                 You can order as a guest. An account is not required.
@@ -191,19 +196,24 @@ function CheckoutPage() {
                     <span className="min-w-0">
                       {line.quantity} × {line.productName}
                       <span className="block text-xs text-muted-foreground">{line.variantName}</span>
+                      {Object.entries(line.fields ?? {}).filter(([, v]) => v).map(([k, v]) => (
+                        <span key={k} className="block text-xs text-muted-foreground">{k}: {v}</span>
+                      ))}
                     </span>
                     <span className="font-display">{formatNpr(line.priceMinor * line.quantity)}</span>
                   </li>
                 ))}
               </ul>
+              <Link to="/cart" className="mt-2 inline-block text-xs text-primary underline">Edit details</Link>
               <div className="mt-4 flex justify-between border-t border-border pt-3 font-display">
                 <span>Estimated total</span>
                 <strong>{formatNpr(subtotalMinor)}</strong>
               </div>
-              <p className="mt-3 text-xs text-muted-foreground">
-                Order statuses are pending, processing, paid, fulfilled, completed, cancelled, failed or refunded. We
-                tell you which one your order is in.
-              </p>
+              <ol className="mt-3 list-decimal space-y-1 pl-4 text-xs text-muted-foreground">
+                <li>We confirm availability.</li>
+                <li>We send payment details using the contact you gave.</li>
+                <li>We deliver and mark the order complete.</li>
+              </ol>
             </aside>
           </div>
         )}
