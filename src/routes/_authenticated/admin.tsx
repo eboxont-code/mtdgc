@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 
-import { approveReview as approveReviewServer, updateOrderStatus as updateOrderStatusServer } from "@/lib/admin.functions";
+import { approveReview as approveReviewServer, archiveProduct as archiveProductServer, updateOrderStatus as updateOrderStatusServer } from "@/lib/admin.functions";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -50,6 +50,7 @@ function AdminPage() {
   const visibleOrders = orders.filter((o) => o.order_number.toLowerCase().includes(orderQuery.trim().toLowerCase()));
 
   const updateOrderStatusFn = useServerFn(updateOrderStatusServer);
+  const archiveProductFn = useServerFn(archiveProductServer);
   const approveReviewFn = useServerFn(approveReviewServer);
 
   const updateOrderStatus = async (id: string, status: string) => {
@@ -187,6 +188,24 @@ function AdminPage() {
                           <td className="py-2">{product.is_published ? "Yes" : "No"}</td>
                           <td className="py-2">{prices.length}</td>
                           <td className="py-2">{prices.length ? formatNpr(Math.min(...prices)) : "Not set"}</td>
+                          <td className="py-2">
+                            {product.status !== "archived" && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={async () => {
+                                  try {
+                                    await archiveProductFn({ data: { id: product.id } });
+                                    setProducts((rows) => rows.map((r) => (r.id === product.id ? { ...r, status: "archived", is_published: false } : r)));
+                                  } catch {
+                                    setLoadError("Could not archive that product. Please try again.");
+                                  }
+                                }}
+                              >
+                                Archive
+                              </Button>
+                            )}
+                          </td>
                         </tr>
                       );
                     })}
