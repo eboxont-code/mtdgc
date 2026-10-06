@@ -22,6 +22,13 @@
       "when": 1791089612549,
       "tag": "0002_create_order_items",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791245904935,
+      "tag": "0003_order_lookup_attempts",
+      "breakpoints": true
     }
   ]
 }

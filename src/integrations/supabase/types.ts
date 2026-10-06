@@ -111,6 +111,24 @@ export type Database = {
           },
         ]
       }
+      order_lookup_attempts: {
+        Row: {
+          created_at: string
+          id: string
+          ip_hash: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip_hash: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip_hash?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           created_at: string
