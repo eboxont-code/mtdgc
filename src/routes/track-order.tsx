@@ -81,7 +81,7 @@ function TrackOrderPage() {
     try {
       const result = await lookup({ data: { orderNumber: order, contact: who } });
       if (result.status === "found") setFound(result.order);
-      else if (result.status === "rate_limited") setError("Too many lookups from this connection. Please wait a few minutes and try again.");
+      else if (result.status === "rate_limited") setError("Too many attempts. Please wait a few minutes and try again.");
       else setError("We could not find an order with that number and contact. Please confirm both and try again, or contact us through the support page.");
     } catch {
       setError("We could not check your order right now. Please try again shortly or contact us through the support page.");
