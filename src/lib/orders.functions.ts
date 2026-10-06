@@ -93,8 +93,6 @@ export const placeOrder = createServerFn({ method: "POST" })
     return { orderNumber, totalMinor: subtotal };
   });
 
-const lookupHits = new Map<string, number[]>();
-
 export const lookupOrder = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>
     z.object({ orderNumber: z.string().trim().min(4).max(40), contact: z.string().trim().min(3).max(120) }).parse(data),
@@ -102,13 +100,20 @@ export const lookupOrder = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { getRequestHeader } = await import("@tanstack/react-start/server");
     const ip = getRequestHeader("cf-connecting-ip") ?? getRequestHeader("x-forwarded-for")?.split(",")[0] ?? "unknown";
-    const now = Date.now();
-    const recent = (lookupHits.get(ip) ?? []).filter((t) => now - t < 10 * 60 * 1000);
-    if (recent.length >= 10) return { status: "rate_limited" as const };
-    recent.push(now);
-    lookupHits.set(ip, recent);
-
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const ipHash = await sha256(`lookup:${ip.trim()}`);
+    const now = Date.now();
+    await supabaseAdmin.from("order_lookup_attempts").delete().lt("created_at", new Date(now - 86400000).toISOString());
+    const { count } = await supabaseAdmin
+      .from("order_lookup_attempts")
+      .select("id", { count: "exact", head: true })
+      .eq("ip_hash", ipHash)
+      .gte("created_at", new Date(now - 10 * 60 * 1000).toISOString());
+    if ((count ?? 0) >= 10) {
+      return { status: "rate_limited" as const, message: "Too many attempts. Please wait a few minutes and try again." };
+    }
+    await supabaseAdmin.from("order_lookup_attempts").insert({ ip_hash: ipHash });
+
     const orderNumber = data.orderNumber.toUpperCase();
     const { data: order } = await supabaseAdmin
       .from("orders")

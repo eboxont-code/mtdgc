@@ -1,5 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+
+import { approveReview as approveReviewServer, updateOrderStatus as updateOrderStatusServer } from "@/lib/admin.functions";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -46,19 +49,23 @@ function AdminPage() {
   const ORDER_STATUSES = ["pending", "processing", "paid", "failed", "cancelled", "refunded", "completed"];
   const visibleOrders = orders.filter((o) => o.order_number.toLowerCase().includes(orderQuery.trim().toLowerCase()));
 
+  const updateOrderStatusFn = useServerFn(updateOrderStatusServer);
+  const approveReviewFn = useServerFn(approveReviewServer);
+
   const updateOrderStatus = async (id: string, status: string) => {
-    const { error } = await supabase.from("orders").update({ status: status as never }).eq("id", id);
-    if (error) {
+    try {
+      await updateOrderStatusFn({ data: { id, status: status as never } });
+    } catch {
       setLoadError("Could not update that order status. Please try again.");
       return;
     }
     setOrders((rows) => rows.map((row) => (row.id === id ? { ...row, status } : row)));
   };
 
-
   const approveReview = async (id: string) => {
-    const { error } = await supabase.from("reviews").update({ is_approved: true }).eq("id", id);
-    if (error) {
+    try {
+      await approveReviewFn({ data: { id } });
+    } catch {
       setLoadError("Could not approve that review. Please try again.");
       return;
     }
