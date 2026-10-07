@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { saveProduct } from "@/lib/admin.functions";
+import { VariantsEditor } from "./variants-editor";
 
 const STATUSES = ["available", "low_stock", "coming_soon", "out_of_stock", "temporarily_unavailable", "archived"] as const;
 
@@ -139,6 +140,7 @@ export function ProductForm({ productId, onSaved, onCancel }: { productId?: stri
         <Button type="button" size="sm" variant="outline" onClick={onCancel}>Close</Button>
         {message && <span role="status" className="text-sm">{message}</span>}
       </div>
+      {productId && <VariantsEditor productId={productId} />}
     </form>
   );
 }
