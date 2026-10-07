@@ -175,7 +175,8 @@ function AdminPage() {
                       <th scope="col" className="py-2">Status</th>
                       <th scope="col" className="py-2">Published</th>
                       <th scope="col" className="py-2">Options</th>
-                      <th scope="col" className="py-2">From</th>
+                     <th scope="col" className="py-2">From</th>
+                     <th scope="col" className="py-2">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
