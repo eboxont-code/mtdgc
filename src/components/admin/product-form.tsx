@@ -35,7 +35,7 @@ function validate(f: Form): Partial<Record<keyof Form, string>> {
   return e;
 }
 
-export function ProductForm({ productId, onSaved, onCancel }: { productId?: string; onSaved: () => void; onCancel: () => void }) {
+export function ProductForm({ productId, onSaved, onCancel }: { productId?: string | undefined; onSaved: () => void; onCancel: () => void }) {
   const [form, setForm] = useState<Form>(EMPTY);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [errors, setErrors] = useState<Partial<Record<keyof Form, string>>>({});
