@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 
 import { approveReview as approveReviewServer, archiveProduct as archiveProductServer, updateOrderStatus as updateOrderStatusServer } from "@/lib/admin.functions";
 
+import { ProductForm } from "@/components/admin/product-form";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,8 @@ function AdminPage() {
   const [pendingReviews, setPendingReviews] = useState<ReviewRow[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [orderQuery, setOrderQuery] = useState("");
+  const [editing, setEditing] = useState<string | null>(null);
+  const [reloadKey, setReloadKey] = useState(0);
   const ORDER_STATUSES = ["pending", "processing", "paid", "failed", "cancelled", "refunded", "completed"];
   const visibleOrders = orders.filter((o) => o.order_number.toLowerCase().includes(orderQuery.trim().toLowerCase()));
 
@@ -122,7 +125,7 @@ function AdminPage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [reloadKey]);
 
   const lowStock = products.flatMap((product) =>
     (product.product_variants ?? [])
@@ -175,7 +178,8 @@ function AdminPage() {
                       <th scope="col" className="py-2">Status</th>
                       <th scope="col" className="py-2">Published</th>
                       <th scope="col" className="py-2">Options</th>
-                      <th scope="col" className="py-2">From</th>
+                     <th scope="col" className="py-2">From</th>
+                     <th scope="col" className="py-2">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -189,6 +193,7 @@ function AdminPage() {
                           <td className="py-2">{prices.length}</td>
                           <td className="py-2">{prices.length ? formatNpr(Math.min(...prices)) : "Not set"}</td>
                           <td className="py-2">
+                            <Button size="sm" variant="outline" className="mr-2" onClick={() => setEditing(product.id)}>Edit</Button>
                             {product.status !== "archived" && (
                               <Button
                                 size="sm"
@@ -213,7 +218,17 @@ function AdminPage() {
                 </table>
               </div>
               {products.length === 0 && (
-                <p className="mt-3 text-sm text-muted-foreground">No products are in the catalog yet.</p>
+                <p className="mt-3 text-sm text-muted-foreground">No products are in the catalog yet. Use Add product to create the first one.</p>
+              )}
+              {editing ? (
+                <ProductForm
+                  key={editing}
+                  productId={editing === "new" ? undefined : editing}
+                  onSaved={() => setReloadKey((k) => k + 1)}
+                  onCancel={() => setEditing(null)}
+                />
+              ) : (
+                <Button size="sm" className="mt-3" onClick={() => setEditing("new")}>Add product</Button>
               )}
             </section>
 
