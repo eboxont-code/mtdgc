@@ -7,26 +7,30 @@ const lineSchema = z.object({
   fields: z.record(z.string().max(80), z.string().max(200)).default({}),
 });
 
-const orderSchema = z.object({
-  name: z.string().trim().min(1).max(80),
-  phone: z.string().trim().max(24).refine((v) => {
-    const d = v.replace(/\D/g, "");
-    return d.length >= 7 && d.length <= 15;
-  }, "Phone must have 7 to 15 digits"),
-  email: z.string().trim().max(120).email().optional().or(z.literal("")),
-  note: z.string().trim().max(500).optional(),
-  userId: z.string().uuid().nullable().optional(),
-  lines: z.array(lineSchema).min(1).max(20),
-});
+const orderSchema = z
+  .object({
+    name: z.string().trim().min(1).max(80),
+    phone: z
+      .string()
+      .trim()
+      .max(24)
+      .refine((v) => {
+        if (!v) return true;
+        const d = v.replace(/\D/g, "");
+        return d.length >= 7 && d.length <= 15;
+      }, "Phone must have 7 to 15 digits")
+      .optional()
+      .default(""),
+    email: z.string().trim().max(120).email().optional().or(z.literal("")),
+    note: z.string().trim().max(500).optional(),
+    userId: z.string().uuid().nullable().optional(),
+    lines: z.array(lineSchema).min(1).max(20),
+  })
+  .refine((d) => Boolean(d.phone) || Boolean(d.email), "Add a mobile number or an email");
 
 function makeReference(): string {
-  const now = new Date();
-  const date = `${String(now.getUTCFullYear()).slice(2)}${String(now.getUTCMonth() + 1).padStart(2, "0")}${String(now.getUTCDate()).padStart(2, "0")}`;
-  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  const bytes = crypto.getRandomValues(new Uint8Array(6));
-  let tail = "";
-  for (const b of bytes) tail += alphabet[b % alphabet.length];
-  return `MTD-${date}-${tail}`;
+  const bytes = crypto.getRandomValues(new Uint32Array(1));
+  return `MT${String(100000 + (bytes[0]! % 900000))}`;
 }
 
 export function normaliseContact(contact: string): string {
