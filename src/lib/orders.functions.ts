@@ -72,24 +72,32 @@ export const placeOrder = createServerFn({ method: "POST" })
       };
     });
     const subtotal = items.reduce((s, i) => s + i.line_total_minor, 0);
-    const orderNumber = makeReference();
     const email = data.email || null;
-    const { data: order, error: orderError } = await supabaseAdmin
-      .from("orders")
-      .insert({
-        order_number: orderNumber,
-        status: "pending",
-        guest_email: email,
-        guest_phone: data.phone,
-        user_id: data.userId ?? null,
-        verification_hash: await sha256(orderNumber + normaliseContact(data.phone)),
-        subtotal_minor: subtotal,
-        total_minor: subtotal,
-        customer_details: { name: data.name, phone: data.phone, email, note: data.note ?? "" },
-      })
-      .select("id")
-      .single();
-    if (orderError || !order) throw new Error("Could not save order");
+    const contactKey = normaliseContact(data.phone || data.email || "");
+    let orderNumber = "";
+    let order: { id: string } | null = null;
+    for (let attempt = 0; attempt < 5 && !order; attempt += 1) {
+      orderNumber = makeReference();
+      const { data: row, error: orderError } = await supabaseAdmin
+        .from("orders")
+        .insert({
+          order_number: orderNumber,
+          status: "pending",
+          guest_email: email,
+          guest_phone: data.phone || null,
+          user_id: data.userId ?? null,
+          verification_hash: await sha256(orderNumber + contactKey),
+          subtotal_minor: subtotal,
+          total_minor: subtotal,
+          customer_details: { name: data.name, phone: data.phone || null, email, note: data.note ?? "" },
+        })
+        .select("id")
+        .single();
+      if (row) order = row;
+      else if (orderError?.code !== "23505") throw new Error("Could not save order");
+    }
+    if (!order) throw new Error("Could not save order");
+    await supabaseAdmin.from("order_status_events").insert({ order_id: order.id, status: "pending", note: "Order placed" });
     const { error: itemsError } = await supabaseAdmin
       .from("order_items")
       .insert(items.map((i) => ({ ...i, order_id: order.id })));
