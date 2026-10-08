@@ -66,8 +66,8 @@ function TrackOrderPage() {
       setError("Please enter your order number and the email or phone number used on the order.");
       return;
     }
-    if (!/^(MTD|MTDGC)-[A-Z0-9-]{4,}$/.test(order)) {
-      setError("That order number does not look right. MTDGC order numbers start with MTD-.");
+    if (!/^(MT\d{6}|(MTD|MTDGC)-[A-Z0-9-]{4,})$/.test(order)) {
+      setError("That order number does not look right. MTDGC order numbers look like MT123456.");
       return;
     }
     const digits = who.replace(/\D/g, "");
@@ -109,7 +109,7 @@ function TrackOrderPage() {
             <input
               value={orderNumber}
               onChange={(event) => setOrderNumber(event.target.value)}
-              placeholder="MTD-000000"
+              placeholder="MT123456"
               autoComplete="off"
               className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm outline-none focus:border-primary"
             />

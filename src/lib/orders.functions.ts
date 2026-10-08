@@ -7,26 +7,30 @@ const lineSchema = z.object({
   fields: z.record(z.string().max(80), z.string().max(200)).default({}),
 });
 
-const orderSchema = z.object({
-  name: z.string().trim().min(1).max(80),
-  phone: z.string().trim().max(24).refine((v) => {
-    const d = v.replace(/\D/g, "");
-    return d.length >= 7 && d.length <= 15;
-  }, "Phone must have 7 to 15 digits"),
-  email: z.string().trim().max(120).email().optional().or(z.literal("")),
-  note: z.string().trim().max(500).optional(),
-  userId: z.string().uuid().nullable().optional(),
-  lines: z.array(lineSchema).min(1).max(20),
-});
+const orderSchema = z
+  .object({
+    name: z.string().trim().min(1).max(80),
+    phone: z
+      .string()
+      .trim()
+      .max(24)
+      .refine((v) => {
+        if (!v) return true;
+        const d = v.replace(/\D/g, "");
+        return d.length >= 7 && d.length <= 15;
+      }, "Phone must have 7 to 15 digits")
+      .optional()
+      .default(""),
+    email: z.string().trim().max(120).email().optional().or(z.literal("")),
+    note: z.string().trim().max(500).optional(),
+    userId: z.string().uuid().nullable().optional(),
+    lines: z.array(lineSchema).min(1).max(20),
+  })
+  .refine((d) => Boolean(d.phone) || Boolean(d.email), "Add a mobile number or an email");
 
 function makeReference(): string {
-  const now = new Date();
-  const date = `${String(now.getUTCFullYear()).slice(2)}${String(now.getUTCMonth() + 1).padStart(2, "0")}${String(now.getUTCDate()).padStart(2, "0")}`;
-  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  const bytes = crypto.getRandomValues(new Uint8Array(6));
-  let tail = "";
-  for (const b of bytes) tail += alphabet[b % alphabet.length];
-  return `MTD-${date}-${tail}`;
+  const bytes = crypto.getRandomValues(new Uint32Array(1));
+  return `MT${String(100000 + (bytes[0]! % 900000))}`;
 }
 
 export function normaliseContact(contact: string): string {
@@ -68,24 +72,32 @@ export const placeOrder = createServerFn({ method: "POST" })
       };
     });
     const subtotal = items.reduce((s, i) => s + i.line_total_minor, 0);
-    const orderNumber = makeReference();
     const email = data.email || null;
-    const { data: order, error: orderError } = await supabaseAdmin
-      .from("orders")
-      .insert({
-        order_number: orderNumber,
-        status: "pending",
-        guest_email: email,
-        guest_phone: data.phone,
-        user_id: data.userId ?? null,
-        verification_hash: await sha256(orderNumber + normaliseContact(data.phone)),
-        subtotal_minor: subtotal,
-        total_minor: subtotal,
-        customer_details: { name: data.name, phone: data.phone, email, note: data.note ?? "" },
-      })
-      .select("id")
-      .single();
-    if (orderError || !order) throw new Error("Could not save order");
+    const contactKey = normaliseContact(data.phone || data.email || "");
+    let orderNumber = "";
+    let order: { id: string } | null = null;
+    for (let attempt = 0; attempt < 5 && !order; attempt += 1) {
+      orderNumber = makeReference();
+      const { data: row, error: orderError } = await supabaseAdmin
+        .from("orders")
+        .insert({
+          order_number: orderNumber,
+          status: "pending",
+          guest_email: email,
+          guest_phone: data.phone || null,
+          user_id: data.userId ?? null,
+          verification_hash: await sha256(orderNumber + contactKey),
+          subtotal_minor: subtotal,
+          total_minor: subtotal,
+          customer_details: { name: data.name, phone: data.phone || null, email, note: data.note ?? "" },
+        })
+        .select("id")
+        .single();
+      if (row) order = row;
+      else if (orderError?.code !== "23505") throw new Error("Could not save order");
+    }
+    if (!order) throw new Error("Could not save order");
+    await supabaseAdmin.from("order_status_events").insert({ order_id: order.id, status: "pending", note: "Order placed" });
     const { error: itemsError } = await supabaseAdmin
       .from("order_items")
       .insert(items.map((i) => ({ ...i, order_id: order.id })));

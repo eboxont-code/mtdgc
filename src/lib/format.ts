@@ -24,4 +24,4 @@ export function isOrderable(status: string): boolean {
   return status === "available" || status === "low_stock";
 }
 
-export const SITE_URL = "https://mtdgc.lovable.app";
+export const SITE_URL = "https://mtdgc.com";
