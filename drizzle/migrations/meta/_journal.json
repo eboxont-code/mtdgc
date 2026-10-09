@@ -50,6 +50,13 @@
       "when": 1791509477973,
       "tag": "0006_order_flow",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791509581607,
+      "tag": "0007_payment_settings",
+      "breakpoints": true
     }
   ]
 }

@@ -218,6 +218,42 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_settings: {
+        Row: {
+          account_name: string | null
+          account_number: string | null
+          bank_name: string | null
+          fonepay_enabled: boolean
+          id: boolean
+          instructions: string | null
+          qr_image_path: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          account_name?: string | null
+          account_number?: string | null
+          bank_name?: string | null
+          fonepay_enabled?: boolean
+          id?: boolean
+          instructions?: string | null
+          qr_image_path?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          account_name?: string | null
+          account_number?: string | null
+          bank_name?: string | null
+          fonepay_enabled?: boolean
+          id?: boolean
+          instructions?: string | null
+          qr_image_path?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       product_variants: {
         Row: {
           currency: string
