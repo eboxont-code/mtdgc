@@ -208,3 +208,16 @@ export const getOrderForViewer = createServerFn({ method: "POST" })
       },
     };
   });
+
+export const getPaymentSettings = createServerFn({ method: "GET" }).handler(async () => {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data } = await supabaseAdmin.from("payment_settings").select("qr_image_path, bank_name, account_name, account_number, instructions, fonepay_enabled").maybeSingle();
+  if (!data) return { configured: false as const };
+  let qrUrl: string | null = null;
+  if (data.qr_image_path) {
+    const { data: signed } = await supabaseAdmin.storage.from("payment-qr").createSignedUrl(data.qr_image_path, 3600);
+    qrUrl = signed?.signedUrl ?? null;
+  }
+  const out = { qrUrl, bankName: data.bank_name, accountName: data.account_name, accountNumber: data.account_number, instructions: data.instructions, fonepay: data.fonepay_enabled };
+  return { configured: Boolean(qrUrl || (data.bank_name && data.account_number)), ...out };
+});

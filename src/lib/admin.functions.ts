@@ -138,3 +138,48 @@ export const saveCategory = createServerFn({ method: "POST" })
     if (error) throw new Error(error.code === "23505" ? "That slug is already used" : "Could not save the category");
     return { ok: true };
   });
+
+const optText = (max: number) => z.string().trim().max(max).transform((v) => (v ? v : null));
+
+export const getAdminPaymentSettings = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context as Ctx);
+    const { data } = await context.supabase.from("payment_settings").select("*").maybeSingle();
+    return data as null | { qr_image_path: string | null; bank_name: string | null; account_name: string | null; account_number: string | null; instructions: string | null; fonepay_enabled: boolean };
+  });
+
+export const savePaymentSettings = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ bank_name: optText(80), account_name: optText(80), account_number: optText(40), instructions: optText(500), fonepay_enabled: z.boolean() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context as Ctx);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("payment_settings").upsert({ id: true, ...data, updated_at: new Date().toISOString(), updated_by: context.userId });
+    if (error) throw new Error("Could not save payment settings");
+    return { ok: true };
+  });
+
+export const uploadPaymentQr = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => {
+    if (!(d instanceof FormData)) throw new Error("Invalid upload");
+    const file = d.get("file");
+    if (!(file instanceof File)) throw new Error("Choose an image");
+    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) throw new Error("Use a PNG, JPG or WEBP image");
+    if (file.size > 2 * 1024 * 1024) throw new Error("The image must be 2 MB or smaller");
+    return { file };
+  })
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context as Ctx);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const ext = data.file.type === "image/png" ? "png" : data.file.type === "image/webp" ? "webp" : "jpg";
+    const path = `qr-${Date.now()}.${ext}`;
+    const { error } = await supabaseAdmin.storage.from("payment-qr").upload(path, await data.file.arrayBuffer(), { contentType: data.file.type });
+    if (error) throw new Error("Could not upload the QR image");
+    const { error: e2 } = await supabaseAdmin.from("payment_settings").upsert({ id: true, qr_image_path: path, updated_at: new Date().toISOString(), updated_by: context.userId });
+    if (e2) throw new Error("Could not save the QR image");
+    return { ok: true };
+  });
