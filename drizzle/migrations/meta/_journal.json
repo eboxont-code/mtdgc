@@ -43,6 +43,13 @@
       "when": 1791509464320,
       "tag": "0005_order_status_payment_values",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791509477973,
+      "tag": "0006_order_flow",
+      "breakpoints": true
     }
   ]
 }

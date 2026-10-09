@@ -166,6 +166,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          access_token_hash: string | null
           created_at: string
           currency: string
           customer_details: Json
@@ -182,6 +183,7 @@ export type Database = {
           verification_hash: string
         }
         Insert: {
+          access_token_hash?: string | null
           created_at?: string
           currency?: string
           customer_details?: Json
@@ -198,6 +200,7 @@ export type Database = {
           verification_hash: string
         }
         Update: {
+          access_token_hash?: string | null
           created_at?: string
           currency?: string
           customer_details?: Json
