@@ -166,6 +166,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          access_token_hash: string | null
           created_at: string
           currency: string
           customer_details: Json
@@ -182,6 +183,7 @@ export type Database = {
           verification_hash: string
         }
         Insert: {
+          access_token_hash?: string | null
           created_at?: string
           currency?: string
           customer_details?: Json
@@ -198,6 +200,7 @@ export type Database = {
           verification_hash: string
         }
         Update: {
+          access_token_hash?: string | null
           created_at?: string
           currency?: string
           customer_details?: Json
@@ -212,6 +215,42 @@ export type Database = {
           updated_at?: string
           user_id?: string | null
           verification_hash?: string
+        }
+        Relationships: []
+      }
+      payment_settings: {
+        Row: {
+          account_name: string | null
+          account_number: string | null
+          bank_name: string | null
+          fonepay_enabled: boolean
+          id: boolean
+          instructions: string | null
+          qr_image_path: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          account_name?: string | null
+          account_number?: string | null
+          bank_name?: string | null
+          fonepay_enabled?: boolean
+          id?: boolean
+          instructions?: string | null
+          qr_image_path?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          account_name?: string | null
+          account_number?: string | null
+          bank_name?: string | null
+          fonepay_enabled?: boolean
+          id?: boolean
+          instructions?: string | null
+          qr_image_path?: string | null
+          updated_at?: string
+          updated_by?: string | null
         }
         Relationships: []
       }
@@ -526,6 +565,11 @@ export type Database = {
         | "refunded"
         | "fulfilled"
         | "completed"
+        | "pending_payment"
+        | "payment_submitted"
+        | "verified"
+        | "rejected"
+        | "delivered"
       product_status:
         | "available"
         | "low_stock"
@@ -670,6 +714,11 @@ export const Constants = {
         "refunded",
         "fulfilled",
         "completed",
+        "pending_payment",
+        "payment_submitted",
+        "verified",
+        "rejected",
+        "delivered",
       ],
       product_status: [
         "available",

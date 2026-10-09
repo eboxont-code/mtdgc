@@ -107,6 +107,7 @@ function CheckoutPage() {
           lines: lines.map((l) => ({ sku: l.sku, quantity: l.quantity, fields: l.fields ?? {} })),
         },
       });
+      try { sessionStorage.setItem(`mtdgc-order-${result.orderNumber}`, result.accessToken); } catch { /* storage unavailable */ }
       setPlaced({ orderNumber: result.orderNumber, totalMinor: result.totalMinor, lines: snapshot });
       clear();
       setStep(3);
@@ -265,7 +266,10 @@ function CheckoutPage() {
                   Keep your order number to <Link to="/track-order" className="underline">track the order</Link> or{" "}
                   <Link to="/support" className="underline">contact support</Link>.
                 </p>
-                <Button asChild className="mt-4"><Link to="/catalog">Continue shopping</Link></Button>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Button asChild><Link to="/order/$orderNumber" params={{ orderNumber: placed.orderNumber }}>View your order</Link></Button>
+                  <Button asChild variant="outline"><Link to="/catalog">Continue shopping</Link></Button>
+                </div>
               </section>
             )}
 

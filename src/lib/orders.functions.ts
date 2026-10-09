@@ -74,6 +74,9 @@ export const placeOrder = createServerFn({ method: "POST" })
     const subtotal = items.reduce((s, i) => s + i.line_total_minor, 0);
     const email = data.email || null;
     const contactKey = normaliseContact(data.phone || data.email || "");
+    const tokenBytes = crypto.getRandomValues(new Uint8Array(32));
+    const accessToken = [...tokenBytes].map((b) => b.toString(16).padStart(2, "0")).join("");
+    const accessTokenHash = await sha256(accessToken);
     let orderNumber = "";
     let order: { id: string } | null = null;
     for (let attempt = 0; attempt < 5 && !order; attempt += 1) {
@@ -82,7 +85,8 @@ export const placeOrder = createServerFn({ method: "POST" })
         .from("orders")
         .insert({
           order_number: orderNumber,
-          status: "pending",
+          status: "pending_payment",
+          access_token_hash: accessTokenHash,
           guest_email: email,
           guest_phone: data.phone || null,
           user_id: data.userId ?? null,
@@ -97,12 +101,12 @@ export const placeOrder = createServerFn({ method: "POST" })
       else if (orderError?.code !== "23505") throw new Error("Could not save order");
     }
     if (!order) throw new Error("Could not save order");
-    await supabaseAdmin.from("order_status_events").insert({ order_id: order.id, status: "pending", note: "Order placed" });
+    await supabaseAdmin.from("order_status_events").insert({ order_id: order.id, status: "pending_payment", note: "Order placed" });
     const { error: itemsError } = await supabaseAdmin
       .from("order_items")
       .insert(items.map((i) => ({ ...i, order_id: order.id })));
     if (itemsError) throw new Error("Could not save order lines");
-    return { orderNumber, totalMinor: subtotal };
+    return { orderNumber, accessToken, totalMinor: subtotal };
   });
 
 export const lookupOrder = createServerFn({ method: "POST" })
@@ -148,3 +152,72 @@ export const lookupOrder = createServerFn({ method: "POST" })
       },
     };
   });
+
+export const getOrderForViewer = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        orderNumber: z.string().trim().min(4).max(40),
+        accessToken: z.string().trim().max(128).optional(),
+        contact: z.string().trim().max(120).optional(),
+        bearer: z.string().max(4000).optional(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const orderNumber = data.orderNumber.toUpperCase();
+    const { data: order } = await supabaseAdmin
+      .from("orders")
+      .select("id, user_id, status, created_at, total_minor, verification_hash, access_token_hash, guest_email, order_items(product_name, variant_name, quantity, line_total_minor)")
+      .eq("order_number", orderNumber)
+      .maybeSingle();
+    let allowed = false;
+    if (order && data.accessToken && order.access_token_hash) {
+      allowed = (await sha256(data.accessToken)) === order.access_token_hash;
+    }
+    if (order && !allowed && data.bearer && order.user_id) {
+      const { data: u } = await supabaseAdmin.auth.getUser(data.bearer);
+      allowed = u.user?.id === order.user_id;
+    }
+    if (!allowed && data.contact) {
+      const { getRequestHeader } = await import("@tanstack/react-start/server");
+      const ip = getRequestHeader("cf-connecting-ip") ?? getRequestHeader("x-forwarded-for")?.split(",")[0] ?? "unknown";
+      const ipHash = await sha256(`lookup:${ip.trim()}`);
+      const { count } = await supabaseAdmin
+        .from("order_lookup_attempts")
+        .select("id", { count: "exact", head: true })
+        .eq("ip_hash", ipHash)
+        .gte("created_at", new Date(Date.now() - 600000).toISOString());
+      if ((count ?? 0) >= 10) return { status: "rate_limited" as const };
+      await supabaseAdmin.from("order_lookup_attempts").insert({ ip_hash: ipHash });
+      if (order) {
+        const c = normaliseContact(data.contact);
+        allowed = (await sha256(orderNumber + c)) === order.verification_hash || (c.includes("@") && order.guest_email?.toLowerCase() === c);
+      }
+    }
+    if (!order || !allowed) return { status: "locked" as const };
+    return {
+      status: "found" as const,
+      order: {
+        orderNumber,
+        status: order.status as string,
+        createdAt: order.created_at,
+        totalMinor: order.total_minor,
+        items: (order.order_items ?? []).map((i) => ({ name: `${i.product_name}, ${i.variant_name}`, quantity: i.quantity, totalMinor: i.line_total_minor })),
+      },
+    };
+  });
+
+export const getPaymentSettings = createServerFn({ method: "GET" }).handler(async () => {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data } = await supabaseAdmin.from("payment_settings").select("qr_image_path, bank_name, account_name, account_number, instructions, fonepay_enabled").maybeSingle();
+  if (!data) return { configured: false as const };
+  let qrUrl: string | null = null;
+  if (data.qr_image_path) {
+    const { data: signed } = await supabaseAdmin.storage.from("payment-qr").createSignedUrl(data.qr_image_path, 3600);
+    qrUrl = signed?.signedUrl ?? null;
+  }
+  const out = { qrUrl, bankName: data.bank_name, accountName: data.account_name, accountNumber: data.account_number, instructions: data.instructions, fonepay: data.fonepay_enabled };
+  return { configured: Boolean(qrUrl || (data.bank_name && data.account_number)), ...out };
+});
