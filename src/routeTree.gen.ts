@@ -31,6 +31,7 @@ import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedWishlistRouteImport } from './routes/_authenticated/wishlist'
 import { Route as CategoriesIndexRouteImport } from './routes/categories.index'
 import { Route as CategoriesSlugRouteImport } from './routes/categories.$slug'
+import { Route as OrderOrderNumberRouteImport } from './routes/order.$orderNumber'
 import { Route as PoliciesDeliveryRouteImport } from './routes/policies/delivery'
 import { Route as PoliciesPrivacyRouteImport } from './routes/policies/privacy'
 import { Route as PoliciesRefundsRouteImport } from './routes/policies/refunds'
@@ -147,6 +148,11 @@ const CategoriesSlugRoute = CategoriesSlugRouteImport.update({
   path: '/categories/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OrderOrderNumberRoute = OrderOrderNumberRouteImport.update({
+  id: '/order/$orderNumber',
+  path: '/order/$orderNumber',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PoliciesDeliveryRoute = PoliciesDeliveryRouteImport.update({
   id: '/policies/delivery',
   path: '/policies/delivery',
@@ -199,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/orders': typeof AuthenticatedOrdersRoute
   '/wishlist': typeof AuthenticatedWishlistRoute
   '/categories/$slug': typeof CategoriesSlugRoute
+  '/order/$orderNumber': typeof OrderOrderNumberRoute
   '/policies/delivery': typeof PoliciesDeliveryRoute
   '/policies/privacy': typeof PoliciesPrivacyRoute
   '/policies/refunds': typeof PoliciesRefundsRoute
@@ -228,6 +235,7 @@ export interface FileRoutesByTo {
   '/orders': typeof AuthenticatedOrdersRoute
   '/wishlist': typeof AuthenticatedWishlistRoute
   '/categories/$slug': typeof CategoriesSlugRoute
+  '/order/$orderNumber': typeof OrderOrderNumberRoute
   '/policies/delivery': typeof PoliciesDeliveryRoute
   '/policies/privacy': typeof PoliciesPrivacyRoute
   '/policies/refunds': typeof PoliciesRefundsRoute
@@ -259,6 +267,7 @@ export interface FileRoutesById {
   '/_authenticated/orders': typeof AuthenticatedOrdersRoute
   '/_authenticated/wishlist': typeof AuthenticatedWishlistRoute
   '/categories/$slug': typeof CategoriesSlugRoute
+  '/order/$orderNumber': typeof OrderOrderNumberRoute
   '/policies/delivery': typeof PoliciesDeliveryRoute
   '/policies/privacy': typeof PoliciesPrivacyRoute
   '/policies/refunds': typeof PoliciesRefundsRoute
@@ -290,6 +299,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/wishlist'
     | '/categories/$slug'
+    | '/order/$orderNumber'
     | '/policies/delivery'
     | '/policies/privacy'
     | '/policies/refunds'
@@ -319,6 +329,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/wishlist'
     | '/categories/$slug'
+    | '/order/$orderNumber'
     | '/policies/delivery'
     | '/policies/privacy'
     | '/policies/refunds'
@@ -349,6 +360,7 @@ export interface FileRouteTypes {
     | '/_authenticated/orders'
     | '/_authenticated/wishlist'
     | '/categories/$slug'
+    | '/order/$orderNumber'
     | '/policies/delivery'
     | '/policies/privacy'
     | '/policies/refunds'
@@ -376,6 +388,7 @@ export interface RootRouteChildren {
   TrackRoute: typeof TrackRoute
   TrackOrderRoute: typeof TrackOrderRoute
   CategoriesSlugRoute: typeof CategoriesSlugRoute
+  OrderOrderNumberRoute: typeof OrderOrderNumberRoute
   PoliciesDeliveryRoute: typeof PoliciesDeliveryRoute
   PoliciesPrivacyRoute: typeof PoliciesPrivacyRoute
   PoliciesRefundsRoute: typeof PoliciesRefundsRoute
@@ -541,6 +554,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategoriesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/order/$orderNumber': {
+      id: '/order/$orderNumber'
+      path: '/order/$orderNumber'
+      fullPath: '/order/$orderNumber'
+      preLoaderRoute: typeof OrderOrderNumberRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/policies/delivery': {
       id: '/policies/delivery'
       path: '/policies/delivery'
@@ -621,6 +641,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrackRoute: TrackRoute,
   TrackOrderRoute: TrackOrderRoute,
   CategoriesSlugRoute: CategoriesSlugRoute,
+  OrderOrderNumberRoute: OrderOrderNumberRoute,
   PoliciesDeliveryRoute: PoliciesDeliveryRoute,
   PoliciesPrivacyRoute: PoliciesPrivacyRoute,
   PoliciesRefundsRoute: PoliciesRefundsRoute,
