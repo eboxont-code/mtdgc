@@ -526,6 +526,11 @@ export type Database = {
         | "refunded"
         | "fulfilled"
         | "completed"
+        | "pending_payment"
+        | "payment_submitted"
+        | "verified"
+        | "rejected"
+        | "delivered"
       product_status:
         | "available"
         | "low_stock"
@@ -670,6 +675,11 @@ export const Constants = {
         "refunded",
         "fulfilled",
         "completed",
+        "pending_payment",
+        "payment_submitted",
+        "verified",
+        "rejected",
+        "delivered",
       ],
       product_status: [
         "available",

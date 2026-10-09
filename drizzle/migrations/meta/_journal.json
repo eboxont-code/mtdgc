@@ -36,6 +36,13 @@
       "when": 1791245942860,
       "tag": "0004_order_status_events",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791509464320,
+      "tag": "0005_order_status_payment_values",
+      "breakpoints": true
     }
   ]
 }
