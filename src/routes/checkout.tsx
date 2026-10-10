@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+import { contactKind } from "@/lib/product-help";
 
 import { supabase } from "@/integrations/supabase/client";
 import { placeOrder } from "@/lib/orders.functions";
@@ -35,19 +37,56 @@ const inputCls = "mt-1 h-10 w-full rounded-md border bg-card px-3 font-display t
 
 type Errors = Record<string, string>;
 
+const CONTACT_KEY = "mtdgc-checkout-contact";
+
 function CheckoutPage() {
-  const { lines, subtotalMinor, updateFields, clear } = useCart();
+  const { lines, subtotalMinor, updateFields, clear, hydrated } = useCart();
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
+  const [editContact, setEditContact] = useState(false);
+  const [editing, setEditing] = useState<Record<string, boolean>>({});
   const [errors, setErrors] = useState<Errors>({});
   const [sending, setSending] = useState(false);
   const [placeError, setPlaceError] = useState<string | null>(null);
   const [placed, setPlaced] = useState<{ orderNumber: string; totalMinor: number; lines: typeof lines } | null>(null);
   const formRef = useRef<HTMLDivElement>(null);
+  const restored = useRef(false);
   const placeOrderFn = useServerFn(placeOrder);
+
+  useEffect(() => {
+    let saved: { name?: string; phone?: string; email?: string; note?: string } = {};
+    try { saved = JSON.parse(sessionStorage.getItem(CONTACT_KEY) ?? "{}"); } catch { /* ignore */ }
+    if (saved.name) setName(saved.name);
+    if (saved.phone) setPhone(saved.phone);
+    if (saved.email) setEmail(saved.email);
+    if (saved.note) setNote(saved.note);
+    restored.current = true;
+    supabase.auth.getSession().then(async ({ data }) => {
+      const user = data.session?.user;
+      if (!user) return;
+      const { data: profile } = await supabase.from("profiles").select("display_name, phone, delivery_email").eq("id", user.id).maybeSingle();
+      setName((v) => v || profile?.display_name || "");
+      setPhone((v) => v || profile?.phone || "");
+      setEmail((v) => v || profile?.delivery_email || user.email || "");
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    const all = lines.flatMap((l) => Object.entries(l.fields ?? {}));
+    const em = all.find(([k, v]) => contactKind(k) === "email" && v.trim())?.[1];
+    const ph = all.find(([k, v]) => contactKind(k) === "phone" && v.trim())?.[1];
+    if (em) setEmail((v) => v || em);
+    if (ph) setPhone((v) => v || ph);
+  }, [hydrated]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!restored.current || placed) return;
+    try { sessionStorage.setItem(CONTACT_KEY, JSON.stringify({ name, phone, email, note })); } catch { /* ignore */ }
+  }, [name, phone, email, note, placed]);
 
   const focusFirst = (errs: Errors) => {
     const first = Object.keys(errs)[0];
@@ -76,11 +115,15 @@ function CheckoutPage() {
     return e;
   };
 
+  const contactReady = Boolean(name.trim() && (phone.trim() || email.trim())) && Object.keys(validateContact()).length === 0;
+  const showContactSummary = contactReady && !editContact;
+
   const next = () => {
     const e = step === 0 ? validateContact() : step === 1 ? validateDelivery() : {};
     setErrors(e);
     if (Object.keys(e).length) return focusFirst(e);
-    setStep((s) => s + 1);
+    const skipDelivery = step === 0 && Object.keys(validateDelivery()).length === 0;
+    setStep((s) => s + (skipDelivery ? 2 : 1));
     formRef.current?.focus();
   };
 
@@ -107,7 +150,9 @@ function CheckoutPage() {
           lines: lines.map((l) => ({ sku: l.sku, quantity: l.quantity, fields: l.fields ?? {} })),
         },
       });
-      try { sessionStorage.setItem(`mtdgc-order-${result.orderNumber}`, result.accessToken); } catch { /* storage unavailable */ }
+      const tokenKey = `mtdgc-order-${result.orderNumber.toUpperCase()}`;
+      try { localStorage.setItem(tokenKey, result.accessToken); } catch { /* storage unavailable */ }
+      try { sessionStorage.setItem(tokenKey, result.accessToken); sessionStorage.removeItem(CONTACT_KEY); } catch { /* storage unavailable */ }
       setPlaced({ orderNumber: result.orderNumber, totalMinor: result.totalMinor, lines: snapshot });
       clear();
       setStep(3);
@@ -148,7 +193,9 @@ function CheckoutPage() {
           ))}
         </ol>
 
-        {!placed && lines.length === 0 ? (
+        {!placed && !hydrated ? (
+          <p className="mt-6 text-sm text-muted-foreground">Loading your order details.</p>
+        ) : !placed && lines.length === 0 ? (
           <div className="mt-8 rounded-lg border border-border py-14 text-center">
             <p className="font-display font-medium">There is nothing to check out</p>
             <Button asChild className="mt-4"><Link to="/catalog">Browse the catalog</Link></Button>
@@ -159,6 +206,14 @@ function CheckoutPage() {
               <section aria-labelledby="h-contact">
                 <h2 id="h-contact" className="font-display text-lg font-medium">Contact</h2>
                 <p className="mt-1 text-xs text-muted-foreground">Add a mobile number, an email, or both. You can order as a guest.</p>
+                {showContactSummary ? (
+                  <div className="mt-3 rounded-lg border border-border p-3 text-sm">
+                    <p>{name}</p>
+                    {phone && <p className="text-muted-foreground">{phone}</p>}
+                    {email && <p className="text-muted-foreground">{email}</p>}
+                    <button type="button" onClick={() => setEditContact(true)} className="mt-1 text-xs text-primary underline">Edit contact</button>
+                  </div>
+                ) : (
                 <div className="mt-3 space-y-3">
                   <label htmlFor="co-name" className="block">
                     <span className="font-display text-xs text-muted-foreground">Full name</span>
@@ -180,6 +235,7 @@ function CheckoutPage() {
                     <textarea id="co-note" value={note} rows={3} onChange={(e) => setNote(e.target.value)} className="mt-1 w-full rounded-md border border-border bg-card p-3 font-display text-sm focus:border-primary" />
                   </label>
                 </div>
+                )}
               </section>
             )}
 
@@ -188,11 +244,20 @@ function CheckoutPage() {
                 <h2 id="h-delivery" className="font-display text-lg font-medium">Delivery details</h2>
                 <div className="mt-3 space-y-5">
                   {lines.map((line) => {
-                    const entries = Object.entries(line.fields ?? {});
+                    const all = Object.entries(line.fields ?? {});
+                    const open = editing[line.sku];
+                    const entries = open ? all : all.filter(([, v]) => !v.trim());
+                    const filled = open ? [] : all.filter(([, v]) => v.trim());
                     return (
                       <fieldset key={line.sku} className="rounded-lg border border-border p-3">
                         <legend className="px-1 font-display text-sm font-medium">{line.productName}, {line.variantName}</legend>
-                        {entries.length === 0 ? (
+                        {filled.map(([k, v]) => (
+                          <p key={k} className="text-xs text-muted-foreground">{k}: {v}</p>
+                        ))}
+                        {filled.length > 0 && (
+                          <button type="button" onClick={() => setEditing({ ...editing, [line.sku]: true })} className="mt-1 text-xs text-primary underline">Edit</button>
+                        )}
+                        {all.length === 0 ? (
                           <p className="text-xs text-muted-foreground">No extra details needed for this item.</p>
                         ) : (
                           entries.map(([key, value]) => {
@@ -230,12 +295,12 @@ function CheckoutPage() {
                     </li>
                   ))}
                 </ul>
-                <button type="button" onClick={() => setStep(1)} className="mt-1 text-xs text-primary underline">Edit delivery details</button>
+                <button type="button" onClick={() => { setEditing(Object.fromEntries(lines.map((l) => [l.sku, true]))); setStep(1); }} className="mt-1 text-xs text-primary underline">Edit delivery details</button>
                 <div className="mt-3 border-t border-border pt-3 text-sm">
                   <p>{name}</p>
                   {phone && <p className="text-muted-foreground">{phone}</p>}
                   {email && <p className="text-muted-foreground">{email}</p>}
-                  <button type="button" onClick={() => setStep(0)} className="mt-1 text-xs text-primary underline">Edit contact</button>
+                  <button type="button" onClick={() => { setEditContact(true); setStep(0); }} className="mt-1 text-xs text-primary underline">Edit contact</button>
                 </div>
                 <div className="mt-3 flex justify-between border-t border-border pt-3 font-display">
                   <span>Total</span>

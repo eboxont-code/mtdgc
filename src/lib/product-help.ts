@@ -5,12 +5,18 @@ const HELP: Array<[RegExp, string]> = [
   [/server|zone/i, "Shown next to your Player ID on the profile screen, usually in brackets."],
   [/region/i, "Must match the region your account was created in, or the top-up may not apply."],
   [/email/i, "We send codes and order updates here. Check it for typos before you continue."],
-  [/phone|whatsapp/i, "The WhatsApp number we should contact about this order."],
+  [/phone|whatsapp|mobile/i, "The mobile number we should contact about this order."],
   [/username|account/i, "Your public username only. Never share a password."],
 ];
 
 export function requirementHelp(requirement: string): string | null {
   return HELP.find(([pattern]) => pattern.test(requirement))?.[1] ?? null;
+}
+
+export function contactKind(key: string): "email" | "phone" | null {
+  if (/e-?mail/i.test(key)) return "email";
+  if (/whatsapp|phone|mobile/i.test(key)) return "phone";
+  return null;
 }
 
 export function productFaqs(product: CatalogProduct): Array<{ q: string; a: string }> {
@@ -21,11 +27,11 @@ export function productFaqs(product: CatalogProduct): Array<{ q: string; a: stri
     },
     {
       q: "How is it delivered?",
-      a: `${product.delivery_method}. ${product.delivery_time}. MTDGC confirms your order on WhatsApp before you pay.`,
+      a: `${product.delivery_method}. Our team verifies your payment, then delivers the order and updates its status on the site.`,
     },
     {
       q: "How do I pay?",
-      a: "After you send your order, MTDGC replies on WhatsApp with the total and payment instructions. Nothing is charged on this site.",
+      a: "Place the order, then pay by QR or bank transfer using the details shown at checkout and upload your payment screenshot. No card payments are taken on this site.",
     },
     { q: "Can I get a refund?", a: product.refund_eligibility },
   ];
