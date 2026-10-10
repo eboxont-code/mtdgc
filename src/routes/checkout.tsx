@@ -150,7 +150,9 @@ function CheckoutPage() {
           lines: lines.map((l) => ({ sku: l.sku, quantity: l.quantity, fields: l.fields ?? {} })),
         },
       });
-      try { sessionStorage.setItem(`mtdgc-order-${result.orderNumber}`, result.accessToken); } catch { /* storage unavailable */ }
+      const tokenKey = `mtdgc-order-${result.orderNumber.toUpperCase()}`;
+      try { localStorage.setItem(tokenKey, result.accessToken); } catch { /* storage unavailable */ }
+      try { sessionStorage.setItem(tokenKey, result.accessToken); sessionStorage.removeItem(CONTACT_KEY); } catch { /* storage unavailable */ }
       setPlaced({ orderNumber: result.orderNumber, totalMinor: result.totalMinor, lines: snapshot });
       clear();
       setStep(3);
@@ -191,7 +193,9 @@ function CheckoutPage() {
           ))}
         </ol>
 
-        {!placed && lines.length === 0 ? (
+        {!placed && !hydrated ? (
+          <p className="mt-6 text-sm text-muted-foreground">Loading your order details.</p>
+        ) : !placed && lines.length === 0 ? (
           <div className="mt-8 rounded-lg border border-border py-14 text-center">
             <p className="font-display font-medium">There is nothing to check out</p>
             <Button asChild className="mt-4"><Link to="/catalog">Browse the catalog</Link></Button>
@@ -202,6 +206,14 @@ function CheckoutPage() {
               <section aria-labelledby="h-contact">
                 <h2 id="h-contact" className="font-display text-lg font-medium">Contact</h2>
                 <p className="mt-1 text-xs text-muted-foreground">Add a mobile number, an email, or both. You can order as a guest.</p>
+                {showContactSummary ? (
+                  <div className="mt-3 rounded-lg border border-border p-3 text-sm">
+                    <p>{name}</p>
+                    {phone && <p className="text-muted-foreground">{phone}</p>}
+                    {email && <p className="text-muted-foreground">{email}</p>}
+                    <button type="button" onClick={() => setEditContact(true)} className="mt-1 text-xs text-primary underline">Edit contact</button>
+                  </div>
+                ) : (
                 <div className="mt-3 space-y-3">
                   <label htmlFor="co-name" className="block">
                     <span className="font-display text-xs text-muted-foreground">Full name</span>
@@ -223,6 +235,7 @@ function CheckoutPage() {
                     <textarea id="co-note" value={note} rows={3} onChange={(e) => setNote(e.target.value)} className="mt-1 w-full rounded-md border border-border bg-card p-3 font-display text-sm focus:border-primary" />
                   </label>
                 </div>
+                )}
               </section>
             )}
 
@@ -231,11 +244,20 @@ function CheckoutPage() {
                 <h2 id="h-delivery" className="font-display text-lg font-medium">Delivery details</h2>
                 <div className="mt-3 space-y-5">
                   {lines.map((line) => {
-                    const entries = Object.entries(line.fields ?? {});
+                    const all = Object.entries(line.fields ?? {});
+                    const open = editing[line.sku];
+                    const entries = open ? all : all.filter(([, v]) => !v.trim());
+                    const filled = open ? [] : all.filter(([, v]) => v.trim());
                     return (
                       <fieldset key={line.sku} className="rounded-lg border border-border p-3">
                         <legend className="px-1 font-display text-sm font-medium">{line.productName}, {line.variantName}</legend>
-                        {entries.length === 0 ? (
+                        {filled.map(([k, v]) => (
+                          <p key={k} className="text-xs text-muted-foreground">{k}: {v}</p>
+                        ))}
+                        {filled.length > 0 && (
+                          <button type="button" onClick={() => setEditing({ ...editing, [line.sku]: true })} className="mt-1 text-xs text-primary underline">Edit</button>
+                        )}
+                        {all.length === 0 ? (
                           <p className="text-xs text-muted-foreground">No extra details needed for this item.</p>
                         ) : (
                           entries.map(([key, value]) => {
@@ -273,12 +295,12 @@ function CheckoutPage() {
                     </li>
                   ))}
                 </ul>
-                <button type="button" onClick={() => setStep(1)} className="mt-1 text-xs text-primary underline">Edit delivery details</button>
+                <button type="button" onClick={() => { setEditing(Object.fromEntries(lines.map((l) => [l.sku, true]))); setStep(1); }} className="mt-1 text-xs text-primary underline">Edit delivery details</button>
                 <div className="mt-3 border-t border-border pt-3 text-sm">
                   <p>{name}</p>
                   {phone && <p className="text-muted-foreground">{phone}</p>}
                   {email && <p className="text-muted-foreground">{email}</p>}
-                  <button type="button" onClick={() => setStep(0)} className="mt-1 text-xs text-primary underline">Edit contact</button>
+                  <button type="button" onClick={() => { setEditContact(true); setStep(0); }} className="mt-1 text-xs text-primary underline">Edit contact</button>
                 </div>
                 <div className="mt-3 flex justify-between border-t border-border pt-3 font-display">
                   <span>Total</span>
