@@ -128,33 +128,54 @@ function AuthPage() {
         </p>
 
         <form onSubmit={submit} className="mt-6 space-y-3" noValidate>
-          <label className="block">
-            <span className="font-display text-xs text-muted-foreground">Email</span>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm outline-none focus:border-primary"
-            />
-          </label>
-          {mode !== "reset" && (
-            <label className="block">
-              <span className="font-display text-xs text-muted-foreground">Password</span>
+          {mode !== "recover" && (
+            <label htmlFor="auth-email" className="block">
+              <span className="font-display text-xs text-muted-foreground">Email</span>
               <input
+                id="auth-email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm focus:border-primary"
+              />
+            </label>
+          )}
+          {mode !== "reset" && (
+            <label htmlFor="auth-password" className="block">
+              <span className="font-display text-xs text-muted-foreground">{mode === "recover" ? "New password" : "Password"}</span>
+              <input
+                id="auth-password"
                 type="password"
+                autoComplete={mode === "signin" ? "current-password" : "new-password"}
                 required
                 minLength={8}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm outline-none focus:border-primary"
+                className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm focus:border-primary"
+              />
+            </label>
+          )}
+          {mode === "recover" && (
+            <label htmlFor="auth-confirm" className="block">
+              <span className="font-display text-xs text-muted-foreground">Confirm new password</span>
+              <input
+                id="auth-confirm"
+                type="password"
+                autoComplete="new-password"
+                required
+                minLength={8}
+                value={confirm}
+                onChange={(event) => setConfirm(event.target.value)}
+                className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm focus:border-primary"
               />
             </label>
           )}
           {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
           {message && <p className="text-sm text-success">{message}</p>}
           <Button type="submit" className="w-full" size="lg" disabled={busy}>
-            {busy ? "Working" : mode === "signup" ? "Create account" : mode === "reset" ? "Send reset link" : "Sign in"}
+            {busy ? "Working" : mode === "signup" ? "Create account" : mode === "reset" ? "Send reset link" : mode === "recover" ? "Set a new password" : "Sign in"}
           </Button>
         </form>
 
