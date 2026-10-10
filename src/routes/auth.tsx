@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -8,7 +8,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { SITE_URL } from "@/lib/format";
 
+function safePath(value: unknown): string | undefined {
+  return typeof value === "string" && value.startsWith("/") && !value.startsWith("//") ? value : undefined;
+}
+
 export const Route = createFileRoute("/auth")({
+  validateSearch: (search: Record<string, unknown>): { redirect?: string } => {
+    const redirect = safePath(search.redirect);
+    return redirect ? { redirect } : {};
+  },
   head: () => ({
     meta: [
       { title: "Sign in | MTDGC" },
@@ -17,6 +25,7 @@ export const Route = createFileRoute("/auth")({
       { property: "og:description", content: "Access your MTDGC orders, wishlist and support requests." },
       { property: "og:url", content: `${SITE_URL}/auth` },
       { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/auth` }],
@@ -24,16 +33,42 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
-type Mode = "signin" | "signup" | "reset";
+type Mode = "signin" | "signup" | "reset" | "recover";
+
+function friendly(caught: unknown): string {
+  const text = caught instanceof Error ? caught.message.toLowerCase() : "";
+  if (text.includes("invalid login")) return "That email or password is not right. Please try again.";
+  if (text.includes("not confirmed")) return "Your email is not confirmed yet. Check your inbox for the link.";
+  if (text.includes("rate") || text.includes("too many")) return "Too many attempts. Please wait a few minutes and try again.";
+  if (text.includes("already registered") || text.includes("already exists")) return "An account with this email already exists. Sign in instead.";
+  return "Something went wrong. Please try again.";
+}
 
 function AuthPage() {
   const navigate = useNavigate();
+  const { redirect } = Route.useSearch();
+  const target = redirect ?? "/account";
   const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    const isRecovery = window.location.hash.includes("type=recovery");
+    if (isRecovery) setMode("recover");
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") setMode("recover");
+    });
+    if (!isRecovery) {
+      supabase.auth.getSession().then(({ data }) => {
+        if (data.session && !window.location.hash.includes("type=recovery")) void navigate({ to: target });
+      });
+    }
+    return () => sub.subscription.unsubscribe();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -43,26 +78,33 @@ function AuthPage() {
     setMessage(null);
     try {
       if (mode === "signup") {
-        const { error: signUpError } = await supabase.auth.signUp({
+        const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/account` },
+          options: { emailRedirectTo: `${window.location.origin}${target}` },
         });
         if (signUpError) throw signUpError;
-        setMessage("Check your email to confirm the account, then sign in.");
+        if (data.session) await navigate({ to: target });
+        else setMessage("Check your email to confirm your account. The link brings you back here signed in.");
       } else if (mode === "reset") {
         const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/account`,
+          redirectTo: `${window.location.origin}/auth`,
         });
         if (resetError) throw resetError;
         setMessage("If that email has an account, a reset link is on its way.");
+      } else if (mode === "recover") {
+        if (password.length < 8) { setError("Use at least 8 characters."); return; }
+        if (password !== confirm) { setError("The two passwords do not match."); return; }
+        const { error: updateError } = await supabase.auth.updateUser({ password });
+        if (updateError) throw updateError;
+        await navigate({ to: "/account" });
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
         if (signInError) throw signInError;
-        await navigate({ to: "/account" });
+        await navigate({ to: target });
       }
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Something went wrong. Please try again.");
+      setError(friendly(caught));
     } finally {
       setBusy(false);
     }
@@ -70,8 +112,8 @@ function AuthPage() {
 
   const google = async () => {
     setError(null);
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-    if (result.error) setError(result.error.message);
+    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: `${window.location.origin}/auth${redirect ? `?redirect=${encodeURIComponent(redirect)}` : ""}` });
+    if (result.error) setError("Google sign-in did not finish. Please try again.");
   };
 
   return (
