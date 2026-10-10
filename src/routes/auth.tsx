@@ -14,7 +14,7 @@ function safePath(value: unknown): string | undefined {
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>): { redirect?: string } => {
-    const redirect = safePath(search.redirect);
+    const redirect = safePath(search["redirect"]);
     return redirect ? { redirect } : {};
   },
   head: () => ({
