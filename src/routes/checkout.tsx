@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+import { contactKind } from "@/lib/product-help";
 
 import { supabase } from "@/integrations/supabase/client";
 import { placeOrder } from "@/lib/orders.functions";
@@ -35,19 +37,56 @@ const inputCls = "mt-1 h-10 w-full rounded-md border bg-card px-3 font-display t
 
 type Errors = Record<string, string>;
 
+const CONTACT_KEY = "mtdgc-checkout-contact";
+
 function CheckoutPage() {
-  const { lines, subtotalMinor, updateFields, clear } = useCart();
+  const { lines, subtotalMinor, updateFields, clear, hydrated } = useCart();
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
+  const [editContact, setEditContact] = useState(false);
+  const [editing, setEditing] = useState<Record<string, boolean>>({});
   const [errors, setErrors] = useState<Errors>({});
   const [sending, setSending] = useState(false);
   const [placeError, setPlaceError] = useState<string | null>(null);
   const [placed, setPlaced] = useState<{ orderNumber: string; totalMinor: number; lines: typeof lines } | null>(null);
   const formRef = useRef<HTMLDivElement>(null);
+  const restored = useRef(false);
   const placeOrderFn = useServerFn(placeOrder);
+
+  useEffect(() => {
+    let saved: { name?: string; phone?: string; email?: string; note?: string } = {};
+    try { saved = JSON.parse(sessionStorage.getItem(CONTACT_KEY) ?? "{}"); } catch { /* ignore */ }
+    if (saved.name) setName(saved.name);
+    if (saved.phone) setPhone(saved.phone);
+    if (saved.email) setEmail(saved.email);
+    if (saved.note) setNote(saved.note);
+    restored.current = true;
+    supabase.auth.getSession().then(async ({ data }) => {
+      const user = data.session?.user;
+      if (!user) return;
+      const { data: profile } = await supabase.from("profiles").select("display_name, phone, delivery_email").eq("id", user.id).maybeSingle();
+      setName((v) => v || profile?.display_name || "");
+      setPhone((v) => v || profile?.phone || "");
+      setEmail((v) => v || profile?.delivery_email || user.email || "");
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    const all = lines.flatMap((l) => Object.entries(l.fields ?? {}));
+    const em = all.find(([k, v]) => contactKind(k) === "email" && v.trim())?.[1];
+    const ph = all.find(([k, v]) => contactKind(k) === "phone" && v.trim())?.[1];
+    if (em) setEmail((v) => v || em);
+    if (ph) setPhone((v) => v || ph);
+  }, [hydrated]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!restored.current || placed) return;
+    try { sessionStorage.setItem(CONTACT_KEY, JSON.stringify({ name, phone, email, note })); } catch { /* ignore */ }
+  }, [name, phone, email, note, placed]);
 
   const focusFirst = (errs: Errors) => {
     const first = Object.keys(errs)[0];
@@ -76,11 +115,15 @@ function CheckoutPage() {
     return e;
   };
 
+  const contactReady = Boolean(name.trim() && (phone.trim() || email.trim())) && Object.keys(validateContact()).length === 0;
+  const showContactSummary = contactReady && !editContact;
+
   const next = () => {
     const e = step === 0 ? validateContact() : step === 1 ? validateDelivery() : {};
     setErrors(e);
     if (Object.keys(e).length) return focusFirst(e);
-    setStep((s) => s + 1);
+    const skipDelivery = step === 0 && Object.keys(validateDelivery()).length === 0;
+    setStep((s) => s + (skipDelivery ? 2 : 1));
     formRef.current?.focus();
   };
 
