@@ -154,7 +154,7 @@ function AdminPage() {
           <>
             <div role="tablist" aria-label="Admin sections" className="mt-6 flex gap-2">
               {(["overview", "payments"] as const).map((t) => (
-                <Button key={t} role="tab" aria-selected={tab === t} variant={tab === t ? "default" : "outline"} size="sm" onClick={() => setTab(t)}>
+                <Button key={t} role="tab" aria-selected={tab === t} variant={tab === t ? "primary" : "outline"} size="sm" onClick={() => setTab(t)}>
                   {t === "overview" ? "Overview" : "Payments"}
                 </Button>
               ))}
