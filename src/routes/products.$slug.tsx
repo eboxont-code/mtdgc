@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { ProductCard } from "@/components/product-card";
