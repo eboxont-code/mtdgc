@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { SiteFooter } from "@/components/site-footer";
@@ -33,6 +33,8 @@ export const Route = createFileRoute("/support")({
   component: SupportPage,
 });
 
+const DRAFT_KEY = "mtdgc-support-draft";
+
 const ISSUE_TYPES = [
   "Wrong player ID or UID",
   "Order not delivered",
@@ -47,6 +49,18 @@ function SupportPage() {
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "signin" | "error">("idle");
 
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(DRAFT_KEY);
+      if (!raw) return;
+      const d = JSON.parse(raw) as { issueType?: string; orderNumber?: string; description?: string };
+      if (d.issueType && ISSUE_TYPES.includes(d.issueType)) setIssueType(d.issueType);
+      setOrderNumber(d.orderNumber ?? "");
+      setDescription(d.description ?? "");
+      sessionStorage.removeItem(DRAFT_KEY);
+    } catch { /* ignore */ }
+  }, []);
+
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (status === "sending") return;
@@ -58,6 +72,7 @@ function SupportPage() {
     const { data } = await supabase.auth.getUser();
     const user = data.user;
     if (!user) {
+      try { sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ issueType, orderNumber, description })); } catch { /* ignore */ }
       setStatus("signin");
       return;
     }
@@ -148,7 +163,7 @@ function SupportPage() {
             {status === "sent" && <p className="text-sm text-success">Your request has been recorded. We will follow up on WhatsApp.</p>}
             {status === "signin" && (
               <p role="alert" className="text-sm text-muted-foreground">
-                Please <Link to="/auth" className="text-primary">sign in</Link> to send a support request, or message us on
+                Please <Link to="/auth" search={{ redirect: "/support" }} className="text-primary">sign in</Link> to send a support request, or message us on
                 WhatsApp instead.
               </p>
             )}
