@@ -23,7 +23,7 @@ const orderSchema = z
       .default(""),
     email: z.string().trim().max(120).email().optional().or(z.literal("")),
     note: z.string().trim().max(500).optional(),
-    userId: z.string().uuid().nullable().optional(),
+    bearer: z.string().max(4000).optional(),
     lines: z.array(lineSchema).min(1).max(20),
   })
   .refine((d) => Boolean(d.phone) || Boolean(d.email), "Add a mobile number or an email");
@@ -47,6 +47,11 @@ export const placeOrder = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => orderSchema.parse(data))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let resolvedUserId: string | null = null;
+    if (data.bearer) {
+      const { data: u } = await supabaseAdmin.auth.getUser(data.bearer);
+      resolvedUserId = u.user?.id ?? null;
+    }
     const skus = data.lines.map((l) => l.sku);
     const { data: variants, error } = await supabaseAdmin
       .from("product_variants")
@@ -89,7 +94,7 @@ export const placeOrder = createServerFn({ method: "POST" })
           access_token_hash: accessTokenHash,
           guest_email: email,
           guest_phone: data.phone || null,
-          user_id: data.userId ?? null,
+          user_id: resolvedUserId,
           verification_hash: await sha256(orderNumber + contactKey),
           subtotal_minor: subtotal,
           total_minor: subtotal,

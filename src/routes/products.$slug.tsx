@@ -1,5 +1,6 @@
+import { supabase } from "@/integrations/supabase/client";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { ProductCard } from "@/components/product-card";
@@ -114,6 +115,25 @@ function ProductPage() {
   const defaultVariant = product!.variants.find((variant) => variant.is_default) ?? product!.variants[0];
   const [selectedSku, setSelectedSku] = useState(defaultVariant?.sku ?? "");
   const [fields, setFields] = useState<Record<string, string>>({});
+  useEffect(() => {
+    let saved: Record<string, string> = {};
+    try { saved = JSON.parse(localStorage.getItem("mtdgc-fields-v1") ?? "{}"); } catch { /* ignore */ }
+    const initial: Record<string, string> = {};
+    for (const r of product.requirements) if (saved[r]) initial[r] = saved[r];
+    setFields((c) => ({ ...initial, ...c }));
+    void (async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) return;
+      const { data: p } = await supabase.from("profiles").select("delivery_email").eq("id", data.user.id).maybeSingle();
+      const mail = p?.delivery_email || data.user.email;
+      if (!mail) return;
+      setFields((c) => {
+        const n = { ...c };
+        for (const r of product.requirements) if (/email/i.test(r) && !n[r]) n[r] = mail;
+        return n;
+      });
+    })();
+  }, [product.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const [error, setError] = useState<string | null>(null);
   const fieldRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const [invalidFields, setInvalidFields] = useState<string[]>([]);
@@ -241,7 +261,7 @@ function ProductPage() {
                         aria-invalid={invalidFields.includes(requirement)}
                         aria-describedby={`${id}-help${invalidFields.includes(requirement) ? ` ${id}-error` : ""}`}
                         value={fields[requirement] ?? ""}
-                        onChange={(event) => setFields((current) => ({ ...current, [requirement]: event.target.value }))}
+                        onChange={(event) => { const v = event.target.value; setFields((current) => ({ ...current, [requirement]: v })); try { const all = JSON.parse(localStorage.getItem("mtdgc-fields-v1") ?? "{}"); all[requirement] = v; localStorage.setItem("mtdgc-fields-v1", JSON.stringify(all)); } catch { /* ignore */ } }}
                         className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm outline-none focus:border-primary"
                       />
                       {help && <p id={`${id}-help`} className="mt-1 text-xs text-muted-foreground">{help}</p>}

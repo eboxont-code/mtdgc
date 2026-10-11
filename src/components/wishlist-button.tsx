@@ -37,7 +37,7 @@ export function WishlistButton({ productId }: { productId: string }) {
   if (!userId) {
     return (
       <Button asChild variant="ghost" size="lg">
-        <Link to="/auth">
+        <Link to="/auth" search={{ redirect: typeof window !== "undefined" ? window.location.pathname : "/" }}>
           <Heart className="size-4" aria-hidden="true" /> Sign in to save
         </Link>
       </Button>

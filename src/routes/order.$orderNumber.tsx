@@ -52,14 +52,24 @@ function OrderPage() {
 
   async function load(withContact?: string) {
     let accessToken: string | undefined;
-    try { accessToken = sessionStorage.getItem(`mtdgc-order-${orderNumber.toUpperCase()}`) ?? undefined; } catch { /* ignore */ }
+    const key = `mtdgc-order-${orderNumber.toUpperCase()}`;
+    try { accessToken = localStorage.getItem(key) ?? sessionStorage.getItem(key) ?? undefined; } catch { /* ignore */ }
     const { data: s } = await supabase.auth.getSession();
     const res = await fetchOrder({ data: { orderNumber, accessToken, contact: withContact, bearer: s.session?.access_token } });
     if (res.status === "found") { setOrder(res.order); setState("found"); }
     else setState(res.status === "rate_limited" ? "limited" : "locked");
   }
 
-  useEffect(() => { void load(); }, [orderNumber]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    void load();
+    void (async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) return;
+      const { data: p } = await supabase.from("profiles").select("phone, delivery_email").eq("id", data.user.id).maybeSingle();
+      const pre = p?.phone || p?.delivery_email || data.user.email || "";
+      if (pre) setContact((c) => c || pre);
+    })();
+  }, [orderNumber]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">

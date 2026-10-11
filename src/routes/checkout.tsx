@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { contactKind } from "@/lib/product-help";
 
 import { supabase } from "@/integrations/supabase/client";
-import { placeOrder } from "@/lib/orders.functions";
+import { getPaymentSettings, placeOrder } from "@/lib/orders.functions";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { SiteFooter } from "@/components/site-footer";
@@ -55,6 +55,9 @@ function CheckoutPage() {
   const formRef = useRef<HTMLDivElement>(null);
   const restored = useRef(false);
   const placeOrderFn = useServerFn(placeOrder);
+  const loadPay = useServerFn(getPaymentSettings);
+  const [pay, setPay] = useState<Awaited<ReturnType<typeof getPaymentSettings>> | null>(null);
+  useEffect(() => { loadPay().then(setPay).catch(() => setPay(null)); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     let saved: { name?: string; phone?: string; email?: string; note?: string } = {};
@@ -138,7 +141,7 @@ function CheckoutPage() {
     setSending(true);
     setPlaceError(null);
     try {
-      const { data: auth } = await supabase.auth.getUser();
+      const { data: sess } = await supabase.auth.getSession();
       const snapshot = [...lines];
       const result = await placeOrderFn({
         data: {
@@ -146,7 +149,7 @@ function CheckoutPage() {
           phone: phone.trim(),
           email: email.trim(),
           note: note.trim(),
-          userId: auth.user?.id ?? null,
+          bearer: sess.session?.access_token,
           lines: lines.map((l) => ({ sku: l.sku, quantity: l.quantity, fields: l.fields ?? {} })),
         },
       });
@@ -319,7 +322,18 @@ function CheckoutPage() {
             {step >= 3 && placed && (
               <section role="status" aria-labelledby="h-done" className="rounded-lg border border-border bg-card p-5 text-sm">
                 <h2 id="h-done" className="font-display text-lg font-medium">Thanks, we have your order.</h2>
-                <p className="mt-1">Our team will send payment details shortly.</p>
+                {pay?.configured ? (
+                  <div className="mt-3 space-y-2">
+                    <p>Pay {formatNpr(placed.totalMinor)} using the details below, then keep your transaction reference.</p>
+                    {pay.qrUrl && <img src={pay.qrUrl} alt="Payment QR code" width={200} height={200} className="size-50 rounded-md border border-border bg-background object-contain" />}
+                    {pay.bankName && <p>Bank: <strong>{pay.bankName}</strong></p>}
+                    {pay.accountName && <p>Account name: <strong>{pay.accountName}</strong></p>}
+                    {pay.accountNumber && <p>Account number: <strong>{pay.accountNumber}</strong></p>}
+                    {pay.instructions && <p className="text-muted-foreground">{pay.instructions}</p>}
+                  </div>
+                ) : (
+                  <p className="mt-1">Thanks, we have your order. Our team will send payment details shortly.</p>
+                )}
                 <p className="mt-3 font-display">Order number: <strong>{placed.orderNumber}</strong></p>
                 <ul className="mt-3 space-y-1 text-muted-foreground">
                   {shownLines.map((line) => (
