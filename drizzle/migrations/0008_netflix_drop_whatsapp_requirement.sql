@@ -1,0 +1,1 @@
+UPDATE public.products SET requirements = COALESCE((SELECT jsonb_agg(r) FROM jsonb_array_elements(requirements) r WHERE r #>> '{}' <> 'WhatsApp number for confirmation' AND COALESCE(r->>'label','') <> 'WhatsApp number for confirmation' AND COALESCE(r->>'key','') <> 'WhatsApp number for confirmation'), '[]'::jsonb) WHERE slug = 'netflix-subscription';
