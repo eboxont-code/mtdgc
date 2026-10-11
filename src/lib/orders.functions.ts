@@ -94,7 +94,7 @@ export const placeOrder = createServerFn({ method: "POST" })
           access_token_hash: accessTokenHash,
           guest_email: email,
           guest_phone: data.phone || null,
-          user_id: data.userId ?? null,
+          user_id: resolvedUserId,
           verification_hash: await sha256(orderNumber + contactKey),
           subtotal_minor: subtotal,
           total_minor: subtotal,
