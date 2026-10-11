@@ -138,7 +138,7 @@ function CheckoutPage() {
     setSending(true);
     setPlaceError(null);
     try {
-      const { data: auth } = await supabase.auth.getUser();
+      const { data: sess } = await supabase.auth.getSession();
       const snapshot = [...lines];
       const result = await placeOrderFn({
         data: {
@@ -146,7 +146,7 @@ function CheckoutPage() {
           phone: phone.trim(),
           email: email.trim(),
           note: note.trim(),
-          userId: auth.user?.id ?? null,
+          bearer: sess.session?.access_token,
           lines: lines.map((l) => ({ sku: l.sku, quantity: l.quantity, fields: l.fields ?? {} })),
         },
       });
