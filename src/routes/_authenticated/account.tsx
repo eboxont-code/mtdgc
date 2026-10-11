@@ -50,6 +50,9 @@ function AccountPage() {
         supabase.from("support_tickets").select("id, issue_type, status, created_at").order("created_at", { ascending: false }),
       ]);
       if (!active) return;
+      if (!profile.error && !profile.data) {
+        await supabase.from("profiles").upsert({ id: user.id }, { onConflict: "id", ignoreDuplicates: true });
+      }
       setDisplayName(profile.data?.display_name ?? "");
       setPhone(profile.data?.phone ?? "");
       setDeliveryEmail(profile.data?.delivery_email ?? "");
@@ -102,7 +105,7 @@ function AccountPage() {
               <input value={displayName} onChange={(event) => setDisplayName(event.target.value)} className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm outline-none focus:border-primary" />
             </label>
             <label className="block">
-              <span className="font-display text-xs text-muted-foreground">WhatsApp number</span>
+              <span className="font-display text-xs text-muted-foreground">Mobile number</span>
               <input value={phone} onChange={(event) => setPhone(event.target.value)} inputMode="tel" className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm outline-none focus:border-primary" />
             </label>
             <label className="block md:col-span-2">

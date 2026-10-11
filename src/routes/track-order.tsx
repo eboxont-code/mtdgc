@@ -1,6 +1,7 @@
+import { supabase } from "@/integrations/supabase/client";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { SiteFooter } from "@/components/site-footer";
@@ -54,6 +55,17 @@ function TrackOrderPage() {
   const [error, setError] = useState<string | null>(null);
   const [found, setFound] = useState<Found | null>(null);
   const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    let active = true;
+    void (async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!data.user || !active) return;
+      const { data: p } = await supabase.from("profiles").select("phone, delivery_email").eq("id", data.user.id).maybeSingle();
+      const pre = p?.phone || p?.delivery_email || data.user.email || "";
+      if (active && pre) setContact((c) => c || pre);
+    })();
+    return () => { active = false; };
+  }, []);
   const lookup = useServerFn(lookupOrder);
 
   const submit = async (event: React.FormEvent) => {

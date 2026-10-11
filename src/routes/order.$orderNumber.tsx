@@ -60,7 +60,16 @@ function OrderPage() {
     else setState(res.status === "rate_limited" ? "limited" : "locked");
   }
 
-  useEffect(() => { void load(); }, [orderNumber]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    void load();
+    void (async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) return;
+      const { data: p } = await supabase.from("profiles").select("phone, delivery_email").eq("id", data.user.id).maybeSingle();
+      const pre = p?.phone || p?.delivery_email || data.user.email || "";
+      if (pre) setContact((c) => c || pre);
+    })();
+  }, [orderNumber]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
