@@ -6,6 +6,7 @@ import { contactKind } from "@/lib/product-help";
 
 import { supabase } from "@/integrations/supabase/client";
 import { getPaymentSettings, placeOrder } from "@/lib/orders.functions";
+import { PaymentProofForm } from "@/components/payment-proof-form";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { SiteFooter } from "@/components/site-footer";
@@ -341,6 +342,7 @@ function CheckoutPage() {
                   ))}
                 </ul>
                 <p className="mt-2 font-display">Total: {formatNpr(placed.totalMinor)}</p>
+                <PaymentProofForm orderNumber={placed.orderNumber} />
                 <p className="mt-3 text-xs text-muted-foreground">
                   Keep your order number to <Link to="/track-order" className="underline">track the order</Link> or{" "}
                   <Link to="/support" className="underline">contact support</Link>.
