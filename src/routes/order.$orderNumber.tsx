@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { formatNpr } from "@/lib/format";
 import { getOrderForViewer } from "@/lib/orders.functions";
+import { PaymentProofForm } from "@/components/payment-proof-form";
 
 export const Route = createFileRoute("/order/$orderNumber")({
   head: () => ({
@@ -97,7 +98,12 @@ function OrderPage() {
               {order.items.map((i) => <li key={i.name}>{i.quantity} × {i.name} · {formatNpr(i.totalMinor)}</li>)}
             </ul>
             <p className="mt-3 font-display">Total: {formatNpr(order.totalMinor)}</p>
-            {order.status === "pending_payment" && <p className="mt-3">Thanks, we have your order. Our team will send payment details shortly.</p>}
+            {order.status === "pending_payment" && (
+              <>
+                <p className="mt-3">Thanks, we have your order. Pay using the details shown at checkout, or the details our team sends you, then upload your screenshot here.</p>
+                <PaymentProofForm orderNumber={order.orderNumber} />
+              </>
+            )}
             <p className="mt-4 text-xs text-muted-foreground">Questions? <Link to="/support" className="underline">Contact support</Link>.</p>
           </section>
         )}

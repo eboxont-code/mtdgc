@@ -218,6 +218,56 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_proofs: {
+        Row: {
+          amount_minor: number
+          created_at: string
+          id: string
+          order_id: string
+          resubmit_requested: boolean
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          storage_path: string
+          transaction_ref: string
+        }
+        Insert: {
+          amount_minor: number
+          created_at?: string
+          id?: string
+          order_id: string
+          resubmit_requested?: boolean
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          storage_path: string
+          transaction_ref: string
+        }
+        Update: {
+          amount_minor?: number
+          created_at?: string
+          id?: string
+          order_id?: string
+          resubmit_requested?: boolean
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          storage_path?: string
+          transaction_ref?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_proofs_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_settings: {
         Row: {
           account_name: string | null

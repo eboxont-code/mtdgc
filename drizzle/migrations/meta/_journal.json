@@ -64,6 +64,13 @@
       "when": 1791677969291,
       "tag": "0008_netflix_drop_whatsapp_requirement",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791764503419,
+      "tag": "0009_payment_qr_private_and_payment_proofs",
+      "breakpoints": true
     }
   ]
 }

@@ -226,3 +226,86 @@ export const getPaymentSettings = createServerFn({ method: "GET" }).handler(asyn
   const out = { qrUrl, bankName: data.bank_name, accountName: data.account_name, accountNumber: data.account_number, instructions: data.instructions, fonepay: data.fonepay_enabled };
   return { configured: Boolean(qrUrl || (data.bank_name && data.account_number)), ...out };
 });
+
+function sniffImage(bytes: Uint8Array): "jpg" | "png" | "webp" | null {
+  if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return "jpg";
+  if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return "png";
+  if (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 && bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) return "webp";
+  return null;
+}
+
+const MIME_EXT: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
+
+export const submitPaymentProof = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) => {
+    if (!(data instanceof FormData)) throw new Error("Invalid form");
+    const file = data.get("file");
+    if (!(file instanceof File)) throw new Error("Please attach your payment screenshot.");
+    const parsed = z
+      .object({
+        orderNumber: z.string().trim().min(4).max(40),
+        transactionRef: z.string().trim().min(4, "Enter the transaction reference (4 to 64 characters).").max(64),
+        accessToken: z.string().trim().max(128).optional(),
+        contact: z.string().trim().max(120).optional(),
+        bearer: z.string().max(4000).optional(),
+      })
+      .parse({
+        orderNumber: data.get("orderNumber"),
+        transactionRef: data.get("transactionRef"),
+        accessToken: data.get("accessToken") || undefined,
+        contact: data.get("contact") || undefined,
+        bearer: data.get("bearer") || undefined,
+      });
+    return { ...parsed, file };
+  })
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const orderNumber = data.orderNumber.toUpperCase();
+    const { data: order } = await supabaseAdmin
+      .from("orders")
+      .select("id, user_id, status, total_minor, verification_hash, access_token_hash, guest_email")
+      .eq("order_number", orderNumber)
+      .maybeSingle();
+    let allowed = false;
+    if (order && data.accessToken && order.access_token_hash) allowed = (await sha256(data.accessToken)) === order.access_token_hash;
+    if (order && !allowed && data.bearer && order.user_id) {
+      const { data: u } = await supabaseAdmin.auth.getUser(data.bearer);
+      allowed = u.user?.id === order.user_id;
+    }
+    if (order && !allowed && data.contact) {
+      const { getRequestHeader } = await import("@tanstack/react-start/server");
+      const ip = getRequestHeader("cf-connecting-ip") ?? getRequestHeader("x-forwarded-for")?.split(",")[0] ?? "unknown";
+      const ipHash = await sha256(`lookup:${ip.trim()}`);
+      const { count } = await supabaseAdmin.from("order_lookup_attempts").select("id", { count: "exact", head: true }).eq("ip_hash", ipHash).gte("created_at", new Date(Date.now() - 600000).toISOString());
+      if ((count ?? 0) >= 10) return { ok: false as const, error: "Too many attempts. Please wait 10 minutes and try again." };
+      await supabaseAdmin.from("order_lookup_attempts").insert({ ip_hash: ipHash });
+      const c = normaliseContact(data.contact);
+      allowed = (await sha256(orderNumber + c)) === order.verification_hash || (c.includes("@") && order.guest_email?.toLowerCase() === c);
+    }
+    if (!order || !allowed) return { ok: false as const, error: "We could not open this order." };
+    if (order.status !== "pending_payment") return { ok: false as const, error: "This order is not waiting for payment." };
+
+    const { data: latest } = await supabaseAdmin.from("payment_proofs").select("resubmit_requested").eq("order_id", order.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
+    if (latest && !latest.resubmit_requested) return { ok: false as const, error: "We already have a payment proof for this order." };
+
+    const file = data.file;
+    if (file.size > 5242880) return { ok: false as const, error: "The screenshot must be 5 MB or smaller." };
+    const ext = MIME_EXT[file.type];
+    const buffer = new Uint8Array(await file.arrayBuffer());
+    const sniffed = sniffImage(buffer);
+    if (!ext || !sniffed || sniffed !== ext) return { ok: false as const, error: "Please upload a JPG, PNG or WebP image." };
+
+    const rand = [...crypto.getRandomValues(new Uint8Array(16))].map((b) => b.toString(16).padStart(2, "0")).join("");
+    const path = `${order.id}/${rand}.${ext}`;
+    const up = await supabaseAdmin.storage.from("payment-proofs").upload(path, buffer, { contentType: file.type });
+    if (up.error) return { ok: false as const, error: "Upload failed. Please try again." };
+
+    const { data: moved } = await supabaseAdmin.from("orders").update({ status: "payment_submitted", updated_at: new Date().toISOString() }).eq("id", order.id).eq("status", "pending_payment").select("id");
+    if (!moved?.length) {
+      await supabaseAdmin.storage.from("payment-proofs").remove([path]);
+      return { ok: false as const, error: "This order is not waiting for payment." };
+    }
+    await supabaseAdmin.from("payment_proofs").insert({ order_id: order.id, storage_path: path, transaction_ref: data.transactionRef, amount_minor: order.total_minor });
+    await supabaseAdmin.from("order_status_events").insert({ order_id: order.id, status: "payment_submitted", note: "Payment proof submitted by customer" });
+    return { ok: true as const };
+  });
