@@ -6,7 +6,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { formatNpr, whatsappLink } from "@/lib/format";
+import { ORDER_NOTICE, ORDER_STEPS, orderStepIndex, formatNpr, whatsappLink } from "@/lib/format";
 
 type Order = { id: string; order_number: string; status: string; total_minor: number; created_at: string };
 
@@ -60,7 +60,7 @@ function OrdersPage() {
                   </p>
                 </div>
                 <span className="rounded bg-secondary px-2 py-0.5 font-display text-[10px] uppercase tracking-[0.1em]">
-                  {order.status}
+                  {ORDER_NOTICE[order.status] ?? ORDER_STEPS[orderStepIndex(order.status)]?.title ?? order.status}
                 </span>
                 {whatsappLink() ? (
                   <Button asChild variant="outline" size="sm">
