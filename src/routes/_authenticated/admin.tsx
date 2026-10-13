@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { approveReview as approveReviewServer, archiveProduct as archiveProductServer, updateOrderStatus as updateOrderStatusServer } from "@/lib/admin.functions";
 
 import { PaymentsPanel } from "@/components/admin/payments-panel";
+import { VerifyPanel } from "@/components/admin/verify-panel";
 import { ProductForm } from "@/components/admin/product-form";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -39,7 +40,7 @@ const LOW_STOCK = 5;
 
 function AdminPage() {
   const [allowed, setAllowed] = useState<boolean | null>(null);
-  const [tab, setTab] = useState<"overview" | "payments">("overview");
+  const [tab, setTab] = useState<"overview" | "verify" | "payments">("overview");
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [orderCount, setOrderCount] = useState(0);
   const [ticketCount, setTicketCount] = useState(0);
