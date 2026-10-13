@@ -7,7 +7,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
-import { formatNpr, SITE_URL, STATUS_LABEL, whatsappLink } from "@/lib/format";
+import { ORDER_NOTICE, ORDER_STEPS, orderStepIndex, formatNpr, SITE_URL, STATUS_LABEL, whatsappLink } from "@/lib/format";
 import { lookupOrder } from "@/lib/orders.functions";
 
 const STATUS_TEXT: Record<string, string> = { ...STATUS_LABEL, pending: "Placed", paid: "Payment confirmed", processing: "Processing", fulfilled: "Fulfilled", completed: "Completed", cancelled: "Cancelled", failed: "Failed", refunded: "Refunded" };
@@ -37,15 +37,6 @@ export const Route = createFileRoute("/track-order")({
   component: TrackOrderPage,
 });
 
-const TIMELINE = [
-  ["Placed", "We have your order details and the products you selected."],
-  ["Payment confirmed", "Your payment has been received and matched to the order."],
-  ["Processing", "The team is preparing the top-up, code or subscription."],
-  ["Fulfilled", "The digital item has been delivered to your account or email."],
-  ["Completed", "The order is closed. Refund terms for the product still apply."],
-];
-
-const STEP_INDEX: Record<string, number> = { pending: 0, paid: 1, processing: 2, fulfilled: 3, completed: 4 };
 
 type Found = { orderNumber: string; status: string; createdAt: string; totalMinor: number; items: { name: string; quantity: number }[] };
 
@@ -101,7 +92,7 @@ function TrackOrderPage() {
       setLoading(false);
     }
   };
-  const current = found ? STEP_INDEX[found.status] ?? -1 : -1;
+  const current = found ? orderStepIndex(found.status) : -1;
 
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
@@ -161,7 +152,8 @@ function TrackOrderPage() {
         <section className="mt-12">
           <h2 className="font-display text-lg font-medium">{found ? "Where your order is" : "What each status means"}</h2>
           <ol className="mt-4 space-y-4">
-            {TIMELINE.map(([title, body], index) => (
+            {found && ORDER_NOTICE[found.status] && <p className="text-sm">{ORDER_NOTICE[found.status]}</p>}
+            {ORDER_STEPS.map(({ title, body }, index) => (
               <li key={title} className="flex gap-3" aria-current={index === current ? "step" : undefined}>
                 <span aria-hidden="true" className={`grid size-7 shrink-0 place-items-center rounded-full font-display text-xs ${index === current ? "bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2" : index < current ? "bg-foreground text-background" : current >= 0 ? "bg-secondary text-muted-foreground" : "bg-foreground text-background"}`}>
                   {index + 1}
