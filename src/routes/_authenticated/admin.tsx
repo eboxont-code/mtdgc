@@ -152,13 +152,14 @@ function AdminPage() {
 
         {allowed && (
           <>
-            <div role="tablist" aria-label="Admin sections" className="mt-6 flex gap-2">
-              {(["overview", "payments"] as const).map((t) => (
-                <Button key={t} role="tab" aria-selected={tab === t} variant={tab === t ? "primary" : "outline"} size="sm" onClick={() => setTab(t)}>
-                  {t === "overview" ? "Overview" : "Payments"}
+            <div role="tablist" aria-label="Admin sections" className="mt-6 flex flex-wrap gap-2">
+              {(["overview", "verify", "payments"] as const).map((t) => (
+                <Button key={t} role="tab" aria-selected={tab === t} variant={tab === t ? "primary" : "outline"} size="sm" className="min-h-11" onClick={() => setTab(t)}>
+                  {t === "overview" ? "Overview" : t === "verify" ? "Payments to verify" : "Payment settings"}
                 </Button>
               ))}
             </div>
+            {tab === "verify" && <div className="mt-6"><VerifyPanel /></div>}
             {tab === "payments" && <div className="mt-6"><PaymentsPanel /></div>}
             <div hidden={tab !== "overview"}>
             <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
