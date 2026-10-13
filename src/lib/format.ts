@@ -25,3 +25,22 @@ export function isOrderable(status: string): boolean {
 }
 
 export const SITE_URL = "https://mtdgc.com";
+
+export const ORDER_STEPS: Array<{ title: string; body: string; statuses: string[] }> = [
+  { title: "Payment received", body: "We have your payment screenshot and will check it against our account.", statuses: ["payment_submitted", "paid"] },
+  { title: "Verified", body: "Your payment matched and the order is confirmed.", statuses: ["verified"] },
+  { title: "Processing", body: "We are preparing your key, account details or code.", statuses: ["processing"] },
+  { title: "Delivered", body: "Your order has been delivered to your order page and email.", statuses: ["delivered", "fulfilled", "completed"] },
+];
+
+export const ORDER_NOTICE: Record<string, string> = {
+  pending: "Waiting for payment.",
+  pending_payment: "Waiting for payment.",
+  rejected: "We could not match the payment. See the note and upload a new proof if asked.",
+  cancelled: "This order was cancelled.",
+  refunded: "This order was refunded.",
+};
+
+export function orderStepIndex(status: string): number {
+  return ORDER_STEPS.findIndex((step) => step.statuses.includes(status));
+}

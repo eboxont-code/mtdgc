@@ -5,6 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { approveReview as approveReviewServer, archiveProduct as archiveProductServer, updateOrderStatus as updateOrderStatusServer } from "@/lib/admin.functions";
 
 import { PaymentsPanel } from "@/components/admin/payments-panel";
+import { VerifyPanel } from "@/components/admin/verify-panel";
 import { ProductForm } from "@/components/admin/product-form";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -39,7 +40,7 @@ const LOW_STOCK = 5;
 
 function AdminPage() {
   const [allowed, setAllowed] = useState<boolean | null>(null);
-  const [tab, setTab] = useState<"overview" | "payments">("overview");
+  const [tab, setTab] = useState<"overview" | "verify" | "payments">("overview");
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [orderCount, setOrderCount] = useState(0);
   const [ticketCount, setTicketCount] = useState(0);
@@ -152,13 +153,14 @@ function AdminPage() {
 
         {allowed && (
           <>
-            <div role="tablist" aria-label="Admin sections" className="mt-6 flex gap-2">
-              {(["overview", "payments"] as const).map((t) => (
-                <Button key={t} role="tab" aria-selected={tab === t} variant={tab === t ? "primary" : "outline"} size="sm" onClick={() => setTab(t)}>
-                  {t === "overview" ? "Overview" : "Payments"}
+            <div role="tablist" aria-label="Admin sections" className="mt-6 flex flex-wrap gap-2">
+              {(["overview", "verify", "payments"] as const).map((t) => (
+                <Button key={t} role="tab" aria-selected={tab === t} variant={tab === t ? "primary" : "outline"} size="sm" className="min-h-11" onClick={() => setTab(t)}>
+                  {t === "overview" ? "Overview" : t === "verify" ? "Payments to verify" : "Payment settings"}
                 </Button>
               ))}
             </div>
+            {tab === "verify" && <div className="mt-6"><VerifyPanel /></div>}
             {tab === "payments" && <div className="mt-6"><PaymentsPanel /></div>}
             <div hidden={tab !== "overview"}>
             <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
