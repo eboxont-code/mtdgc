@@ -47,3 +47,12 @@ export const ORDER_NOTICE: Record<string, string> = {
 export function orderStepIndex(status: string): number {
   return ORDER_STEPS.findIndex((step) => step.statuses.includes(status));
 }
+
+/** Latest time an order entered any status belonging to the given step. */
+export function stepTime(stepIndex: number, events: Array<{ status: string; at: string }>): string | null {
+  const step = ORDER_STEPS[stepIndex];
+  if (!step) return null;
+  const times = events.filter((e) => step.statuses.includes(e.status)).map((e) => e.at).sort();
+  const last = times[times.length - 1];
+  return last ? new Date(last).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }) : null;
+}

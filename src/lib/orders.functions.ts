@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
 const lineSchema = z.object({
   sku: z.string().min(1).max(80),
   quantity: z.number().int().min(1).max(10),
@@ -138,7 +140,7 @@ export const lookupOrder = createServerFn({ method: "POST" })
     const orderNumber = data.orderNumber.toUpperCase();
     const { data: order } = await supabaseAdmin
       .from("orders")
-      .select("id, status, created_at, total_minor, verification_hash, guest_email, order_items(product_name, variant_name, quantity)")
+      .select("id, status, created_at, total_minor, verification_hash, guest_email, order_items(product_name, variant_name, quantity), order_status_events(status, created_at)")
       .eq("order_number", orderNumber)
       .maybeSingle();
     if (!order) return { status: "not_found" as const };
@@ -154,8 +156,29 @@ export const lookupOrder = createServerFn({ method: "POST" })
         createdAt: order.created_at,
         totalMinor: order.total_minor,
         items: (order.order_items ?? []).map((i) => ({ name: `${i.product_name}, ${i.variant_name}`, quantity: i.quantity })),
+        events: (order.order_status_events ?? []).map((e) => ({ status: e.status, at: e.created_at })),
       },
     };
+  });
+
+export const listMyOrders = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("orders")
+      .select("id, order_number, status, total_minor, created_at, order_items(product_name, variant_name, quantity, line_total_minor), order_status_events(status, created_at)")
+      .eq("user_id", context.userId)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error("We could not load your orders.");
+    return (data ?? []).map((o) => ({
+      id: o.id,
+      orderNumber: o.order_number,
+      status: o.status as string,
+      totalMinor: o.total_minor,
+      createdAt: o.created_at,
+      items: (o.order_items ?? []).map((i) => ({ name: `${i.product_name}, ${i.variant_name}`, quantity: i.quantity, totalMinor: i.line_total_minor })),
+      events: (o.order_status_events ?? []).map((e) => ({ status: e.status, at: e.created_at })),
+    }));
   });
 
 export const getOrderForViewer = createServerFn({ method: "POST" })
