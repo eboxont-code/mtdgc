@@ -7,7 +7,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
-import { ORDER_NOTICE, ORDER_STEPS, orderStepIndex, formatNpr, SITE_URL, STATUS_LABEL, whatsappLink } from "@/lib/format";
+import { ORDER_NOTICE, ORDER_STEPS, orderStepIndex, stepTime, formatNpr, SITE_URL, STATUS_LABEL, whatsappLink } from "@/lib/format";
 import { lookupOrder } from "@/lib/orders.functions";
 
 const STATUS_TEXT: Record<string, string> = { ...STATUS_LABEL, pending: "Placed", paid: "Payment confirmed", processing: "Processing", fulfilled: "Fulfilled", completed: "Completed", cancelled: "Cancelled", failed: "Failed", refunded: "Refunded" };
@@ -38,7 +38,7 @@ export const Route = createFileRoute("/track-order")({
 });
 
 
-type Found = { orderNumber: string; status: string; createdAt: string; totalMinor: number; items: { name: string; quantity: number }[] };
+type Found = { orderNumber: string; status: string; createdAt: string; totalMinor: number; items: { name: string; quantity: number }[]; events: { status: string; at: string }[] };
 
 function TrackOrderPage() {
   const [orderNumber, setOrderNumber] = useState("");
@@ -169,6 +169,9 @@ function TrackOrderPage() {
                 <div>
                   <h3 className="font-display text-sm font-medium">{title}</h3>
                   <p className="mt-0.5 text-sm text-muted-foreground">{body}</p>
+                  {found && index <= current && stepTime(index, found.events) && (
+                    <p className="mt-0.5 font-display text-xs">{stepTime(index, found.events)}</p>
+                  )}
                 </div>
               </li>
             ))}

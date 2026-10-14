@@ -1,14 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { useCallback, useEffect, useState } from "react";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
-import { ORDER_NOTICE, ORDER_STEPS, orderStepIndex, formatNpr, whatsappLink } from "@/lib/format";
+import { ORDER_NOTICE, ORDER_STEPS, orderStepIndex, stepTime, formatNpr } from "@/lib/format";
+import { listMyOrders } from "@/lib/orders.functions";
 
-type Order = { id: string; order_number: string; status: string; total_minor: number; created_at: string };
+type Order = Awaited<ReturnType<typeof listMyOrders>>[number];
 
 export const Route = createFileRoute("/_authenticated/orders")({
   head: () => ({
@@ -22,15 +23,19 @@ export const Route = createFileRoute("/_authenticated/orders")({
 });
 
 function OrdersPage() {
+  const fetchOrders = useServerFn(listMyOrders);
   const [orders, setOrders] = useState<Order[] | null>(null);
+  const [error, setError] = useState(false);
 
-  useEffect(() => {
-    supabase
-      .from("orders")
-      .select("id, order_number, status, total_minor, created_at")
-      .order("created_at", { ascending: false })
-      .then(({ data }) => setOrders((data ?? []) as Order[]));
-  }, []);
+  const load = useCallback(() => {
+    setError(false);
+    setOrders(null);
+    fetchOrders()
+      .then(setOrders)
+      .catch(() => setError(true));
+  }, [fetchOrders]);
+
+  useEffect(load, [load]);
 
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
@@ -38,10 +43,13 @@ function OrdersPage() {
       <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-4xl px-4 pb-16 pt-6">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Account", to: "/account" }, { label: "Orders" }]} />
         <h1 className="font-display text-[26px] font-medium md:text-4xl">Your orders</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Orders confirmed by MTDGC appear here. Orders still being arranged on WhatsApp may take a little while to show.
-        </p>
-        {orders === null ? (
+        <p className="mt-2 text-sm text-muted-foreground">Orders you place while signed in are listed here with their current status.</p>
+        {error ? (
+          <div role="alert" className="mt-6 rounded-lg border border-border p-4 text-sm">
+            <p>We could not load your orders.</p>
+            <Button className="mt-3 min-h-11" variant="outline" onClick={load}>Try again</Button>
+          </div>
+        ) : orders === null ? (
           <p className="mt-6 text-sm text-muted-foreground">Loading your orders.</p>
         ) : orders.length === 0 ? (
           <div className="mt-8 rounded-lg border border-border py-14 text-center">
@@ -51,28 +59,46 @@ function OrdersPage() {
           </div>
         ) : (
           <ul className="mt-6 space-y-3">
-            {orders.map((order) => (
-              <li key={order.id} className="flex flex-wrap items-center gap-3 rounded-lg border border-border p-4">
-                <div className="min-w-0 flex-1">
-                  <p className="font-display font-medium">{order.order_number}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {new Date(order.created_at).toLocaleDateString("en-GB")} · {formatNpr(order.total_minor)}
-                  </p>
-                </div>
-                <span className="rounded bg-secondary px-2 py-0.5 font-display text-[10px] uppercase tracking-[0.1em]">
-                  {ORDER_NOTICE[order.status] ?? ORDER_STEPS[orderStepIndex(order.status)]?.title ?? order.status}
-                </span>
-                {whatsappLink() ? (
-                  <Button asChild variant="outline" size="sm">
-                    <a href={whatsappLink(`Hello MTDGC, I would like to order again: ${order.order_number}`)!} target="_blank" rel="noreferrer">
-                      Order again
-                    </a>
-                  </Button>
-                ) : (
-                  <Button asChild variant="outline" size="sm"><Link to="/catalog">Order again</Link></Button>
-                )}
-              </li>
-            ))}
+            {orders.map((order) => {
+              const current = orderStepIndex(order.status);
+              return (
+                <li key={order.id} className="rounded-lg border border-border p-4">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-display font-medium">{order.orderNumber}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(order.createdAt).toLocaleDateString("en-GB")} · {formatNpr(order.totalMinor)}
+                      </p>
+                    </div>
+                    <span className="rounded bg-secondary px-2 py-0.5 font-display text-[10px] uppercase tracking-[0.1em]">
+                      {ORDER_NOTICE[order.status] ?? ORDER_STEPS[current]?.title ?? order.status}
+                    </span>
+                  </div>
+                  <ol className="mt-3 grid gap-2 sm:grid-cols-4">
+                    {ORDER_STEPS.map((step, index) => (
+                      <li key={step.title} aria-current={index === current ? "step" : undefined} className={`text-xs ${index <= current ? "text-foreground" : "text-muted-foreground"}`}>
+                        <span className={`font-display ${index === current ? "font-semibold text-primary" : ""}`}>{index + 1}. {step.title}</span>
+                        {index <= current && stepTime(index, order.events) && <span className="block">{stepTime(index, order.events)}</span>}
+                      </li>
+                    ))}
+                  </ol>
+                  <details className="mt-3">
+                    <summary className="flex min-h-11 cursor-pointer items-center font-display text-sm">Order details</summary>
+                    <ul className="mt-1 space-y-1 text-sm">
+                      {order.items.map((item, i) => (
+                        <li key={i} className="flex justify-between gap-3">
+                          <span>{item.quantity} × {item.name}</span>
+                          <span className="font-display">{formatNpr(item.totalMinor)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Link to="/order/$orderNumber" params={{ orderNumber: order.orderNumber }} className="mt-2 inline-flex min-h-11 items-center text-sm text-primary underline">
+                      Open order page
+                    </Link>
+                  </details>
+                </li>
+              );
+            })}
           </ul>
         )}
       </main>
