@@ -6,7 +6,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { formatNpr } from "@/lib/format";
+import { formatNpr, whatsappLink } from "@/lib/format";
 import { getOrderForViewer } from "@/lib/orders.functions";
 import { PaymentProofForm } from "@/components/payment-proof-form";
 
@@ -105,6 +105,19 @@ function OrderPage() {
               </>
             )}
             <p className="mt-4 text-xs text-muted-foreground">Questions? <Link to="/support" className="underline">Contact support</Link>.</p>
+            {whatsappLink() && (
+              <p className="text-sm text-muted-foreground">
+                Need help with this order?{" "}
+                <a
+                  href={whatsappLink(`Hi MTDGC, I need help with order ${order.orderNumber}`)!}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-11 items-center text-primary underline"
+                >
+                  Message our support team on WhatsApp.
+                </a>
+              </p>
+            )}
           </section>
         )}
       </main>
