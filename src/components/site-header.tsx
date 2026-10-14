@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart";
+import { SUPPORT_MESSAGE, whatsappLink } from "@/lib/format";
 
 const NAV = [
   { to: "/catalog", label: "Catalog" },
@@ -50,6 +51,16 @@ export function SiteHeader() {
                 {item.label}
               </Link>
             ))}
+            {whatsappLink() && (
+              <a
+                href={whatsappLink(SUPPORT_MESSAGE)!}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-md px-3 py-2 font-display text-sm text-primary hover:bg-secondary"
+              >
+                WhatsApp support
+              </a>
+            )}
           </nav>
 
           <Button asChild variant="ghost" size="icon" aria-label="Search the catalog">
@@ -96,6 +107,16 @@ export function SiteHeader() {
                 {item.label}
               </Link>
             ))}
+            {whatsappLink() && (
+              <a
+                href={whatsappLink(SUPPORT_MESSAGE)!}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block min-h-11 rounded-md px-2 py-3 font-display text-sm text-primary"
+              >
+                WhatsApp support
+              </a>
+            )}
           </nav>
         )}
       </header>

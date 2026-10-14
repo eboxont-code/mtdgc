@@ -7,7 +7,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
-import { ORDER_NOTICE, ORDER_STEPS, orderStepIndex, formatNpr, SITE_URL, STATUS_LABEL, whatsappLink } from "@/lib/format";
+import { ORDER_NOTICE, ORDER_STEPS, orderStepIndex, stepTime, formatNpr, SITE_URL, STATUS_LABEL, whatsappLink } from "@/lib/format";
 import { lookupOrder } from "@/lib/orders.functions";
 
 const STATUS_TEXT: Record<string, string> = { ...STATUS_LABEL, pending: "Placed", paid: "Payment confirmed", processing: "Processing", fulfilled: "Fulfilled", completed: "Completed", cancelled: "Cancelled", failed: "Failed", refunded: "Refunded" };
@@ -38,7 +38,7 @@ export const Route = createFileRoute("/track-order")({
 });
 
 
-type Found = { orderNumber: string; status: string; createdAt: string; totalMinor: number; items: { name: string; quantity: number }[] };
+type Found = { orderNumber: string; status: string; createdAt: string; totalMinor: number; items: { name: string; quantity: number }[]; events: { status: string; at: string }[] };
 
 function TrackOrderPage() {
   const [orderNumber, setOrderNumber] = useState("");
@@ -101,8 +101,8 @@ function TrackOrderPage() {
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Track order" }]} />
         <h1 className="font-display text-[26px] font-medium md:text-4xl">Track your order</h1>
         <p className="mt-2 max-w-[62ch] text-sm text-muted-foreground">
-          Every MTDGC order gets a readable order number. Enter it with the email or phone number used on the order and
-          we confirm the current status on WhatsApp. If you have an account, your orders also appear in your{" "}
+          Every MTDGC order gets a readable order number. Enter it with the email or phone number used on the order to
+          see its current status. If you have an account, your orders also appear in your{" "}
           <Link to="/account" className="text-primary">account dashboard</Link>.
         </p>
 
@@ -129,12 +129,20 @@ function TrackOrderPage() {
           <div className="flex flex-wrap gap-2">
             <Button type="submit" disabled={loading}>{loading ? "Checking" : "Check my order"}</Button>
             <Button asChild variant="outline"><Link to="/support">Contact support</Link></Button>
-            {whatsappLink() && (
-              <Button asChild variant="outline">
-                <a href={whatsappLink(`Hello MTDGC, please check my order ${orderNumber.trim().toUpperCase()}.`)!} target="_blank" rel="noreferrer">Ask on WhatsApp</a>
-              </Button>
-            )}
           </div>
+          {whatsappLink() && (
+            <p className="text-sm text-muted-foreground">
+              Need help with this order?{" "}
+              <a
+                href={whatsappLink(orderNumber.trim() ? `Hi MTDGC, I need help with order ${orderNumber.trim().toUpperCase()}` : "Hi MTDGC, I need help")!}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 items-center text-primary underline"
+              >
+                Message our support team on WhatsApp.
+              </a>
+            </p>
+          )}
         </form>
 
         {found && (
@@ -161,6 +169,9 @@ function TrackOrderPage() {
                 <div>
                   <h3 className="font-display text-sm font-medium">{title}</h3>
                   <p className="mt-0.5 text-sm text-muted-foreground">{body}</p>
+                  {found && index <= current && stepTime(index, found.events) && (
+                    <p className="mt-0.5 font-display text-xs">{stepTime(index, found.events)}</p>
+                  )}
                 </div>
               </li>
             ))}

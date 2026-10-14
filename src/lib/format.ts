@@ -2,8 +2,11 @@ export function formatNpr(minor: number): string {
   return `Rs ${(minor / 100).toLocaleString("en-NP", { maximumFractionDigits: 0 })}`;
 }
 
-// The only place the WhatsApp number is set. Leave empty until the owner provides a real number.
-export const WHATSAPP_NUMBER: string = "";
+// MTDGC support WhatsApp number (support only, never part of ordering or payment).
+// Digits only with country code, as wa.me expects. Use only through whatsappLink().
+export const WHATSAPP_NUMBER: string = "9779740204403";
+export const WHATSAPP_DISPLAY = "+977 9740204403";
+export const SUPPORT_MESSAGE = "Hi MTDGC, I need help";
 
 export function whatsappLink(message?: string): string | null {
   if (!WHATSAPP_NUMBER) return null;
@@ -43,4 +46,13 @@ export const ORDER_NOTICE: Record<string, string> = {
 
 export function orderStepIndex(status: string): number {
   return ORDER_STEPS.findIndex((step) => step.statuses.includes(status));
+}
+
+/** Latest time an order entered any status belonging to the given step. */
+export function stepTime(stepIndex: number, events: Array<{ status: string; at: string }>): string | null {
+  const step = ORDER_STEPS[stepIndex];
+  if (!step) return null;
+  const times = events.filter((e) => step.statuses.includes(e.status)).map((e) => e.at).sort();
+  const last = times[times.length - 1];
+  return last ? new Date(last).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }) : null;
 }
