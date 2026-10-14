@@ -2,8 +2,11 @@ export function formatNpr(minor: number): string {
   return `Rs ${(minor / 100).toLocaleString("en-NP", { maximumFractionDigits: 0 })}`;
 }
 
-// The only place the WhatsApp number is set. Leave empty until the owner provides a real number.
-export const WHATSAPP_NUMBER: string = "";
+// MTDGC support WhatsApp number (support only, never part of ordering or payment).
+// Digits only with country code, as wa.me expects. Use only through whatsappLink().
+export const WHATSAPP_NUMBER: string = "9779740204403";
+export const WHATSAPP_DISPLAY = "+977 9740204403";
+export const SUPPORT_MESSAGE = "Hi MTDGC, I need help";
 
 export function whatsappLink(message?: string): string | null {
   if (!WHATSAPP_NUMBER) return null;
