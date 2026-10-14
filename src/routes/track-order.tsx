@@ -101,8 +101,8 @@ function TrackOrderPage() {
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Track order" }]} />
         <h1 className="font-display text-[26px] font-medium md:text-4xl">Track your order</h1>
         <p className="mt-2 max-w-[62ch] text-sm text-muted-foreground">
-          Every MTDGC order gets a readable order number. Enter it with the email or phone number used on the order and
-          we confirm the current status on WhatsApp. If you have an account, your orders also appear in your{" "}
+          Every MTDGC order gets a readable order number. Enter it with the email or phone number used on the order to
+          see its current status. If you have an account, your orders also appear in your{" "}
           <Link to="/account" className="text-primary">account dashboard</Link>.
         </p>
 
@@ -129,12 +129,20 @@ function TrackOrderPage() {
           <div className="flex flex-wrap gap-2">
             <Button type="submit" disabled={loading}>{loading ? "Checking" : "Check my order"}</Button>
             <Button asChild variant="outline"><Link to="/support">Contact support</Link></Button>
-            {whatsappLink() && (
-              <Button asChild variant="outline">
-                <a href={whatsappLink(`Hello MTDGC, please check my order ${orderNumber.trim().toUpperCase()}.`)!} target="_blank" rel="noreferrer">Ask on WhatsApp</a>
-              </Button>
-            )}
           </div>
+          {whatsappLink() && (
+            <p className="text-sm text-muted-foreground">
+              Need help with this order?{" "}
+              <a
+                href={whatsappLink(orderNumber.trim() ? `Hi MTDGC, I need help with order ${orderNumber.trim().toUpperCase()}` : "Hi MTDGC, I need help")!}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 items-center text-primary underline"
+              >
+                Message our support team on WhatsApp.
+              </a>
+            </p>
+          )}
         </form>
 
         {found && (
