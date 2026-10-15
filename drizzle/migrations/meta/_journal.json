@@ -71,6 +71,62 @@
       "when": 1791764503419,
       "tag": "0009_payment_qr_private_and_payment_proofs",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791764504419,
+      "tag": "0010_categories_order_and_featured_ranks",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791764505419,
+      "tag": "0011_products_listing_fields",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791764506419,
+      "tag": "0012_variant_plan_fields",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791764507419,
+      "tag": "0013_orders_eta_at",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1791764508419,
+      "tag": "0014_draft_software_subscription_listings",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1791764509419,
+      "tag": "0015_order_deliveries",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1791764510419,
+      "tag": "0016_coupons",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1791764511419,
+      "tag": "0017_support_tickets_guest_contact",
+      "breakpoints": true
     }
   ]
 }
