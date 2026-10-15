@@ -115,7 +115,7 @@ function CatalogPage() {
               value={query}
               onChange={(event) => { const q = event.target.value; setQuery(q); syncUrl({ q, category, sort, availability, price }); }}
               placeholder="Search by game, brand, category or SKU"
-              className="min-w-0 flex-1 bg-transparent font-display text-sm outline-none placeholder:text-muted-foreground"
+              className="h-11 min-w-0 flex-1 bg-transparent px-3 font-display text-base outline-none placeholder:text-muted-foreground"
             />
           </label>
 
