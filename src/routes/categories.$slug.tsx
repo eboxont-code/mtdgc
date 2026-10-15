@@ -20,7 +20,7 @@ export const Route = createFileRoute("/categories/$slug")({
     }
     const category = loaderData.category;
     const url = `${SITE_URL}/categories/${params.slug}`;
-    const title = `${category.name} in Nepal | MTDGC`;
+    const title = `${category.name} in Nepal, prices in NPR | MTDGC`;
     const description = category.description;
     const shareSlug = ["game-top-ups", "gift-cards", "subscriptions"].includes(category.slug) ? category.slug : "mtdgc";
     const shareImage = `${SITE_URL}/og/${shareSlug}.png`;
