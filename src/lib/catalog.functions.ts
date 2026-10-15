@@ -90,7 +90,18 @@ function shape(row: RawProduct): CatalogProduct {
   };
 }
 
-export const listCatalog = createServerFn({ method: "GET" }).handler(async () => {
+// Published catalog reads only. Never cache admin, cart, order or user data here.
+const CACHE_TTL_MS = 60_000;
+const publicCache = new Map<string, { at: number; value: unknown }>();
+async function cached<T>(key: string, load: () => Promise<T>): Promise<T> {
+  const hit = publicCache.get(key);
+  if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.value as T;
+  const value = await load();
+  publicCache.set(key, { at: Date.now(), value });
+  return value;
+}
+
+export const listCatalog = createServerFn({ method: "GET" }).handler(() => cached("catalog", async () => {
   const supabase = publicClient();
   const [products, categories] = await Promise.all([
     supabase.from("products").select(PRODUCT_SELECT).eq("is_published", true),
@@ -102,11 +113,11 @@ export const listCatalog = createServerFn({ method: "GET" }).handler(async () =>
     products: (products.data ?? []).map((row) => shape(row as RawProduct)),
     categories: (categories.data ?? []) as CatalogCategory[],
   };
-});
+}));
 
 export const getProductBySlug = createServerFn({ method: "GET" })
   .inputValidator((data: { slug: string }) => data)
-  .handler(async ({ data }) => {
+  .handler(({ data }) => cached(`product:${data.slug}`, async () => {
     const supabase = publicClient();
     const { data: row, error } = await supabase
       .from("products")
