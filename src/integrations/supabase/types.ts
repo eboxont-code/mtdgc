@@ -44,6 +44,48 @@ export type Database = {
         }
         Relationships: []
       }
+      coupons: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          ends_at: string | null
+          id: string
+          kind: string
+          max_uses: number | null
+          min_subtotal_minor: number
+          starts_at: string | null
+          used_count: number
+          value: number
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          kind: string
+          max_uses?: number | null
+          min_subtotal_minor?: number
+          starts_at?: string | null
+          used_count?: number
+          value: number
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          kind?: string
+          max_uses?: number | null
+          min_subtotal_minor?: number
+          starts_at?: string | null
+          used_count?: number
+          value?: number
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           created_at: string
@@ -111,6 +153,54 @@ export type Database = {
           },
         ]
       }
+      order_deliveries: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string | null
+          id: string
+          kind: string
+          order_id: string
+          order_item_id: string
+          revealed_at: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind: string
+          order_id: string
+          order_item_id: string
+          revealed_at?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          kind?: string
+          order_id?: string
+          order_item_id?: string
+          revealed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_deliveries_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_deliveries_order_item_id_fkey"
+            columns: ["order_item_id"]
+            isOneToOne: false
+            referencedRelation: "order_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_lookup_attempts: {
         Row: {
           created_at: string
@@ -166,6 +256,8 @@ export type Database = {
       }
       orders: {
         Row: {
+          eta_at: string | null
+          coupon_code: string | null
           access_token_hash: string | null
           created_at: string
           currency: string
@@ -183,6 +275,8 @@ export type Database = {
           verification_hash: string
         }
         Insert: {
+          eta_at?: string | null
+          coupon_code?: string | null
           access_token_hash?: string | null
           created_at?: string
           currency?: string
@@ -200,6 +294,8 @@ export type Database = {
           verification_hash: string
         }
         Update: {
+          eta_at?: string | null
+          coupon_code?: string | null
           access_token_hash?: string | null
           created_at?: string
           currency?: string
@@ -306,6 +402,11 @@ export type Database = {
       }
       product_variants: {
         Row: {
+          duration_months: number | null
+          account_type: string | null
+          device_limit: number | null
+          compare_at_minor: number | null
+          sale_ends_at: string | null
           currency: string
           id: string
           is_default: boolean
@@ -318,6 +419,11 @@ export type Database = {
           stock_quantity: number | null
         }
         Insert: {
+          duration_months?: number | null
+          account_type?: string | null
+          device_limit?: number | null
+          compare_at_minor?: number | null
+          sale_ends_at?: string | null
           currency?: string
           id?: string
           is_default?: boolean
@@ -330,6 +436,11 @@ export type Database = {
           stock_quantity?: number | null
         }
         Update: {
+          duration_months?: number | null
+          account_type?: string | null
+          device_limit?: number | null
+          compare_at_minor?: number | null
+          sale_ends_at?: string | null
           currency?: string
           id?: string
           is_default?: boolean
@@ -353,6 +464,17 @@ export type Database = {
       }
       products: {
         Row: {
+          product_type: string
+          delivery_channel: string
+          activation_steps: Json
+          warranty_days: number | null
+          warranty_note: string | null
+          system_requirements: string | null
+          delivery_time_label: string | null
+          region_locked: boolean
+          refund_note: string | null
+          collection: string | null
+          pairs_with: string[]
           badges: string[]
           brand: string
           category_id: string | null
@@ -380,6 +502,17 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          product_type?: string
+          delivery_channel?: string
+          activation_steps?: Json
+          warranty_days?: number | null
+          warranty_note?: string | null
+          system_requirements?: string | null
+          delivery_time_label?: string | null
+          region_locked?: boolean
+          refund_note?: string | null
+          collection?: string | null
+          pairs_with?: string[]
           badges?: string[]
           brand: string
           category_id?: string | null
@@ -407,6 +540,17 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          product_type?: string
+          delivery_channel?: string
+          activation_steps?: Json
+          warranty_days?: number | null
+          warranty_note?: string | null
+          system_requirements?: string | null
+          delivery_time_label?: string | null
+          region_locked?: boolean
+          refund_note?: string | null
+          collection?: string | null
+          pairs_with?: string[]
           badges?: string[]
           brand?: string
           category_id?: string | null
@@ -516,6 +660,7 @@ export type Database = {
       }
       support_tickets: {
         Row: {
+          contact: string | null
           created_at: string
           description: string
           id: string
@@ -526,6 +671,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          contact?: string | null
           created_at?: string
           description: string
           id?: string
@@ -536,6 +682,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          contact?: string | null
           created_at?: string
           description?: string
           id?: string
