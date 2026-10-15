@@ -143,7 +143,7 @@ export const getProductBySlug = createServerFn({ method: "GET" })
       related: (sameCategory.length ? sameCategory : others).slice(0, 4),
       explore: sameCategory.length ? otherCategories.slice(0, 4) : [],
     };
-  });
+  }));
 
 export const getCategoryBySlug = createServerFn({ method: "GET" })
   .inputValidator((data: { slug: string }) => data)
