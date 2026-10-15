@@ -9,10 +9,10 @@ import { breadcrumbLd, pageLd } from "@/lib/seo";
 export const Route = createFileRoute("/policies/terms")({
   head: () => ({
     meta: [
-      { title: "Terms of service | MTDGC" },
-      { name: "description", content: "The terms that apply when you order digital products from MTDGC." },
-      { property: "og:title", content: "MTDGC terms of service" },
-      { property: "og:description", content: "Terms for ordering digital products from MTDGC." },
+      { title: "Terms of service | MTDGC Nepal" },
+      { name: "description", content: "The terms that apply when you order software, subscriptions, gift cards or game top-ups from MTDGC, including payment checks, delivery and your responsibilities." },
+      { property: "og:title", content: "Terms of service | MTDGC Nepal" },
+      { property: "og:description", content: "The terms that apply when you order software, subscriptions, gift cards or game top-ups from MTDGC, including payment checks, delivery and your responsibilities." },
       { property: "og:url", content: `${SITE_URL}/policies/terms` },
       { property: "og:type", content: "website" },
     ],

@@ -9,7 +9,7 @@ export function lowestPrice(product: CatalogProduct): number | null {
   return Math.min(...product.variants.map((variant) => variant.price_minor));
 }
 
-export function ProductCard({ product }: { product: CatalogProduct }) {
+export function ProductCard({ product, priority = false }: { product: CatalogProduct; priority?: boolean }) {
   const price = lowestPrice(product);
   const orderable = isOrderable(product.status);
 
@@ -20,7 +20,9 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
           <img
             src={product.image_url}
             alt={product.name}
-            loading="lazy"
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "auto"}
+            decoding="async"
             width={320}
             height={320}
             className="mb-3 aspect-square w-full rounded-md object-cover"
@@ -30,25 +32,25 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
         )}
         <div className="flex flex-wrap gap-1">
           <span
-            className={`rounded px-2 py-0.5 font-display text-[9px] uppercase tracking-[0.1em] ${
+            className={`rounded px-2 py-0.5 font-display text-xs uppercase tracking-[0.1em] ${
               orderable ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground"
             }`}
           >
             {STATUS_LABEL[product.status] ?? product.status}
           </span>
           {product.badges.map((badge) => (
-            <span key={badge} className="rounded bg-secondary px-2 py-0.5 font-display text-[9px] uppercase tracking-[0.1em] text-secondary-foreground">
+            <span key={badge} className="rounded bg-secondary px-2 py-0.5 font-display text-xs uppercase tracking-[0.1em] text-secondary-foreground">
               {badge}
             </span>
           ))}
         </div>
         <h3 className="mt-2 font-display text-[14px] font-medium leading-tight">{product.name}</h3>
-        <p className="mt-1 line-clamp-2 text-[11px] text-muted-foreground">{product.summary}</p>
-        <p className="mt-1 font-display text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
+        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{product.summary}</p>
+        <p className="mt-1 font-display text-xs uppercase tracking-[0.1em] text-muted-foreground">
           Region: {product.region}
         </p>
         <div className="mt-auto flex items-center justify-between pt-3">
-          <span className="font-display text-[10px] text-muted-foreground">{price === null ? "" : "From"}</span>
+          <span className="font-display text-xs text-muted-foreground">{price === null ? "" : "From"}</span>
           <span className="font-display text-[15px] font-semibold">
             {price === null ? "Price on request" : formatNpr(price)}
           </span>

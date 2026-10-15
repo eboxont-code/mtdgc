@@ -30,7 +30,7 @@ export function SiteHeader() {
 
       <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-1 px-4">
-          <Link to="/" className="mr-auto flex items-center gap-2" aria-label="MTDGC home">
+          <Link to="/" className="mr-auto inline-flex min-h-11 items-center gap-2" aria-label="MTDGC home">
             <span aria-hidden="true" className="size-3 rounded-sm bg-primary" />
             <span className="flex flex-col leading-none">
               <span className="font-display text-[15px] font-semibold">MTDGC</span>

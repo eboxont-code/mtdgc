@@ -12,13 +12,13 @@ export const Route = createFileRoute("/categories/")({
   loader: () => listCatalog(),
   head: ({ loaderData }) => ({
     meta: [
-      { title: "Product categories | MTDGC" },
+      { title: "Shop by category: software, subscriptions and more | MTDGC" },
       {
         name: "description",
         content:
           "Browse MTDGC categories: game top-ups, gift cards and subscriptions. Each category page lists what is available and how delivery works.",
       },
-      { property: "og:title", content: "MTDGC product categories" },
+      { property: "og:title", content: "Shop by category: software, subscriptions and more | MTDGC" },
       { property: "og:description", content: "Game top-ups, gift cards and subscriptions available from MTDGC." },
       { property: "og:url", content: `${SITE_URL}/categories` },
       { property: "og:type", content: "website" },

@@ -13,7 +13,7 @@ export const Route = createFileRoute("/products/")({
   loader: () => listCatalog(),
   head: ({ loaderData }) => ({
     meta: [
-      { title: "All products | MTDGC" },
+      { title: "All digital products in Nepal, prices in NPR | MTDGC" },
       {
         name: "description",
         content:
@@ -21,11 +21,11 @@ export const Route = createFileRoute("/products/")({
       },
       { property: "og:title", content: "All MTDGC products" },
       { property: "og:description", content: "Every MTDGC product page in one list, priced in Nepalese rupees." },
-      { property: "og:url", content: `${SITE_URL}/products` },
+      { property: "og:url", content: `${SITE_URL}/catalog` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/products` }],
+    links: [{ rel: "canonical", href: `${SITE_URL}/catalog` }],
     scripts: [
       itemListLd("MTDGC Products", "/products", "Digital goods sold by MTDGC in NPR.", (loaderData?.products ?? []).map((p) => ({ name: p.name, path: `/products/${p.slug}` }))),
       breadcrumbLd([{ name: "Home", path: "/" }, { name: "Products", path: "/products" }]),
@@ -58,8 +58,8 @@ function ProductsIndexPage() {
 
         {products.length ? (
           <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+            {products.map((product, index) => (
+                <ProductCard key={product.id} product={product} priority={index < 2} />
             ))}
           </div>
         ) : (

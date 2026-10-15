@@ -20,7 +20,7 @@ export const Route = createFileRoute("/categories/$slug")({
     }
     const category = loaderData.category;
     const url = `${SITE_URL}/categories/${params.slug}`;
-    const title = `${category.name} in Nepal | MTDGC`;
+    const title = `${category.name} in Nepal, prices in NPR | MTDGC`;
     const description = category.description;
     const shareSlug = ["game-top-ups", "gift-cards", "subscriptions"].includes(category.slug) ? category.slug : "mtdgc";
     const shareImage = `${SITE_URL}/og/${shareSlug}.png`;
@@ -98,9 +98,10 @@ function CategoryPage() {
               {products.length} {products.length === 1 ? "product" : "products"} in this category. Every price is in
               Nepalese rupees and each product page lists the region, what we need from you and how delivery works.
             </p>
+            <h2 className="sr-only">Products in {category.name}</h2>
             <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-              {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
+              {products.map((product, index) => (
+                <ProductCard key={product.id} product={product} priority={index < 2} />
               ))}
             </div>
           </>

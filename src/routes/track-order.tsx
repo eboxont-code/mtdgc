@@ -16,7 +16,7 @@ import { breadcrumbLd, pageLd } from "@/lib/seo";
 export const Route = createFileRoute("/track-order")({
   head: () => ({
     meta: [
-      { title: "Track your order | MTDGC" },
+      { title: "Track your MTDGC order" },
       {
         name: "description",
         content:

@@ -9,10 +9,10 @@ import { breadcrumbLd, pageLd } from "@/lib/seo";
 export const Route = createFileRoute("/policies/refunds")({
   head: () => ({
     meta: [
-      { title: "Refund policy | MTDGC" },
-      { name: "description", content: "When MTDGC can refund a digital order, and when an order can no longer be reversed." },
-      { property: "og:title", content: "MTDGC refund policy" },
-      { property: "og:description", content: "Refund terms for MTDGC digital orders." },
+      { title: "Refund policy for digital orders | MTDGC" },
+      { name: "description", content: "When MTDGC refunds a digital order, how replacement periods on each listing work, and when a key, code or top-up can no longer be reversed." },
+      { property: "og:title", content: "Refund policy for digital orders | MTDGC" },
+      { property: "og:description", content: "When MTDGC refunds a digital order, how replacement periods on each listing work, and when a key, code or top-up can no longer be reversed." },
       { property: "og:url", content: `${SITE_URL}/policies/refunds` },
       { property: "og:type", content: "website" },
     ],

@@ -36,12 +36,12 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "MTDGC, Modern Tech Digital Goods & Commerce. Game top-ups, gift cards and subscriptions delivered digitally across Nepal, priced in NPR.",
+          "Software licences and subscriptions in Nepal, plus digital deals and gift cards, with game top-ups too. Priced in NPR with on-site order tracking.",
       },
       { property: "og:title", content: "MTDGC | Nepal's Digital Marketplace" },
       {
         property: "og:description",
-        content: "Modern Tech Digital Goods & Commerce. Game top-ups, gift cards and subscriptions for Nepal.",
+        content: "Software licences and subscriptions in Nepal, plus deals, gift cards and game top-ups. Priced in NPR.",
       },
       { property: "og:url", content: `${SITE_URL}/` },
       { property: "og:type", content: "website" },

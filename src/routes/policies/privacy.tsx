@@ -9,10 +9,10 @@ import { breadcrumbLd, pageLd } from "@/lib/seo";
 export const Route = createFileRoute("/policies/privacy")({
   head: () => ({
     meta: [
-      { title: "Privacy policy | MTDGC" },
-      { name: "description", content: "What information MTDGC collects to fulfil digital orders, and how it is used." },
-      { property: "og:title", content: "MTDGC privacy policy" },
-      { property: "og:description", content: "How MTDGC handles customer information." },
+      { title: "Privacy policy | MTDGC Nepal" },
+      { name: "description", content: "What information MTDGC collects to process and deliver your digital orders, how we use and protect it, and how to ask us about your data." },
+      { property: "og:title", content: "Privacy policy | MTDGC Nepal" },
+      { property: "og:description", content: "What information MTDGC collects to process and deliver your digital orders, how we use and protect it, and how to ask us about your data." },
       { property: "og:url", content: `${SITE_URL}/policies/privacy` },
       { property: "og:type", content: "website" },
     ],
