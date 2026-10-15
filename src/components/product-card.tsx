@@ -9,7 +9,7 @@ export function lowestPrice(product: CatalogProduct): number | null {
   return Math.min(...product.variants.map((variant) => variant.price_minor));
 }
 
-export function ProductCard({ product }: { product: CatalogProduct }) {
+export function ProductCard({ product, priority = false }: { product: CatalogProduct; priority?: boolean }) {
   const price = lowestPrice(product);
   const orderable = isOrderable(product.status);
 
@@ -20,7 +20,9 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
           <img
             src={product.image_url}
             alt={product.name}
-            loading="lazy"
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : "auto"}
+            decoding="async"
             width={320}
             height={320}
             className="mb-3 aspect-square w-full rounded-md object-cover"

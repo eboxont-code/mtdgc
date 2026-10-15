@@ -169,8 +169,8 @@ function CatalogPage() {
         {visible.length ? (
           <>
             <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
-              {visible.slice(0, shown).map((product) => (
-                <ProductCard key={product.id} product={product} />
+              {visible.slice(0, shown).map((product, index) => (
+                <ProductCard key={product.id} product={product} priority={index < 2} />
               ))}
             </div>
             {visible.length > shown && (

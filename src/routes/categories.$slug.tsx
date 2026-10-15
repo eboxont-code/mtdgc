@@ -99,8 +99,8 @@ function CategoryPage() {
               Nepalese rupees and each product page lists the region, what we need from you and how delivery works.
             </p>
             <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-              {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
+              {products.map((product, index) => (
+                <ProductCard key={product.id} product={product} priority={index < 2} />
               ))}
             </div>
           </>
