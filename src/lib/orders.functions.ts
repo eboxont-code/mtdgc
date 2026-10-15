@@ -27,6 +27,8 @@ const orderSchema = z
     note: z.string().trim().max(500).optional(),
     bearer: z.string().max(4000).optional(),
     lines: z.array(lineSchema).min(1).max(20),
+    coupon: z.string().trim().max(40).optional(), // D4
+    website: z.string().max(200).optional(), // 23: honeypot, must stay empty
   })
   .refine((d) => Boolean(d.phone) || Boolean(d.email), "Add a mobile number or an email");
 
@@ -45,9 +47,29 @@ async function sha256(text: string): Promise<string> {
   return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+/**
+ * D4: validate a coupon and claim one use with a conditional (optimistic) update on used_count.
+ * TODO: if the order insert fails after this, the use is not released; move to a single RPC/transaction on Boxont's Supabase.
+ */
+async function redeemCoupon(admin: any, rawCode: string, subtotal: number): Promise<{ code: string; discount: number }> {
+  const code = rawCode.trim().toUpperCase();
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const { data: c } = await admin.from("coupons").select("id, code, kind, value, min_subtotal_minor, max_uses, used_count, starts_at, ends_at, active").eq("code", code).maybeSingle();
+    const now = Date.now();
+    if (!c || !c.active || (c.starts_at && Date.parse(c.starts_at) > now) || (c.ends_at && Date.parse(c.ends_at) <= now)) throw new Error("That coupon code is not valid.");
+    if (subtotal < c.min_subtotal_minor) throw new Error("Your order is below this coupon's minimum.");
+    if (c.max_uses != null && c.used_count >= c.max_uses) throw new Error("That coupon has been fully used.");
+    const discount = Math.min(subtotal, c.kind === "percent" ? Math.floor((subtotal * c.value) / 100) : c.value);
+    const { data: claimed } = await admin.from("coupons").update({ used_count: c.used_count + 1 }).eq("id", c.id).eq("used_count", c.used_count).select("id");
+    if (claimed?.length) return { code: c.code, discount };
+  }
+  throw new Error("Could not apply the coupon. Try again.");
+}
+
 export const placeOrder = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => orderSchema.parse(data))
   .handler(async ({ data }) => {
+    if (data.website) throw new Error("Could not place the order"); // 23: honeypot filled
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     let resolvedUserId: string | null = null;
     if (data.bearer) {
@@ -79,6 +101,8 @@ export const placeOrder = createServerFn({ method: "POST" })
       };
     });
     const subtotal = items.reduce((s, i) => s + i.line_total_minor, 0);
+    const coupon = data.coupon ? await redeemCoupon(supabaseAdmin, data.coupon, subtotal) : null;
+    const discount = coupon?.discount ?? 0;
     const email = data.email || null;
     const contactKey = normaliseContact(data.phone || data.email || "");
     const tokenBytes = crypto.getRandomValues(new Uint8Array(32));
@@ -99,7 +123,9 @@ export const placeOrder = createServerFn({ method: "POST" })
           user_id: resolvedUserId,
           verification_hash: await sha256(orderNumber + contactKey),
           subtotal_minor: subtotal,
-          total_minor: subtotal,
+          discount_minor: discount,
+          total_minor: subtotal - discount,
+          coupon_code: coupon?.code ?? null,
           customer_details: { name: data.name, phone: data.phone || null, email, note: data.note ?? "" },
         })
         .select("id")
@@ -113,7 +139,7 @@ export const placeOrder = createServerFn({ method: "POST" })
       .from("order_items")
       .insert(items.map((i) => ({ ...i, order_id: order.id })));
     if (itemsError) throw new Error("Could not save order lines");
-    return { orderNumber, accessToken, totalMinor: subtotal };
+    return { orderNumber, accessToken, totalMinor: subtotal - discount };
   });
 
 export const lookupOrder = createServerFn({ method: "POST" })
@@ -166,7 +192,7 @@ export const listMyOrders = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("orders")
-      .select("id, order_number, status, total_minor, created_at, order_items(product_name, variant_name, quantity, line_total_minor), order_status_events(status, created_at)")
+      .select("id, order_number, status, total_minor, created_at, eta_at, order_items(id, product_name, variant_name, quantity, line_total_minor, products(delivery_time_label)), order_status_events(status, created_at), order_deliveries(id, order_item_id, kind, revealed_at)")
       .eq("user_id", context.userId)
       .order("created_at", { ascending: false });
     if (error) throw new Error("We could not load your orders.");
@@ -176,28 +202,33 @@ export const listMyOrders = createServerFn({ method: "GET" })
       status: o.status as string,
       totalMinor: o.total_minor,
       createdAt: o.created_at,
-      items: (o.order_items ?? []).map((i) => ({ name: `${i.product_name}, ${i.variant_name}`, quantity: i.quantity, totalMinor: i.line_total_minor })),
+      etaAt: o.eta_at,
+      items: (o.order_items ?? []).map((i) => ({
+        name: `${i.product_name}, ${i.variant_name}`,
+        quantity: i.quantity,
+        totalMinor: i.line_total_minor,
+        deliveryTimeLabel: (i.products as { delivery_time_label: string | null } | null)?.delivery_time_label ?? null,
+      })),
+      // F19: delivery metadata only; content comes from revealDelivery.
+      deliveries: (o.order_deliveries ?? []).map((d) => ({ id: d.id, orderItemId: d.order_item_id, kind: d.kind, revealedAt: d.revealed_at })),
       events: (o.order_status_events ?? []).map((e) => ({ status: e.status, at: e.created_at })),
     }));
   });
 
-export const getOrderForViewer = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) =>
-    z
-      .object({
-        orderNumber: z.string().trim().min(4).max(40),
-        accessToken: z.string().trim().max(128).optional(),
-        contact: z.string().trim().max(120).optional(),
-        bearer: z.string().max(4000).optional(),
-      })
-      .parse(data),
-  )
-  .handler(async ({ data }) => {
+const viewerSchema = z.object({
+  orderNumber: z.string().trim().min(4).max(40),
+  accessToken: z.string().trim().max(128).optional(),
+  contact: z.string().trim().max(120).optional(),
+  bearer: z.string().max(4000).optional(),
+});
+
+/** Shared access check for getOrderForViewer and revealDelivery (F19). */
+async function authorizeViewer(data: z.infer<typeof viewerSchema>) {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const orderNumber = data.orderNumber.toUpperCase();
     const { data: order } = await supabaseAdmin
       .from("orders")
-      .select("id, user_id, status, created_at, total_minor, verification_hash, access_token_hash, guest_email, order_items(product_name, variant_name, quantity, line_total_minor)")
+      .select("id, user_id, status, created_at, total_minor, eta_at, verification_hash, access_token_hash, guest_email, order_items(product_name, variant_name, quantity, line_total_minor, products(delivery_time_label))")
       .eq("order_number", orderNumber)
       .maybeSingle();
     let allowed = false;
@@ -217,13 +248,31 @@ export const getOrderForViewer = createServerFn({ method: "POST" })
         .select("id", { count: "exact", head: true })
         .eq("ip_hash", ipHash)
         .gte("created_at", new Date(Date.now() - 600000).toISOString());
-      if ((count ?? 0) >= 10) return { status: "rate_limited" as const };
+      if ((count ?? 0) >= 10) return { rateLimited: true as const, order: null, allowed: false, orderNumber };
       await supabaseAdmin.from("order_lookup_attempts").insert({ ip_hash: ipHash });
       if (order) {
         const c = normaliseContact(data.contact);
         allowed = (await sha256(orderNumber + c)) === order.verification_hash || (c.includes("@") && order.guest_email?.toLowerCase() === c);
       }
     }
+    return { rateLimited: false as const, order, allowed, orderNumber };
+}
+
+export const getOrderForViewer = createServerFn({ method: "POST" })
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        orderNumber: z.string().trim().min(4).max(40),
+        accessToken: z.string().trim().max(128).optional(),
+        contact: z.string().trim().max(120).optional(),
+        bearer: z.string().max(4000).optional(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    const auth = await authorizeViewer(data);
+    if (auth.rateLimited) return { status: "rate_limited" as const };
+    const { order, allowed, orderNumber } = auth;
     if (!order || !allowed) return { status: "locked" as const };
     return {
       status: "found" as const,
@@ -232,7 +281,13 @@ export const getOrderForViewer = createServerFn({ method: "POST" })
         status: order.status as string,
         createdAt: order.created_at,
         totalMinor: order.total_minor,
-        items: (order.order_items ?? []).map((i) => ({ name: `${i.product_name}, ${i.variant_name}`, quantity: i.quantity, totalMinor: i.line_total_minor })),
+        etaAt: order.eta_at, // P7
+        items: (order.order_items ?? []).map((i) => ({
+          name: `${i.product_name}, ${i.variant_name}`,
+          quantity: i.quantity,
+          totalMinor: i.line_total_minor,
+          deliveryTimeLabel: (i.products as { delivery_time_label: string | null } | null)?.delivery_time_label ?? null, // P6-ETA
+        })),
       },
     };
   });
@@ -331,4 +386,84 @@ export const submitPaymentProof = createServerFn({ method: "POST" })
     await supabaseAdmin.from("payment_proofs").insert({ order_id: order.id, storage_path: path, transaction_ref: data.transactionRef, amount_minor: order.total_minor });
     await supabaseAdmin.from("order_status_events").insert({ order_id: order.id, status: "payment_submitted", note: "Payment proof submitted by customer" });
     return { ok: true as const };
+  });
+
+/** F19: reveal one delivery. Same access check as getOrderForViewer; sets revealed_at the first time. Never logs content. */
+export const revealDelivery = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => viewerSchema.extend({ deliveryId: z.string().uuid() }).parse(d))
+  .handler(async ({ data }) => {
+    const auth = await authorizeViewer(data);
+    if (auth.rateLimited) return { status: "rate_limited" as const };
+    if (!auth.order || !auth.allowed) return { status: "locked" as const };
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row } = await supabaseAdmin.from("order_deliveries").select("id, kind, content, revealed_at").eq("id", data.deliveryId).eq("order_id", auth.order.id).maybeSingle();
+    if (!row) return { status: "locked" as const };
+    let revealedAt = row.revealed_at;
+    if (!revealedAt) {
+      revealedAt = new Date().toISOString();
+      await supabaseAdmin.from("order_deliveries").update({ revealed_at: revealedAt }).eq("id", row.id).is("revealed_at", null);
+    }
+    return { status: "found" as const, delivery: { id: row.id, kind: row.kind, content: row.content, revealedAt } };
+  });
+
+/** Item 21 + 23: support request from guests or signed-in users, with honeypot. */
+export const createSupportTicket = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        issueType: z.string().trim().min(1).max(60),
+        orderNumber: z.string().trim().max(40).optional(),
+        description: z.string().trim().min(10).max(2000),
+        contact: z.string().trim().max(120).optional(),
+        bearer: z.string().max(4000).optional(),
+        website: z.string().max(200).optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data }) => {
+    if (data.website) throw new Error("Could not send your request"); // honeypot
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let userId: string | null = null;
+    if (data.bearer) {
+      const { data: u } = await supabaseAdmin.auth.getUser(data.bearer);
+      userId = u.user?.id ?? null;
+    }
+    const contact = data.contact ?? "";
+    const validContact = z.string().email().safeParse(contact).success || (/^[+\d\s()-]+$/.test(contact) && contact.replace(/\D/g, "").length >= 7 && contact.replace(/\D/g, "").length <= 15);
+    if (!userId && !validContact) throw new Error("Add an email or a mobile number so we can reply.");
+    // TODO: rate-limit guest tickets (reuse order_lookup_attempts pattern or a new table) before going live.
+    const { error } = await supabaseAdmin.from("support_tickets").insert({
+      user_id: userId,
+      issue_type: data.issueType,
+      order_number: data.orderNumber ? data.orderNumber.toUpperCase() : null,
+      description: data.description,
+      contact: contact || null,
+    });
+    if (error) throw new Error("Could not send your request");
+    return { ok: true };
+  });
+
+/** Item 10: submit a review (always is_approved false). is_verified_purchase is decided here only. */
+export const submitReview = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ productId: z.string().uuid(), rating: z.number().int().min(1).max(5), body: z.string().trim().min(20).max(1000) }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: bought } = await supabaseAdmin
+      .from("order_items")
+      .select("id, orders!inner(user_id, status)")
+      .eq("product_id", data.productId)
+      .eq("orders.user_id", context.userId)
+      .in("orders.status", ["delivered", "fulfilled", "completed"])
+      .limit(1);
+    const { error } = await supabaseAdmin.from("reviews").insert({
+      product_id: data.productId,
+      user_id: context.userId,
+      rating: data.rating,
+      body: data.body,
+      is_approved: false,
+      is_verified_purchase: Boolean(bought?.length),
+    });
+    if (error) throw new Error("Could not save your review");
+    return { ok: true };
   });
