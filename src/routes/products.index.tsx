@@ -13,7 +13,7 @@ export const Route = createFileRoute("/products/")({
   loader: () => listCatalog(),
   head: ({ loaderData }) => ({
     meta: [
-      { title: "All products | MTDGC" },
+      { title: "All digital products in Nepal, prices in NPR | MTDGC" },
       {
         name: "description",
         content:
