@@ -7,6 +7,7 @@ import { approveReview as approveReviewServer, archiveProduct as archiveProductS
 import { PaymentsPanel } from "@/components/admin/payments-panel";
 import { VerifyPanel } from "@/components/admin/verify-panel";
 import { ProductForm } from "@/components/admin/product-form";
+import { ADMIN_ORDER_STATUSES, OrderDetailPanel } from "@/components/admin/order-detail-panel";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,13 @@ export const Route = createFileRoute("/_authenticated/admin")({
       { title: "Admin | MTDGC" },
       { name: "description", content: "MTDGC internal administration." },
       { name: "robots", content: "noindex" },
+      { property: "og:title", content: "Admin | MTDGC" },
+      { property: "og:description", content: "MTDGC internal administration." },
+      { property: "og:url", content: "https://mtdgc.com/admin" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
+    links: [{ rel: "canonical", href: "https://mtdgc.com/admin" }],
   }),
   component: AdminPage,
 });
@@ -52,7 +59,8 @@ function AdminPage() {
   const [orderQuery, setOrderQuery] = useState("");
   const [editing, setEditing] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
-  const ORDER_STATUSES = ["pending", "processing", "paid", "failed", "cancelled", "refunded", "completed"];
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const ORDER_STATUSES = ADMIN_ORDER_STATUSES;
   const visibleOrders = orders.filter((o) => o.order_number.toLowerCase().includes(orderQuery.trim().toLowerCase()));
 
   const updateOrderStatusFn = useServerFn(updateOrderStatusServer);
@@ -265,6 +273,9 @@ function AdminPage() {
 
             <section className="mt-8">
               <h2 className="font-display text-lg font-medium">Latest orders</h2>
+              <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                {[["Awaiting payment", ["pending", "pending_payment"]], ["Processing", ["processing"]], ["Delivered", ["delivered", "completed", "fulfilled"]]].map(([label, statuses]) => <div key={String(label)} className="border-b border-border py-3"><p className="text-sm text-muted-foreground">{label}</p><p className="font-display text-2xl">{orders.filter((o) => (statuses as string[]).includes(o.status)).length}</p><p className="text-xs text-muted-foreground">In latest loaded orders</p></div>)}
+              </div>
               <label className="mt-2 block">
                 <span className="sr-only">Search orders by MTD reference</span>
                 <input
@@ -278,14 +289,15 @@ function AdminPage() {
                 <ul className="mt-2 divide-y divide-border text-sm">
                   {visibleOrders.map((o) => (
                     <li key={o.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
-                      <span className="font-display">{o.order_number}</span>
+                      <Button variant="ghost" className="min-h-11 font-display" onClick={() => setSelectedOrderId(o.id)}>{o.order_number}</Button>
                       <label>
                         <span className="sr-only">Status for {o.order_number}</span>
                         <select
                           value={o.status}
                           onChange={(e) => updateOrderStatus(o.id, e.target.value)}
-                          className="h-8 rounded-md border border-border bg-card px-2 text-sm"
+                          className="min-h-11 rounded-md border border-border bg-card px-2 text-base"
                         >
+                          {!ORDER_STATUSES.some((s) => s === o.status) && <option value={o.status} disabled>{o.status.replaceAll("_", " ")}</option>}
                           {ORDER_STATUSES.map((s) => (
                             <option key={s} value={s}>{s}</option>
                           ))}
@@ -298,7 +310,7 @@ function AdminPage() {
                 </ul>
               ) : (
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {orders.length ? "No orders match that reference." : "No orders are recorded in the system yet. WhatsApp orders are handled in chat."}
+                  {orders.length ? "No orders match that reference." : "No orders are recorded yet."}
                 </p>
               )}
             </section>
@@ -341,6 +353,7 @@ function AdminPage() {
         )}
       </main>
       <SiteFooter />
+      {allowed && <OrderDetailPanel orderId={selectedOrderId} onClose={() => setSelectedOrderId(null)} onUpdated={(id, status) => setOrders((rows) => rows.map((row) => row.id === id ? { ...row, status } : row))} />}
     </div>
   );
 }

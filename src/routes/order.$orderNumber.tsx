@@ -11,7 +11,7 @@ import { getOrderForViewer } from "@/lib/orders.functions";
 import { PaymentProofForm } from "@/components/payment-proof-form";
 
 export const Route = createFileRoute("/order/$orderNumber")({
-  head: () => ({
+  head: ({ params }) => ({
     meta: [
       { title: "Your order | MTDGC" },
       { name: "description", content: "View the status of your MTDGC order." },
@@ -21,6 +21,7 @@ export const Route = createFileRoute("/order/$orderNumber")({
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
     ],
+    links: [{ rel: "canonical", href: `https://mtdgc.com/order/${params.orderNumber}` }],
   }),
   component: OrderPage,
 });

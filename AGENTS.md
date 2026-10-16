@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Admin order details live in a focused sheet component and use existing role-protected actions; keep status options aligned with the existing validator.
+- Responsive product images map original asset URLs to CDN WebP pointers in a browser-safe helper; never rewrite listing records to optimize presentation.

@@ -12,6 +12,7 @@ import { getProductBySlug } from "@/lib/catalog.functions";
 import { useCart } from "@/lib/cart";
 import { formatNpr, isOrderable, SITE_URL, STATUS_LABEL } from "@/lib/format";
 import { productFaqs, requirementHelp } from "@/lib/product-help";
+import { productImageSources } from "@/lib/product-images";
 
 export const Route = createFileRoute("/products/$slug")({
   loader: async ({ params }) => {
@@ -184,7 +185,10 @@ function ProductPage() {
           <div>
             {product.image_url ? (
               <img
-                src={product.image_url}
+                {...productImageSources(product.image_url)}
+                sizes="(max-width: 768px) 100vw, 480px"
+                fetchPriority="high"
+                decoding="async"
                 alt={product.name}
                 width={640}
                 height={640}
@@ -200,7 +204,7 @@ function ProductPage() {
             <h1 className="mt-1 font-display text-[26px] font-medium md:text-4xl">{product.name}</h1>
             <p className="mt-2 text-sm text-muted-foreground">{product.summary}</p>
 
-            <div className="mt-3 flex flex-wrap gap-1">
+            <div className="mt-3 flex min-h-6 flex-wrap gap-1">
               <span className="rounded bg-accent px-2 py-0.5 font-display text-[10px] uppercase tracking-[0.1em] text-accent-foreground">
                 {STATUS_LABEL[product.status] ?? product.status}
               </span>
@@ -219,7 +223,7 @@ function ProductPage() {
             </dl>
 
             {product.variants.length > 0 && (
-              <fieldset className="mt-6">
+              <fieldset className="mt-6 min-h-32">
                 <legend className="font-display text-sm font-medium">Choose an option</legend>
                 <div className="mt-2 grid gap-2 sm:grid-cols-2">
                   {product.variants.map((item) => (
@@ -247,7 +251,7 @@ function ProductPage() {
             )}
 
             {product.requirements.length > 0 && (
-              <div className="mt-6 space-y-3">
+              <div className="mt-6 min-h-40 space-y-3">
                 <h2 className="font-display text-sm font-medium">What we need from you</h2>
                 {product.requirements.map((requirement) => {
                   const help = requirementHelp(requirement);
@@ -281,7 +285,7 @@ function ProductPage() {
             {error && <p role="alert" className="mt-3 text-sm text-destructive">{error}</p>}
 
             <div className="mt-5 flex flex-wrap items-center gap-3">
-              <Button size="lg" disabled={!orderable} onClick={addToCart}>
+              <Button size="lg" className="min-w-56 tabular-nums" disabled={!orderable} onClick={addToCart}>
                 {orderable ? `Add to cart · ${variant ? formatNpr(variant.price_minor) : ""}` : "Not available yet"}
               </Button>
               <Button asChild variant="outline" size="lg"><Link to="/catalog">Keep browsing</Link></Button>

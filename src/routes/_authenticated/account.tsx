@@ -13,7 +13,13 @@ export const Route = createFileRoute("/_authenticated/account")({
       { title: "Your account | MTDGC" },
       { name: "description", content: "Your MTDGC profile, order history, wishlist and support requests." },
       { name: "robots", content: "noindex" },
+      { property: "og:title", content: "Your account | MTDGC" },
+      { property: "og:description", content: "Your MTDGC profile, order history, wishlist and support requests." },
+      { property: "og:url", content: "https://mtdgc.com/account" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
+    links: [{ rel: "canonical", href: "https://mtdgc.com/account" }],
   }),
   component: AccountPage,
 });
