@@ -1,0 +1,16 @@
+REVOKE ALL ON ALL TABLES IN SCHEMA public FROM anon, authenticated;
+GRANT SELECT ON public.categories, public.products, public.product_variants, public.reviews TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.categories, public.products, public.product_variants TO authenticated;
+GRANT SELECT, INSERT, UPDATE ON public.reviews TO authenticated;
+GRANT SELECT, INSERT, UPDATE ON public.profiles TO authenticated;
+GRANT SELECT ON public.user_roles TO authenticated;
+GRANT SELECT, UPDATE ON public.orders TO authenticated;
+GRANT SELECT ON public.order_items TO authenticated;
+GRANT SELECT, INSERT ON public.order_status_events TO authenticated;
+GRANT SELECT, INSERT, DELETE ON public.wishlist_items TO authenticated;
+GRANT SELECT, INSERT ON public.support_tickets TO authenticated;
+GRANT SELECT ON public.payment_settings TO authenticated;
+GRANT SELECT ON public.payment_proofs TO authenticated;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON TABLES FROM anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.has_role(uuid, public.app_role) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.has_role(uuid, public.app_role) TO anon, authenticated, service_role;
