@@ -19,7 +19,13 @@ export const Route = createFileRoute("/_authenticated/admin")({
       { title: "Admin | MTDGC" },
       { name: "description", content: "MTDGC internal administration." },
       { name: "robots", content: "noindex" },
+      { property: "og:title", content: "Admin | MTDGC" },
+      { property: "og:description", content: "MTDGC internal administration." },
+      { property: "og:url", content: "https://mtdgc.com/admin" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
+    links: [{ rel: "canonical", href: "https://mtdgc.com/admin" }],
   }),
   component: AdminPage,
 });
