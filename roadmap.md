@@ -1,5 +1,12 @@
 # MTDGC launch roadmap
 
+## October 16 UI pack
+- [ ] Item 0: preserve listings and permanent redirects; confirm page metadata
+- [ ] T0: skip dependency bump when react-start is already at least 1.168.60
+- [ ] P7: order detail slide-over using existing admin calls only
+- [ ] Remaining A, F, D, P, S, numbered, U and G items in requested order
+- [ ] Publish green changes and report credits and revision
+
 - [ ] Commerce schema, access policies, and launch catalog migration
 - [ ] Shared storefront shell, catalog search/filter/sort, product pages
 - [ ] Persistent cart, checkout, orders, confirmation, and tracking

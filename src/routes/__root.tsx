@@ -49,11 +49,11 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error, reset }: { error: unknown; reset: () => void }) {
   console.error(error);
   const router = useRouter();
   useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    reportLovableError(error instanceof Error ? error : new Error(String(error)), { boundary: "tanstack_root_error_component" });
   }, [error]);
 
   return (
@@ -91,7 +91,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: ({ matches }) => ({
     meta: [
       { charSet: "utf-8" },
-      ...(matches.some((m) => m.status === "notFound" || m.globalNotFound)
+      ...(matches.some((m) => m.status === "notFound")
         ? [
             { title: "Page not found | MTDGC" },
             { name: "robots", content: "noindex" },
