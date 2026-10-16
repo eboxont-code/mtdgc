@@ -12,6 +12,7 @@ import { getProductBySlug } from "@/lib/catalog.functions";
 import { useCart } from "@/lib/cart";
 import { formatNpr, isOrderable, SITE_URL, STATUS_LABEL } from "@/lib/format";
 import { productFaqs, requirementHelp } from "@/lib/product-help";
+import { productImageSources } from "@/lib/product-images";
 
 export const Route = createFileRoute("/products/$slug")({
   loader: async ({ params }) => {
@@ -184,7 +185,10 @@ function ProductPage() {
           <div>
             {product.image_url ? (
               <img
-                src={product.image_url}
+                {...productImageSources(product.image_url)}
+                sizes="(max-width: 768px) 100vw, 480px"
+                fetchPriority="high"
+                decoding="async"
                 alt={product.name}
                 width={640}
                 height={640}

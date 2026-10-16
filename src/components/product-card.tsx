@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import type { CatalogProduct } from "@/lib/catalog.functions";
 import { formatNpr, isOrderable, STATUS_LABEL } from "@/lib/format";
+import { productImageSources } from "@/lib/product-images";
 
 export function lowestPrice(product: CatalogProduct): number | null {
   if (!product.variants.length) return null;
@@ -18,7 +19,8 @@ export function ProductCard({ product, priority = false }: { product: CatalogPro
       <Link to="/products/$slug" params={{ slug: product.slug }} className="flex flex-1 flex-col">
         {product.image_url ? (
           <img
-            src={product.image_url}
+            {...productImageSources(product.image_url)}
+            sizes="(max-width: 640px) 45vw, 240px"
             alt={product.name}
             loading={priority ? "eager" : "lazy"}
             fetchPriority={priority ? "high" : "auto"}
