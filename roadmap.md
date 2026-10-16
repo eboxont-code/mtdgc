@@ -8,6 +8,7 @@
 - [x] A2: published Lovable badge hidden
 - [x] A4: responsive CDN WebP product images
 - [x] A5: self-hosted fonts with preload and swap
+- [x] A6: reserved plan, availability and requirement space; stable price button width
 - [ ] Remaining A, F, D, P, S, numbered, U and G items in requested order
 - [ ] Publish green changes and report credits and revision
 
