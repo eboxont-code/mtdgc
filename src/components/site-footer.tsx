@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 
 import { Wordmark } from "@/components/brand/wordmark";
+import { PaymentsRow } from "@/components/trust-band";
 import { SUPPORT_MESSAGE, WHATSAPP_DISPLAY, whatsappLink } from "@/lib/format";
 
 const GROUPS: { title: string; links: { to: string; label: string }[] }[] = [
@@ -65,7 +66,9 @@ export function SiteFooter() {
           ))}
         </div>
 
-        <div className="mt-8 flex flex-col gap-2 border-t border-border pt-5 text-xs text-muted-foreground md:flex-row md:items-center md:justify-between">
+        <PaymentsRow className="mt-8" />
+
+        <div className="mt-6 flex flex-col gap-2 border-t border-border pt-5 text-xs text-muted-foreground md:flex-row md:items-center md:justify-between">
           <p>© {new Date().getFullYear()} MTDGC, Matrix Digital Goods &amp; Commerce.</p>
           {whatsappLink() && (
             <a href={whatsappLink(SUPPORT_MESSAGE)!} target="_blank" rel="noopener noreferrer" aria-label={`WhatsApp support ${WHATSAPP_DISPLAY} (opens in a new tab)`} className="inline-flex min-h-11 items-center font-display font-medium text-foreground">

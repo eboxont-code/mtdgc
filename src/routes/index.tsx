@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { HeroCarousel, buildSlides } from "@/components/home/hero-carousel";
 import { CategoryRail, ProductRail, SectionHeader, SeeAll } from "@/components/home/rails";
 import { ProductArt } from "@/components/product-art";
+import { TrustBand } from "@/components/trust-band";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
@@ -25,7 +26,7 @@ const FAQS = [
   ],
   [
     "How do I pay?",
-    "There is no card checkout on this site. You send your order for confirmation, we check availability, then we send payment instructions on WhatsApp.",
+    "Pay by QR code or bank transfer at checkout, then upload your payment screenshot with the transaction reference. There is no card payment on this site.",
   ],
   [
     "Can I get help with an order?",
@@ -189,13 +190,15 @@ function Index() {
           </section>
         ))}
 
+        <TrustBand />
+
         <section className="mx-auto max-w-6xl px-4 py-7">
           <h2 className="mb-5 font-display text-[17px] font-medium md:text-2xl">How it works</h2>
           <ol className="grid gap-4 md:grid-cols-3">
             {[
               ["1", "Choose a product", "Pick a game top-up, subscription or gift card and select the option you want."],
               ["2", "Enter your details", "Add the player ID or delivery email the product needs."],
-              ["3", "Confirm and receive", "We confirm availability, send payment instructions, then deliver."],
+              ["3", "Pay and receive", "Pay by QR code or bank transfer, upload your screenshot, and we deliver after checking it."],
             ].map(([number, title, text]) => (
               <li key={number} className="flex gap-3">
                 <span className="grid size-7 shrink-0 place-items-center rounded-full bg-foreground font-display text-xs text-background">
