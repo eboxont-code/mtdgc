@@ -11,6 +11,7 @@ import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { WishlistButton } from "@/components/wishlist-button";
 import { getProductBySlug } from "@/lib/catalog.functions";
+import { PRICE_COMING_SOON, pricesHidden } from "@/lib/price-visibility";
 import { useCart } from "@/lib/cart";
 import { formatNpr, isOrderable, SITE_URL, STATUS_LABEL, SUPPORT_MESSAGE, whatsappLink } from "@/lib/format";
 import { enabledProviders } from "@/lib/payments";
@@ -30,7 +31,8 @@ export const Route = createFileRoute("/products/$slug")({
     const product = loaderData.product;
     const url = `${SITE_URL}/products/${product.slug}`;
     const image = product.image_url ? (product.image_url.startsWith("http") ? product.image_url : `${SITE_URL}${product.image_url}`) : undefined;
-    const prices = product.variants.filter((variant) => variant.price_minor > 0 && variant.status !== "archived").map((variant) => variant.price_minor);
+    const hidePrices = pricesHidden(product);
+    const prices = hidePrices ? [] : product.variants.filter((variant) => variant.price_minor > 0 && variant.status !== "archived").map((variant) => variant.price_minor);
     const lowestPrice = prices.length ? Math.min(...prices) : 0;
     return {
       meta: [
@@ -48,8 +50,10 @@ export const Route = createFileRoute("/products/$slug")({
           { name: "twitter:image", content: image },
           { name: "twitter:image:alt", content: `${product.name} from MTDGC` },
         ] : []),
-        { property: "product:price:amount", content: (lowestPrice / 100).toFixed(2) },
-        { property: "product:price:currency", content: "NPR" },
+        ...(lowestPrice > 0 ? [
+          { property: "product:price:amount", content: (lowestPrice / 100).toFixed(2) },
+          { property: "product:price:currency", content: "NPR" },
+        ] : []),
         { name: "twitter:card", content: "summary_large_image" },
       ],
       links: [{ rel: "canonical", href: url }],
@@ -66,7 +70,7 @@ export const Route = createFileRoute("/products/$slug")({
             sku: product.variants[0]?.sku ?? product.slug,
             brand: { "@type": "Brand", name: product.brand },
             category: product.category?.name,
-            offers: [
+            ...(hidePrices ? {} : { offers: [
               ...product.variants
               .filter((variant) => variant.price_minor > 0 && variant.status !== "archived")
               .map((variant) => ({
@@ -84,7 +88,7 @@ export const Route = createFileRoute("/products/$slug")({
                     : "https://schema.org/OutOfStock",
                 url,
               })),
-            ],
+            ] }),
             seller: { "@type": "Organization", name: "MTDGC", url: `${SITE_URL}/` },
             itemCondition: "https://schema.org/NewCondition",
             hasMerchantReturnPolicy: {
@@ -143,11 +147,12 @@ function ProductPage() {
 
   if (!product) return null;
   const variant = product.variants.find((item) => item.sku === selectedSku) ?? defaultVariant;
-  const orderable = isOrderable(product.status) && !!variant && isOrderable(variant.status);
+  const hidePrices = pricesHidden(product);
+  const orderable = !hidePrices && isOrderable(product.status) && !!variant && isOrderable(variant.status) && variant.price_minor > 0;
 
   const navigate = useNavigate();
   const addToCart = (buyNow = false) => {
-    if (!variant) return;
+    if (!variant || !orderable) return;
     const missing = product.requirements.filter((requirement) => !(fields[requirement] ?? "").trim());
     if (missing.length) {
       setError(`Please fill in: ${missing.join(", ")}.`);
@@ -238,8 +243,8 @@ function ProductPage() {
               <div className="mt-3 flex items-baseline justify-between gap-3">
                 <span className="font-display text-sm">{variant?.name ?? "Choose an option"}</span>
                 <span className="font-mono text-xl font-bold text-price">
-                  {variant ? formatNpr(variant.price_minor) : ""}
-                  {variantWas && <span className="ml-2 text-sm font-normal text-muted-foreground line-through">{formatNpr(variantWas)}</span>}
+                  {hidePrices ? PRICE_COMING_SOON : variant ? formatNpr(variant.price_minor) : ""}
+                  {!hidePrices && variantWas && <span className="ml-2 text-sm font-normal text-muted-foreground line-through">{formatNpr(variantWas)}</span>}
                 </span>
               </div>
               <p className="mt-1 text-xs text-muted-foreground">{product.delivery_time}</p>
@@ -312,10 +317,10 @@ function ProductPage() {
                           <input type="radio" name="variant" value={item.sku} checked={selected} onChange={() => setSelectedSku(item.sku)} className="sr-only" />
                           {selected && <Check className="absolute right-2 top-2 size-4 text-primary" aria-hidden="true" />}
                           <span className="pr-5 font-mono text-[13px] font-medium leading-tight">{item.name}</span>
-                          <span className="font-mono text-sm font-bold text-price">{formatNpr(item.price_minor)}</span>
-                          {was && <span className="font-mono text-[11px] text-muted-foreground line-through">{formatNpr(was)}</span>}
+                          <span className="font-mono text-sm font-bold text-price">{hidePrices ? PRICE_COMING_SOON : formatNpr(item.price_minor)}</span>
+                          {!hidePrices && was && <span className="font-mono text-[11px] text-muted-foreground line-through">{formatNpr(was)}</span>}
                           {item.status === "low_stock" && <span className="font-mono text-[10px] uppercase text-warn">Limited</span>}
-                          {!itemOrderable && item.status !== "low_stock" && <span className="font-mono text-[10px] uppercase text-warn">{STATUS_LABEL[item.status] ?? item.status}</span>}
+                          {!hidePrices && !itemOrderable && item.status !== "low_stock" && <span className="font-mono text-[10px] uppercase text-warn">{STATUS_LABEL[item.status] ?? item.status}</span>}
                         </label>
                       );
                     })}
@@ -400,7 +405,7 @@ function ProductPage() {
         <div className="flex items-center gap-2.5">
           <div className="min-w-0 flex-1">
             <p className="truncate text-[11px] text-muted-foreground">{variant?.name ?? "Choose an option"}</p>
-            <p className="font-mono text-[17px] font-bold leading-tight text-price">{variant ? formatNpr(variant.price_minor) : ""}</p>
+            <p className={`font-mono font-bold leading-tight text-price ${hidePrices ? "text-[13px]" : "text-[17px]"}`}>{hidePrices ? PRICE_COMING_SOON : variant ? formatNpr(variant.price_minor) : ""}</p>
           </div>
           {wa && (
             <a href={wa} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp support (opens in a new tab)" className="grid size-11 shrink-0 place-items-center rounded-xl border border-border text-primary">

@@ -4,10 +4,13 @@ import { ProductArt } from "@/components/product-art";
 import type { CatalogProduct } from "@/lib/catalog.functions";
 import { formatNpr, isOrderable, STATUS_LABEL } from "@/lib/format";
 import { bestDeal } from "@/lib/pricing";
+import { PRICE_COMING_SOON, pricesHidden } from "@/lib/price-visibility";
 
+/** Lowest real price, or null for sample and coming-soon items (their prices are never shown). */
 export function lowestPrice(product: CatalogProduct): number | null {
-  if (!product.variants.length) return null;
-  return Math.min(...product.variants.map((variant) => variant.price_minor));
+  if (pricesHidden(product)) return null;
+  const prices = product.variants.map((variant) => variant.price_minor).filter((value) => value > 0);
+  return prices.length ? Math.min(...prices) : null;
 }
 
 const HIDDEN_BADGES = new Set(["sample", "coming soon"]);
@@ -64,7 +67,7 @@ export function ProductTile({ product, priority = false, className = "" }: { pro
                 {deal && <span className="ml-1.5 text-[11px] text-muted-foreground line-through">{formatNpr(deal.was)}</span>}
               </>
             ) : (
-              <span className="text-muted-foreground">Not open yet</span>
+              <span className="text-muted-foreground">{pricesHidden(product) ? PRICE_COMING_SOON : "Not open yet"}</span>
             )}
           </p>
         </div>
@@ -94,7 +97,7 @@ export function ProductRow({ product }: { product: CatalogProduct }) {
         <p className="truncate text-[11px] text-muted-foreground">{productMeta(product)}</p>
       </div>
       <span className="shrink-0 font-mono text-xs">
-        {orderable && price !== null ? <span className="font-bold text-price">{formatNpr(price)}</span> : <span className="text-warn">Coming soon</span>}
+        {orderable && price !== null ? <span className="font-bold text-price">{formatNpr(price)}</span> : <span className="text-warn">{pricesHidden(product) ? PRICE_COMING_SOON : "Coming soon"}</span>}
       </span>
     </Link>
   );

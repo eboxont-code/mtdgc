@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/integrations/supabase/types";
+import { pricesHidden } from "@/lib/price-visibility";
 
 export type Variant = {
   id: string;
@@ -82,11 +83,20 @@ function shape(row: RawProduct): CatalogProduct {
   const variants = [...(row.product_variants ?? [])].sort((a, b) => a.sort_order - b.sort_order);
   const requirements = Array.isArray(row.requirements) ? (row.requirements as string[]) : [];
   const { categories, product_variants: _ignored, ...rest } = row;
+  const base = rest as unknown as Omit<CatalogProduct, "category" | "variants" | "requirements">;
+  // Sample and coming-soon prices never leave the server: no price, and no option can be ordered.
+  const hidden = pricesHidden(base);
   return {
-    ...(rest as unknown as Omit<CatalogProduct, "category" | "variants" | "requirements">),
+    ...base,
     requirements,
     category: categories ?? null,
-    variants,
+    variants: hidden
+      ? variants.map((variant) => ({
+          ...variant,
+          price_minor: 0,
+          status: variant.status === "available" || variant.status === "low_stock" ? "coming_soon" : variant.status,
+        }))
+      : variants,
   };
 }
 

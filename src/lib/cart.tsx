@@ -28,6 +28,11 @@ type CartContextValue = {
 };
 
 const STORAGE_KEY = "mtdgc.cart.v1";
+
+/** Sample and coming-soon items have no public price and can never sit in the cart. */
+function cartable(line: Pick<CartLine, "productSlug" | "priceMinor">): boolean {
+  return !line.productSlug.startsWith("sample-") && line.priceMinor > 0;
+}
 export const MAX_QTY = 10;
 
 const CartContext = createContext<CartContextValue | null>(null);
@@ -43,7 +48,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const raw = window.localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed: unknown = JSON.parse(raw);
-        if (Array.isArray(parsed)) setLines(parsed as CartLine[]);
+        if (Array.isArray(parsed)) setLines((parsed as CartLine[]).filter(cartable));
       }
     } catch {
       // ignore unreadable storage
@@ -56,7 +61,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (event.key !== STORAGE_KEY || !event.newValue) return;
       try {
         const parsed: unknown = JSON.parse(event.newValue);
-        if (Array.isArray(parsed)) setLines(parsed as CartLine[]);
+        if (Array.isArray(parsed)) setLines((parsed as CartLine[]).filter(cartable));
       } catch {
         // Ignore malformed data written by another tab.
       }
@@ -75,6 +80,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [lines, hydrated]);
 
   const add = useCallback((line: Omit<CartLine, "quantity">, quantity = 1) => {
+    if (!cartable(line)) return;
     setLines((current) => {
       const existing = current.find((item) => item.sku === line.sku);
       if (existing) {
