@@ -242,3 +242,7 @@ main .bg-card, main .bg-panel { background: var(--glass-bg); border-color: var(-
   15% { opacity: 1; }
   100% { opacity: 0; transform: translateY(var(--scan-distance, 220px)); }
 }
+
+@media (prefers-reduced-motion: no-preference) {
+  .notice-fade { animation: rise 0.45s ease both; }
+}

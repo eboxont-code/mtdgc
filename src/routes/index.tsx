@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronDown, MessageCircle, Search, PackageCheck, UserRoundCheck, CreditCard } from "lucide-react";
+import { ChevronDown, MessageCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { HeroCarousel, buildSlides } from "@/components/home/hero-carousel";
@@ -98,8 +98,6 @@ function Index() {
   const products = data?.products ?? [];
   const categories = data?.categories ?? [];
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [heroQuery, setHeroQuery] = useState("");
-  const navigate = Route.useNavigate();
 
   const sorted = useMemo(() => [...products].sort(byRank), [products]);
   const popular = useMemo(() => sorted.slice(0, 10), [sorted]);
@@ -147,19 +145,10 @@ function Index() {
       <SiteHeader />
 
       <main id="main-content" tabIndex={-1} className="focus:outline-none pb-16">
-        <div className="mx-auto max-w-6xl px-4 pt-3 md:pt-6">
-          <h1 className="truncate font-mono text-[10.5px] uppercase tracking-[0.06em] text-muted-foreground md:text-xs md:tracking-[0.14em]">
+        <div className="mx-auto max-w-6xl px-4 pt-1 md:pt-6">
+          <h1 className="sr-only md:not-sr-only md:truncate md:font-mono text-[10.5px] uppercase tracking-[0.06em] text-muted-foreground md:text-xs md:tracking-[0.14em]">
             Game top-ups, gift cards and subscriptions in NPR
           </h1>
-          <form
-            role="search"
-            className="mt-2 flex h-11 items-center gap-2 rounded-xl border border-border bg-secondary px-3 md:hidden"
-            onSubmit={(event) => { event.preventDefault(); void navigate({ to: "/catalog", search: { q: heroQuery.trim() } }); }}
-          >
-            <Search className="size-4 shrink-0 text-muted-foreground" />
-            <label htmlFor="home-search" className="sr-only">Search the catalog</label>
-            <input id="home-search" value={heroQuery} onChange={(event) => setHeroQuery(event.target.value)} placeholder="Search games, gift cards, subscriptions" className="h-full min-w-0 flex-1 bg-transparent text-[15px] text-foreground outline-none placeholder:text-muted-foreground" />
-          </form>
 
           <div className="mt-3 grid gap-3 md:mt-4 md:grid-cols-[2fr_1fr]">
             {slides.length > 0 && <HeroCarousel slides={slides} />}

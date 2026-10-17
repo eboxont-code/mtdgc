@@ -15,6 +15,7 @@ import { CartProvider } from "../lib/cart";
 import { CartDrawer } from "../components/cart-drawer";
 import { BottomNav } from "../components/bottom-nav";
 import { ScrollReveals } from "../components/scroll-reveals";
+import { WhatsAppFab } from "../components/whatsapp-fab";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
@@ -162,6 +163,7 @@ function RootComponent() {
         <Outlet />
         <CartDrawer />
         <BottomNav />
+        <WhatsAppFab />
         <ScrollReveals />
       </CartProvider>
     </QueryClientProvider>
