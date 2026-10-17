@@ -44,8 +44,24 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
+// Permanent (301) redirect for trailing-slash URLs, e.g. /policies/refunds/ -> /policies/refunds.
+// The router would otherwise answer with a temporary 307. Query string is kept; the
+// Location is a same-origin path; leading slashes are collapsed so //host/ cannot become an open redirect.
+function trailingSlashRedirect(request: Request): Response | null {
+  if (request.method !== "GET" && request.method !== "HEAD") return null;
+  const url = new URL(request.url);
+  if (url.pathname.length <= 1 || !url.pathname.endsWith("/")) return null;
+  const path = url.pathname.replace(/\/+$/, "").replace(/^\/+/, "/") || "/";
+  return new Response(null, {
+    status: 301,
+    headers: { location: path + url.search, "cache-control": "public, max-age=3600" },
+  });
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
+    const redirect = trailingSlashRedirect(request);
+    if (redirect) return redirect;
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
