@@ -3,12 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, MessageCircle, Search, ArrowUpRight, MonitorCog, Repeat, Tag, Gift, Gamepad2 } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { ProductCard, lowestPrice } from "@/components/product-card";
+import { ProductCard } from "@/components/product-card";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
-import { listCatalog, type CatalogProduct } from "@/lib/catalog.functions";
-import { formatNpr, SITE_URL, whatsappLink } from "@/lib/format";
+import { listCatalog } from "@/lib/catalog.functions";
+import { SITE_URL, whatsappLink } from "@/lib/format";
 
 const FAQS = [
   [
@@ -75,10 +75,6 @@ function Index() {
     );
     return activeCategory === "all" ? sorted : sorted.filter((p) => p.category?.slug === activeCategory);
   }, [products, activeCategory]);
-
-  const feature: CatalogProduct | undefined =
-    products.find((p) => p.slug === "pubg-mobile-uc") ?? visible[0] ?? products[0];
-  const featurePrice = feature ? lowestPrice(feature) : null;
 
   const orgJsonLd = {
     "@context": "https://schema.org",
@@ -152,18 +148,7 @@ function Index() {
               </div>
             </div>
 
-            {false && feature ? (
-              <div className="rounded-lg bg-background p-3 ring-1 ring-foreground/5">
-                <div className="flex gap-3">
-                  {feature.image_url ? (
-                    <img
-                      src={feature.image_url}
-                      alt={feature.name}
-                      width={96}
-                      height={96}
-                      className="size-16 shrink-0 rounded-md object-cover md:size-24"
-                    />
-                  ) : null}
+
                   <div className="min-w-0 flex-1">
                     <p className="font-display text-[10px] uppercase tracking-[0.12em] text-primary">Popular choice</p>
                     <div className="mt-1 flex items-baseline justify-between gap-2">
