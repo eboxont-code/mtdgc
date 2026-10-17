@@ -2,7 +2,7 @@
 
 ## October 17 ordered UI pack
 - [x] R0: dark glass theme, cards, header, CSS grid hero, category tiles, search-to-catalog, reduced-motion reveals and bottom navigation; mobile home/search/cart/checkout checked, account checked signed out. Published revision requested.
-- [ ] 0c: route metadata and permitted removal of /products from sitemap
+- [x] 0c: removed /products sitemap entry; 22 remaining live entries return 200, self canonicals and unique titles. Full private-route and published-row comparison unavailable in this check; robots unchanged. Reported limitation before proceeding.
 - [ ] A13, A16-A20, F items, D2/D3, P/S items, numbered items, U items, G items in requested order
 
 ## October 16 UI pack
