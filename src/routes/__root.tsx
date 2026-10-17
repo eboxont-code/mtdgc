@@ -92,7 +92,13 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: ({ matches }) => ({
+  head: ({ matches }) => {
+    const pageMeta = matches.flatMap((match) => match.meta ?? []);
+    const titleMeta = pageMeta.findLast((meta) => meta && "title" in meta);
+    const descriptionMeta = pageMeta.findLast((meta) => meta && "name" in meta && meta.name === "description");
+    const title = titleMeta && "title" in titleMeta ? String(titleMeta.title) : "MTDGC | Nepal's Digital Marketplace";
+    const description = descriptionMeta && "content" in descriptionMeta ? String(descriptionMeta.content) : "Software licences and subscriptions in Nepal, priced in NPR.";
+    return {
     meta: [
       { charSet: "utf-8" },
       ...(matches.some((m) => m.status === "notFound")
@@ -106,13 +112,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "author", content: "MTDGC" },
       { property: "og:site_name", content: "MTDGC" },
       { property: "og:type", content: "website" },
-      { property: "og:image", content: "https://mtdgc.com/og/mtdgc.png" },
-      { property: "og:image:alt", content: "MTDGC, digital goods for Nepal" },
-      { property: "og:image:width", content: "1200" },
-      { property: "og:image:height", content: "630" },
+      { property: "og:title", content: title },
+      { property: "og:description", content: description },
+      { name: "twitter:title", content: title },
+      { name: "twitter:description", content: description },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: "https://mtdgc.com/og/mtdgc.png" },
-      { name: "twitter:image:alt", content: "MTDGC, digital goods for Nepal" },
     ],
     links: [
       {
@@ -125,7 +129,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "apple-touch-icon", href: "/favicon.ico" },
       { rel: "manifest", href: "/site.webmanifest" },
     ],
-  }),
+  }; },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
