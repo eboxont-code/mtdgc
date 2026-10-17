@@ -14,6 +14,8 @@ import bodyFont from "@fontsource/newsreader/files/newsreader-latin-400-normal.w
 import displayFont from "@fontsource/space-grotesk/files/space-grotesk-latin-400-normal.woff2?url";
 import { CartProvider } from "../lib/cart";
 import { CartDrawer } from "../components/cart-drawer";
+import { BottomNav } from "../components/bottom-nav";
+import { ScrollReveals } from "../components/scroll-reveals";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
@@ -154,6 +156,8 @@ function RootComponent() {
         {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
         <CartDrawer />
+        <BottomNav />
+        <ScrollReveals />
       </CartProvider>
     </QueryClientProvider>
   );
