@@ -149,31 +149,6 @@ function Index() {
             </div>
 
 
-                  <div className="min-w-0 flex-1">
-                    <p className="font-display text-[10px] uppercase tracking-[0.12em] text-primary">Popular choice</p>
-                    <div className="mt-1 flex items-baseline justify-between gap-2">
-                      <h2 className="font-display text-[15px] font-medium md:text-xl">{feature.name}</h2>
-                      {featurePrice !== null ? (
-                        <span className="shrink-0 font-display text-[15px] font-semibold">
-                          From {formatNpr(featurePrice)}
-                        </span>
-                      ) : null}
-                    </div>
-                    <p className="mt-0.5 text-xs text-muted-foreground">{feature.summary}</p>
-                  </div>
-                </div>
-                <div className="mt-3 flex gap-2">
-                  <Button asChild variant="ink" className="flex-1" size="sm">
-                    <Link to="/products/$slug" params={{ slug: feature.slug }}>
-                      View options
-                    </Link>
-                  </Button>
-                  <Button asChild variant="outline" size="sm">
-                    <Link to="/catalog">All products</Link>
-                  </Button>
-                </div>
-              </div>
-            ) : null}
           </div>
         </section>
 
