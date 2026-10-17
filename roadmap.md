@@ -5,7 +5,8 @@
 - [x] 0c: removed /products sitemap entry; 22 remaining live entries return 200, self canonicals and unique titles. Full private-route and published-row comparison unavailable in this check; robots unchanged. Reported limitation before proceeding.
 - [ ] A13, A16-A20, F items, D2/D3, P/S items, numbered items, U items, G items in requested order
 - [x] A13: individual offers only, seller, item condition and policy link; no sale_ends_at field exists, so validity omitted.
-- [x] A16: default Open Graph and Twitter titles/descriptions inherit page metadata; removed root-level shared images.
+- [ ] A16 partial: sharing defaults added and root images removed; initial rendered cart check still shows fallback metadata, so route-specific inheritance remains open.
+- [ ] R0 remaining verification: product and authenticated views, measured contrast; Search slot currently opens catalog rather than U2 sheet.
 
 ## October 16 UI pack
 - [x] Item 0a/b: listings unchanged; legacy redirects verified 301. Trailing slash remains router-managed 307.

@@ -94,8 +94,8 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: ({ matches }) => {
     const pageMeta = matches.flatMap((match) => match.meta ?? []);
-    const titleMeta = pageMeta.findLast((meta) => meta && "title" in meta);
-    const descriptionMeta = pageMeta.findLast((meta) => meta && "name" in meta && meta.name === "description");
+    const titleMeta = [...pageMeta].reverse().find((meta) => meta && "title" in meta);
+    const descriptionMeta = [...pageMeta].reverse().find((meta) => meta && "name" in meta && meta.name === "description");
     const title = titleMeta && "title" in titleMeta ? String(titleMeta.title) : "MTDGC | Nepal's Digital Marketplace";
     const description = descriptionMeta && "content" in descriptionMeta ? String(descriptionMeta.content) : "Software licences and subscriptions in Nepal, priced in NPR.";
     return {
