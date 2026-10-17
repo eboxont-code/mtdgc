@@ -64,7 +64,7 @@ export function ProductTile({ product, priority = false, className = "" }: { pro
                 {deal && <span className="ml-1.5 text-[11px] text-muted-foreground line-through">{formatNpr(deal.was)}</span>}
               </>
             ) : (
-              <span className="text-muted-foreground">Not open for orders yet</span>
+              <span className="text-muted-foreground">Not open yet</span>
             )}
           </p>
         </div>

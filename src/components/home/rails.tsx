@@ -48,7 +48,7 @@ export function SectionHeader({ title, subtitle, action }: { title: string; subt
           <span aria-hidden="true" className="h-4 w-1 rounded-full bg-primary md:h-5" />
           {title}
         </h2>
-        {subtitle && <p className="mt-0.5 pl-3 text-xs text-muted-foreground md:text-sm">{subtitle}</p>}
+        {subtitle && <p className="mt-0.5 line-clamp-1 pl-3 text-xs text-muted-foreground md:line-clamp-none md:text-sm">{subtitle}</p>}
       </div>
       {action}
     </div>

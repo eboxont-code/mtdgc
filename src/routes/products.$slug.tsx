@@ -1,17 +1,20 @@
 import { supabase } from "@/integrations/supabase/client";
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
+import { Check, Clock, Globe, MessageCircle, ShieldCheck, ShoppingBag, Zap } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { ProductArt } from "@/components/product-art";
-import { ProductCard } from "@/components/product-card";
+import { ProductRail, SectionHeader } from "@/components/home/rails";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { WishlistButton } from "@/components/wishlist-button";
 import { getProductBySlug } from "@/lib/catalog.functions";
 import { useCart } from "@/lib/cart";
-import { formatNpr, isOrderable, SITE_URL, STATUS_LABEL } from "@/lib/format";
+import { formatNpr, isOrderable, SITE_URL, STATUS_LABEL, SUPPORT_MESSAGE, whatsappLink } from "@/lib/format";
+import { enabledProviders } from "@/lib/payments";
+import { compareAt } from "@/lib/pricing";
 import { productFaqs, requirementHelp } from "@/lib/product-help";
 
 export const Route = createFileRoute("/products/$slug")({
@@ -142,7 +145,8 @@ function ProductPage() {
   const variant = product.variants.find((item) => item.sku === selectedSku) ?? defaultVariant;
   const orderable = isOrderable(product.status) && !!variant && isOrderable(variant.status);
 
-  const addToCart = () => {
+  const navigate = useNavigate();
+  const addToCart = (buyNow = false) => {
     if (!variant) return;
     const missing = product.requirements.filter((requirement) => !(fields[requirement] ?? "").trim());
     if (missing.length) {
@@ -164,13 +168,48 @@ function ProductPage() {
       categorySlug: product.category?.slug,
       fields,
     });
-    setDrawerOpen(true);
+    if (buyNow) void navigate({ to: "/checkout" });
+    else setDrawerOpen(true);
   };
+
+  const hasDetails = product.requirements.length > 0;
+  const packStep = hasDetails ? 2 : 1;
+  const payStep = packStep + 1;
+  const wa = whatsappLink(`${SUPPORT_MESSAGE} with ${product.name}`);
+  const providers = enabledProviders();
+  const variantWas = variant ? compareAt(variant) : null;
+
+  const StepTitle = ({ n, children }: { n: number; children: React.ReactNode }) => (
+    <h2 className="flex items-center gap-2.5 font-display text-[16px] font-semibold md:text-lg">
+      <span className="grid size-7 place-items-center rounded-full border border-primary/50 bg-primary/10 font-mono text-xs font-bold text-primary">{n}</span>
+      {children}
+    </h2>
+  );
+
+  const trust = (
+    <ul className="space-y-2 text-[13px] text-foreground/85">
+      <li className="flex gap-2"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />We check every order before you pay.</li>
+      <li className="flex gap-2"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />We never ask for your password, OTP or payment PIN.</li>
+      <li className="flex gap-2"><Check className="mt-0.5 size-4 shrink-0 text-primary" /><span>Refunds follow our <Link to="/policies/refunds" className="text-primary underline-offset-2 hover:underline">refund policy</Link>.</span></li>
+      {wa && <li className="flex gap-2"><MessageCircle className="mt-0.5 size-4 shrink-0 text-primary" /><span>Questions first? <a href={wa} target="_blank" rel="noopener noreferrer" className="text-primary underline-offset-2 hover:underline">Ask on WhatsApp</a>.</span></li>}
+    </ul>
+  );
+
+  const actions = (
+    <div className="flex gap-2">
+      <Button variant="outline" size="lg" className="flex-1" disabled={!orderable} onClick={() => addToCart(false)}>
+        <ShoppingBag className="size-4" /> Add to cart
+      </Button>
+      <Button size="lg" className="flex-1" disabled={!orderable} onClick={() => addToCart(true)}>
+        {orderable ? "Buy now" : "Not open yet"}
+      </Button>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
       <SiteHeader />
-      <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-6xl px-4 pb-16 pt-6">
+      <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-6xl px-4 pb-32 pt-3 md:pb-16 md:pt-6">
         <Breadcrumbs
           items={[
             { label: "Home", to: "/" },
@@ -180,122 +219,157 @@ function ProductPage() {
           ]}
         />
 
-        <div className="grid gap-8 md:grid-cols-[0.9fr_1.1fr]">
-          <div>
-            <ProductArt product={product} priority sizes="(max-width: 768px) 100vw, 480px" className="rounded-2xl" />
-          </div>
-
-          <div>
-            <p className="font-display text-[11px] uppercase tracking-[0.14em] text-primary">{product.brand}</p>
-            <h1 className="mt-1 font-display text-[26px] font-medium md:text-4xl">{product.name}</h1>
-            <p className="mt-2 text-sm text-muted-foreground">{product.summary}</p>
-
-            <div className="mt-3 flex min-h-6 flex-wrap gap-1">
-              <span className="rounded bg-accent px-2 py-0.5 font-display text-[10px] uppercase tracking-[0.1em] text-accent-foreground">
-                {STATUS_LABEL[product.status] ?? product.status}
-              </span>
-              {product.badges.map((badge) => (
-                <span key={badge} className="rounded bg-secondary px-2 py-0.5 font-display text-[10px] uppercase tracking-[0.1em]">
-                  {badge}
-                </span>
-              ))}
+        <div className="grid gap-6 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:gap-10">
+          {/* Left: art and, on desktop, the sticky order summary */}
+          <div className="md:sticky md:top-32 md:self-start">
+            <div className="flex gap-4 md:block">
+              <div className="w-[38%] shrink-0 overflow-hidden rounded-2xl border border-border md:w-full">
+                <ProductArt product={product} priority sizes="(max-width: 768px) 40vw, 440px" />
+              </div>
+              <div className="min-w-0 md:hidden">
+                <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-primary">{product.brand}</p>
+                <h1 className="mt-1 font-display text-[22px] font-semibold leading-tight">{product.name}</h1>
+                <p className="mt-1 line-clamp-3 text-[13px] text-muted-foreground">{product.summary}</p>
+              </div>
             </div>
 
-            <dl className="mt-5 grid grid-cols-2 gap-3 rounded-lg bg-panel p-4 text-xs">
-              <div><dt className="text-muted-foreground">Region</dt><dd className="font-display font-medium">{product.region}</dd></div>
-              <div><dt className="text-muted-foreground">Platform</dt><dd className="font-display font-medium">{product.platform ?? "Not applicable"}</dd></div>
-              <div><dt className="text-muted-foreground">Delivery method</dt><dd className="font-display font-medium">{product.delivery_method}</dd></div>
-              <div><dt className="text-muted-foreground">Delivery time</dt><dd className="font-display font-medium">{product.delivery_time}</dd></div>
-            </dl>
+            <div className="mt-5 hidden rounded-2xl border border-border bg-card p-5 md:block">
+              <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Order summary</p>
+              <div className="mt-3 flex items-baseline justify-between gap-3">
+                <span className="font-display text-sm">{variant?.name ?? "Choose an option"}</span>
+                <span className="font-mono text-xl font-bold text-price">
+                  {variant ? formatNpr(variant.price_minor) : ""}
+                  {variantWas && <span className="ml-2 text-sm font-normal text-muted-foreground line-through">{formatNpr(variantWas)}</span>}
+                </span>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">{product.delivery_time}</p>
+              <div className="mt-4">{actions}</div>
+              <div className="mt-4 border-t border-border pt-4">{trust}</div>
+            </div>
+          </div>
+
+          {/* Right: details and steps */}
+          <div className="min-w-0">
+            <div className="hidden md:block">
+              <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-primary">{product.brand}</p>
+              <h1 className="mt-1 font-display text-4xl font-semibold">{product.name}</h1>
+              <p className="mt-2 text-sm text-muted-foreground">{product.summary}</p>
+            </div>
+
+            <ul className="mt-1 flex flex-wrap gap-1.5 md:mt-4">
+              {!isOrderable(product.status) && (
+                <li className="rounded-full border border-warn/40 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.08em] text-warn">{STATUS_LABEL[product.status] ?? product.status}</li>
+              )}
+              <li className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-[11px]"><Zap className="size-3.5 text-primary" />{product.delivery_method}</li>
+              <li className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-[11px]"><Globe className="size-3.5 text-primary" />{product.region}</li>
+              <li className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-[11px]"><Clock className="size-3.5 text-primary" />{product.delivery_time}</li>
+              {product.platform && <li className="rounded-full border border-border bg-card px-2.5 py-1 text-[11px]">{product.platform}</li>}
+            </ul>
+
+            {hasDetails && (
+              <section className="mt-6 rounded-2xl border border-border bg-card p-4 md:p-5">
+                <StepTitle n={1}>Your details</StepTitle>
+                <div className="mt-4 space-y-3">
+                  {product.requirements.map((requirement) => {
+                    const help = requirementHelp(requirement);
+                    const id = `req-${requirement.replace(/\W+/g, "-").toLowerCase()}`;
+                    return (
+                      <div key={requirement}>
+                        <label htmlFor={id} className="font-display text-xs text-muted-foreground">{requirement}</label>
+                        <input
+                          ref={(node) => { fieldRefs.current[requirement] = node; }}
+                          id={id}
+                          aria-invalid={invalidFields.includes(requirement)}
+                          aria-describedby={`${id}-help${invalidFields.includes(requirement) ? ` ${id}-error` : ""}`}
+                          value={fields[requirement] ?? ""}
+                          onChange={(event) => { const v = event.target.value; setFields((current) => ({ ...current, [requirement]: v })); try { const all = JSON.parse(localStorage.getItem("mtdgc-fields-v1") ?? "{}"); all[requirement] = v; localStorage.setItem("mtdgc-fields-v1", JSON.stringify(all)); } catch { /* ignore */ } }}
+                          className="mt-1 h-11 w-full rounded-xl border border-border bg-secondary px-3 font-mono text-sm outline-none focus:border-primary aria-[invalid=true]:border-destructive"
+                        />
+                        {help && <p id={`${id}-help`} className="mt-1 text-xs text-muted-foreground">{help}</p>}
+                        {invalidFields.includes(requirement) && <p id={`${id}-error`} className="mt-1 text-xs text-destructive">This detail is required.</p>}
+                      </div>
+                    );
+                  })}
+                  <p className="text-xs text-muted-foreground">MTDGC will never ask for your password, OTP or payment PIN.</p>
+                </div>
+              </section>
+            )}
 
             {product.variants.length > 0 && (
-              <fieldset className="mt-6 min-h-32">
-                <legend className="font-display text-sm font-medium">Choose an option</legend>
-                <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                  {product.variants.map((item) => (
-                    <label
-                      key={item.sku}
-                      className={`flex cursor-pointer items-center justify-between rounded-md border p-3 ${
-                        selectedSku === item.sku ? "border-primary bg-card" : "border-border"
-                      }`}
-                    >
-                      <span className="flex items-center gap-2">
-                        <input
-                          type="radio"
-                          name="variant"
-                          value={item.sku}
-                          checked={selectedSku === item.sku}
-                          onChange={() => setSelectedSku(item.sku)}
-                        />
-                        <span className="font-display text-sm">{item.name}</span>
-                      </span>
-                      <span className="font-display text-sm font-semibold">{formatNpr(item.price_minor)}</span>
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
+              <section className="mt-4 rounded-2xl border border-border bg-card p-4 md:p-5">
+                <fieldset>
+                  <legend className="contents"><StepTitle n={packStep}>Choose an option</StepTitle></legend>
+                  <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    {product.variants.map((item) => {
+                      const selected = selectedSku === item.sku;
+                      const was = compareAt(item);
+                      const itemOrderable = isOrderable(item.status);
+                      return (
+                        <label
+                          key={item.sku}
+                          className={`relative flex cursor-pointer flex-col gap-1 rounded-xl border p-3 transition-colors ${selected ? "border-primary bg-primary/10" : "border-border bg-secondary/60 hover:border-primary/40"}`}
+                        >
+                          <input type="radio" name="variant" value={item.sku} checked={selected} onChange={() => setSelectedSku(item.sku)} className="sr-only" />
+                          {selected && <Check className="absolute right-2 top-2 size-4 text-primary" aria-hidden="true" />}
+                          <span className="pr-5 font-mono text-[13px] font-medium leading-tight">{item.name}</span>
+                          <span className="font-mono text-sm font-bold text-price">{formatNpr(item.price_minor)}</span>
+                          {was && <span className="font-mono text-[11px] text-muted-foreground line-through">{formatNpr(was)}</span>}
+                          {item.status === "low_stock" && <span className="font-mono text-[10px] uppercase text-warn">Limited</span>}
+                          {!itemOrderable && item.status !== "low_stock" && <span className="font-mono text-[10px] uppercase text-warn">{STATUS_LABEL[item.status] ?? item.status}</span>}
+                        </label>
+                      );
+                    })}
+                  </div>
+                </fieldset>
+                {variant?.status === "low_stock" && (
+                  <p className="mt-3 text-xs text-muted-foreground">Limited supply on this option. We confirm availability before you pay.</p>
+                )}
+              </section>
             )}
 
-            {product.requirements.length > 0 && (
-              <div className="mt-6 min-h-40 space-y-3">
-                <h2 className="font-display text-sm font-medium">What we need from you</h2>
-                {product.requirements.map((requirement) => {
-                  const help = requirementHelp(requirement);
-                  const id = `req-${requirement.replace(/\W+/g, "-").toLowerCase()}`;
-                  return (
-                    <div key={requirement}>
-                      <label htmlFor={id} className="font-display text-xs text-muted-foreground">{requirement}</label>
-                      <input
-                        ref={(node) => { fieldRefs.current[requirement] = node; }}
-                        id={id}
-                        aria-invalid={invalidFields.includes(requirement)}
-                        aria-describedby={`${id}-help${invalidFields.includes(requirement) ? ` ${id}-error` : ""}`}
-                        value={fields[requirement] ?? ""}
-                        onChange={(event) => { const v = event.target.value; setFields((current) => ({ ...current, [requirement]: v })); try { const all = JSON.parse(localStorage.getItem("mtdgc-fields-v1") ?? "{}"); all[requirement] = v; localStorage.setItem("mtdgc-fields-v1", JSON.stringify(all)); } catch { /* ignore */ } }}
-                        className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm outline-none focus:border-primary"
-                      />
-                      {help && <p id={`${id}-help`} className="mt-1 text-xs text-muted-foreground">{help}</p>}
-                      {invalidFields.includes(requirement) && <p id={`${id}-error`} className="mt-1 text-xs text-destructive">This detail is required.</p>}
-                    </div>
-                  );
-                })}
-                <p className="text-xs text-muted-foreground">
-                  MTDGC will never ask for your password, OTP or payment PIN.
-                </p>
-              </div>
-            )}
+            <section className="mt-4 rounded-2xl border border-border bg-card p-4 md:p-5">
+              <StepTitle n={payStep}>How you pay</StepTitle>
+              <ul className="mt-3 space-y-2">
+                {providers.map((provider) => (
+                  <li key={provider.id} className="rounded-xl border border-border bg-secondary/60 p-3">
+                    <p className="font-display text-sm font-medium">{provider.label}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{provider.description}</p>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3 text-xs text-muted-foreground">You pay at checkout, after placing the order. Payment details are shown there.</p>
+            </section>
 
-            {variant?.status === "low_stock" && (
-              <p className="mt-3 text-xs text-muted-foreground">Limited supply on this option. We confirm availability before you pay.</p>
-            )}
-            {error && <p role="alert" className="mt-3 text-sm text-destructive">{error}</p>}
+            {error && <p role="alert" className="mt-4 text-sm text-destructive">{error}</p>}
 
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-              <Button size="lg" className="min-w-56 tabular-nums" disabled={!orderable} onClick={addToCart}>
-                {orderable ? `Add to cart · ${variant ? formatNpr(variant.price_minor) : ""}` : "Not available yet"}
-              </Button>
-              <Button asChild variant="outline" size="lg"><Link to="/catalog">Keep browsing</Link></Button>
+            <div className="mt-5 hidden items-center gap-3 md:flex">
               <WishlistButton productId={product.id} />
             </div>
 
-            <section className="mt-8">
-              <h2 className="font-display text-lg font-medium">About this product</h2>
-              <p className="mt-2 text-sm text-foreground/80">{product.description}</p>
-              {product.redemption_instructions && (
-                <>
-                  <h3 className="mt-5 font-display text-sm font-medium">How to redeem</h3>
-                  <p className="mt-1 text-sm text-foreground/80">{product.redemption_instructions}</p>
-                </>
-              )}
-              <h3 className="mt-5 font-display text-sm font-medium">Refund eligibility</h3>
-              <p className="mt-1 text-sm text-foreground/80">{product.refund_eligibility}</p>
-            </section>
+            <div className="mt-6 rounded-2xl border border-border bg-card p-4 md:hidden">{trust}</div>
 
-            <section className="mt-8">
-              <h2 className="font-display text-lg font-medium">Questions about this product</h2>
-              <div className="mt-2 divide-y divide-border rounded-lg border border-border">
+            <div className="mt-6 divide-y divide-border rounded-2xl border border-border">
+              <details className="group p-4" open>
+                <summary className="cursor-pointer list-none font-display text-sm font-semibold">About this product</summary>
+                <p className="mt-2 text-sm text-foreground/80">{product.description}</p>
+              </details>
+              {product.redemption_instructions && (
+                <details className="p-4">
+                  <summary className="cursor-pointer list-none font-display text-sm font-semibold">How to redeem</summary>
+                  <p className="mt-2 text-sm text-foreground/80">{product.redemption_instructions}</p>
+                </details>
+              )}
+              <details className="p-4">
+                <summary className="cursor-pointer list-none font-display text-sm font-semibold">Refund eligibility</summary>
+                <p className="mt-2 text-sm text-foreground/80">{product.refund_eligibility}</p>
+              </details>
+            </div>
+
+            <section className="mt-6">
+              <h2 className="font-display text-base font-semibold">Questions about this product</h2>
+              <div className="mt-2 divide-y divide-border rounded-2xl border border-border">
                 {productFaqs(product).map((faq) => (
-                  <details key={faq.q} className="p-3">
+                  <details key={faq.q} className="p-4">
                     <summary className="cursor-pointer font-display text-sm font-medium">{faq.q}</summary>
                     <p className="mt-2 text-sm text-foreground/80">{faq.a}</p>
                   </details>
@@ -307,26 +381,40 @@ function ProductPage() {
 
         {related.length > 0 && (
           <section className="mt-12" aria-labelledby="related-heading">
-            <h2 id="related-heading" className="mb-4 font-display text-lg font-medium">Related products</h2>
-            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4">
-              {related.map((item) => (
-                <ProductCard key={item.id} product={item} />
-              ))}
-            </div>
+            <h2 id="related-heading" className="sr-only">More like this</h2>
+            <SectionHeader title="More like this" />
+            <ProductRail products={related} />
           </section>
         )}
         {explore.length > 0 && (
           <section className="mt-10" aria-labelledby="explore-heading">
-            <h2 id="explore-heading" className="mb-1 font-display text-lg font-medium">Also in the MTDGC catalog</h2>
-            <p className="mb-4 text-sm text-muted-foreground">Products from other categories we currently sell.</p>
-            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4">
-              {explore.map((item) => (
-                <ProductCard key={item.id} product={item} />
-              ))}
-            </div>
+            <h2 id="explore-heading" className="sr-only">Also on MTDGC</h2>
+            <SectionHeader title="Also on MTDGC" subtitle="Products from other categories." />
+            <ProductRail products={explore} />
           </section>
         )}
       </main>
+
+      {/* Sticky buy bar on phones */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-3 pb-[calc(0.6rem+env(safe-area-inset-bottom))] pt-2.5 backdrop-blur-xl md:hidden">
+        <div className="flex items-center gap-2.5">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[11px] text-muted-foreground">{variant?.name ?? "Choose an option"}</p>
+            <p className="font-mono text-[17px] font-bold leading-tight text-price">{variant ? formatNpr(variant.price_minor) : ""}</p>
+          </div>
+          {wa && (
+            <a href={wa} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp support (opens in a new tab)" className="grid size-11 shrink-0 place-items-center rounded-xl border border-border text-primary">
+              <MessageCircle className="size-5" />
+            </a>
+          )}
+          <Button variant="outline" className="h-11 shrink-0 px-3" disabled={!orderable} onClick={() => addToCart(false)} aria-label="Add to cart">
+            <ShoppingBag className="size-4" />
+          </Button>
+          <Button className="h-11 shrink-0 px-5" disabled={!orderable} onClick={() => addToCart(true)}>
+            {orderable ? "Buy now" : "Not open yet"}
+          </Button>
+        </div>
+      </div>
       <SiteFooter />
     </div>
   );
