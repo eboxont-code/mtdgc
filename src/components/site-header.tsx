@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Gamepad2, Gift, LayoutGrid, Menu, MessageCircle, MonitorCog, Repeat, Search, ShoppingBag, Tag, UserRound, X } from "lucide-react";
+import { Gamepad2, Gift, LayoutGrid, Menu, MessageCircle, MonitorCog, Repeat, Search, ShoppingBag, UserRound, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Wordmark } from "@/components/brand/wordmark";
@@ -13,7 +13,6 @@ const CATEGORIES = [
   { slug: "gift-cards", label: "Gift cards", icon: Gift },
   { slug: "subscriptions", label: "Subscriptions", icon: Repeat },
   { slug: "software", label: "Software", icon: MonitorCog },
-  { slug: "deals", label: "Deals", icon: Tag },
 ];
 
 const NAV = [
