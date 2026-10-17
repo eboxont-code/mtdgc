@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Menu, Search, ShoppingBag, UserRound, X } from "lucide-react";
 import { useState } from "react";
 
+import { Wordmark } from "@/components/brand/wordmark";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/lib/cart";
 import { SUPPORT_MESSAGE, whatsappLink } from "@/lib/format";
@@ -30,14 +31,8 @@ export function SiteHeader() {
 
       <header className="glass-surface sticky top-0 z-30">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-1 px-4">
-          <Link to="/" className="mr-auto inline-flex min-h-11 items-center gap-2" aria-label="MTDGC home">
-            <span aria-hidden="true" className="size-3 rounded-sm bg-primary" />
-            <span className="flex flex-col leading-none">
-              <span className="font-display text-[15px] font-semibold">MTDGC</span>
-              <span className="hidden text-[9px] uppercase tracking-[0.12em] text-muted-foreground sm:block">
-                Modern Tech Digital Goods &amp; Commerce
-              </span>
-            </span>
+          <Link to="/" className="mr-auto inline-flex min-h-11 items-center" aria-label="MTDGC, Matrix Digital Goods & Commerce, home">
+            <Wordmark />
           </Link>
 
           <nav aria-label="Main" className="mr-2 hidden items-center gap-1 md:flex">

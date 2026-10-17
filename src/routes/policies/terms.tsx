@@ -35,7 +35,7 @@ function TermsPage() {
         <p className="mt-1 text-xs text-muted-foreground">Last updated 4 October 2026</p>
         <div className="mt-6 space-y-4 text-sm text-foreground/80">
           <p>
-            MTDGC, trading as Modern Tech Digital Goods and Commerce, sells digital products to customers in Nepal.
+            MTDGC, trading as Matrix Digital Goods and Commerce, sells digital products to customers in Nepal.
             Placing an order through this website is a request to buy. A sale is formed once we confirm availability and
             you complete payment.
           </p>

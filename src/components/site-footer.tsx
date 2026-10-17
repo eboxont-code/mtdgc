@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 
+import { Wordmark } from "@/components/brand/wordmark";
 import { SUPPORT_MESSAGE, WHATSAPP_DISPLAY, whatsappLink } from "@/lib/format";
 
 const GROUPS: { title: string; links: { to: string; label: string }[] }[] = [
@@ -38,13 +39,7 @@ export function SiteFooter() {
       <div className="mx-auto max-w-6xl px-4 py-10">
         <div className="grid gap-8 md:grid-cols-[1.2fr_repeat(3,0.6fr)]">
           <div>
-            <div className="flex items-center gap-2">
-              <span aria-hidden="true" className="size-3 rounded-sm bg-primary" />
-              <span className="font-display text-[15px] font-semibold">MTDGC</span>
-            </div>
-            <p className="mt-2 font-display text-xs uppercase tracking-[0.12em] text-muted-foreground">
-              Modern Tech Digital Goods &amp; Commerce
-            </p>
+            <Wordmark size="lg" />
             <p className="mt-2 max-w-[46ch] text-xs text-muted-foreground">
               Nepal&apos;s digital marketplace for game top-ups, gift cards and subscriptions, built to add more
               digital product lines over time.
@@ -71,7 +66,7 @@ export function SiteFooter() {
         </div>
 
         <div className="mt-8 flex flex-col gap-2 border-t border-border pt-5 text-xs text-muted-foreground md:flex-row md:items-center md:justify-between">
-          <p>© {new Date().getFullYear()} MTDGC. Modern Tech Digital Goods &amp; Commerce.</p>
+          <p>© {new Date().getFullYear()} MTDGC, Matrix Digital Goods &amp; Commerce.</p>
           {whatsappLink() && (
             <a href={whatsappLink(SUPPORT_MESSAGE)!} target="_blank" rel="noopener noreferrer" aria-label={`WhatsApp support ${WHATSAPP_DISPLAY} (opens in a new tab)`} className="inline-flex min-h-11 items-center font-display font-medium text-foreground">
               WhatsApp support: {WHATSAPP_DISPLAY}

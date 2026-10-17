@@ -10,7 +10,6 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import bodyFont from "@fontsource/newsreader/files/newsreader-latin-400-normal.woff2?url";
 import displayFont from "@fontsource/space-grotesk/files/space-grotesk-latin-400-normal.woff2?url";
 import { CartProvider } from "../lib/cart";
 import { CartDrawer } from "../components/cart-drawer";
@@ -109,6 +108,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           ]
         : []),
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "theme-color", content: "#070b09" },
       { name: "author", content: "MTDGC" },
       { property: "og:site_name", content: "MTDGC" },
       { property: "og:type", content: "website" },
@@ -123,9 +123,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "preload", href: bodyFont, as: "font", type: "font/woff2", crossOrigin: "anonymous" },
+      { rel: "preload", href: "/fonts/jetbrains-mono-latin-700-normal.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" },
       { rel: "preload", href: displayFont, as: "font", type: "font/woff2", crossOrigin: "anonymous" },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "icon", href: "/favicon.ico", type: "image/x-icon", sizes: "48x48" },
       { rel: "apple-touch-icon", href: "/favicon.ico" },
       { rel: "manifest", href: "/site.webmanifest" },
     ],

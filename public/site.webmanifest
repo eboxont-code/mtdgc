@@ -1,12 +1,12 @@
 {
-  "name": "MTDGC | Modern Tech Digital Goods and Commerce",
+  "name": "MTDGC | Matrix Digital Goods and Commerce",
   "short_name": "MTDGC",
   "description": "Nepal's digital marketplace for game top-ups, gift cards and subscriptions.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#faf7f2",
-  "theme_color": "#1c1917",
+  "background_color": "#070b09",
+  "theme_color": "#070b09",
   "icons": [
     { "src": "/favicon.ico", "sizes": "48x48", "type": "image/x-icon" }
   ]

@@ -80,7 +80,7 @@ function Index() {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "MTDGC",
-    alternateName: "Modern Tech Digital Goods & Commerce",
+    alternateName: "Matrix Digital Goods & Commerce",
     url: `${SITE_URL}/`,
     description: "Digital commerce company in Nepal selling game top-ups, gift cards and subscriptions.",
     logo: `${SITE_URL}/og/mtdgc.png`,

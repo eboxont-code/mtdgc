@@ -1,14 +1,14 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
-@import "@fontsource/newsreader/latin-400.css";
-@import "@fontsource/newsreader/latin-500.css";
-@import "@fontsource/newsreader/latin-600.css";
-@import "@fontsource/newsreader/latin-700.css";
 @import "@fontsource/space-grotesk/latin-400.css";
 @import "@fontsource/space-grotesk/latin-500.css";
 @import "@fontsource/space-grotesk/latin-600.css";
 @import "@fontsource/space-grotesk/latin-700.css";
+
+@font-face { font-family: "JetBrains Mono"; font-style: normal; font-weight: 400; font-display: swap; src: url("/fonts/jetbrains-mono-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "JetBrains Mono"; font-style: normal; font-weight: 500; font-display: swap; src: url("/fonts/jetbrains-mono-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "JetBrains Mono"; font-style: normal; font-weight: 700; font-display: swap; src: url("/fonts/jetbrains-mono-latin-700-normal.woff2") format("woff2"); }
 
 @custom-variant dark (&:is(.dark *));
 
@@ -74,39 +74,49 @@
   --color-glass-border: var(--glass-border);
   --shadow-glow-cyan: var(--glow-cyan);
   --shadow-glow-violet: var(--glow-violet);
-  --font-display: "Space Grotesk", sans-serif;
-  --font-body: "Space Grotesk", sans-serif;
+  --color-price: var(--price);
+  --color-deal: var(--deal);
+  --color-warn: var(--warn);
+  --color-matrix: var(--matrix);
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 :root, .dark {
-  --radius: 0.5rem;
-  --background: oklch(0.15 0.025 269);
-  --foreground: oklch(0.97 0.008 250);
-  --card: oklch(0.19 0.035 266);
+  /* Matrix Digital Goods & Commerce: near-black with a green tint, matrix green used sparingly. */
+  --radius: 0.75rem;
+  --background: oklch(0.13 0.012 160);
+  --foreground: oklch(0.96 0.01 150);
+  --card: oklch(0.17 0.014 160);
   --card-foreground: var(--foreground);
-  --popover: oklch(0.22 0.035 266);
+  --popover: oklch(0.19 0.016 160);
   --popover-foreground: var(--foreground);
-  --primary: oklch(0.8 0.14 211);
-  --primary-foreground: oklch(0.15 0.025 269);
-  --secondary: oklch(0.25 0.035 266);
+  --primary: oklch(0.86 0.2 150);
+  --primary-foreground: oklch(0.13 0.012 160);
+  --secondary: oklch(0.22 0.016 160);
   --secondary-foreground: var(--foreground);
   --muted: var(--secondary);
-  --muted-foreground: oklch(0.76 0.025 260);
-  --accent: oklch(0.59 0.22 293);
-  --accent-foreground: oklch(1 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(1 0 0 / 12%);
-  --input: oklch(1 0 0 / 20%);
-  --ring: var(--primary);
+  --muted-foreground: oklch(0.74 0.02 155);
+  --accent: oklch(0.82 0.13 195);
+  --accent-foreground: oklch(0.13 0.012 160);
+  --destructive: oklch(0.64 0.21 25);
+  --destructive-foreground: oklch(0.98 0.005 150);
+  --border: oklch(1 0 0 / 9%);
+  --input: oklch(1 0 0 / 16%);
+  --ring: var(--accent);
   --brand-soft: var(--primary);
   --panel: var(--card);
-  --success: oklch(0.78 0.14 158);
-  --glass-bg: oklch(1 0 0 / 6%);
-  --glass-border: oklch(1 0 0 / 12%);
-  --glow-cyan: 0 8px 30px oklch(0.8 0.14 211 / 12%);
-  --glow-violet: 0 8px 30px oklch(0.59 0.22 293 / 16%);
-  --gradient-brand: linear-gradient(110deg, var(--primary), var(--accent));
+  --success: oklch(0.82 0.17 150);
+  --price: oklch(0.9 0.17 145);
+  --deal: oklch(0.68 0.21 25);
+  --warn: oklch(0.82 0.14 80);
+  --matrix: oklch(0.86 0.2 150);
+  --glass-bg: oklch(1 0 0 / 4%);
+  --glass-border: oklch(1 0 0 / 9%);
+  --glow-cyan: 0 0 0 transparent;
+  --glow-violet: 0 0 0 transparent;
+  --gradient-brand: linear-gradient(90deg, transparent, var(--primary), transparent);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -177,25 +187,25 @@
 }
 
 .glass-surface { background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(20px); }
-.brand-line { height: 2px; background: var(--gradient-brand); }
+.brand-line { height: 1px; background: var(--gradient-brand); opacity: 0.6; }
 .future-hero { position: relative; isolation: isolate; overflow: hidden; background: var(--background); }
-.future-hero::before { content: ""; position: absolute; inset: 0; z-index: -1; opacity: 0.35; background-image: linear-gradient(var(--glass-border) 1px, transparent 1px), linear-gradient(90deg, var(--glass-border) 1px, transparent 1px); background-size: 56px 56px; mask-image: linear-gradient(to bottom, transparent, var(--foreground), transparent); }
+.future-hero::before { content: ""; position: absolute; inset: 0; z-index: -1; opacity: 0.35; background-image: linear-gradient(var(--glass-border) 1px, transparent 1px), linear-gradient(90deg, var(--glass-border) 1px, transparent 1px); background-size: 40px 40px; mask-image: linear-gradient(to bottom, transparent, var(--foreground), transparent); }
 .brand-text { color: var(--primary); }
+.matrix-grid { background-image: linear-gradient(oklch(0.86 0.2 150 / 6%) 1px, transparent 1px), linear-gradient(90deg, oklch(0.86 0.2 150 / 6%) 1px, transparent 1px); background-size: 40px 40px; }
 .future-card { box-shadow: var(--glow-cyan); }
-.future-card:nth-child(even) { box-shadow: var(--glow-violet); }
 main .bg-card, main .bg-panel { background: var(--glass-bg); border-color: var(--glass-border); backdrop-filter: blur(20px); }
 .mobile-bottom-nav [aria-current="page"] { color: var(--primary); }
 @media (max-width: 639px) { input, select, textarea { font-size: 16px; } }
 @media (max-width: 767px) { body:has(.mobile-bottom-nav) { padding-bottom: calc(76px + env(safe-area-inset-bottom)); } }
 @media (prefers-reduced-motion: no-preference) {
-  .future-hero::before { animation: grid-drift 18s linear infinite; }
+  .future-hero::before { animation: grid-drift 40s linear infinite; }
   .future-card, .category-tile, button, a { transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease; }
   .future-card:hover, .future-card:focus-within, .category-tile:hover { transform: translateY(-2px); }
   .future-card:active, .category-tile:active, button:active { transform: translateY(-2px); }
   [data-scroll-reveal].reveal-pending { opacity: 0; transform: translateY(12px); }
   [data-scroll-reveal] { transition: opacity 550ms ease, transform 550ms ease; }
 }
-@keyframes grid-drift { to { background-position: 56px 56px; } }
+@keyframes grid-drift { to { background-position: 40px 40px; } }
 
 @keyframes rise {
   from { opacity: 0; transform: translateY(10px); }

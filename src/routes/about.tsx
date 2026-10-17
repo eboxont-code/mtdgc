@@ -8,7 +8,7 @@ import { SITE_URL } from "@/lib/format";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About MTDGC | Modern Tech Digital Goods & Commerce" },
+      { title: "About MTDGC | Matrix Digital Goods & Commerce" },
       {
         name: "description",
         content:
@@ -28,7 +28,7 @@ export const Route = createFileRoute("/about")({
           "@context": "https://schema.org",
           "@type": "Organization",
           name: "MTDGC",
-          legalName: "Modern Tech Digital Goods & Commerce",
+          legalName: "Matrix Digital Goods & Commerce",
           url: SITE_URL,
           areaServed: "NP",
           description:
@@ -50,7 +50,7 @@ function AboutPage() {
 
         <section className="mt-6 space-y-4 text-sm text-foreground/80">
           <p>
-            MTDGC stands for Modern Tech Digital Goods and Commerce. We are a digital commerce company serving customers
+            MTDGC stands for Matrix Digital Goods and Commerce. We are a digital commerce company serving customers
             in Nepal. Our first product lines are game top-ups, digital gift cards and subscription plans, and the
             catalog is built so we can add software, AI services, mobile products and business services as each line is
             properly sourced.
