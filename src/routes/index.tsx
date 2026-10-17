@@ -238,14 +238,15 @@ function Index() {
           </div>
         </section>
 
-        <section className="bg-foreground text-background">
+        <section className="mx-auto max-w-6xl px-4 pt-6">
+          <div className="overflow-hidden rounded-2xl border border-border bg-card">
           <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-6">
-            <span className="grid size-10 shrink-0 place-items-center rounded-md bg-brand-soft">
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-primary/30 bg-primary/10 text-primary">
               <MessageCircle className="size-5" />
             </span>
             <div className="min-w-0">
               <h2 className="font-display text-[15px] font-medium">Questions before you order?</h2>
-              <p className="text-xs text-background/60">Our support team can help before you place an order.</p>
+              <p className="text-xs text-muted-foreground">Our support team can help before you place an order.</p>
             </div>
             <Button asChild variant="primary" size="sm" className="ml-auto">
               {whatsappLink() ? (
@@ -254,6 +255,7 @@ function Index() {
                 <Link to="/support">Get help</Link>
               )}
             </Button>
+          </div>
           </div>
         </section>
       </main>
