@@ -1,5 +1,10 @@
 # MTDGC launch roadmap
 
+## October 17 ordered UI pack
+- [ ] R0: dark glass redesign, mobile bottom navigation, search and motion, mobile verification, publish
+- [ ] 0c: route metadata and permitted removal of /products from sitemap
+- [ ] A13, A16-A20, F items, D2/D3, P/S items, numbered items, U items, G items in requested order
+
 ## October 16 UI pack
 - [x] Item 0a/b: listings unchanged; legacy redirects verified 301. Trailing slash remains router-managed 307.
 - [ ] Item 0c: added private-page canonicals; sitemap published-state verification not completed (files unchanged).
