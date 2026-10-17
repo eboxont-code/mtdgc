@@ -1,5 +1,13 @@
 # MTDGC launch roadmap
 
+## October 17 ordered UI pack
+- [x] R0: dark glass theme, cards, header, CSS grid hero, category tiles, search-to-catalog, reduced-motion reveals and bottom navigation; mobile home/search/cart/checkout checked, account checked signed out. Published revision requested.
+- [x] 0c: removed /products sitemap entry; 22 remaining live entries return 200, self canonicals and unique titles. Full private-route and published-row comparison unavailable in this check; robots unchanged. Reported limitation before proceeding.
+- [ ] A13, A16-A20, F items, D2/D3, P/S items, numbered items, U items, G items in requested order
+- [x] A13: individual offers only, seller, item condition and policy link; no sale_ends_at field exists, so validity omitted.
+- [ ] A16 partial: sharing defaults added and root images removed; initial rendered cart check still shows fallback metadata, so route-specific inheritance remains open.
+- [ ] R0 remaining verification: product and authenticated views, measured contrast; Search slot currently opens catalog rather than U2 sheet.
+
 ## October 16 UI pack
 - [x] Item 0a/b: listings unchanged; legacy redirects verified 301. Trailing slash remains router-managed 307.
 - [ ] Item 0c: added private-page canonicals; sitemap published-state verification not completed (files unchanged).

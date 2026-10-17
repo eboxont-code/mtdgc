@@ -1,14 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronDown, MessageCircle } from "lucide-react";
+import { ChevronDown, MessageCircle, Search, ArrowUpRight, MonitorCog, Repeat, Tag, Gift, Gamepad2 } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { ProductCard, lowestPrice } from "@/components/product-card";
+import { ProductCard } from "@/components/product-card";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
-import { listCatalog, type CatalogProduct } from "@/lib/catalog.functions";
-import { formatNpr, SITE_URL, whatsappLink } from "@/lib/format";
+import { listCatalog } from "@/lib/catalog.functions";
+import { SITE_URL, whatsappLink } from "@/lib/format";
 
 const FAQS = [
   [
@@ -66,6 +66,8 @@ function Index() {
   const categories = data?.categories ?? [];
   const [activeCategory, setActiveCategory] = useState("all");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [heroQuery, setHeroQuery] = useState("");
+  const navigate = Route.useNavigate();
 
   const visible = useMemo(() => {
     const sorted = [...products].sort(
@@ -73,10 +75,6 @@ function Index() {
     );
     return activeCategory === "all" ? sorted : sorted.filter((p) => p.category?.slug === activeCategory);
   }, [products, activeCategory]);
-
-  const feature: CatalogProduct | undefined =
-    products.find((p) => p.slug === "pubg-mobile-uc") ?? visible[0] ?? products[0];
-  const featurePrice = feature ? lowestPrice(feature) : null;
 
   const orgJsonLd = {
     "@context": "https://schema.org",
@@ -112,18 +110,18 @@ function Index() {
       <SiteHeader />
 
       <main id="main-content" tabIndex={-1} className="focus:outline-none pb-16">
-        <section className="border-b border-border bg-panel">
-          <div className="mx-auto grid max-w-6xl gap-8 px-4 py-7 md:grid-cols-[1fr_0.8fr] md:items-center md:py-14">
+        <section className="future-hero border-b border-border">
+          <div className="brand-line" />
+          <div className="mx-auto max-w-6xl px-4 pb-8 pt-12 md:pb-12 md:pt-20">
             <div>
               <p className="mb-2 font-display text-[11px] uppercase tracking-[0.16em] text-primary">
-                Nepal&apos;s Digital Marketplace
+                MTDGC / Nepal&apos;s Digital Marketplace
               </p>
-              <h1 className="max-w-xl font-display text-[34px] font-medium leading-tight md:text-6xl">
-                Digital goods, delivered after a quick check.
+              <h1 className="max-w-3xl font-display text-[36px] font-semibold leading-tight md:text-6xl">
+                Software and subscriptions,<br className="hidden md:block" /> <span className="brand-text">delivered in Nepal.</span>
               </h1>
               <p className="mt-2 max-w-[46ch] text-[15px] text-foreground/70 md:text-lg">
-                MTDGC is a digital commerce company serving Nepal. We start with game top-ups, gift cards and
-                subscriptions, and we keep adding product lines.
+                Explore software licences, subscriptions and digital goods. Prices in NPR.
               </p>
               <div className="mt-4 flex flex-wrap items-center gap-3">
                 <Button asChild size="lg">
@@ -132,49 +130,25 @@ function Index() {
                 <Button asChild variant="outline">
                   <Link to="/how-it-works">How ordering works</Link>
                 </Button>
-                <span className="font-display text-xs text-muted-foreground">
-                  {products.length} {products.length === 1 ? "product" : "products"} live
-                </span>
+              </div>
+              <form className="glass-surface mt-8 flex max-w-2xl items-center gap-3 rounded-2xl p-2" onSubmit={(event) => { event.preventDefault(); void navigate({ to: "/catalog", search: { q: heroQuery.trim() } }); }}>
+                <Search className="ml-2 size-5 shrink-0 text-primary" />
+                <label htmlFor="home-search" className="sr-only">Search the catalog</label>
+                <input id="home-search" value={heroQuery} onChange={(event) => setHeroQuery(event.target.value)} placeholder="Search software, subscriptions…" className="h-12 min-w-0 flex-1 bg-transparent text-base text-foreground placeholder:text-muted-foreground" />
+                <Button type="submit" size="icon" aria-label="Search"><ArrowUpRight className="size-5" /></Button>
+              </form>
+              <div className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-5">
+                {[
+                  { slug: "software", name: "Software", icon: MonitorCog },
+                  { slug: "subscriptions", name: "Subscriptions", icon: Repeat },
+                  { slug: "deals", name: "Deals", icon: Tag },
+                  { slug: "gift-cards", name: "Gift cards", icon: Gift },
+                  { slug: "game-top-ups", name: "Game top-ups", icon: Gamepad2 },
+                ].map(({ slug, name, icon: Icon }) => <Link key={slug} to="/catalog" search={{ category: slug }} className="category-tile glass-surface flex min-h-24 flex-col justify-center gap-3 rounded-2xl p-4 font-display text-sm"><Icon className="size-6 text-primary" />{name}</Link>)}
               </div>
             </div>
 
-            {feature ? (
-              <div className="rounded-lg bg-background p-3 ring-1 ring-foreground/5">
-                <div className="flex gap-3">
-                  {feature.image_url ? (
-                    <img
-                      src={feature.image_url}
-                      alt={feature.name}
-                      width={96}
-                      height={96}
-                      className="size-16 shrink-0 rounded-md object-cover md:size-24"
-                    />
-                  ) : null}
-                  <div className="min-w-0 flex-1">
-                    <p className="font-display text-[10px] uppercase tracking-[0.12em] text-primary">Popular choice</p>
-                    <div className="mt-1 flex items-baseline justify-between gap-2">
-                      <h2 className="font-display text-[15px] font-medium md:text-xl">{feature.name}</h2>
-                      {featurePrice !== null ? (
-                        <span className="shrink-0 font-display text-[15px] font-semibold">
-                          From {formatNpr(featurePrice)}
-                        </span>
-                      ) : null}
-                    </div>
-                    <p className="mt-0.5 text-xs text-muted-foreground">{feature.summary}</p>
-                  </div>
-                </div>
-                <div className="mt-3 flex gap-2">
-                  <Button asChild variant="ink" className="flex-1" size="sm">
-                    <Link to="/products/$slug" params={{ slug: feature.slug }}>
-                      View options
-                    </Link>
-                  </Button>
-                  <Button asChild variant="outline" size="sm">
-                    <Link to="/catalog">All products</Link>
-                  </Button>
-                </div>
-              </div>
-            ) : null}
+
           </div>
         </section>
 
@@ -208,7 +182,7 @@ function Index() {
               </Link>
             </div>
             {visible.length ? (
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-5">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
                 {visible.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
@@ -270,14 +244,14 @@ function Index() {
             <h2 className="mb-2 font-display text-[17px] font-medium md:text-2xl">Frequently asked</h2>
             {FAQS.map(([question, answer], index) => (
               <div key={question} className="border-b border-border">
-                <button
+                <Button variant="ghost"
                   className="flex w-full items-center justify-between py-4 text-left font-display text-sm font-medium"
                   onClick={() => setOpenFaq(openFaq === index ? null : index)}
                   aria-expanded={openFaq === index}
                 >
                   {question}
                   <ChevronDown className={`size-4 transition-transform ${openFaq === index ? "rotate-180" : ""}`} />
-                </button>
+                </Button>
                 {openFaq === index ? <p className="pb-4 pr-6 text-sm text-muted-foreground">{answer}</p> : null}
               </div>
             ))}

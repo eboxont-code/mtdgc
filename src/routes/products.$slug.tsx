@@ -81,15 +81,14 @@ export const Route = createFileRoute("/products/$slug")({
                     : "https://schema.org/OutOfStock",
                 url,
               })),
-              ...(prices.length ? [{
-                "@type": "AggregateOffer",
-                lowPrice: (Math.min(...prices) / 100).toFixed(2),
-                highPrice: (Math.max(...prices) / 100).toFixed(2),
-                offerCount: prices.length,
-                priceCurrency: "NPR",
-              }] : []),
             ],
-            seller: { "@type": "Organization", name: "MTDGC", url: SITE_URL },
+            seller: { "@type": "Organization", name: "MTDGC", url: `${SITE_URL}/` },
+            itemCondition: "https://schema.org/NewCondition",
+            hasMerchantReturnPolicy: {
+              "@type": "MerchantReturnPolicy",
+              applicableCountry: "NP",
+              merchantReturnLink: `${SITE_URL}/policies/refunds`,
+            },
           }),
         },
         {

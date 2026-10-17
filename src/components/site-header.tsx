@@ -28,7 +28,7 @@ export function SiteHeader() {
         </div>
       </div>
 
-      <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur">
+      <header className="glass-surface sticky top-0 z-30">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-1 px-4">
           <Link to="/" className="mr-auto inline-flex min-h-11 items-center gap-2" aria-label="MTDGC home">
             <span aria-hidden="true" className="size-3 rounded-sm bg-primary" />

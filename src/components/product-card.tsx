@@ -15,7 +15,7 @@ export function ProductCard({ product, priority = false }: { product: CatalogPro
   const orderable = isOrderable(product.status);
 
   return (
-    <article className="flex flex-col rounded-lg bg-card p-3 ring-1 ring-foreground/5 transition-transform hover:-translate-y-0.5">
+    <article data-scroll-reveal className="future-card glass-surface flex flex-col rounded-2xl p-4">
       <Link to="/products/$slug" params={{ slug: product.slug }} className="flex flex-1 flex-col">
         {product.image_url ? (
           <img
