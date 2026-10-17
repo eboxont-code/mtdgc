@@ -1,7 +1,7 @@
 # MTDGC launch roadmap
 
 ## October 17 ordered UI pack
-- [ ] R0: dark glass redesign, mobile bottom navigation, search and motion, mobile verification, publish
+- [x] R0: dark glass theme, cards, header, CSS grid hero, category tiles, search-to-catalog, reduced-motion reveals and bottom navigation; mobile home/search/cart/checkout checked, account checked signed out. Published revision requested.
 - [ ] 0c: route metadata and permitted removal of /products from sitemap
 - [ ] A13, A16-A20, F items, D2/D3, P/S items, numbered items, U items, G items in requested order
 
