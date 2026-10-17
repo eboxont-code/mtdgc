@@ -182,7 +182,7 @@ function Index() {
               </Link>
             </div>
             {visible.length ? (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
+              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                 {visible.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}

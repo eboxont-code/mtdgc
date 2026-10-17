@@ -231,3 +231,14 @@ main .bg-card, main .bg-panel { background: var(--glass-bg); border-color: var(-
   .reveal, .ticker { animation: none; }
   * { scroll-behavior: auto !important; }
 }
+
+/* Product tile: one green scanline sweep on hover or focus. */
+.product-tile .tile-scan { opacity: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .product-tile:hover .tile-scan, .product-tile:focus-within .tile-scan { animation: tile-scan 700ms ease-out 1; }
+}
+@keyframes tile-scan {
+  0% { opacity: 0; transform: translateY(0); }
+  15% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(var(--scan-distance, 220px)); }
+}

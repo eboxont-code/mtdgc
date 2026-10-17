@@ -57,7 +57,7 @@ function ProductsIndexPage() {
         </div>
 
         {products.length ? (
-          <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4">
             {products.map((product, index) => (
                 <ProductCard key={product.id} product={product} priority={index < 2} />
             ))}

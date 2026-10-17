@@ -3,6 +3,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { ProductArt } from "@/components/product-art";
 import { ProductCard } from "@/components/product-card";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -12,7 +13,6 @@ import { getProductBySlug } from "@/lib/catalog.functions";
 import { useCart } from "@/lib/cart";
 import { formatNpr, isOrderable, SITE_URL, STATUS_LABEL } from "@/lib/format";
 import { productFaqs, requirementHelp } from "@/lib/product-help";
-import { productImageSources } from "@/lib/product-images";
 
 export const Route = createFileRoute("/products/$slug")({
   loader: async ({ params }) => {
@@ -182,20 +182,7 @@ function ProductPage() {
 
         <div className="grid gap-8 md:grid-cols-[0.9fr_1.1fr]">
           <div>
-            {product.image_url ? (
-              <img
-                {...productImageSources(product.image_url)}
-                sizes="(max-width: 768px) 100vw, 480px"
-                fetchPriority="high"
-                decoding="async"
-                alt={product.name}
-                width={640}
-                height={640}
-                className="w-full rounded-lg object-cover"
-              />
-            ) : (
-              <div aria-hidden="true" className="aspect-square w-full rounded-lg bg-secondary" />
-            )}
+            <ProductArt product={product} priority sizes="(max-width: 768px) 100vw, 480px" className="rounded-2xl" />
           </div>
 
           <div>
@@ -321,7 +308,7 @@ function ProductPage() {
         {related.length > 0 && (
           <section className="mt-12" aria-labelledby="related-heading">
             <h2 id="related-heading" className="mb-4 font-display text-lg font-medium">Related products</h2>
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4">
               {related.map((item) => (
                 <ProductCard key={item.id} product={item} />
               ))}
@@ -332,7 +319,7 @@ function ProductPage() {
           <section className="mt-10" aria-labelledby="explore-heading">
             <h2 id="explore-heading" className="mb-1 font-display text-lg font-medium">Also in the MTDGC catalog</h2>
             <p className="mb-4 text-sm text-muted-foreground">Products from other categories we currently sell.</p>
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4">
               {explore.map((item) => (
                 <ProductCard key={item.id} product={item} />
               ))}
