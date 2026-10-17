@@ -86,15 +86,15 @@ function CartPage() {
               ))}
             </ul>
 
-            <div className="mt-6 rounded-lg bg-panel p-4">
+            <div className="mt-6 rounded-2xl border border-border bg-card p-4">
               <div className="mb-2 flex items-center justify-between text-sm"><span>Items</span><span>{count}</span></div>
               <div className="flex items-center justify-between font-display">
                 <span>Estimated total</span>
-                <strong>{formatNpr(subtotalMinor)}</strong>
+                <strong className="font-mono text-lg text-price">{formatNpr(subtotalMinor)}</strong>
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
-                No payment is taken on this site. MTDGC confirms availability and sends payment instructions before you
-                pay.
+                Nothing is charged on this site. After you place the order you pay by QR code or bank transfer, then upload
+                your payment screenshot.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <Button asChild size="lg"><Link to="/checkout">Continue to checkout</Link></Button>

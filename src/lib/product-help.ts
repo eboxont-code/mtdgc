@@ -14,6 +14,8 @@ export function requirementHelp(requirement: string): string | null {
 }
 
 export function contactKind(key: string): "email" | "phone" | null {
+  // Game account fields such as "PUBG Mobile player ID" are not contact details.
+  if (/player|\bid\b|uid|nickname|username|server/i.test(key)) return null;
   if (/e-?mail/i.test(key)) return "email";
   if (/whatsapp|phone|mobile/i.test(key)) return "phone";
   return null;
