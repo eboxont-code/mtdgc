@@ -21,7 +21,7 @@ export function BottomNav() {
     <nav aria-label="Mobile navigation" className="mobile-bottom-nav fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-background/92 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden">
       <Link to="/" aria-current={pathname === "/" ? "page" : undefined} className={item}><Home className="size-5" />Home</Link>
       <Link to="/categories" aria-current={pathname.startsWith("/categories") || pathname === "/catalog" ? "page" : undefined} className={item}><LayoutGrid className="size-5" />Categories</Link>
-      <Link to="/catalog" onClick={focusSearch} className={item}><Search className="size-5" />Search</Link>
+      <Link to="/catalog" search={{ q: "" }} activeOptions={{ includeSearch: true }} onClick={focusSearch} className={item}><Search className="size-5" />Search</Link>
       <Link to="/track-order" aria-current={pathname.startsWith("/track") || pathname.startsWith("/order") ? "page" : undefined} className={item}><PackageSearch className="size-5" />Orders</Link>
       <button type="button" className={item} aria-label={`Open cart, ${count} ${count === 1 ? "item" : "items"}`} onClick={() => setDrawerOpen(true)}>
         <ShoppingBag className="size-5" />Cart
