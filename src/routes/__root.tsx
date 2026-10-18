@@ -98,7 +98,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     const descriptionMeta = [...pageMeta].reverse().find((meta) => meta && "name" in meta && meta.name === "description");
     const title = titleMeta && "title" in titleMeta ? String(titleMeta.title) : "MTDGC | Nepal's Digital Marketplace";
     const description = descriptionMeta && "content" in descriptionMeta ? String(descriptionMeta.content) : "Software licences and subscriptions in Nepal, priced in NPR.";
-    const canonical = [...matches].reverse().flatMap((match) => match.links ?? []).find((link) => link.rel === "canonical");
+    const canonical = [...matches].reverse().flatMap((match) => match.links ?? []).find((link) => link?.rel === "canonical");
     return {
     meta: [
       { charSet: "utf-8" },
