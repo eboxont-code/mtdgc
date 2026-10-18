@@ -75,7 +75,7 @@ export function VerifyPanel() {
       ) : (
         <ul className="mt-3 grid gap-3">
           {rows.map((row) => (
-            <li key={row.id} className="rounded-lg border border-border p-3">
+            <li key={row.id} className="rounded-lg border border-glass-border bg-glass-bg p-3">
               <div className="flex flex-wrap justify-between gap-2 font-display text-sm">
                 <strong>{row.order_number}</strong>
                 <span>{formatNpr(row.total_minor)}</span>
@@ -93,7 +93,7 @@ export function VerifyPanel() {
                     <Button variant="outline" size="sm" className="mt-2 min-h-11" onClick={() => open(row.proof!.id)}>View screenshot</Button>
                   )}
                   <label className="mt-3 block text-xs text-muted-foreground" htmlFor={`note-${row.proof.id}`}>Note (required to reject)</label>
-                  <textarea id={`note-${row.proof.id}`} rows={2} maxLength={500} value={notes[row.proof.id] ?? ""} onChange={(e) => setNotes((n) => ({ ...n, [row.proof!.id]: e.target.value }))} className="mt-1 w-full rounded-md border border-border bg-card p-2 text-sm" />
+                  <textarea id={`note-${row.proof.id}`} rows={2} maxLength={500} value={notes[row.proof.id] ?? ""} onChange={(e) => setNotes((n) => ({ ...n, [row.proof!.id]: e.target.value }))} className="mt-1 w-full rounded-md border border-input bg-card p-2 text-sm" />
                   <label className="mt-2 flex min-h-11 items-center gap-2 text-sm">
                     <input type="checkbox" checked={!!askNew[row.proof.id]} onChange={(e) => setAskNew((a) => ({ ...a, [row.proof!.id]: e.target.checked }))} />
                     Ask for a new proof

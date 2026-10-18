@@ -76,23 +76,23 @@ function OrderPage() {
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
       <SiteHeader />
-      <main id="main-content" tabIndex={-1} className="mx-auto max-w-2xl px-4 pb-16 pt-8 focus:outline-none">
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-2xl px-4 pb-28 pt-8 focus:outline-none">
         <h1 className="font-display text-2xl font-medium">Order {orderNumber.toUpperCase()}</h1>
         {state === "loading" && <p className="mt-4 text-sm text-muted-foreground">Loading your order.</p>}
         {(state === "locked" || state === "limited") && (
           <form
-            className="mt-5 space-y-3 rounded-lg border border-border bg-card p-5"
+            className="mt-5 space-y-3 rounded-lg border border-input bg-card p-5"
             onSubmit={async (e) => { e.preventDefault(); if (busy || contact.trim().length < 3) return; setBusy(true); await load(contact); setBusy(false); }}
           >
             <p className="text-sm">Enter the mobile number or email you used when ordering to view this order.</p>
             {state === "limited" && <p role="alert" className="text-sm text-destructive">Too many attempts. Please wait a few minutes and try again.</p>}
             <label htmlFor="order-contact" className="block font-display text-sm">Mobile number or email</label>
-            <input id="order-contact" value={contact} onChange={(e) => setContact(e.target.value)} className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm" />
+            <input id="order-contact" value={contact} onChange={(e) => setContact(e.target.value)} className="min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm" />
             <Button type="submit" disabled={busy}>{busy ? "Checking" : "View order"}</Button>
           </form>
         )}
         {state === "found" && order && (
-          <section className="mt-5 rounded-lg border border-border bg-card p-5 text-sm">
+          <section className="mt-5 rounded-lg border border-input bg-card p-5 text-sm">
             <p className="font-display">Status: <strong>{STATUS_TEXT[order.status] ?? order.status}</strong></p>
             <p className="mt-1 text-muted-foreground">Placed {new Date(order.createdAt).toLocaleString("en-NP")}</p>
             <ul className="mt-3 space-y-1">
@@ -105,7 +105,7 @@ function OrderPage() {
                 <PaymentProofForm orderNumber={order.orderNumber} />
               </>
             )}
-            <p className="mt-4 text-xs text-muted-foreground">Questions? <Link to="/support" className="underline">Contact support</Link>.</p>
+            <p className="mt-4 text-xs text-muted-foreground">Questions? <Link to="/support" className="inline-flex min-h-11 items-center text-primary underline">Contact support</Link>.</p>
             {whatsappLink() && (
               <p className="text-sm text-muted-foreground">
                 Need help with this order?{" "}

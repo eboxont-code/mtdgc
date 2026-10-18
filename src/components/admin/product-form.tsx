@@ -95,22 +95,22 @@ export function ProductForm({ productId, onSaved, onCancel }: { productId?: stri
     <label className="block">
       <span className="font-display text-xs text-muted-foreground">{label}</span>
       {multiline ? (
-        <textarea value={form[k] as string} onChange={(e) => set(k, e.target.value)} rows={3} aria-invalid={Boolean(errors[k])} className="mt-1 w-full rounded-md border border-border bg-card p-2 text-sm" />
+        <textarea value={form[k] as string} onChange={(e) => set(k, e.target.value)} rows={3} aria-invalid={Boolean(errors[k])} className="mt-1 w-full rounded-md border border-input bg-card p-2 text-sm" />
       ) : (
-        <input value={form[k] as string} onChange={(e) => set(k, e.target.value)} aria-invalid={Boolean(errors[k])} className="mt-1 h-9 w-full rounded-md border border-border bg-card px-2 text-sm" />
+        <input value={form[k] as string} onChange={(e) => set(k, e.target.value)} aria-invalid={Boolean(errors[k])} className="mt-1 min-h-11 w-full rounded-md border border-input bg-card px-2 text-sm" />
       )}
       {errors[k] && <span className="mt-1 block text-xs text-destructive">{errors[k]}</span>}
     </label>
   );
 
   return (
-    <form onSubmit={submit} noValidate className="mt-3 grid gap-3 rounded-lg border border-border bg-panel p-4 md:grid-cols-2">
+    <form onSubmit={submit} noValidate className="mt-3 grid min-w-0 gap-3 border-t border-border py-4 md:grid-cols-2">
       {field("name", "Name")}
       {field("slug", "Slug")}
       {field("brand", "Brand")}
       <label className="block">
         <span className="font-display text-xs text-muted-foreground">Category</span>
-        <select value={form.category_id} onChange={(e) => set("category_id", e.target.value)} className="mt-1 h-9 w-full rounded-md border border-border bg-card px-2 text-sm">
+        <select value={form.category_id} onChange={(e) => set("category_id", e.target.value)} className="mt-1 min-h-11 w-full rounded-md border border-input bg-card px-2 text-sm">
           <option value="">None</option>
           {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
@@ -127,11 +127,11 @@ export function ProductForm({ productId, onSaved, onCancel }: { productId?: stri
       {field("seo_description", "SEO description", true)}
       <label className="block">
         <span className="font-display text-xs text-muted-foreground">Status</span>
-        <select value={form.status} onChange={(e) => set("status", e.target.value)} className="mt-1 h-9 w-full rounded-md border border-border bg-card px-2 text-sm">
+        <select value={form.status} onChange={(e) => set("status", e.target.value)} className="mt-1 min-h-11 w-full rounded-md border border-input bg-card px-2 text-sm">
           {STATUSES.map((s) => <option key={s} value={s}>{s.replace(/_/g, " ")}</option>)}
         </select>
       </label>
-      <label className="flex items-center gap-2 text-sm">
+      <label className="flex min-h-11 items-center gap-2 text-sm">
         <input type="checkbox" checked={form.is_published} onChange={(e) => set("is_published", e.target.checked)} />
         Published
       </label>

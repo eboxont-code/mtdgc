@@ -99,7 +99,7 @@ function AccountPage() {
       <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-4xl px-4 pb-16 pt-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="font-display text-[26px] font-medium md:text-4xl">Your account</h1>
-          <Button variant="outline" onClick={signOut}>Sign out</Button>
+          <Button variant="outline" className="min-h-11" onClick={signOut}>Sign out</Button>
         </div>
         <p className="mt-2 text-sm text-muted-foreground">{email}</p>
 
@@ -108,18 +108,18 @@ function AccountPage() {
           <form onSubmit={saveProfile} className="mt-3 grid gap-3 md:grid-cols-2">
             <label className="block">
               <span className="font-display text-xs text-muted-foreground">Display name</span>
-              <input value={displayName} onChange={(event) => setDisplayName(event.target.value)} className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm outline-none focus:border-primary" />
+              <input value={displayName} onChange={(event) => setDisplayName(event.target.value)} className="mt-1 min-h-11 w-full rounded-md border border-input bg-card px-3 font-display text-sm focus:border-primary" />
             </label>
             <label className="block">
               <span className="font-display text-xs text-muted-foreground">Mobile number</span>
-              <input value={phone} onChange={(event) => setPhone(event.target.value)} inputMode="tel" className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm outline-none focus:border-primary" />
+              <input value={phone} onChange={(event) => setPhone(event.target.value)} inputMode="tel" className="mt-1 min-h-11 w-full rounded-md border border-input bg-card px-3 font-display text-sm focus:border-primary" />
             </label>
             <label className="block md:col-span-2">
               <span className="font-display text-xs text-muted-foreground">Delivery email for codes and subscriptions</span>
-              <input value={deliveryEmail} onChange={(event) => setDeliveryEmail(event.target.value)} type="email" className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm outline-none focus:border-primary" />
+              <input value={deliveryEmail} onChange={(event) => setDeliveryEmail(event.target.value)} type="email" className="mt-1 min-h-11 w-full rounded-md border border-input bg-card px-3 font-display text-sm focus:border-primary" />
             </label>
             <div className="md:col-span-2">
-              <Button type="submit" disabled={saving}>{saving ? "Saving" : "Save profile"}</Button>
+              <Button type="submit" className="min-h-11" disabled={saving}>{saving ? "Saving" : "Save profile"}</Button>
               {saved && <span className="ml-3 font-display text-xs text-success">Saved</span>}
             </div>
           </form>
@@ -161,7 +161,7 @@ function AccountPage() {
               {wishlist.map((item) => (
                 <li key={item.product_id}>
                   {item.products ? (
-                    <Link to="/products/$slug" params={{ slug: item.products.slug }} className="font-display text-sm text-primary">
+                    <Link to="/products/$slug" params={{ slug: item.products.slug }} className="inline-flex min-h-11 items-center font-display text-sm text-primary">
                       {item.products.name}
                     </Link>
                   ) : null}
@@ -175,7 +175,7 @@ function AccountPage() {
           <h2 className="font-display text-lg font-medium">Support requests</h2>
           {tickets.length === 0 ? (
             <p className="mt-2 text-sm text-muted-foreground">
-              No support requests yet. You can raise one from the <Link to="/support" className="text-primary">support page</Link>.
+              No support requests yet. You can raise one from the <Link to="/support" className="inline-flex min-h-11 items-center text-primary">support page</Link>.
             </p>
           ) : (
             <ul className="mt-3 divide-y divide-border">

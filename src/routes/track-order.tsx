@@ -97,13 +97,13 @@ function TrackOrderPage() {
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
       <SiteHeader />
-      <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-4xl px-4 pb-16 pt-6">
+      <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-4xl px-4 pb-28 pt-6">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Track order" }]} />
         <h1 className="font-display text-[26px] font-medium md:text-4xl">Track your order</h1>
         <p className="mt-2 max-w-[62ch] text-sm text-muted-foreground">
           Every MTDGC order gets a readable order number. Enter it with the email or phone number used on the order to
           see its current status. If you have an account, your orders also appear in your{" "}
-          <Link to="/account" className="text-primary">account dashboard</Link>.
+          <Link to="/account" className="inline-flex min-h-11 items-center text-primary">account dashboard</Link>.
         </p>
 
         <form onSubmit={submit} className="mt-6 grid gap-3 md:max-w-xl" noValidate>
@@ -114,7 +114,7 @@ function TrackOrderPage() {
               onChange={(event) => setOrderNumber(event.target.value)}
               placeholder="MT123456"
               autoComplete="off"
-              className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm outline-none focus:border-primary"
+              className="mt-1 min-h-11 w-full rounded-md border border-input bg-card px-3 font-display text-sm focus:border-primary"
             />
           </label>
           <label className="block">
@@ -122,7 +122,7 @@ function TrackOrderPage() {
             <input
               value={contact}
               onChange={(event) => setContact(event.target.value)}
-              className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm outline-none focus:border-primary"
+              className="mt-1 min-h-11 w-full rounded-md border border-input bg-card px-3 font-display text-sm focus:border-primary"
             />
           </label>
           {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
@@ -146,7 +146,7 @@ function TrackOrderPage() {
         </form>
 
         {found && (
-          <section role="status" className="mt-8 rounded-lg border border-border bg-card p-4 md:max-w-xl">
+          <section role="status" className="mt-8 rounded-lg border border-input bg-card p-4 md:max-w-xl">
             <h2 className="font-display text-lg font-medium">Order {found.orderNumber}</h2>
             <p className="text-xs text-muted-foreground">
               Placed {new Date(found.createdAt).toLocaleDateString("en-GB")} · {formatNpr(found.totalMinor)} · Status: {STATUS_TEXT[found.status] ?? found.status}
