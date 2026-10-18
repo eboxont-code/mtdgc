@@ -2,7 +2,7 @@
 
 ## October 18 strict gate
 - [x] R0.8: Matrix tokens, glass surfaces and 44px controls applied to account, orders, wishlist, order, tracking and admin. Classes and markup only. Build OK; all six pages checked at 390px with no horizontal overflow. Private pages correctly redirect to sign-in. Tracking rejects missing contact; an order number alone stays locked. Auth redirect has existing 40px inputs and 20px text buttons, outside this styling unit. Private populated states were not checked. Publishing requested. Code revision: 2ad3d0e (automatic Lovable commit; custom commit labels unavailable).
-- [x] R0.9: measured current Matrix tokens using browser Canvas sRGB conversion and WCAG relative luminance, compositing glass over background. All table pairs meet 4.5:1. Destructive badge foreground was 3.50:1; only its lightness changed from 0.98 to 0.22, preserving hue and chroma. No palette or layout redesign. Build and publication pending final check.
+- [x] R0.9: measured current Matrix tokens using browser Canvas sRGB conversion and WCAG relative luminance, compositing glass over background. All table pairs meet 4.5:1. Destructive badge foreground was 3.50:1; only its lightness changed from 0.98 to 0.22, preserving hue and chroma. No palette or layout redesign. Build OK; code revision 7971d60; publishing requested. Placeholder opacity and hover compositing remain unverified.
 - [ ] 0c, A16-A20, F items, D2/D3, P/S items, numbered items, U2-U22, G1-G6: blocked until preceding item is checked and committed.
 - Git state and commit messages are managed by Lovable. Record each automatic code revision before advancing the gate.
 
