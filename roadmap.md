@@ -2,7 +2,7 @@
 
 ## October 18 strict gate
 - [x] R0.8: Matrix tokens, glass surfaces and 44px controls applied to account, orders, wishlist, order, tracking and admin. Classes and markup only. Build OK; all six pages checked at 390px with no horizontal overflow. Private pages correctly redirect to sign-in. Tracking rejects missing contact; an order number alone stays locked. Auth redirect has existing 40px inputs and 20px text buttons, outside this styling unit. Private populated states were not checked. Publishing requested. Code revision: 2ad3d0e (automatic Lovable commit; custom commit labels unavailable).
-- [ ] R0.9: measured contrast table and minimum token lightness corrections.
+- [x] R0.9: measured current Matrix tokens using browser Canvas sRGB conversion and WCAG relative luminance, compositing glass over background. All table pairs meet 4.5:1. Destructive badge foreground was 3.50:1; only its lightness changed from 0.98 to 0.22, preserving hue and chroma. No palette or layout redesign. Build and publication pending final check.
 - [ ] 0c, A16-A20, F items, D2/D3, P/S items, numbered items, U2-U22, G1-G6: blocked until preceding item is checked and committed.
 - Git state and commit messages are managed by Lovable. Record each automatic code revision before advancing the gate.
 
@@ -45,3 +45,69 @@
 - [ ] Add sitemap.xml and verify HTTP 200
 - [ ] Final mobile, accessibility, asset, metadata, navigation, and brand smoke test
 - [ ] Publish and report shipped, rolled, blockers, commit, URL, and credits
+
+### R0.9 measured contrast
+Body/input text and outline badges use foreground; muted text and inactive navigation use muted-foreground; links and active navigation use primary; prices use price. Default badges and primary buttons use primary-foreground on primary; secondary badges/buttons use secondary-foreground on secondary. Glass values are composited over the page background. Values measure token pairs, not disabled opacity or image overlays.
+
+| Foreground token | Background token | Ratio | AA normal text |
+| --- | --- | ---: | --- |
+| foreground | background | 17.94:1 | Pass |
+| foreground | card | 17.09:1 | Pass |
+| foreground | panel | 17.09:1 | Pass |
+| foreground | popover | 16.45:1 | Pass |
+| foreground | secondary | 15.41:1 | Pass |
+| foreground | muted | 15.41:1 | Pass |
+| foreground | glass-bg | 16.82:1 | Pass |
+| muted-foreground | background | 8.78:1 | Pass |
+| muted-foreground | card | 8.36:1 | Pass |
+| muted-foreground | panel | 8.36:1 | Pass |
+| muted-foreground | popover | 8.05:1 | Pass |
+| muted-foreground | secondary | 7.54:1 | Pass |
+| muted-foreground | muted | 7.54:1 | Pass |
+| muted-foreground | glass-bg | 8.23:1 | Pass |
+| primary | background | 14.03:1 | Pass |
+| primary | card | 13.36:1 | Pass |
+| primary | panel | 13.36:1 | Pass |
+| primary | popover | 12.87:1 | Pass |
+| primary | secondary | 12.05:1 | Pass |
+| primary | muted | 12.05:1 | Pass |
+| primary | glass-bg | 13.15:1 | Pass |
+| price | background | 15.68:1 | Pass |
+| price | card | 14.94:1 | Pass |
+| price | panel | 14.94:1 | Pass |
+| price | popover | 14.38:1 | Pass |
+| price | secondary | 13.47:1 | Pass |
+| price | muted | 13.47:1 | Pass |
+| price | glass-bg | 14.70:1 | Pass |
+| success | background | 12.21:1 | Pass |
+| success | card | 11.63:1 | Pass |
+| success | panel | 11.63:1 | Pass |
+| success | popover | 11.20:1 | Pass |
+| success | secondary | 10.49:1 | Pass |
+| success | muted | 10.49:1 | Pass |
+| success | glass-bg | 11.45:1 | Pass |
+| warn | background | 11.32:1 | Pass |
+| warn | card | 10.79:1 | Pass |
+| warn | panel | 10.79:1 | Pass |
+| warn | popover | 10.39:1 | Pass |
+| warn | secondary | 9.73:1 | Pass |
+| warn | muted | 9.73:1 | Pass |
+| warn | glass-bg | 10.62:1 | Pass |
+| deal | background | 6.28:1 | Pass |
+| deal | card | 5.99:1 | Pass |
+| deal | panel | 5.99:1 | Pass |
+| deal | popover | 5.76:1 | Pass |
+| deal | secondary | 5.40:1 | Pass |
+| deal | muted | 5.40:1 | Pass |
+| deal | glass-bg | 5.89:1 | Pass |
+| destructive | background | 5.40:1 | Pass |
+| destructive | card | 5.14:1 | Pass |
+| destructive | panel | 5.14:1 | Pass |
+| destructive | popover | 4.95:1 | Pass |
+| destructive | secondary | 4.64:1 | Pass |
+| destructive | muted | 4.64:1 | Pass |
+| destructive | glass-bg | 5.06:1 | Pass |
+| primary-foreground | primary | 14.03:1 | Pass |
+| secondary-foreground | secondary | 15.41:1 | Pass |
+| accent-foreground | accent | 12.09:1 | Pass |
+| destructive-foreground | destructive | 4.66:1 | Pass |
