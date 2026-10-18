@@ -1,5 +1,11 @@
 # MTDGC launch roadmap
 
+## October 18 strict gate
+- [ ] R0.8: Matrix tokens and existing controls on account, orders, wishlist, order, tracking and admin. Classes and markup only; signed-out mobile checks required.
+- [ ] R0.9: measured contrast table and minimum token lightness corrections.
+- [ ] 0c, A16-A20, F items, D2/D3, P/S items, numbered items, U2-U22, G1-G6: blocked until preceding item is checked and committed.
+- Per-item manual commits are unavailable: Git state is managed by Lovable. Do not advance the gate without a recorded revision.
+
 ## October 17 ordered UI pack
 - [x] R0: dark glass theme, cards, header, CSS grid hero, category tiles, search-to-catalog, reduced-motion reveals and bottom navigation; mobile home/search/cart/checkout checked, account checked signed out. Published revision requested.
 - [x] 0c: removed /products sitemap entry; 22 remaining live entries return 200, self canonicals and unique titles. Full private-route and published-row comparison unavailable in this check; robots unchanged. Reported limitation before proceeding.
