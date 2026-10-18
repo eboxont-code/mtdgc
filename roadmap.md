@@ -1,10 +1,10 @@
 # MTDGC launch roadmap
 
 ## October 18 strict gate
-- [ ] R0.8: Matrix tokens and existing controls on account, orders, wishlist, order, tracking and admin. Classes and markup only; signed-out mobile checks required.
+- [x] R0.8: Matrix tokens, glass surfaces and 44px controls applied to account, orders, wishlist, order, tracking and admin. Classes and markup only. Build OK; all six pages checked at 390px with no horizontal overflow. Private pages correctly redirect to sign-in. Tracking rejects missing contact; an order number alone stays locked. Auth redirect has existing 40px inputs and 20px text buttons, outside this styling unit. Private populated states were not checked. Publishing requested. Code revision: 2ad3d0e (automatic Lovable commit; custom commit labels unavailable).
 - [ ] R0.9: measured contrast table and minimum token lightness corrections.
 - [ ] 0c, A16-A20, F items, D2/D3, P/S items, numbered items, U2-U22, G1-G6: blocked until preceding item is checked and committed.
-- Per-item manual commits are unavailable: Git state is managed by Lovable. Do not advance the gate without a recorded revision.
+- Git state and commit messages are managed by Lovable. Record each automatic code revision before advancing the gate.
 
 ## October 17 ordered UI pack
 - [x] R0: dark glass theme, cards, header, CSS grid hero, category tiles, search-to-catalog, reduced-motion reveals and bottom navigation; mobile home/search/cart/checkout checked, account checked signed out. Published revision requested.
