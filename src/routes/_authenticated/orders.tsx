@@ -46,19 +46,19 @@ function OrdersPage() {
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
       <SiteHeader />
-      <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-4xl px-4 pb-16 pt-6">
+      <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-4xl px-4 pb-28 pt-6">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Account", to: "/account" }, { label: "Orders" }]} />
         <h1 className="font-display text-[26px] font-medium md:text-4xl">Your orders</h1>
         <p className="mt-2 text-sm text-muted-foreground">Orders you place while signed in are listed here with their current status.</p>
         {error ? (
-          <div role="alert" className="mt-6 rounded-lg border border-border p-4 text-sm">
+          <div role="alert" className="mt-6 rounded-lg border border-glass-border bg-glass-bg p-4 text-sm">
             <p>We could not load your orders.</p>
             <Button className="mt-3 min-h-11" variant="outline" onClick={load}>Try again</Button>
           </div>
         ) : orders === null ? (
           <p className="mt-6 text-sm text-muted-foreground">Loading your orders.</p>
         ) : orders.length === 0 ? (
-          <div className="mt-8 rounded-lg border border-border py-14 text-center">
+          <div className="mt-8 rounded-lg border border-glass-border bg-glass-bg py-14 text-center">
             <p className="font-display font-medium">No orders on this account yet</p>
             <p className="mt-1 text-sm text-muted-foreground">When you place an order it will be listed here.</p>
             <Button asChild className="mt-4"><Link to="/catalog">Browse the catalog</Link></Button>
@@ -68,7 +68,7 @@ function OrdersPage() {
             {orders.map((order) => {
               const current = orderStepIndex(order.status);
               return (
-                <li key={order.id} className="rounded-lg border border-border p-4">
+                <li key={order.id} className="rounded-lg border border-glass-border bg-glass-bg p-4">
                   <div className="flex flex-wrap items-center gap-3">
                     <div className="min-w-0 flex-1">
                       <p className="font-display font-medium">{order.orderNumber}</p>

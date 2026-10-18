@@ -148,7 +148,7 @@ function AdminPage() {
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
       <SiteHeader />
-      <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-5xl px-4 pb-16 pt-6">
+      <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-5xl px-4 pb-28 pt-6">
         <h1 className="font-display text-[26px] font-medium md:text-4xl">Admin</h1>
 
         {allowed === null && <p className="mt-4 text-sm text-muted-foreground">Checking your access.</p>}
@@ -171,14 +171,14 @@ function AdminPage() {
             {tab === "verify" && <div className="mt-6"><VerifyPanel /></div>}
             {tab === "payments" && <div className="mt-6"><PaymentsPanel /></div>}
             <div hidden={tab !== "overview"}>
-            <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+            <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
               {[
                 ["Products", String(products.length)],
                 ["Orders recorded", String(orderCount)],
                 ["Support tickets", String(ticketCount)],
                 ["Reviews awaiting approval", String(reviewCount)],
               ].map(([label, value]) => (
-                <div key={label} className="rounded-lg bg-panel p-4">
+                <div key={label} className="border-b border-border py-4">
                   <p className="font-display text-xs uppercase tracking-[0.1em] text-muted-foreground">{label}</p>
                   <p className="mt-1 font-display text-2xl font-semibold">{value}</p>
                 </div>
@@ -191,7 +191,7 @@ function AdminPage() {
                 Products, categories, denominations and availability are stored in the database, so new lines can be
                 added without changing the site design.
               </p>
-              <div className="mt-3 overflow-x-auto">
+              <div className="mt-3 max-w-full overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead>
                     <tr className="border-b border-border font-display text-xs uppercase tracking-[0.1em] text-muted-foreground">
@@ -260,7 +260,7 @@ function AdminPage() {
               {lowStock.length ? (
                 <ul className="mt-2 divide-y divide-border text-sm">
                   {lowStock.map((v) => (
-                    <li key={v.sku} className="flex justify-between py-2">
+                    <li key={v.sku} className="flex flex-col gap-2 py-2 sm:flex-row sm:justify-between">
                       <span>{v.product}, {v.name} <span className="text-xs text-muted-foreground">({v.sku})</span></span>
                       <span>{v.stock_quantity === null ? "Marked low" : `${v.stock_quantity} left`}</span>
                     </li>
@@ -282,7 +282,7 @@ function AdminPage() {
                   value={orderQuery}
                   onChange={(e) => setOrderQuery(e.target.value)}
                   placeholder="Search by MTD reference"
-                  className="h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm"
+                  className="min-h-11 w-full rounded-md border border-input bg-card px-3 font-display text-sm"
                 />
               </label>
               {visibleOrders.length ? (
@@ -295,7 +295,7 @@ function AdminPage() {
                         <select
                           value={o.status}
                           onChange={(e) => updateOrderStatus(o.id, e.target.value)}
-                          className="min-h-11 rounded-md border border-border bg-card px-2 text-base"
+                          className="min-h-11 rounded-md border border-input bg-card px-2 text-base"
                         >
                           {!ORDER_STATUSES.some((s) => s === o.status) && <option value={o.status} disabled>{o.status.replaceAll("_", " ")}</option>}
                           {ORDER_STATUSES.map((s) => (
@@ -337,7 +337,7 @@ function AdminPage() {
               {pendingReviews.length ? (
                 <ul className="mt-2 space-y-3 text-sm">
                   {pendingReviews.map((r) => (
-                    <li key={r.id} className="rounded-lg border border-border p-3">
+                    <li key={r.id} className="rounded-lg border border-glass-border bg-glass-bg p-3">
                       <p className="font-display">{r.rating} out of 5</p>
                       <p className="mt-1 text-muted-foreground">{r.body}</p>
                       <Button size="sm" className="mt-2" onClick={() => approveReview(r.id)}>Approve</Button>

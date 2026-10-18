@@ -45,13 +45,13 @@ function WishlistPage() {
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
       <SiteHeader />
-      <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-4xl px-4 pb-16 pt-6">
+      <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-4xl px-4 pb-28 pt-6">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Account", to: "/account" }, { label: "Wishlist" }]} />
         <h1 className="font-display text-[26px] font-medium md:text-4xl">Your wishlist</h1>
         {rows === null ? (
           <p className="mt-6 text-sm text-muted-foreground">Loading your saved products.</p>
         ) : rows.length === 0 ? (
-          <div className="mt-8 rounded-lg border border-border py-14 text-center">
+          <div className="mt-8 rounded-lg border border-glass-border bg-glass-bg py-14 text-center">
             <p className="font-display font-medium">Nothing saved yet</p>
             <p className="mt-1 text-sm text-muted-foreground">Tap "Save to wishlist" on any product page to keep it here.</p>
             <Button asChild className="mt-4"><Link to="/catalog">Browse the catalog</Link></Button>
@@ -60,19 +60,19 @@ function WishlistPage() {
           <ul className="mt-6 space-y-3">
             {rows.map((row) =>
               row.products ? (
-                <li key={row.product_id} className="flex items-center gap-3 rounded-lg border border-border p-3">
+                <li key={row.product_id} className="flex items-center gap-3 rounded-lg border border-glass-border bg-glass-bg p-3">
                   {row.products.image_url ? (
                     <img src={row.products.image_url} alt="" className="size-14 rounded-md object-cover" loading="lazy" />
                   ) : (
                     <span aria-hidden="true" className="size-14 rounded-md bg-secondary" />
                   )}
                   <div className="min-w-0 flex-1">
-                    <Link to="/products/$slug" params={{ slug: row.products.slug }} className="font-display font-medium hover:text-primary">
+                    <Link to="/products/$slug" params={{ slug: row.products.slug }} className="inline-flex min-h-11 items-center font-display font-medium hover:text-primary">
                       {row.products.name}
                     </Link>
                     <p className="truncate text-xs text-muted-foreground">{row.products.summary}</p>
                   </div>
-                  <Button variant="ghost" size="sm" onClick={() => remove(row.product_id)}>Remove</Button>
+                  <Button className="col-span-2 min-h-11 sm:col-auto" variant="ghost" size="sm" onClick={() => remove(row.product_id)}>Remove</Button>
                 </li>
               ) : null,
             )}

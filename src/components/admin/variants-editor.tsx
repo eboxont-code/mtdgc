@@ -60,11 +60,11 @@ export function VariantsEditor({ productId }: { productId: string }) {
     }
   };
 
-  const cell = "h-8 w-full rounded border border-border bg-card px-1 text-sm";
+  const cell = "min-h-11 w-full rounded border border-input bg-card px-1 text-sm";
   return (
-    <div className="md:col-span-2">
+    <div className="min-w-0 md:col-span-2">
       <h3 className="font-display text-sm font-medium">Options</h3>
-      <div className="mt-2 overflow-x-auto">
+      <div className="mt-2 max-w-full overflow-x-auto">
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead>
             <tr className="text-xs text-muted-foreground">
