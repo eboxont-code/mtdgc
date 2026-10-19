@@ -35,7 +35,7 @@ const FAQS = [
 ];
 
 export const Route = createFileRoute("/")({
-  head: () => ({
+  head: ({ loaderData }) => ({
     meta: [
       { title: "MTDGC | Nepal's Digital Marketplace" },
       {
