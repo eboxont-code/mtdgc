@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 
 import { approveReview as approveReviewServer, archiveProduct as archiveProductServer, updateOrderStatus as updateOrderStatusServer } from "@/lib/admin.functions";
 
+import { CategoriesPanel } from "@/components/admin/categories-panel";
 import { PaymentsPanel } from "@/components/admin/payments-panel";
 import { VerifyPanel } from "@/components/admin/verify-panel";
 import { ProductForm } from "@/components/admin/product-form";
@@ -253,6 +254,7 @@ function AdminPage() {
               ) : (
                 <Button size="sm" className="mt-3" onClick={() => setEditing("new")}>Add product</Button>
               )}
+              <CategoriesPanel />
             </section>
 
             {loadError && <p role="alert" className="mt-6 text-sm text-destructive">{loadError}</p>}
