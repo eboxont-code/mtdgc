@@ -58,6 +58,24 @@ export const Route = createFileRoute("/")({
       },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/` }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: "Software and subscriptions from MTDGC",
+          itemListElement: (loaderData?.products ?? [])
+            .filter((p) => p.category && (p.category.slug === "software" || p.category.slug === "subscriptions"))
+            .map((p, i) => ({
+              "@type": "ListItem",
+              position: i + 1,
+              name: p.name,
+              url: `${SITE_URL}/products/${p.slug}`,
+            })),
+        }),
+      },
+    ],
   }),
   loader: () => listCatalog(),
   component: Index,
