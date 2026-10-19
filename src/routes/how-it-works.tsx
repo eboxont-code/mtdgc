@@ -17,6 +17,8 @@ export const Route = createFileRoute("/how-it-works")({
       },
       { property: "og:title", content: "How MTDGC orders and delivery work" },
       { property: "og:description", content: "Ordering, payment and digital delivery at MTDGC, step by step." },
+      { name: "twitter:title", content: "How MTDGC orders and delivery work"  },
+      { name: "twitter:description", content: "Ordering, payment and digital delivery at MTDGC, step by step."  },
       { property: "og:url", content: `${SITE_URL}/how-it-works` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

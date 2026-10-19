@@ -35,7 +35,7 @@ const FAQS = [
 ];
 
 export const Route = createFileRoute("/")({
-  head: () => ({
+  head: ({ loaderData }) => ({
     meta: [
       { title: "MTDGC | Nepal's Digital Marketplace" },
       {
@@ -51,8 +51,31 @@ export const Route = createFileRoute("/")({
       { property: "og:url", content: `${SITE_URL}/` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "MTDGC | Nepal's Digital Marketplace" },
+      {
+        name: "twitter:description",
+        content: "Software licences and subscriptions in Nepal, plus deals, gift cards and game top-ups. Priced in NPR.",
+      },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/` }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: "Software and subscriptions from MTDGC",
+          itemListElement: (loaderData?.products ?? [])
+            .filter((p) => p.category && (p.category.slug === "software" || p.category.slug === "subscriptions"))
+            .map((p, i) => ({
+              "@type": "ListItem",
+              position: i + 1,
+              name: p.name,
+              url: `${SITE_URL}/products/${p.slug}`,
+            })),
+        }),
+      },
+    ],
   }),
   loader: () => listCatalog(),
   component: Index,

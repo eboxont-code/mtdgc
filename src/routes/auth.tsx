@@ -23,6 +23,8 @@ export const Route = createFileRoute("/auth")({
       { name: "description", content: "Sign in to your MTDGC account to see your orders, wishlist and support requests." },
       { property: "og:title", content: "Sign in to MTDGC" },
       { property: "og:description", content: "Access your MTDGC orders, wishlist and support requests." },
+      { name: "twitter:title", content: "Sign in to MTDGC"  },
+      { name: "twitter:description", content: "Access your MTDGC orders, wishlist and support requests."  },
       { property: "og:url", content: `${SITE_URL}/auth` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

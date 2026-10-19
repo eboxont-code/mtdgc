@@ -246,3 +246,9 @@ main .bg-card, main .bg-panel { background: var(--glass-bg); border-color: var(-
 @media (prefers-reduced-motion: no-preference) {
   .notice-fade { animation: rise 0.45s ease both; }
 }
+
+/* Inline text links keep a 44px tall tap target without changing line height. */
+p a, li a {
+  padding-block: 0.5rem;
+  margin-block: -0.5rem;
+}

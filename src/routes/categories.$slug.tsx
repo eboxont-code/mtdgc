@@ -30,6 +30,8 @@ export const Route = createFileRoute("/categories/$slug")({
         { name: "description", content: description },
         { property: "og:title", content: title },
         { property: "og:description", content: description },
+      { name: "twitter:title", content: title  },
+      { name: "twitter:description", content: description  },
         { property: "og:url", content: url },
         { property: "og:type", content: "website" },
         { property: "og:image", content: shareImage },
@@ -78,6 +80,15 @@ export const Route = createFileRoute("/categories/$slug")({
   component: CategoryPage,
 });
 
+const CATEGORY_INTROS: Record<string, string> = {
+  subscriptions:
+    "A prepaid subscription gives you access to a service for a fixed period that you pay for up front. Nothing renews on its own: when the period ends, you simply order again if you want to continue. Some plans are private accounts that only you use, while others are shared plans where you receive one profile or seat on an account we manage. Each listing states which type it is before you order. After we verify your payment, your account details or activation instructions appear on your order page and are also sent to your delivery email. You never need to share your own password with us, and we will never ask for a one-time code. If anything is unclear before you order, our how it works page walks through each step from choosing a plan to receiving your details.",
+  "gift-cards":
+    "A gift card is a prepaid code that adds balance or membership time to an account on the service it belongs to. You choose the amount and region on the listing, and we deliver the code digitally after your payment is verified. Codes arrive on your order page and by email, so you can keep them or forward them as a gift. Region matters: a code only redeems on accounts registered in the region shown on the listing, so check your account region before ordering. Once a code is revealed it cannot be taken back, which is why we ask you to confirm the region and the delivery email at checkout. Our how it works page explains the full ordering and delivery process step by step.",
+  "game-top-ups":
+    "A game top-up adds in-game currency or a pass directly to your game account. To deliver it we need the details shown on the listing, usually your player ID and sometimes a server or zone ID, both of which you can copy from your profile screen inside the game. We never need your password or login. After you place the order and your payment is verified, the top-up is credited to the account matching the ID you gave us, so it is important to double check that ID before you confirm. Credited top-ups cannot be reversed. Each listing shows the region it supports and what you receive. If you are unsure where to find your ID, the product page and our how it works page show you where to look.",
+};
+
 function CategoryPage() {
   const { category, products } = Route.useLoaderData();
   if (!category) return null;
@@ -91,6 +102,15 @@ function CategoryPage() {
         />
         <h1 className="font-display text-[26px] font-medium md:text-4xl">{category.name}</h1>
         <p className="mt-2 max-w-[62ch] text-sm text-muted-foreground">{category.description}</p>
+        {CATEGORY_INTROS[category.slug] && (
+          <p className="mt-3 max-w-[70ch] text-sm text-foreground/80">
+            {CATEGORY_INTROS[category.slug]}{" "}
+            <Link to="/how-it-works" className="text-primary underline-offset-4 hover:underline">
+              See how ordering works
+            </Link>
+            .
+          </p>
+        )}
 
         {products.length ? (
           <>

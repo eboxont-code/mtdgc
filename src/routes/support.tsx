@@ -20,6 +20,8 @@ export const Route = createFileRoute("/support")({
       },
       { property: "og:title", content: "MTDGC support and order help" },
       { property: "og:description", content: "Order help, delivery questions and refund requests for MTDGC customers." },
+      { name: "twitter:title", content: "MTDGC support and order help"  },
+      { name: "twitter:description", content: "Order help, delivery questions and refund requests for MTDGC customers."  },
       { property: "og:url", content: `${SITE_URL}/support` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

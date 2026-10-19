@@ -13,6 +13,8 @@ export const Route = createFileRoute("/policies/refunds")({
       { name: "description", content: "When MTDGC refunds a digital order, how replacement periods on each listing work, and when a key, code or top-up can no longer be reversed." },
       { property: "og:title", content: "Refund policy for digital orders | MTDGC" },
       { property: "og:description", content: "When MTDGC refunds a digital order, how replacement periods on each listing work, and when a key, code or top-up can no longer be reversed." },
+      { name: "twitter:title", content: "Refund policy for digital orders | MTDGC"  },
+      { name: "twitter:description", content: "When MTDGC refunds a digital order, how replacement periods on each listing work, and when a key, code or top-up can no longer be reversed."  },
       { property: "og:url", content: `${SITE_URL}/policies/refunds` },
       { property: "og:type", content: "website" },
     ],

@@ -40,6 +40,8 @@ export const Route = createFileRoute("/products/$slug")({
         { name: "description", content: product.seo_description },
         { property: "og:title", content: product.seo_title },
         { property: "og:description", content: product.seo_description },
+      { name: "twitter:title", content: product.seo_title  },
+      { name: "twitter:description", content: product.seo_description  },
         { property: "og:url", content: url },
         { property: "og:type", content: "product" },
         ...(image ? [

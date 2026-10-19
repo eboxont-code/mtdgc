@@ -21,6 +21,8 @@ export const Route = createFileRoute("/products/")({
       },
       { property: "og:title", content: "All MTDGC products" },
       { property: "og:description", content: "Every MTDGC product page in one list, priced in Nepalese rupees." },
+      { name: "twitter:title", content: "All MTDGC products"  },
+      { name: "twitter:description", content: "Every MTDGC product page in one list, priced in Nepalese rupees."  },
       { property: "og:url", content: `${SITE_URL}/catalog` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

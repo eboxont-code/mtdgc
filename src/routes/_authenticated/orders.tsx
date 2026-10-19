@@ -19,6 +19,8 @@ export const Route = createFileRoute("/_authenticated/orders")({
       { name: "robots", content: "noindex" },
       { property: "og:title", content: "Your orders | MTDGC" },
       { property: "og:description", content: "Your MTDGC order history and status." },
+      { name: "twitter:title", content: "Your orders | MTDGC"  },
+      { name: "twitter:description", content: "Your MTDGC order history and status."  },
       { property: "og:url", content: "https://mtdgc.com/orders" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

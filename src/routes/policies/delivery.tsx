@@ -13,6 +13,8 @@ export const Route = createFileRoute("/policies/delivery")({
       { name: "description", content: "How MTDGC delivers keys, account details and codes to your order page and email, what we need from you, and what can affect delivery timing." },
       { property: "og:title", content: "Delivery policy for digital orders | MTDGC" },
       { property: "og:description", content: "How MTDGC delivers keys, account details and codes to your order page and email, what we need from you, and what can affect delivery timing." },
+      { name: "twitter:title", content: "Delivery policy for digital orders | MTDGC"  },
+      { name: "twitter:description", content: "How MTDGC delivers keys, account details and codes to your order page and email, what we need from you, and what can affect delivery timing."  },
       { property: "og:url", content: `${SITE_URL}/policies/delivery` },
       { property: "og:type", content: "website" },
     ],

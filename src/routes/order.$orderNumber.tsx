@@ -17,6 +17,8 @@ export const Route = createFileRoute("/order/$orderNumber")({
       { name: "description", content: "View the status of your MTDGC order." },
       { property: "og:title", content: "Your MTDGC order" },
       { property: "og:description", content: "View the status of your MTDGC order." },
+      { name: "twitter:title", content: "Your MTDGC order"  },
+      { name: "twitter:description", content: "View the status of your MTDGC order."  },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },

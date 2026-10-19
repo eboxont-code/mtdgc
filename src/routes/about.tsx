@@ -16,6 +16,8 @@ export const Route = createFileRoute("/about")({
       },
       { property: "og:title", content: "About MTDGC" },
       { property: "og:description", content: "Who MTDGC is, what we sell and how digital delivery works." },
+      { name: "twitter:title", content: "About MTDGC"  },
+      { name: "twitter:description", content: "Who MTDGC is, what we sell and how digital delivery works."  },
       { property: "og:url", content: `${SITE_URL}/about` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -24,6 +24,8 @@ export const Route = createFileRoute("/track-order")({
       },
       { property: "og:title", content: "Track your MTDGC order" },
       { property: "og:description", content: "Check the status of an MTDGC order using your order number." },
+      { name: "twitter:title", content: "Track your MTDGC order"  },
+      { name: "twitter:description", content: "Check the status of an MTDGC order using your order number."  },
       { property: "og:url", content: `${SITE_URL}/track-order` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -104,6 +106,10 @@ function TrackOrderPage() {
           Every MTDGC order gets a readable order number. Enter it with the email or phone number used on the order to
           see its current status. If you have an account, your orders also appear in your{" "}
           <Link to="/account" className="inline-flex min-h-11 items-center text-primary">account dashboard</Link>.
+        </p>
+        <p className="mt-2 max-w-[62ch] text-sm text-muted-foreground">
+          Where to find your order number: it is shown on the order confirmation page right after you place an order
+          and in the confirmation email we send you.
         </p>
 
         <form onSubmit={submit} className="mt-6 grid gap-3 md:max-w-xl" noValidate>
