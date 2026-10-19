@@ -121,8 +121,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: title },
       { property: "og:description", content: description },
       ...(canonical?.href ? [{ property: "og:url", content: canonical.href }] : []),
-      { name: "twitter:title", content: title },
-      { name: "twitter:description", content: description },
+      { name: "twitter:title", content: shareTitle },
+      { name: "twitter:description", content: shareDescription },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
