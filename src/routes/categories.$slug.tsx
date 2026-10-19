@@ -102,6 +102,15 @@ function CategoryPage() {
         />
         <h1 className="font-display text-[26px] font-medium md:text-4xl">{category.name}</h1>
         <p className="mt-2 max-w-[62ch] text-sm text-muted-foreground">{category.description}</p>
+        {CATEGORY_INTROS[category.slug] && (
+          <p className="mt-3 max-w-[70ch] text-sm text-foreground/80">
+            {CATEGORY_INTROS[category.slug]}{" "}
+            <Link to="/how-it-works" className="text-primary underline-offset-4 hover:underline">
+              See how ordering works
+            </Link>
+            .
+          </p>
+        )}
 
         {products.length ? (
           <>
