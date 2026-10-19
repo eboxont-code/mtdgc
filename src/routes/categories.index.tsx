@@ -20,6 +20,8 @@ export const Route = createFileRoute("/categories/")({
       },
       { property: "og:title", content: "Shop by category: software, subscriptions and more | MTDGC" },
       { property: "og:description", content: "Game top-ups, gift cards and subscriptions available from MTDGC." },
+      { name: "twitter:title", content: "Shop by category: software, subscriptions and more | MTDGC"  },
+      { name: "twitter:description", content: "Game top-ups, gift cards and subscriptions available from MTDGC."  },
       { property: "og:url", content: `${SITE_URL}/categories` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

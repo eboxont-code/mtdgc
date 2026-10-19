@@ -13,6 +13,8 @@ export const Route = createFileRoute("/policies/privacy")({
       { name: "description", content: "What information MTDGC collects to process and deliver your digital orders, how we use and protect it, and how to ask us about your data." },
       { property: "og:title", content: "Privacy policy | MTDGC Nepal" },
       { property: "og:description", content: "What information MTDGC collects to process and deliver your digital orders, how we use and protect it, and how to ask us about your data." },
+      { name: "twitter:title", content: "Privacy policy | MTDGC Nepal"  },
+      { name: "twitter:description", content: "What information MTDGC collects to process and deliver your digital orders, how we use and protect it, and how to ask us about your data."  },
       { property: "og:url", content: `${SITE_URL}/policies/privacy` },
       { property: "og:type", content: "website" },
     ],

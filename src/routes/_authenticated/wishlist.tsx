@@ -17,6 +17,8 @@ export const Route = createFileRoute("/_authenticated/wishlist")({
       { name: "robots", content: "noindex" },
       { property: "og:title", content: "Your wishlist | MTDGC" },
       { property: "og:description", content: "Products you have saved on MTDGC." },
+      { name: "twitter:title", content: "Your wishlist | MTDGC"  },
+      { name: "twitter:description", content: "Products you have saved on MTDGC."  },
       { property: "og:url", content: "https://mtdgc.com/wishlist" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

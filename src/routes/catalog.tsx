@@ -32,6 +32,8 @@ export const Route = createFileRoute("/catalog")({
       },
       { property: "og:title", content: "MTDGC catalog" },
       { property: "og:description", content: "Game top-ups, gift cards and subscriptions for Nepal, priced in NPR." },
+      { name: "twitter:title", content: "MTDGC catalog"  },
+      { name: "twitter:description", content: "Game top-ups, gift cards and subscriptions for Nepal, priced in NPR."  },
       { property: "og:url", content: `${SITE_URL}/catalog` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -48,6 +48,8 @@ export const Route = createFileRoute("/faq")({
       },
       { property: "og:title", content: "MTDGC frequently asked questions" },
       { property: "og:description", content: "Delivery, payment, regions, refunds and security questions answered." },
+      { name: "twitter:title", content: "MTDGC frequently asked questions"  },
+      { name: "twitter:description", content: "Delivery, payment, regions, refunds and security questions answered."  },
       { property: "og:url", content: `${SITE_URL}/faq` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

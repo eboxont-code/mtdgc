@@ -30,6 +30,8 @@ export const Route = createFileRoute("/categories/$slug")({
         { name: "description", content: description },
         { property: "og:title", content: title },
         { property: "og:description", content: description },
+      { name: "twitter:title", content: title  },
+      { name: "twitter:description", content: description  },
         { property: "og:url", content: url },
         { property: "og:type", content: "website" },
         { property: "og:image", content: shareImage },

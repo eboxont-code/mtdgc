@@ -24,6 +24,8 @@ export const Route = createFileRoute("/track-order")({
       },
       { property: "og:title", content: "Track your MTDGC order" },
       { property: "og:description", content: "Check the status of an MTDGC order using your order number." },
+      { name: "twitter:title", content: "Track your MTDGC order"  },
+      { name: "twitter:description", content: "Check the status of an MTDGC order using your order number."  },
       { property: "og:url", content: `${SITE_URL}/track-order` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

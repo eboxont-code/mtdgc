@@ -15,6 +15,8 @@ export const Route = createFileRoute("/cart")({
       { name: "description", content: "Review the products in your MTDGC cart before sending your order for confirmation." },
       { property: "og:title", content: "Your MTDGC cart" },
       { property: "og:description", content: "Review your MTDGC order before confirmation." },
+      { name: "twitter:title", content: "Your MTDGC cart"  },
+      { name: "twitter:description", content: "Review your MTDGC order before confirmation."  },
       { property: "og:url", content: `${SITE_URL}/cart` },
       { property: "og:type", content: "website" },
       { name: "robots", content: "noindex" },

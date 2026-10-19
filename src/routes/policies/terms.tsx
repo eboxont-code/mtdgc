@@ -13,6 +13,8 @@ export const Route = createFileRoute("/policies/terms")({
       { name: "description", content: "The terms that apply when you order software, subscriptions, gift cards or game top-ups from MTDGC, including payment checks, delivery and your responsibilities." },
       { property: "og:title", content: "Terms of service | MTDGC Nepal" },
       { property: "og:description", content: "The terms that apply when you order software, subscriptions, gift cards or game top-ups from MTDGC, including payment checks, delivery and your responsibilities." },
+      { name: "twitter:title", content: "Terms of service | MTDGC Nepal"  },
+      { name: "twitter:description", content: "The terms that apply when you order software, subscriptions, gift cards or game top-ups from MTDGC, including payment checks, delivery and your responsibilities."  },
       { property: "og:url", content: `${SITE_URL}/policies/terms` },
       { property: "og:type", content: "website" },
     ],

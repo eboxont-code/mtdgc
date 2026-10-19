@@ -24,6 +24,8 @@ export const Route = createFileRoute("/checkout")({
       { name: "description", content: "Place your MTDGC order, then pay by QR or bank transfer and upload your payment screenshot for verification." },
       { property: "og:title", content: "MTDGC checkout" },
       { property: "og:description", content: "Place your order and pay locally in NPR." },
+      { name: "twitter:title", content: "MTDGC checkout"  },
+      { name: "twitter:description", content: "Place your order and pay locally in NPR."  },
       { property: "og:url", content: `${SITE_URL}/checkout` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
