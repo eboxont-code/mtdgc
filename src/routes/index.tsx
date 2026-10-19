@@ -51,6 +51,11 @@ export const Route = createFileRoute("/")({
       { property: "og:url", content: `${SITE_URL}/` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "MTDGC | Nepal's Digital Marketplace" },
+      {
+        name: "twitter:description",
+        content: "Software licences and subscriptions in Nepal, plus deals, gift cards and game top-ups. Priced in NPR.",
+      },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/` }],
   }),
