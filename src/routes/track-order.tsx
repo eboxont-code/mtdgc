@@ -107,6 +107,10 @@ function TrackOrderPage() {
           see its current status. If you have an account, your orders also appear in your{" "}
           <Link to="/account" className="inline-flex min-h-11 items-center text-primary">account dashboard</Link>.
         </p>
+        <p className="mt-2 max-w-[62ch] text-sm text-muted-foreground">
+          Where to find your order number: it is shown on the order confirmation page right after you place an order
+          and in the confirmation email we send you.
+        </p>
 
         <form onSubmit={submit} className="mt-6 grid gap-3 md:max-w-xl" noValidate>
           <label className="block">
