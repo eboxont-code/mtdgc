@@ -99,6 +99,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     const title = titleMeta && "title" in titleMeta ? String(titleMeta.title) : "MTDGC | Nepal's Digital Marketplace";
     const description = descriptionMeta && "content" in descriptionMeta ? String(descriptionMeta.content) : "Software licences and subscriptions in Nepal, priced in NPR.";
     const canonical = [...matches].reverse().flatMap((match) => match.links ?? []).find((link) => link?.rel === "canonical");
+    const leafOgTitle = [...pageMeta].reverse().find((meta) => meta && "property" in meta && meta.property === "og:title");
+    const leafOgDescription = [...pageMeta].reverse().find((meta) => meta && "property" in meta && meta.property === "og:description");
+    const shareTitle = leafOgTitle && "content" in leafOgTitle ? String(leafOgTitle.content) : title;
+    const shareDescription = leafOgDescription && "content" in leafOgDescription ? String(leafOgDescription.content) : description;
     return {
     meta: [
       { charSet: "utf-8" },
