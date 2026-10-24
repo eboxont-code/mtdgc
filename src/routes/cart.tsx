@@ -95,7 +95,7 @@ function CartPage() {
                 <strong className="font-mono text-lg text-price">{formatNpr(subtotalMinor)}</strong>
               </div>
               <p className="mt-2 text-xs text-muted-foreground">
-                Nothing is charged on this site. After you place the order you pay by QR code or bank transfer, then upload
+                No card is charged on this site. After you place the order you pay by QR code or bank transfer, then upload
                 your payment screenshot.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">

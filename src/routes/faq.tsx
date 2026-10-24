@@ -9,7 +9,7 @@ import { breadcrumbLd, pageLd } from "@/lib/seo";
 const FAQS: [string, string][] = [
   [
     "How long does delivery take?",
-    "Every order is reviewed by a person first, so delivery time depends on the product and when you order. We confirm a realistic time with you before you pay. We do not promise instant delivery, because our fulfilment is not automated.",
+    "Every order is reviewed by a person first, so delivery time depends on the product and when you order. Each product page shows the expected delivery time, and we tell you if anything delays your order. We do not promise instant delivery, because our fulfilment is not automated.",
   ],
   [
     "What details do you need from me?",

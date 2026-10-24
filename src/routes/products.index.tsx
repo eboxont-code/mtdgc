@@ -70,7 +70,7 @@ function ProductsIndexPage() {
         ) : (
           <div className="mt-8 rounded-lg border border-border py-14 text-center">
             <p className="font-display font-medium">No products are listed yet</p>
-            <p className="mt-1 text-sm text-muted-foreground">Check back shortly or message us on WhatsApp.</p>
+            <p className="mt-1 text-sm text-muted-foreground">Check back shortly, or message our support team on WhatsApp.</p>
             <Button asChild className="mt-4"><Link to="/support">Contact support</Link></Button>
           </div>
         )}

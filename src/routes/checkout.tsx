@@ -392,7 +392,7 @@ function CheckoutPage() {
                   <div className="mt-4 rounded-xl border border-border bg-background/40 p-4 text-sm">
                     <p className="font-display font-medium">How paying works</p>
                     <ol className="mt-2 list-decimal space-y-1 pl-5 text-xs text-muted-foreground">
-                      <li>Place your order. Nothing is charged on this site.</li>
+                      <li>Place your order to get your order number. No card is charged on this site.</li>
                       <li>{pay?.configured ? "The QR code and bank details appear on the next screen." : "Our team will send payment details shortly after you place the order."}</li>
                       <li>Pay the exact total, then upload your payment screenshot with the transaction reference.</li>
                       <li>We verify the payment and deliver your order.</li>

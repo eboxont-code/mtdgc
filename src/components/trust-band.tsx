@@ -3,7 +3,7 @@ import { Landmark, MessageCircle, PackageSearch, QrCode, ShieldCheck, Wallet } f
 import { enabledProviders } from "@/lib/payments";
 
 const POINTS = [
-  { icon: ShieldCheck, title: "Checked before you pay", body: "We confirm stock and your details first." },
+  { icon: ShieldCheck, title: "Payments verified by hand", body: "We check your payment and details before delivery." },
   { icon: Wallet, title: "Prices in NPR", body: "Every price is shown in Nepalese rupees." },
   { icon: PackageSearch, title: "Track every order", body: "Follow each step with your order number." },
   { icon: MessageCircle, title: "Real people on WhatsApp", body: "For support. Orders are placed on the site." },

@@ -45,8 +45,8 @@ function DeliveryPage() {
             provide. Gift card codes and subscription details are sent to the delivery email on your order.
           </p>
           <p>
-            Fulfilment is handled by a person, not an automated system, so we do not advertise instant delivery. We
-            confirm a realistic delivery time with you before you pay, and we tell you if anything delays it.
+            Fulfilment is handled by a person, not an automated system, so we do not advertise instant delivery. Each
+            product page shows the expected delivery time, and we tell you if anything delays your order.
           </p>
           <p>
             Delivery depends on the details you give us being correct. A wrong player ID, zone, server or email address

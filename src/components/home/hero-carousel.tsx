@@ -48,7 +48,7 @@ export function buildSlides(products: CatalogProduct[]): Slide[] {
       id: "netflix",
       eyebrow: "Subscriptions",
       title: "Netflix plans, paid in rupees",
-      body: "Pick a plan length, give us your delivery email and we confirm before you pay.",
+      body: "Pick a plan length, give us your delivery email and check out. We deliver once your payment is verified.",
       cta: "See plans",
       to: "/products/$slug",
       params: { slug: netflix.slug },

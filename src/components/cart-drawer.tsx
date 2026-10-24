@@ -111,8 +111,8 @@ function OpenCartDrawer() {
               <strong>{formatNpr(subtotalMinor)}</strong>
             </div>
             <p className="mt-3 rounded-md bg-secondary p-3 text-xs text-muted-foreground">
-              MTDGC confirms availability and sends payment instructions before you pay. Nothing is charged on this
-              site.
+              Check out on this site to get your order number and payment details, then upload your payment
+              screenshot. We deliver once it is verified.
             </p>
             <Button asChild className="mt-3 w-full" size="lg" onClick={() => setDrawerOpen(false)}>
               <Link to="/checkout">Go to checkout</Link>
