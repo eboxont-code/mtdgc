@@ -8,8 +8,11 @@ const GROUPS: { title: string; links: { to: string; label: string }[] }[] = [
   {
     title: "Shop",
     links: [
+      { to: "/categories/software", label: "Software" },
+      { to: "/categories/subscriptions", label: "Subscriptions" },
+      { to: "/categories/gift-cards", label: "Gift cards" },
+      { to: "/categories/game-top-ups", label: "Game top-ups" },
       { to: "/catalog", label: "Full catalog" },
-      { to: "/cart", label: "Cart" },
       { to: "/track-order", label: "Track an order" },
       { to: "/account", label: "Your account" },
     ],
@@ -42,8 +45,8 @@ export function SiteFooter() {
           <div>
             <Wordmark size="lg" />
             <p className="mt-2 max-w-[46ch] text-xs text-muted-foreground">
-              Nepal&apos;s digital marketplace for game top-ups, gift cards and subscriptions, built to add more
-              digital product lines over time.
+              Nepal&apos;s digital marketplace for software, subscriptions and digital deals, with gift cards and
+              game top-ups too. Prices in NPR.
             </p>
             <p className="mt-3 text-xs text-muted-foreground">
               MTDGC will never ask for your password, OTP or payment PIN.

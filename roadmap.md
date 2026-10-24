@@ -114,3 +114,9 @@ Body/input text and outline badges use foreground; muted text and inactive navig
 | secondary-foreground | secondary | 15.41:1 | Pass |
 | accent-foreground | accent | 12.09:1 | Pass |
 | destructive-foreground | destructive | 4.66:1 | Pass |
+
+## 24 Oct run
+- [x] F2-check: typecheck green, no changes needed
+- [x] F4: footer Shop links and blurb (Deals link waits for D2)
+- [x] burn-test marker added to __root.tsx as a JSX comment
+- [ ] F7 onward still open
