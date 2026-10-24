@@ -10,22 +10,22 @@ import { breadcrumbLd, pageLd } from "@/lib/seo";
 export const Route = createFileRoute("/policies/terms")({
   head: () => ({
     meta: [
-      { title: "Terms of service | MTDGC Nepal" },
+      { title: "Terms of service | MTDGC" },
       { name: "description", content: "The terms that apply when you order software, subscriptions, gift cards or game top-ups from MTDGC, including payment checks, delivery and your responsibilities." },
-      { property: "og:title", content: "Terms of service | MTDGC Nepal" },
+      { property: "og:title", content: "Terms of service | MTDGC" },
       { property: "og:description", content: "The terms that apply when you order software, subscriptions, gift cards or game top-ups from MTDGC, including payment checks, delivery and your responsibilities." },
-      { name: "twitter:title", content: "Terms of service | MTDGC Nepal"  },
+      { name: "twitter:title", content: "Terms of service | MTDGC"  },
       { name: "twitter:description", content: "The terms that apply when you order software, subscriptions, gift cards or game top-ups from MTDGC, including payment checks, delivery and your responsibilities."  },
       { property: "og:url", content: `${SITE_URL}/policies/terms` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:image", content: `${SITE_URL}/og/mtdgc.png` },
-      { property: "og:image:alt", content: "MTDGC, Nepal's digital marketplace" },
+      { property: "og:image:alt", content: "MTDGC, the digital marketplace for Nepal and Australia" },
       { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/policies/terms` }],
     scripts: [
-      pageLd("WebPage", "MTDGC Terms of service", "/policies/terms", "Terms of service from MTDGC, Nepal's digital marketplace."),
+      pageLd("WebPage", "MTDGC Terms of service", "/policies/terms", "Terms of service from MTDGC, the digital marketplace for Nepal and Australia."),
       breadcrumbLd([{ name: "Home", path: "/" }, { name: "Terms of service", path: "/policies/terms" }]),
     ],
   }),
@@ -41,7 +41,7 @@ function TermsPage() {
         <PageHero eyebrow="Policy" title="Terms of service" intro="Last updated 4 October 2026" />
         <div className="mt-6 space-y-4 text-sm text-foreground/80">
           <p>
-            MTDGC, trading as Matrix Digital Goods and Commerce, sells digital products to customers in Nepal.
+            MTDGC, trading as Matrix Digital Goods and Commerce, sells digital products to customers in Nepal and Australia.
             Placing an order through this website is a request to buy. A sale is formed once we confirm availability and
             you complete payment.
           </p>

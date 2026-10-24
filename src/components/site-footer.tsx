@@ -45,7 +45,7 @@ export function SiteFooter() {
           <div>
             <Wordmark size="lg" />
             <p className="mt-2 max-w-[46ch] text-xs text-muted-foreground">
-              Nepal&apos;s digital marketplace for software, subscriptions and digital deals, with gift cards and
+              A digital marketplace for Nepal and Australia: subscriptions and gift cards first, with software, deals and
               game top-ups too. Prices in NPR.
             </p>
             <p className="mt-3 text-xs text-muted-foreground">

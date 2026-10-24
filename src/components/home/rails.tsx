@@ -66,7 +66,7 @@ export function SeeAll({ to, search, label = "See all" }: { to: "/catalog"; sear
 /** Horizontal rail on phones (about 2.3 tiles in view), a grid from md up. */
 export function ProductRail({ products, priorityCount = 0 }: { products: CatalogProduct[]; priorityCount?: number }) {
   return (
-    <div className="scrollbar-hidden -mx-4 flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-4 pb-1 md:mx-0 md:grid md:grid-cols-4 md:gap-3 md:overflow-visible md:px-0 lg:grid-cols-5">
+    <div className="scrollbar-hidden -mx-4 flex snap-x snap-mandatory scroll-px-4 gap-2.5 overflow-x-auto px-4 pb-1 md:mx-0 md:grid md:grid-cols-4 md:gap-3 md:overflow-visible md:px-0 lg:grid-cols-5">
       {products.map((product, i) => (
         <ProductTile key={product.id} product={product} priority={i < priorityCount} className="w-[42%] shrink-0 snap-start sm:w-[30%] md:w-auto" />
       ))}

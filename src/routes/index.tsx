@@ -37,27 +37,27 @@ const FAQS = [
 export const Route = createFileRoute("/")({
   head: ({ loaderData }) => ({
     meta: [
-      { title: "MTDGC | Nepal's Digital Marketplace" },
+      { title: "MTDGC | Digital Marketplace for Nepal and Australia" },
       {
         name: "description",
         content:
-          "Software licences and subscriptions in Nepal, plus digital deals and gift cards, with game top-ups too. Priced in NPR with on-site order tracking.",
+          "Subscriptions and gift cards for Nepal and Australia, plus digital deals and gift cards, with game top-ups too. Priced in NPR with on-site order tracking.",
       },
-      { property: "og:title", content: "MTDGC | Nepal's Digital Marketplace" },
+      { property: "og:title", content: "MTDGC | Digital Marketplace for Nepal and Australia" },
       {
         property: "og:description",
-        content: "Software licences and subscriptions in Nepal, plus deals, gift cards and game top-ups. Priced in NPR.",
+        content: "Subscriptions and gift cards for Nepal and Australia, plus deals, gift cards and game top-ups. Priced in NPR.",
       },
       { property: "og:url", content: `${SITE_URL}/` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:image", content: `${SITE_URL}/og/mtdgc.png` },
-      { property: "og:image:alt", content: "MTDGC, Nepal's digital marketplace" },
+      { property: "og:image:alt", content: "MTDGC, the digital marketplace for Nepal and Australia" },
       { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
-      { name: "twitter:title", content: "MTDGC | Nepal's Digital Marketplace" },
+      { name: "twitter:title", content: "MTDGC | Digital Marketplace for Nepal and Australia" },
       {
         name: "twitter:description",
-        content: "Software licences and subscriptions in Nepal, plus deals, gift cards and game top-ups. Priced in NPR.",
+        content: "Subscriptions and gift cards for Nepal and Australia, plus deals, gift cards and game top-ups. Priced in NPR.",
       },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/` }],
@@ -145,7 +145,7 @@ function Index() {
     name: "MTDGC",
     alternateName: "Matrix Digital Goods & Commerce",
     url: `${SITE_URL}/`,
-    description: "Digital commerce company in Nepal selling game top-ups, gift cards and subscriptions.",
+    description: "Digital commerce company serving Nepal and Australia selling game top-ups, gift cards and subscriptions.",
     logo: `${SITE_URL}/og/mtdgc.png`,
     contactPoint: {
       "@type": "ContactPoint",

@@ -20,7 +20,7 @@ export function WhatsAppFab() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="WhatsApp support (opens in a new tab)"
-      className="fixed bottom-[calc(76px+env(safe-area-inset-bottom))] right-3 z-40 inline-flex h-12 items-center gap-2 rounded-full border border-primary/40 bg-card/95 px-3.5 text-primary shadow-lg shadow-black/50 backdrop-blur transition-all hover:border-primary md:bottom-6 md:right-6"
+      className="fixed bottom-[calc(84px+env(safe-area-inset-bottom))] right-3 z-40 inline-flex h-12 items-center gap-2 rounded-full border border-primary/40 bg-card/95 px-3.5 text-primary shadow-lg shadow-black/50 backdrop-blur transition-all hover:border-primary md:bottom-6 md:right-6"
     >
       <MessageCircle className="size-5 shrink-0" aria-hidden="true" />
       <span className={`overflow-hidden whitespace-nowrap font-display text-sm font-medium transition-all duration-300 ${expanded ? "max-w-24" : "max-w-0"}`}>Support</span>

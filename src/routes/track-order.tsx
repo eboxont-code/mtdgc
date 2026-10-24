@@ -34,7 +34,7 @@ export const Route = createFileRoute("/track-order")({
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/track-order` }],
     scripts: [
-      pageLd("WebPage", "MTDGC Track order", "/track-order", "Track order from MTDGC, Nepal's digital marketplace."),
+      pageLd("WebPage", "MTDGC Track order", "/track-order", "Track order from MTDGC, the digital marketplace for Nepal and Australia."),
       breadcrumbLd([{ name: "Home", path: "/" }, { name: "Track order", path: "/track-order" }]),
     ],
   }),

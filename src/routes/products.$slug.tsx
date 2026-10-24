@@ -203,10 +203,12 @@ function ProductPage() {
     </ul>
   );
 
+  const addLabel = product.category?.slug === "gift-cards" ? "Get gift card" : product.category?.slug === "subscriptions" ? "Get subscription" : "Add to cart";
+
   const actions = (
     <div className="flex gap-2">
       <Button variant="outline" size="lg" className="flex-1" disabled={!orderable} onClick={() => addToCart(false)}>
-        <ShoppingBag className="size-4" /> Add to cart
+        <ShoppingBag className="size-4" /> {addLabel}
       </Button>
       <Button size="lg" className="flex-1" disabled={!orderable} onClick={() => addToCart(true)}>
         {orderable ? "Buy now" : "Not open yet"}
@@ -418,7 +420,7 @@ function ProductPage() {
               <MessageCircle className="size-5" />
             </a>
           )}
-          <Button variant="outline" className="h-11 shrink-0 px-3" disabled={!orderable} onClick={() => addToCart(false)} aria-label="Add to cart">
+          <Button variant="outline" className="h-11 shrink-0 px-3" disabled={!orderable} onClick={() => addToCart(false)} aria-label={addLabel}>
             <ShoppingBag className="size-4" />
           </Button>
           <Button className="h-11 shrink-0 px-5" disabled={!orderable} onClick={() => addToCart(true)}>

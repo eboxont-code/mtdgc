@@ -37,7 +37,7 @@ export function ProductTile({ product, priority = false, className = "" }: { pro
         params={{ slug: product.slug }}
         className="flex h-full flex-col rounded-2xl border border-border bg-card p-1.5 transition-colors hover:border-primary/50 focus-visible:border-primary"
       >
-        <div className="relative overflow-hidden rounded-xl">
+        <div className="relative aspect-square min-h-24 overflow-hidden rounded-xl bg-secondary">
           <ProductArt product={product} priority={priority} />
           <span aria-hidden="true" className="tile-scan pointer-events-none absolute inset-x-0 top-0 h-px bg-primary/80" />
           {!orderable && (

@@ -13,7 +13,7 @@ export const Route = createFileRoute("/products/")({
   loader: () => listCatalog(),
   head: ({ loaderData }) => ({
     meta: [
-      { title: "All digital products in Nepal, prices in NPR | MTDGC" },
+      { title: "All digital products for Nepal and Australia, prices in NPR | MTDGC" },
       {
         name: "description",
         content:
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/products/")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:image", content: `${SITE_URL}/og/mtdgc.png` },
-      { property: "og:image:alt", content: "MTDGC, Nepal's digital marketplace" },
+      { property: "og:image:alt", content: "MTDGC, the digital marketplace for Nepal and Australia" },
       { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/products` }],

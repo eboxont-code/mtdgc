@@ -10,22 +10,22 @@ import { breadcrumbLd, pageLd } from "@/lib/seo";
 export const Route = createFileRoute("/policies/privacy")({
   head: () => ({
     meta: [
-      { title: "Privacy policy | MTDGC Nepal" },
+      { title: "Privacy policy | MTDGC" },
       { name: "description", content: "What information MTDGC collects to process and deliver your digital orders, how we use and protect it, and how to ask us about your data." },
-      { property: "og:title", content: "Privacy policy | MTDGC Nepal" },
+      { property: "og:title", content: "Privacy policy | MTDGC" },
       { property: "og:description", content: "What information MTDGC collects to process and deliver your digital orders, how we use and protect it, and how to ask us about your data." },
-      { name: "twitter:title", content: "Privacy policy | MTDGC Nepal"  },
+      { name: "twitter:title", content: "Privacy policy | MTDGC"  },
       { name: "twitter:description", content: "What information MTDGC collects to process and deliver your digital orders, how we use and protect it, and how to ask us about your data."  },
       { property: "og:url", content: `${SITE_URL}/policies/privacy` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:image", content: `${SITE_URL}/og/mtdgc.png` },
-      { property: "og:image:alt", content: "MTDGC, Nepal's digital marketplace" },
+      { property: "og:image:alt", content: "MTDGC, the digital marketplace for Nepal and Australia" },
       { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/policies/privacy` }],
     scripts: [
-      pageLd("WebPage", "MTDGC Privacy policy", "/policies/privacy", "Privacy policy from MTDGC, Nepal's digital marketplace."),
+      pageLd("WebPage", "MTDGC Privacy policy", "/policies/privacy", "Privacy policy from MTDGC, the digital marketplace for Nepal and Australia."),
       breadcrumbLd([{ name: "Home", path: "/" }, { name: "Privacy policy", path: "/policies/privacy" }]),
     ],
   }),

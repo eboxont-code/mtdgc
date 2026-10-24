@@ -96,8 +96,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     const pageMeta = matches.flatMap((match) => match.meta ?? []);
     const titleMeta = [...pageMeta].reverse().find((meta) => meta && "title" in meta);
     const descriptionMeta = [...pageMeta].reverse().find((meta) => meta && "name" in meta && meta.name === "description");
-    const title = titleMeta && "title" in titleMeta ? String(titleMeta.title) : "MTDGC | Nepal's Digital Marketplace";
-    const description = descriptionMeta && "content" in descriptionMeta ? String(descriptionMeta.content) : "Software licences and subscriptions in Nepal, priced in NPR.";
+    const title = titleMeta && "title" in titleMeta ? String(titleMeta.title) : "MTDGC | Digital Marketplace for Nepal and Australia";
+    const description = descriptionMeta && "content" in descriptionMeta ? String(descriptionMeta.content) : "Subscriptions and gift cards for Nepal and Australia, priced in NPR.";
     const canonical = [...matches].reverse().flatMap((match) => match.links ?? []).find((link) => link?.rel === "canonical");
     const leafOgTitle = [...pageMeta].reverse().find((meta) => meta && "property" in meta && meta.property === "og:title");
     const leafOgDescription = [...pageMeta].reverse().find((meta) => meta && "property" in meta && meta.property === "og:description");

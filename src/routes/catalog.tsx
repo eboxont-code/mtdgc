@@ -24,21 +24,21 @@ export const Route = createFileRoute("/catalog")({
   loader: () => listCatalog(),
   head: ({ loaderData }) => ({
     meta: [
-      { title: "Catalog | MTDGC digital goods for Nepal" },
+      { title: "Catalog | MTDGC digital goods for Nepal and Australia" },
       {
         name: "description",
         content:
           "Browse the MTDGC catalog of game top-ups, gift cards and subscriptions. Search, filter by category and sort by price, all priced in NPR.",
       },
       { property: "og:title", content: "MTDGC catalog" },
-      { property: "og:description", content: "Game top-ups, gift cards and subscriptions for Nepal, priced in NPR." },
+      { property: "og:description", content: "Game top-ups, gift cards and subscriptions for Nepal and Australia, priced in NPR." },
       { name: "twitter:title", content: "MTDGC catalog"  },
-      { name: "twitter:description", content: "Game top-ups, gift cards and subscriptions for Nepal, priced in NPR."  },
+      { name: "twitter:description", content: "Game top-ups, gift cards and subscriptions for Nepal and Australia, priced in NPR."  },
       { property: "og:url", content: `${SITE_URL}/catalog` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:image", content: `${SITE_URL}/og/mtdgc.png` },
-      { property: "og:image:alt", content: "MTDGC, Nepal's digital marketplace" },
+      { property: "og:image:alt", content: "MTDGC, the digital marketplace for Nepal and Australia" },
       { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/catalog` }],

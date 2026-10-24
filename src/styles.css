@@ -97,7 +97,7 @@
   --secondary: oklch(0.22 0.016 160);
   --secondary-foreground: var(--foreground);
   --muted: var(--secondary);
-  --muted-foreground: oklch(0.74 0.02 155);
+  --muted-foreground: oklch(0.8 0.02 155);
   --accent: oklch(0.82 0.13 195);
   --accent-foreground: oklch(0.13 0.012 160);
   --destructive: oklch(0.64 0.21 25);
@@ -202,7 +202,7 @@ main .bg-card, main .bg-panel { background: var(--glass-bg); border-color: var(-
   .future-card, .category-tile, button, a { transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease; }
   .future-card:hover, .future-card:focus-within, .category-tile:hover { transform: translateY(-2px); }
   .future-card:active, .category-tile:active, button:active { transform: translateY(-2px); }
-  [data-scroll-reveal].reveal-pending { opacity: 0; transform: translateY(12px); }
+  [data-scroll-reveal].reveal-pending { opacity: 0.4; transform: translateY(12px); }
   [data-scroll-reveal] { transition: opacity 550ms ease, transform 550ms ease; }
 }
 @keyframes grid-drift { to { background-position: 40px 40px; } }
@@ -251,4 +251,11 @@ main .bg-card, main .bg-panel { background: var(--glass-bg); border-color: var(-
 p a, li a {
   padding-block: 0.5rem;
   margin-block: -0.5rem;
+}
+
+/* Keep the floating support button and sticky bars clear of page content on phones. */
+@media (max-width: 767px) {
+  #main-content {
+    padding-bottom: max(8rem, calc(7rem + env(safe-area-inset-bottom)));
+  }
 }
