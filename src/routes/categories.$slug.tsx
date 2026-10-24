@@ -82,7 +82,7 @@ export const Route = createFileRoute("/categories/$slug")({
 
 const CATEGORY_INTROS: Record<string, string> = {
   subscriptions:
-    "A prepaid subscription gives you access to a service for a fixed period that you pay for up front. Nothing renews on its own: when the period ends, you simply order again if you want to continue. Some plans are private accounts that only you use, while others are shared plans where you receive one profile or seat on an account we manage. Each listing states which type it is before you order. After we verify your payment, your account details or activation instructions appear on your order page and are also sent to your delivery email. You never need to share your own password with us, and we will never ask for a one-time code. If anything is unclear before you order, our how it works page walks through each step from choosing a plan to receiving your details.",
+    "A prepaid subscription gives you access to a service for a fixed period that you pay for up front. Nothing renews on its own: when the period ends, you simply order again if you want to continue. Some plans are private accounts that only you use, while others are shared plans where you receive one profile or seat on an account we manage. Each listing states which type it is before you order. After we verify your payment, your account details or activation instructions appear on your order page and are also sent to your delivery email. If anything is unclear before you order, our how it works page walks through each step from choosing a plan to receiving your details.",
   "gift-cards":
     "A gift card is a prepaid code that adds balance or membership time to an account on the service it belongs to. You choose the amount and region on the listing, and we deliver the code digitally after your payment is verified. Codes arrive on your order page and by email, so you can keep them or forward them as a gift. Region matters: a code only redeems on accounts registered in the region shown on the listing, so check your account region before ordering. Once a code is revealed it cannot be taken back, which is why we ask you to confirm the region and the delivery email at checkout. Our how it works page explains the full ordering and delivery process step by step.",
   "game-top-ups":
@@ -142,7 +142,7 @@ function CategoryPage() {
           <p className="mt-2 max-w-[70ch] text-sm text-foreground/80">
             Choose a product and denomination, give us the account details the product needs, and place the order
             at checkout. You get an order number and the payment details, then upload a screenshot of your payment. We
-            deliver once the payment is verified, and we never ask for your password, one-time code or payment PIN.
+            deliver once the payment is verified.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <Button asChild variant="outline" size="sm"><Link to="/how-it-works">How ordering works</Link></Button>

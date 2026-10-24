@@ -21,27 +21,19 @@ export function contactKind(key: string): "email" | "phone" | null {
   return null;
 }
 
+/**
+ * Product-specific questions only. Generic questions (delivery, payment,
+ * refunds, details we need) live on /how-it-works and /faq.
+ */
 export function productFaqs(product: CatalogProduct): Array<{ q: string; a: string }> {
-  const faqs = [
+  return [
     {
       q: `Which region does ${product.name} work in?`,
       a: `This product is for the ${product.region} region. Check that your account matches before ordering.`,
     },
     {
-      q: "How is it delivered?",
-      a: `${product.delivery_method}. Our team verifies your payment, then delivers the order and updates its status on the site.`,
+      q: `How is ${product.name} delivered?`,
+      a: `${product.delivery_method}. Expected time: ${product.delivery_time}.`,
     },
-    {
-      q: "How do I pay?",
-      a: "Place the order, then pay by QR or bank transfer using the details shown at checkout and upload your payment screenshot. No card payments are taken on this site.",
-    },
-    { q: "Can I get a refund?", a: product.refund_eligibility },
   ];
-  if (product.requirements.length) {
-    faqs.splice(1, 0, {
-      q: "What details do you need from me?",
-      a: `${product.requirements.join(", ")}. We never ask for your password, OTP or payment PIN.`,
-    });
-  }
-  return faqs;
 }

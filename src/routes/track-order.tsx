@@ -4,6 +4,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { PageHero } from "@/components/sections/page-hero";
+import { PackageSearch } from "lucide-react";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
@@ -101,12 +103,17 @@ function TrackOrderPage() {
       <SiteHeader />
       <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-4xl px-4 pb-28 pt-6">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Track order" }]} />
-        <h1 className="font-display text-[26px] font-medium md:text-4xl">Track your order</h1>
-        <p className="mt-2 max-w-[62ch] text-sm text-muted-foreground">
-          Every MTDGC order gets a readable order number. Enter it with the email or phone number used on the order to
-          see its current status. If you have an account, your orders also appear in your{" "}
-          <Link to="/account" className="inline-flex min-h-11 items-center text-primary">account dashboard</Link>.
-        </p>
+        <PageHero
+          variant="icon"
+          icon={PackageSearch}
+          eyebrow="Order status"
+          title="Track your order"
+          intro={<>
+            Every MTDGC order gets a readable order number. Enter it with the email or phone number used on the order to
+            see its current status. If you have an account, your orders also appear in your{" "}
+            <Link to="/account" className="inline-flex min-h-11 items-center text-primary">account dashboard</Link>.
+          </>}
+        />
         <p className="mt-2 max-w-[62ch] text-sm text-muted-foreground">
           Where to find your order number: it is shown on the order confirmation page right after you place an order
           and in the confirmation email we send you.

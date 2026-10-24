@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { PageHero } from "@/components/sections/page-hero";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { SITE_URL } from "@/lib/format";
@@ -51,7 +52,7 @@ function AboutPage() {
       <SiteHeader />
       <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-3xl px-4 pb-16 pt-6">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "About" }]} />
-        <h1 className="font-display text-[26px] font-medium md:text-4xl">About MTDGC</h1>
+        <PageHero eyebrow="Company" title="About MTDGC" intro="Matrix Digital Goods and Commerce. Digital products for customers in Nepal, checked by a person before delivery." />
 
         <section className="mt-6 space-y-4 text-sm text-foreground/80">
           <p>

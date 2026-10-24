@@ -17,6 +17,8 @@ import { formatNpr, isOrderable, SITE_URL, STATUS_LABEL, SUPPORT_MESSAGE, whatsa
 import { enabledProviders } from "@/lib/payments";
 import { compareAt } from "@/lib/pricing";
 import { productFaqs, requirementHelp } from "@/lib/product-help";
+import { AccordionList } from "@/components/sections/accordion-list";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/products/$slug")({
   loader: async ({ params }) => {
@@ -196,7 +198,6 @@ function ProductPage() {
   const trust = (
     <ul className="space-y-2 text-[13px] text-foreground/85">
       <li className="flex gap-2"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />We verify your payment and deliver once it is checked.</li>
-      <li className="flex gap-2"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />We never ask for your password, OTP or payment PIN.</li>
       <li className="flex gap-2"><Check className="mt-0.5 size-4 shrink-0 text-primary" /><span>Refunds follow our <Link to="/policies/refunds" className="text-primary underline-offset-2 hover:underline">refund policy</Link>.</span></li>
       {wa && <li className="flex gap-2"><MessageCircle className="mt-0.5 size-4 shrink-0 text-primary" /><span>Questions first? <a href={wa} target="_blank" rel="noopener noreferrer" className="text-primary underline-offset-2 hover:underline">Ask on WhatsApp</a>.</span></li>}
     </ul>
@@ -297,7 +298,6 @@ function ProductPage() {
                       </div>
                     );
                   })}
-                  <p className="text-xs text-muted-foreground">MTDGC will never ask for your password, OTP or payment PIN.</p>
                 </div>
               </section>
             )}
@@ -355,33 +355,37 @@ function ProductPage() {
 
             <div className="mt-6 rounded-2xl border border-border bg-card p-4 md:hidden">{trust}</div>
 
-            <div className="mt-6 divide-y divide-border rounded-2xl border border-border">
-              <details className="group p-4" open>
-                <summary className="cursor-pointer list-none font-display text-sm font-semibold">About this product</summary>
-                <p className="mt-2 text-sm text-foreground/80">{product.description}</p>
-              </details>
-              {product.redemption_instructions && (
-                <details className="p-4">
-                  <summary className="cursor-pointer list-none font-display text-sm font-semibold">How to redeem</summary>
-                  <p className="mt-2 text-sm text-foreground/80">{product.redemption_instructions}</p>
-                </details>
-              )}
-              <details className="p-4">
-                <summary className="cursor-pointer list-none font-display text-sm font-semibold">Refund eligibility</summary>
-                <p className="mt-2 text-sm text-foreground/80">{product.refund_eligibility}</p>
-              </details>
-            </div>
+            <Tabs defaultValue="about" className="mt-6 rounded-2xl border border-border bg-card p-3 md:p-4">
+              <TabsList className="grid h-auto w-full grid-cols-3 gap-1 bg-secondary/60 p-1">
+                <TabsTrigger value="about" className="min-h-10 px-1 text-xs data-[state=active]:text-primary sm:text-sm">About</TabsTrigger>
+                <TabsTrigger value="redeem" className="min-h-10 px-1 text-xs data-[state=active]:text-primary sm:text-sm">How to redeem</TabsTrigger>
+                <TabsTrigger value="refund" className="min-h-10 px-1 text-xs data-[state=active]:text-primary sm:text-sm">Refunds</TabsTrigger>
+              </TabsList>
+              <TabsContent value="about" className="px-1 pt-2">
+                <h2 className="sr-only">About this product</h2>
+                <p className="text-sm text-foreground/80">{product.description}</p>
+              </TabsContent>
+              <TabsContent value="redeem" className="px-1 pt-2">
+                <h2 className="sr-only">How to redeem</h2>
+                <p className="text-sm text-foreground/80">{product.redemption_instructions || product.delivery_method}</p>
+              </TabsContent>
+              <TabsContent value="refund" className="px-1 pt-2">
+                <h2 className="sr-only">Refund eligibility</h2>
+                <p className="text-sm text-foreground/80">{product.refund_eligibility}</p>
+                <Link to="/policies/refunds" className="mt-2 inline-block text-xs text-primary underline-offset-2 hover:underline">Read the full refund policy</Link>
+              </TabsContent>
+            </Tabs>
 
-            <section className="mt-6">
-              <h2 className="font-display text-base font-semibold">Questions about this product</h2>
-              <div className="mt-2 divide-y divide-border rounded-2xl border border-border">
-                {productFaqs(product).map((faq) => (
-                  <details key={faq.q} className="p-4">
-                    <summary className="cursor-pointer font-display text-sm font-medium">{faq.q}</summary>
-                    <p className="mt-2 text-sm text-foreground/80">{faq.a}</p>
-                  </details>
-                ))}
-              </div>
+            <section className="mt-6" aria-labelledby="product-questions">
+              <h2 id="product-questions" className="font-display text-base font-semibold">Questions about this product</h2>
+              <AccordionList
+                className="mt-2"
+                items={productFaqs(product).map((faq) => ({ id: faq.q, title: faq.q, content: <p>{faq.a}</p> }))}
+              />
+              <p className="mt-3 text-xs text-muted-foreground">
+                Payment, delivery and refund basics are the same for every product. See{" "}
+                <Link to="/how-it-works" className="text-primary underline-offset-2 hover:underline">how it works</Link>.
+              </p>
             </section>
           </div>
         </div>

@@ -238,9 +238,6 @@ function Index() {
               </li>
             ))}
           </ol>
-          <p className="mt-4 text-xs text-muted-foreground">
-            MTDGC will never ask you for your password, OTP or payment PIN.
-          </p>
         </section>
 
         <section className="border-t border-border">

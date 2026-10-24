@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { AccordionList } from "@/components/sections/accordion-list";
+import { PageHero } from "@/components/sections/page-hero";
+import { HelpCircle } from "lucide-react";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { SITE_URL } from "@/lib/format";
@@ -33,7 +36,7 @@ const FAQS: [string, string][] = [
   ],
   [
     "Will MTDGC ever ask for my password or OTP?",
-    "No. MTDGC will never ask for your password, one-time code or payment PIN. If someone claiming to be MTDGC asks for those, stop and contact us through the support page.",
+    "No. Keep your password, one-time codes and payment PIN to yourself. If someone claiming to be MTDGC asks for them, stop and contact us through the support page.",
   ],
 ];
 
@@ -83,19 +86,20 @@ function FaqPage() {
       <SiteHeader />
       <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-3xl px-4 pb-16 pt-6">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "FAQ" }]} />
-        <h1 className="font-display text-[26px] font-medium md:text-4xl">Frequently asked questions</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The questions our customers ask most often, answered plainly.
-        </p>
+        <PageHero
+          variant="icon"
+          icon={HelpCircle}
+          eyebrow="Help"
+          title="Frequently asked questions"
+          intro="The questions our customers ask most often, answered plainly. Tap a question to open it."
+        />
 
-        <div className="mt-8 divide-y divide-border">
-          {FAQS.map(([question, answer]) => (
-            <article key={question} className="py-5">
-              <h2 className="font-display text-sm font-medium">{question}</h2>
-              <p className="mt-2 text-sm text-muted-foreground">{answer}</p>
-            </article>
-          ))}
-        </div>
+        <AccordionList
+          className="mt-8"
+          headingLevel={2}
+          defaultOpen={[0]}
+          items={FAQS.map(([question, answer]) => ({ id: question, title: question, content: <p>{answer}</p> }))}
+        />
 
         <p className="mt-8 text-sm">
           Still stuck? Visit <Link to="/support" className="text-primary">support</Link> or read{" "}

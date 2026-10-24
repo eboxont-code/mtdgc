@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { PageHero } from "@/components/sections/page-hero";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { SITE_URL } from "@/lib/format";
@@ -37,8 +38,7 @@ function TermsPage() {
       <SiteHeader />
       <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-3xl px-4 pb-16 pt-6">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Terms of service" }]} />
-        <h1 className="font-display text-[26px] font-medium md:text-4xl">Terms of service</h1>
-        <p className="mt-1 text-xs text-muted-foreground">Last updated 4 October 2026</p>
+        <PageHero eyebrow="Policy" title="Terms of service" intro="Last updated 4 October 2026" />
         <div className="mt-6 space-y-4 text-sm text-foreground/80">
           <p>
             MTDGC, trading as Matrix Digital Goods and Commerce, sells digital products to customers in Nepal.

@@ -23,7 +23,7 @@ const NAV = [
 
 const NOTICES = [
   "Prices in NPR. Payments verified before delivery.",
-  "We never ask for your password or OTP.",
+  "Every order is checked by a person.",
   "Track any order with your order number.",
 ];
 

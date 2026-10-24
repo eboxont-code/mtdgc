@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { PageHero } from "@/components/sections/page-hero";
+import { LifeBuoy, PackageX, RotateCcw, UserX, type LucideIcon } from "lucide-react";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
@@ -95,11 +97,13 @@ function SupportPage() {
       <SiteHeader />
       <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-4xl px-4 pb-16 pt-6">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Support" }]} />
-        <h1 className="font-display text-[26px] font-medium md:text-4xl">Support and order help</h1>
-        <p className="mt-2 max-w-[62ch] text-sm text-muted-foreground">
-          Send your order number and a short description of the problem and our team will work through it with you.
-        </p>
-
+        <PageHero
+          variant="split"
+          icon={LifeBuoy}
+          eyebrow="Support"
+          title="Support and order help"
+          intro="Send your order number and a short description of the problem and our team will work through it with you."
+        >
         <div className="mt-5 flex flex-wrap gap-2">
           {whatsappLink() && (
             <Button asChild size="lg">
@@ -110,21 +114,27 @@ function SupportPage() {
           )}
           <Button asChild variant="outline" size="lg"><Link to="/track-order">Track an order</Link></Button>
         </div>
+        </PageHero>
 
-        <section className="mt-10 grid gap-6 md:grid-cols-3">
-          {[
-            ["Wrong player ID", "Tell us straight away with your order number. If the top-up has not been sent yet we can correct the ID before delivery."],
-            ["Order not delivered", "Send your order number. We check the fulfilment status and tell you where the order is in the process."],
-            ["Refund request", "Refunds are reviewed before fulfilment. Once a code is revealed or currency is credited, the order cannot be reversed."],
-          ].map(([title, body]) => (
-            <article key={title}>
-              <h2 className="font-display text-sm font-medium">{title}</h2>
-              <p className="mt-1 text-sm text-muted-foreground">{body}</p>
+        <section className="mt-10 grid gap-3 md:grid-cols-3" aria-label="Common issues">
+          {([
+            ["Wrong player ID", "Tell us straight away with your order number. If the top-up has not been sent yet we can correct the ID before delivery.", UserX],
+            ["Order not delivered", "Send your order number. We check the fulfilment status and tell you where the order is in the process.", PackageX],
+            ["Refund request", "Refunds are reviewed before fulfilment. Once a code is revealed or currency is credited, the order cannot be reversed.", RotateCcw],
+          ] as Array<[string, string, LucideIcon]>).map(([title, body, Icon]) => (
+            <article key={title} className="rounded-2xl border border-border border-l-2 border-l-primary bg-card p-4">
+              <div className="flex items-center gap-3">
+                <span aria-hidden="true" className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary/10">
+                  <Icon className="size-5 text-primary" />
+                </span>
+                <h2 className="font-display text-sm font-medium">{title}</h2>
+              </div>
+              <p className="mt-2 text-sm text-muted-foreground">{body}</p>
             </article>
           ))}
         </section>
 
-        <section className="mt-12">
+        <section className="mt-10 rounded-2xl border border-primary/30 bg-card p-4 md:p-6">
           <h2 className="font-display text-lg font-medium">Raise a support request</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Support requests are stored on your MTDGC account, so you need to be signed in to send one.
@@ -176,9 +186,6 @@ function SupportPage() {
           </form>
         </section>
 
-        <p className="mt-10 text-xs text-muted-foreground">
-          MTDGC will never ask for your password, OTP or payment PIN.
-        </p>
       </main>
       <SiteFooter />
     </div>

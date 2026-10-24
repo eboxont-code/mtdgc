@@ -203,9 +203,6 @@ function AuthPage() {
           )}
         </div>
 
-        <p className="mt-8 text-xs text-muted-foreground">
-          MTDGC will never ask for your password, OTP or payment PIN over WhatsApp or email.
-        </p>
       </main>
       <SiteFooter />
     </div>
