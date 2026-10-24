@@ -46,10 +46,10 @@ async function buildSitemap() {
       },
     });
     const [categories, products] = await Promise.all([
-      db.from("categories").select("slug, updated_at").eq("is_published", true).order("sort_order"),
+      db.from("categories").select("slug").eq("is_published", true).order("sort_order"),
       db.from("products").select("slug, updated_at").eq("is_published", true).order("slug"),
     ]);
-    for (const c of categories.data ?? []) urls.push(entry(`/categories/${c.slug}`, "0.7", c.updated_at));
+    for (const c of categories.data ?? []) urls.push(entry(`/categories/${c.slug}`, "0.7"));
     for (const p of products.data ?? []) urls.push(entry(`/products/${p.slug}`, "0.8", p.updated_at));
   }
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join("\n")}\n</urlset>\n`;
