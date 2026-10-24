@@ -140,9 +140,9 @@ function CategoryPage() {
         <section className="mt-12 rounded-lg bg-panel p-5">
           <h2 className="font-display text-lg font-medium">Ordering from MTDGC</h2>
           <p className="mt-2 max-w-[70ch] text-sm text-foreground/80">
-            Choose a product and denomination, give us the account details the product needs, and send the order to us
-            on WhatsApp. We confirm availability and the price before you pay. There is no card checkout on this site
-            and we never ask for your password, one-time code or payment PIN.
+            Choose a product and denomination, give us the account details the product needs, and place the order
+            at checkout. You get an order number and the payment details, then upload a screenshot of your payment. We
+            deliver once the payment is verified, and we never ask for your password, one-time code or payment PIN.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <Button asChild variant="outline" size="sm"><Link to="/how-it-works">How ordering works</Link></Button>

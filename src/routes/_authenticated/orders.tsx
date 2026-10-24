@@ -6,7 +6,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
-import { ORDER_NOTICE, ORDER_STEPS, orderStepIndex, stepTime, formatNpr } from "@/lib/format";
+import { ORDER_NOTICE, ORDER_STEPS, orderStepIndex, stepTime, formatNpr, SITE_URL } from "@/lib/format";
 import { listMyOrders } from "@/lib/orders.functions";
 
 type Order = Awaited<ReturnType<typeof listMyOrders>>[number];
@@ -21,11 +21,11 @@ export const Route = createFileRoute("/_authenticated/orders")({
       { property: "og:description", content: "Your MTDGC order history and status." },
       { name: "twitter:title", content: "Your orders | MTDGC"  },
       { name: "twitter:description", content: "Your MTDGC order history and status."  },
-      { property: "og:url", content: "https://mtdgc.com/orders" },
+      { property: "og:url", content: `${SITE_URL}/orders` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
-    links: [{ rel: "canonical", href: "https://mtdgc.com/orders" }],
+    links: [{ rel: "canonical", href: `${SITE_URL}/orders` }],
   }),
   component: OrdersPage,
 });

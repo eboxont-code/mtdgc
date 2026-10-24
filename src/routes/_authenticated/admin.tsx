@@ -13,7 +13,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { formatNpr, STATUS_LABEL } from "@/lib/format";
+import { formatNpr, STATUS_LABEL, SITE_URL } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -25,11 +25,11 @@ export const Route = createFileRoute("/_authenticated/admin")({
       { property: "og:description", content: "MTDGC internal administration." },
       { name: "twitter:title", content: "Admin | MTDGC"  },
       { name: "twitter:description", content: "MTDGC internal administration."  },
-      { property: "og:url", content: "https://mtdgc.com/admin" },
+      { property: "og:url", content: `${SITE_URL}/admin` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
-    links: [{ rel: "canonical", href: "https://mtdgc.com/admin" }],
+    links: [{ rel: "canonical", href: `${SITE_URL}/admin` }],
   }),
   component: AdminPage,
 });

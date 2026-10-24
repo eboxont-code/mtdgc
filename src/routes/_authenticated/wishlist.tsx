@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { SITE_URL } from "@/lib/format";
 
 type Row = { product_id: string; products: { slug: string; name: string; summary: string; image_url: string | null } | null };
 
@@ -19,11 +20,11 @@ export const Route = createFileRoute("/_authenticated/wishlist")({
       { property: "og:description", content: "Products you have saved on MTDGC." },
       { name: "twitter:title", content: "Your wishlist | MTDGC"  },
       { name: "twitter:description", content: "Products you have saved on MTDGC."  },
-      { property: "og:url", content: "https://mtdgc.com/wishlist" },
+      { property: "og:url", content: `${SITE_URL}/wishlist` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
-    links: [{ rel: "canonical", href: "https://mtdgc.com/wishlist" }],
+    links: [{ rel: "canonical", href: `${SITE_URL}/wishlist` }],
   }),
   component: WishlistPage,
 });

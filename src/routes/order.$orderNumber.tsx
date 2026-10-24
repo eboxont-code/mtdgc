@@ -6,7 +6,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { formatNpr, whatsappLink } from "@/lib/format";
+import { formatNpr, whatsappLink, SITE_URL } from "@/lib/format";
 import { getOrderForViewer } from "@/lib/orders.functions";
 import { PaymentProofForm } from "@/components/payment-proof-form";
 
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/order/$orderNumber")({
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
     ],
-    links: [{ rel: "canonical", href: `https://mtdgc.com/order/${params.orderNumber}` }],
+    links: [{ rel: "canonical", href: `${SITE_URL}/order/${params.orderNumber}` }],
   }),
   component: OrderPage,
 });

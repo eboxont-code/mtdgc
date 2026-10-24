@@ -13,7 +13,7 @@ export const Route = createFileRoute("/how-it-works")({
       {
         name: "description",
         content:
-          "How an MTDGC order works: choose a product and denomination, give us the details we need, confirm payment on WhatsApp, then receive your digital item.",
+          "How an MTDGC order works: choose a product and denomination, give us the details we need, place the order at checkout, pay and upload your payment proof, then receive your digital item.",
       },
       { property: "og:title", content: "How MTDGC orders and delivery work" },
       { property: "og:description", content: "Ordering, payment and digital delivery at MTDGC, step by step." },
@@ -22,6 +22,9 @@ export const Route = createFileRoute("/how-it-works")({
       { property: "og:url", content: `${SITE_URL}/how-it-works` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: `${SITE_URL}/og/mtdgc.png` },
+      { property: "og:image:alt", content: "MTDGC, Nepal's digital marketplace" },
+      { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/how-it-works` }],
     scripts: [
@@ -35,9 +38,9 @@ export const Route = createFileRoute("/how-it-works")({
 const STEPS = [
   ["Choose a product and denomination", "Each product page shows the available packs or amounts, the region the product works in and what we need from you."],
   ["Add your details", "Game top-ups need a player ID, and some need a zone or server. Gift cards and subscriptions need a delivery email. We check these before fulfilling."],
-  ["Send the order for confirmation", "Your cart opens a prefilled WhatsApp message. Nothing is charged on this website."],
-  ["Confirm payment", "We reply with availability and the payment instructions that apply to your order. Payment is arranged directly with our team."],
-  ["Receive your item", "Top-ups are credited to the account you gave us. Codes and subscription details are sent to your delivery email."],
+  ["Place your order at checkout", "Checkout takes three short steps on this site. When you place the order you get an order number to keep."],
+  ["Pay and upload your proof", "Your order page shows the payment details for your order. Pay, then upload a screenshot of the payment so our team can verify it."],
+  ["Receive your item", "We deliver once your payment is verified. Top-ups are credited to the account you gave us. Codes and subscription details are sent to your delivery email."],
 ];
 
 function HowItWorksPage() {

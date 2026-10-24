@@ -195,7 +195,7 @@ function ProductPage() {
 
   const trust = (
     <ul className="space-y-2 text-[13px] text-foreground/85">
-      <li className="flex gap-2"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />We check every order before you pay.</li>
+      <li className="flex gap-2"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />We verify your payment and deliver once it is checked.</li>
       <li className="flex gap-2"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />We never ask for your password, OTP or payment PIN.</li>
       <li className="flex gap-2"><Check className="mt-0.5 size-4 shrink-0 text-primary" /><span>Refunds follow our <Link to="/policies/refunds" className="text-primary underline-offset-2 hover:underline">refund policy</Link>.</span></li>
       {wa && <li className="flex gap-2"><MessageCircle className="mt-0.5 size-4 shrink-0 text-primary" /><span>Questions first? <a href={wa} target="_blank" rel="noopener noreferrer" className="text-primary underline-offset-2 hover:underline">Ask on WhatsApp</a>.</span></li>}
@@ -329,7 +329,7 @@ function ProductPage() {
                   </div>
                 </fieldset>
                 {variant?.status === "low_stock" && (
-                  <p className="mt-3 text-xs text-muted-foreground">Limited supply on this option. We confirm availability before you pay.</p>
+                  <p className="mt-3 text-xs text-muted-foreground">Limited supply on this option. If it runs out after you order, we tell you and refund your payment.</p>
                 )}
               </section>
             )}

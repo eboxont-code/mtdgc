@@ -51,6 +51,9 @@ export const Route = createFileRoute("/")({
       { property: "og:url", content: `${SITE_URL}/` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: `${SITE_URL}/og/mtdgc.png` },
+      { property: "og:image:alt", content: "MTDGC, Nepal's digital marketplace" },
+      { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
       { name: "twitter:title", content: "MTDGC | Nepal's Digital Marketplace" },
       {
         name: "twitter:description",
@@ -64,9 +67,10 @@ export const Route = createFileRoute("/")({
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "ItemList",
-          name: "Software and subscriptions from MTDGC",
-          itemListElement: (loaderData?.products ?? [])
-            .filter((p) => p.category && (p.category.slug === "software" || p.category.slug === "subscriptions"))
+          name: "Featured products from MTDGC",
+          itemListElement: [...(loaderData?.products ?? [])]
+            .filter((p) => p.featured_rank != null)
+            .sort((a, b) => (a.featured_rank ?? 0) - (b.featured_rank ?? 0))
             .map((p, i) => ({
               "@type": "ListItem",
               position: i + 1,

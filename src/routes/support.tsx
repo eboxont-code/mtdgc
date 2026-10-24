@@ -25,6 +25,9 @@ export const Route = createFileRoute("/support")({
       { property: "og:url", content: `${SITE_URL}/support` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: `${SITE_URL}/og/mtdgc.png` },
+      { property: "og:image:alt", content: "MTDGC, Nepal's digital marketplace" },
+      { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/support` }],
     scripts: [
@@ -162,7 +165,7 @@ function SupportPage() {
                 {status === "sending" ? "Sending" : "Send request"}
               </Button>
             </div>
-            {status === "sent" && <p className="text-sm text-success">Your request has been recorded. We will follow up on WhatsApp.</p>}
+            {status === "sent" && <p className="text-sm text-success">Your request has been recorded. We will reply to the email address on your account.</p>}
             {status === "signin" && (
               <p role="alert" className="text-sm text-muted-foreground">
                 Please <Link to="/auth" search={{ redirect: "/support" }} className="text-primary">sign in</Link> to send a support request, or message us on

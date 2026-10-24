@@ -5,7 +5,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { formatNpr } from "@/lib/format";
+import { formatNpr, SITE_URL } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/account")({
   head: () => ({
@@ -17,11 +17,11 @@ export const Route = createFileRoute("/_authenticated/account")({
       { property: "og:description", content: "Your MTDGC profile, order history, wishlist and support requests." },
       { name: "twitter:title", content: "Your account | MTDGC"  },
       { name: "twitter:description", content: "Your MTDGC profile, order history, wishlist and support requests."  },
-      { property: "og:url", content: "https://mtdgc.com/account" },
+      { property: "og:url", content: `${SITE_URL}/account` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
-    links: [{ rel: "canonical", href: "https://mtdgc.com/account" }],
+    links: [{ rel: "canonical", href: `${SITE_URL}/account` }],
   }),
   component: AccountPage,
 });
@@ -133,7 +133,7 @@ function AccountPage() {
             <p className="mt-2 text-sm text-muted-foreground">Loading your orders.</p>
           ) : orders.length === 0 ? (
             <p className="mt-2 text-sm text-muted-foreground">
-              No orders recorded on your account yet. Orders placed over WhatsApp are added once our team records them.
+              No orders on your account yet. Orders you place at checkout while signed in appear here.
             </p>
           ) : (
             <ul className="mt-3 divide-y divide-border">

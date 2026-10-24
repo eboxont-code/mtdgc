@@ -21,6 +21,9 @@ export const Route = createFileRoute("/about")({
       { property: "og:url", content: `${SITE_URL}/about` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: `${SITE_URL}/og/mtdgc.png` },
+      { property: "og:image:alt", content: "MTDGC, Nepal's digital marketplace" },
+      { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/about` }],
     scripts: [
@@ -64,9 +67,9 @@ function AboutPage() {
             fulfilment is not automated yet.
           </p>
           <p>
-            Prices on this site are shown in Nepalese rupees. We do not take card payments on the website. You send your
-            order through the cart, we confirm availability and payment instructions on WhatsApp, and delivery follows
-            once payment is settled.
+            Prices on this site are shown in Nepalese rupees. You place your order through the checkout on this site and
+            receive an order number with the payment details. After you pay, you upload a screenshot of the payment,
+            and we deliver once our team has verified it. WhatsApp is there if you need support.
           </p>
           <p>
             We publish only claims we can stand behind. There are no customer counts, ratings or review numbers on this

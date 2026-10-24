@@ -1,7 +1,7 @@
 # MTDGC Data Architecture Design
 
 ## 1. Overview
-MTDGC (Modern Tech Digital Goods & Commerce) is a digital marketplace for Nepal. This architecture is designed for security, scalability, and ease of expansion beyond game top-ups into other digital product lines.
+MTDGC (Matrix Digital Goods & Commerce) is a digital marketplace for Nepal. This architecture is designed for security, scalability, and ease of expansion beyond game top-ups into other digital product lines.
 
 ## 2. Secure Data Model
 

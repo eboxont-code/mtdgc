@@ -17,7 +17,7 @@ const FAQS: [string, string][] = [
   ],
   [
     "How do I pay?",
-    "No payment is taken on this website. You send your order through the cart, we confirm availability, and then we give you payment instructions directly.",
+    "Place your order through the checkout on this site. You get an order number and the payment details for your order. Pay, then upload a screenshot of the payment on your order page. We verify it and then deliver.",
   ],
   [
     "Why does region matter for gift cards?",
@@ -53,6 +53,9 @@ export const Route = createFileRoute("/faq")({
       { property: "og:url", content: `${SITE_URL}/faq` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: `${SITE_URL}/og/mtdgc.png` },
+      { property: "og:image:alt", content: "MTDGC, Nepal's digital marketplace" },
+      { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/faq` }],
     scripts: [

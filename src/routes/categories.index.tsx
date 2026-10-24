@@ -81,8 +81,8 @@ function CategoriesIndexPage() {
         <section className="mt-10 rounded-lg bg-panel p-4">
           <h2 className="font-display text-lg font-medium">How ordering works</h2>
           <p className="mt-2 max-w-[62ch] text-sm text-muted-foreground">
-            Choose a product and denomination, give us the details the product needs, then send the order on WhatsApp.
-            MTDGC confirms availability and sends payment instructions before you pay. Nothing is charged on this site.
+            Choose a product and denomination, give us the details the product needs, then place the order at checkout.
+            You get an order number and payment details, upload a screenshot of your payment, and we deliver once it is verified.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Button asChild variant="outline" size="sm"><Link to="/how-it-works">How it works</Link></Button>
