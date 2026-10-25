@@ -127,3 +127,4 @@ Body/input text and outline badges use foreground; muted text and inactive navig
 - [x] F4: existing footer already has the requested Shop links except Deals, which waits for D2. Preserve the developer's final Nepal and Australia blurb instead of replacing it with older Nepal-only wording.
 - [ ] F7 onward: next ordered work. Preserve the developer's Nepal and Australia copy where older task wording conflicts.
 - [x] F7: added display labels, category mapping, duration and discount helpers; four focused tests pass and automatic validation reports build OK. Revision e20fb7b. These helpers do not change displayed prices or catalog data.
+- [ ] F11: client-only publication safeguards and Drafts filter added; tests and automatic validation pending. No server changes.

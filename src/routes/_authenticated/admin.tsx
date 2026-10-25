@@ -52,6 +52,7 @@ function AdminPage() {
   const [allowed, setAllowed] = useState<boolean | null>(null);
   const [tab, setTab] = useState<"overview" | "verify" | "payments">("overview");
   const [products, setProducts] = useState<ProductRow[]>([]);
+  const [draftsOnly, setDraftsOnly] = useState(false);
   const [orderCount, setOrderCount] = useState(0);
   const [ticketCount, setTicketCount] = useState(0);
   const [reviewCount, setReviewCount] = useState(0);
@@ -195,6 +196,10 @@ function AdminPage() {
                 added without changing the site design.
               </p>
               <div className="mt-3 max-w-full overflow-x-auto">
+                <label className="mb-3 flex min-h-11 items-center gap-2 text-sm">
+                  <input type="checkbox" checked={draftsOnly} onChange={(event) => setDraftsOnly(event.target.checked)} />
+                  Drafts only
+                </label>
                 <table className="w-full text-left text-sm">
                   <thead>
                     <tr className="border-b border-border font-display text-xs uppercase tracking-[0.1em] text-muted-foreground">
@@ -207,11 +212,11 @@ function AdminPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {products.map((product) => {
+                    {products.filter((product) => !draftsOnly || !product.is_published).map((product) => {
                       const prices = (product.product_variants ?? []).map((variant) => variant.price_minor);
                       return (
                         <tr key={product.id} className="border-b border-border">
-                          <td className="py-2">{product.name}</td>
+                          <td className="py-2">{product.name}{!product.is_published && <span className="ml-2 inline-block rounded-md bg-secondary px-2 py-1 text-xs text-muted-foreground">Draft</span>}</td>
                           <td className="py-2">{STATUS_LABEL[product.status] ?? product.status}</td>
                           <td className="py-2">{product.is_published ? "Yes" : "No"}</td>
                           <td className="py-2">{prices.length}</td>
