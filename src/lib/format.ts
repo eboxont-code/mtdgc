@@ -27,6 +27,56 @@ export function isOrderable(status: string): boolean {
   return status === "available" || status === "low_stock";
 }
 
+export const PRODUCT_TYPE_LABEL = {
+  software: "Software",
+  subscription: "Subscription",
+  gift_card: "Gift card",
+  game_top_up: "Game top-up",
+} as const;
+
+export const ACCOUNT_TYPE_LABEL = {
+  private: "Private account, only you use it",
+  shared: "Shared account, you get one profile or seat",
+  own_account: "Activated on your own account",
+  licence_key: "Licence key",
+} as const;
+
+export const DELIVERY_CHANNEL_LABEL = {
+  email: "By email",
+  order_page: "On your order page",
+  email_and_order_page: "By email and on your order page",
+} as const;
+
+export const AVAILABILITY_LABEL: Readonly<Record<string, string>> = new Proxy(
+  { available: "Available", low_stock: "Limited" },
+  { get: (labels, status: string) => labels[status as keyof typeof labels] ?? "Unavailable" },
+);
+
+export function durationLabel(months: number): string | null {
+  if (!Number.isInteger(months) || months <= 0) return null;
+  if (months % 12 === 0) {
+    const years = months / 12;
+    return `${years} ${years === 1 ? "year" : "years"}`;
+  }
+  return `${months} ${months === 1 ? "month" : "months"}`;
+}
+
+export function percentOff(priceMinor: number, compareAtMinor?: number | null): number | null {
+  if (!Number.isFinite(priceMinor) || priceMinor <= 0 ||
+      compareAtMinor == null || !Number.isFinite(compareAtMinor) || compareAtMinor <= priceMinor) return null;
+  return Math.floor(((compareAtMinor - priceMinor) / compareAtMinor) * 100);
+}
+
+export function categoryTypeFromSlug(slug: string): keyof typeof PRODUCT_TYPE_LABEL | null {
+  switch (slug) {
+    case "software": return "software";
+    case "subscriptions": return "subscription";
+    case "gift-cards": return "gift_card";
+    case "game-top-ups": return "game_top_up";
+    default: return null;
+  }
+}
+
 export const SITE_URL = "https://mtdgc.com";
 
 export const ORDER_STEPS: Array<{ title: string; body: string; statuses: string[] }> = [

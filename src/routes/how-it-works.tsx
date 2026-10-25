@@ -30,7 +30,7 @@ export const Route = createFileRoute("/how-it-works")({
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/how-it-works` }],
     scripts: [
-      pageLd("WebPage", "MTDGC How it works", "/how-it-works", "How it works from MTDGC, the digital marketplace for Nepal and Australia."),
+      pageLd("WebPage", "MTDGC How it works", "/how-it-works", "Choose a product, provide delivery details, place an order, pay by QR or bank transfer and upload your screenshot and transaction reference for verification."),
       breadcrumbLd([{ name: "Home", path: "/" }, { name: "How it works", path: "/how-it-works" }]),
     ],
   }),
@@ -79,8 +79,25 @@ function HowItWorksPage() {
           <p className="mt-2 text-sm text-foreground/80">
             There is no card checkout on this website and we do not store card details. After you place your order,
             your order page shows the payment details. Pay using only those details, then upload your payment
-            screenshot so our team can verify it.
+            screenshot and transaction reference so our team can verify it. If payment details are not yet shown,
+            you can still place your order. Our team will send payment details shortly.
           </p>
+        </section>
+
+        <section className="mt-10">
+          <h2 className="font-display text-lg font-medium">What we need from you</h2>
+          <dl className="mt-3 divide-y divide-border text-sm">
+            {[
+              ["Software and subscriptions", "Delivery email"],
+              ["Gift cards", "Delivery email"],
+              ["Game top-ups", "Player ID and in-game name; any extra details are shown on the listing"],
+            ].map(([type, details]) => (
+              <div key={type} className="grid grid-cols-1 gap-1 py-3 sm:grid-cols-2">
+                <dt className="font-display font-medium">{type}</dt><dd className="text-muted-foreground">{details}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="mt-3 text-sm text-muted-foreground">Follow the activation steps on your listing after delivery. You can check progress on the <Link to="/track-order" className="inline-flex min-h-11 items-center text-primary">Track order page</Link>.</p>
         </section>
 
         <section className="mt-10">

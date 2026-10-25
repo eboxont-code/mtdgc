@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { saveProduct } from "@/lib/admin.functions";
 import { VariantsEditor } from "./variants-editor";
+import { publicationBlockReason } from "@/lib/publication-check";
 
 const STATUSES = ["available", "low_stock", "coming_soon", "out_of_stock", "temporarily_unavailable", "archived"] as const;
 
@@ -42,6 +43,8 @@ export function ProductForm({ productId, onSaved, onCancel }: { productId?: stri
   const [errors, setErrors] = useState<Partial<Record<keyof Form, string>>>({});
   const [message, setMessage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [variants, setVariants] = useState<{ status: string; price_minor: number }[] | null>(productId ? null : []);
+  const publicationReason = variants === null ? "Checking option prices before publishing." : publicationBlockReason(form, variants);
   const save = useServerFn(saveProduct);
 
   useEffect(() => {
@@ -79,7 +82,7 @@ export function ProductForm({ productId, onSaved, onCancel }: { productId?: stri
           platform: form.platform.trim() || null, delivery_method: form.delivery_method.trim(), delivery_time: form.delivery_time.trim(),
           requirements: form.requirements.split(",").map((s) => s.trim()).filter(Boolean).slice(0, 8),
           image_url: form.image_url.trim() || null, seo_title: form.seo_title.trim(), seo_description: form.seo_description.trim(),
-          status: form.status, is_published: form.is_published,
+          status: form.status, is_published: form.is_published && !publicationReason,
         },
       });
       setMessage("Product saved.");
@@ -132,15 +135,16 @@ export function ProductForm({ productId, onSaved, onCancel }: { productId?: stri
         </select>
       </label>
       <label className="flex min-h-11 items-center gap-2 text-sm">
-        <input type="checkbox" checked={form.is_published} onChange={(e) => set("is_published", e.target.checked)} />
+        <input type="checkbox" checked={form.is_published && !publicationReason} disabled={Boolean(publicationReason)} aria-describedby={publicationReason ? "publication-reason" : undefined} onChange={(e) => set("is_published", e.target.checked)} />
         Published
       </label>
+      {publicationReason && <p id="publication-reason" role="status" className="text-sm text-muted-foreground md:col-span-2">{publicationReason}</p>}
       <div className="flex flex-wrap items-center gap-2 md:col-span-2">
         <Button type="submit" size="sm" disabled={saving}>{saving ? "Saving" : "Save product"}</Button>
         <Button type="button" size="sm" variant="outline" onClick={onCancel}>Close</Button>
         {message && <span role="status" className="text-sm">{message}</span>}
       </div>
-      {productId && <VariantsEditor productId={productId} />}
+      {productId && <VariantsEditor productId={productId} onVariantsChange={setVariants} />}
     </form>
   );
 }

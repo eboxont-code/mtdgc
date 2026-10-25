@@ -11,7 +11,7 @@ type Row = { id?: string; sku: string; name: string; price: string; stock: strin
 
 const blank = (): Row => ({ sku: "", name: "", price: "", stock: "", status: "available", is_default: false, sort_order: "0" });
 
-export function VariantsEditor({ productId }: { productId: string }) {
+export function VariantsEditor({ productId, onVariantsChange }: { productId: string; onVariantsChange?: (variants: { status: string; price_minor: number }[]) => void }) {
   const [rows, setRows] = useState<Row[]>([]);
   const [message, setMessage] = useState<string | null>(null);
   const [reload, setReload] = useState(0);
@@ -24,7 +24,9 @@ export function VariantsEditor({ productId }: { productId: string }) {
       .select("id, sku, name, price_minor, stock_quantity, status, is_default, sort_order")
       .eq("product_id", productId)
       .order("sort_order")
-      .then(({ data }) =>
+      .then(({ data, error }) => {
+        if (error) return;
+        onVariantsChange?.(data ?? []);
         setRows([
           ...(data ?? []).map((v) => ({
             id: v.id, sku: v.sku, name: v.name, price: String(v.price_minor / 100),
@@ -32,9 +34,9 @@ export function VariantsEditor({ productId }: { productId: string }) {
             is_default: v.is_default, sort_order: String(v.sort_order),
           })),
           blank(),
-        ]),
-      );
-  }, [productId, reload]);
+        ]);
+      });
+  }, [productId, reload, onVariantsChange]);
 
   const update = (i: number, patch: Partial<Row>) => setRows((r) => r.map((row, j) => (j === i ? { ...row, ...patch } : row)));
 
