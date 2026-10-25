@@ -120,3 +120,8 @@ Body/input text and outline badges use foreground; muted text and inactive navig
 - [x] F4: footer Shop links and blurb (Deals link waits for D2)
 - [x] burn-test marker added to __root.tsx as a JSX comment
 - [ ] F7 onward still open
+
+## 25 Oct ordered pack (starting head f4364c73)
+- [ ] F2-check: editor and mounting preserved; automatic build validation pending. Manual builds/typechecks and custom Git commits are managed by Lovable, not shell commands.
+- [x] F3: dropped; final Matrix header preserved.
+- [ ] F4 onward: continue only after F2-check passes. Preserve the developer's Nepal and Australia copy where older task wording conflicts.
