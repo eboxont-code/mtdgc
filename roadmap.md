@@ -128,4 +128,9 @@ Body/input text and outline badges use foreground; muted text and inactive navig
 - [ ] F7 onward: next ordered work. Preserve the developer's Nepal and Australia copy where older task wording conflicts.
 - [x] F7: added display labels, category mapping, duration and discount helpers; four focused tests pass and automatic validation reports build OK. Revision e20fb7b. These helpers do not change displayed prices or catalog data.
 - [x] F11: client-only publication safeguards and Drafts filter added; three focused tests pass, automatic validation reports build OK; revision 852b129. No server changes. Signed-in admin UI check blocked: session minting found no matching account for the requester; do not modify real listing data just to test.
-- [ ] F13: software/subscriptions show existing delivery method and timing in labelled rows; empty values and placeholder timing suppressed. Duration omitted because getProductBySlug has no duration field. Validation pending; Netflix listing data untouched.
+- [x] F13 (partial): software/subscriptions show existing delivery method and timing in labelled rows; empty values and placeholder timing suppressed. Duration omitted because getProductBySlug has no duration field. Automatic build OK, revision 12687ea. Existing game product checked at 390px and desktop with no overflow; software/subscription branch not verified with populated live data. Netflix listing data untouched.
+- [x] F14: dropped; final Matrix option tiles and stepped flow preserved.
+- [x] F16: skipped conflict with final 339da6e7 single footer security notice and listing-specific refunds tab. Do not duplicate the notice or invent an unconditional refund promise.
+- [x] F17: dropped; final Matrix product tiles preserved.
+- [x] F18: skipped; product-help.ts is explicitly protected and prepaid renewal terms cannot be invented without listing data.
+- [ ] F20 onward, D2/D3, P/S, numbered, U and G items remain open in strict order.
