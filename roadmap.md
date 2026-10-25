@@ -122,6 +122,7 @@ Body/input text and outline badges use foreground; muted text and inactive navig
 - [ ] F7 onward still open
 
 ## 25 Oct ordered pack (starting head f4364c73)
-- [ ] F2-check: editor and mounting preserved; automatic build validation pending. Manual builds/typechecks and custom Git commits are managed by Lovable, not shell commands.
+- [x] F2-check: editor and mounting unchanged; automatic validation reports build OK. Revision 440f101. Manual builds/typechecks and custom Git commits are managed by Lovable, not shell commands.
 - [x] F3: dropped; final Matrix header preserved.
-- [ ] F4 onward: continue only after F2-check passes. Preserve the developer's Nepal and Australia copy where older task wording conflicts.
+- [x] F4: existing footer already has the requested Shop links except Deals, which waits for D2. Preserve the developer's final Nepal and Australia blurb instead of replacing it with older Nepal-only wording.
+- [ ] F7 onward: next ordered work. Preserve the developer's Nepal and Australia copy where older task wording conflicts.
