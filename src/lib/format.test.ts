@@ -1,30 +1,31 @@
-import { describe, expect, test } from "bun:test";
+import { describe, test } from "node:test";
+import { strict as assert } from "node:assert";
 import { AVAILABILITY_LABEL, categoryTypeFromSlug, durationLabel, percentOff } from "./format";
 
 describe("F7 catalog helpers", () => {
   test("formats months and complete years", () => {
-    expect(durationLabel(1)).toBe("1 month");
-    expect(durationLabel(3)).toBe("3 months");
-    expect(durationLabel(12)).toBe("1 year");
-    expect(durationLabel(0)).toBeNull();
+    assert.equal(durationLabel(1), "1 month");
+    assert.equal(durationLabel(3), "3 months");
+    assert.equal(durationLabel(12), "1 year");
+    assert.equal(durationLabel(0), null);
   });
   test("rounds savings down and rejects invalid compare-at prices", () => {
-    expect(percentOff(667, 1000)).toBe(33);
-    expect(percentOff(1000, 1000)).toBeNull();
-    expect(percentOff(1000, null)).toBeNull();
-    expect(percentOff(0, 1000)).toBeNull();
+    assert.equal(percentOff(667, 1000), 33);
+    assert.equal(percentOff(1000, 1000), null);
+    assert.equal(percentOff(1000, null), null);
+    assert.equal(percentOff(0, 1000), null);
   });
   test("limits availability to the two orderable statuses", () => {
-    expect(AVAILABILITY_LABEL.available).toBe("Available");
-    expect(AVAILABILITY_LABEL.low_stock).toBe("Limited");
-    expect(AVAILABILITY_LABEL.coming_soon).toBe("Unavailable");
-    expect(AVAILABILITY_LABEL.unknown).toBe("Unavailable");
+    assert.equal(AVAILABILITY_LABEL["available"], "Available");
+    assert.equal(AVAILABILITY_LABEL["low_stock"], "Limited");
+    assert.equal(AVAILABILITY_LABEL["coming_soon"], "Unavailable");
+    assert.equal(AVAILABILITY_LABEL["unknown"], "Unavailable");
   });
   test("maps existing category slugs without guessing other types", () => {
-    expect(categoryTypeFromSlug("software")).toBe("software");
-    expect(categoryTypeFromSlug("subscriptions")).toBe("subscription");
-    expect(categoryTypeFromSlug("gift-cards")).toBe("gift_card");
-    expect(categoryTypeFromSlug("game-top-ups")).toBe("game_top_up");
-    expect(categoryTypeFromSlug("deals")).toBeNull();
+    assert.equal(categoryTypeFromSlug("software"), "software");
+    assert.equal(categoryTypeFromSlug("subscriptions"), "subscription");
+    assert.equal(categoryTypeFromSlug("gift-cards"), "gift_card");
+    assert.equal(categoryTypeFromSlug("game-top-ups"), "game_top_up");
+    assert.equal(categoryTypeFromSlug("deals"), null);
   });
 });
