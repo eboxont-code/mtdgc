@@ -134,3 +134,4 @@ Body/input text and outline badges use foreground; muted text and inactive navig
 - [x] F17: dropped; final Matrix product tiles preserved.
 - [x] F18: skipped; product-help.ts is explicitly protected and prepaid renewal terms cannot be invented without listing data.
 - [ ] F20 onward, D2/D3, P/S, numbered, U and G items remain open in strict order.
+- [ ] F20: preserved developer's final five-step icon layout; added required-details rows, payment fallback and transaction reference guidance, activation/tracking links and matching WebPage description. Validation pending. Existing delivery promises unchanged.
