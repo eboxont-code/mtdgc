@@ -12,3 +12,4 @@
 - Admin order details live in a focused sheet component and use existing role-protected actions; keep status options aligned with the existing validator.
 - Responsive product images map original asset URLs to CDN WebP pointers in a browser-safe helper; never rewrite listing records to optimize presentation.
 - Mount mobile navigation and reduced-motion-aware scroll reveals within the root cart provider so shared navigation can access the existing cart without changing checkout flows.
+- Catalog display labels and pure duration/discount helpers live in format.ts; keep them independent of catalog records and price visibility so presentation never changes stored offers.
