@@ -13,7 +13,7 @@ import { WishlistButton } from "@/components/wishlist-button";
 import { getProductBySlug } from "@/lib/catalog.functions";
 import { PRICE_COMING_SOON, pricesHidden } from "@/lib/price-visibility";
 import { useCart } from "@/lib/cart";
-import { formatNpr, isOrderable, SITE_URL, STATUS_LABEL, SUPPORT_MESSAGE, whatsappLink } from "@/lib/format";
+import { categoryTypeFromSlug, formatNpr, isOrderable, SITE_URL, STATUS_LABEL, SUPPORT_MESSAGE, whatsappLink } from "@/lib/format";
 import { enabledProviders } from "@/lib/payments";
 import { compareAt } from "@/lib/pricing";
 import { productFaqs, requirementHelp } from "@/lib/product-help";
@@ -187,6 +187,10 @@ function ProductPage() {
   const wa = whatsappLink(`${SUPPORT_MESSAGE} with ${product.name}`);
   const providers = enabledProviders();
   const variantWas = variant ? compareAt(variant) : null;
+  const productType = categoryTypeFromSlug(product.category?.slug ?? "");
+  const isPlan = productType === "software" || productType === "subscription";
+  const deliveryTime = product.delivery_time.trim() === "Confirmed after order review" ? "" : product.delivery_time.trim();
+  const deliveryMethod = product.delivery_method.trim() === "Confirmed after order review" ? "" : product.delivery_method.trim();
 
   const StepTitle = ({ n, children }: { n: number; children: React.ReactNode }) => (
     <h2 className="flex items-center gap-2.5 font-display text-[16px] font-semibold md:text-lg">
@@ -256,7 +260,7 @@ function ProductPage() {
                   {!hidePrices && variantWas && <span className="ml-2 text-sm font-normal text-muted-foreground line-through">{formatNpr(variantWas)}</span>}
                 </span>
               </div>
-              <p className="mt-1 text-xs text-muted-foreground">{product.delivery_time}</p>
+              {deliveryTime && <p className="mt-1 text-xs text-muted-foreground">{deliveryTime}</p>}
               <div className="mt-4">{actions}</div>
               <div className="mt-4 border-t border-border pt-4">{trust}</div>
             </div>
@@ -274,11 +278,17 @@ function ProductPage() {
               {!isOrderable(product.status) && (
                 <li className="rounded-full border border-warn/40 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.08em] text-warn">{STATUS_LABEL[product.status] ?? product.status}</li>
               )}
-              <li className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-[11px]"><Zap className="size-3.5 text-primary" />{product.delivery_method}</li>
-              <li className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-[11px]"><Globe className="size-3.5 text-primary" />{product.region}</li>
-              <li className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-[11px]"><Clock className="size-3.5 text-primary" />{product.delivery_time}</li>
-              {product.platform && <li className="rounded-full border border-border bg-card px-2.5 py-1 text-[11px]">{product.platform}</li>}
+              {!isPlan && deliveryMethod && <li className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-[11px]"><Zap className="size-3.5 text-primary" />{deliveryMethod}</li>}
+              {!isPlan && product.region && <li className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-[11px]"><Globe className="size-3.5 text-primary" />{product.region}</li>}
+              {!isPlan && deliveryTime && <li className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-[11px]"><Clock className="size-3.5 text-primary" />{deliveryTime}</li>}
+              {!isPlan && product.platform && <li className="rounded-full border border-border bg-card px-2.5 py-1 text-[11px]">{product.platform}</li>}
             </ul>
+            {isPlan && (deliveryMethod || deliveryTime) && (
+              <dl className="mt-4 space-y-2 text-sm">
+                {deliveryMethod && <div className="grid grid-cols-1 gap-1 sm:grid-cols-2"><dt className="text-muted-foreground">You receive</dt><dd>{deliveryMethod}</dd></div>}
+                {deliveryTime && <div className="grid grid-cols-1 gap-1 sm:grid-cols-2"><dt className="text-muted-foreground">Delivery</dt><dd>{deliveryTime}</dd></div>}
+              </dl>
+            )}
 
             {hasDetails && (
               <section className="mt-6 rounded-2xl border border-border bg-card p-4 md:p-5">
@@ -373,7 +383,7 @@ function ProductPage() {
               </TabsContent>
               <TabsContent value="redeem" className="px-1 pt-2">
                 <h2 className="sr-only">How to redeem</h2>
-                <p className="text-sm text-foreground/80">{product.redemption_instructions || product.delivery_method}</p>
+                {(product.redemption_instructions || deliveryMethod) && <p className="text-sm text-foreground/80">{product.redemption_instructions || deliveryMethod}</p>}
               </TabsContent>
               <TabsContent value="refund" className="px-1 pt-2">
                 <h2 className="sr-only">Refund eligibility</h2>
