@@ -211,13 +211,13 @@ function CatalogPage() {
             </div>
 
             <nav aria-label="Product types" className="mt-3 flex flex-wrap gap-2">
-              {[
+              {([
                 ["all", "All"],
                 ["software", "Software"],
                 ["subscriptions", "Subscriptions"],
                 ["gift-cards", "Gift cards"],
                 ["game-top-ups", "Game top-ups"],
-              ].map(([slug, label]) => (
+              ] as const).map(([slug, label]) => (
                 <Button key={slug} variant={category === slug ? "secondary" : "outline"} className="min-h-11" aria-pressed={category === slug} onClick={() => {
                   setCategory(slug);
                   syncUrl({ q: query, category: slug, sort, availability, price });
