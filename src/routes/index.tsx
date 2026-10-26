@@ -17,20 +17,24 @@ import { bestDeal } from "@/lib/pricing";
 
 const FAQS = [
   [
-    "How quickly will I receive my order?",
-    "Delivery time depends on the product. Each product page shows its delivery method and the time we can commit to. Our team confirms your order before anything is charged.",
-  ],
-  [
-    "What details do I need to give?",
-    "Game top-ups usually need your player ID and in-game name. Subscriptions and gift cards need a delivery email. The product page lists exactly what we ask for.",
-  ],
-  [
     "How do I pay?",
-    "Pay by QR code or bank transfer at checkout, then upload your payment screenshot with the transaction reference. There is no card payment on this site.",
+    "Place your order on this site, then pay using the QR or bank details shown for your order. Upload your payment screenshot and transaction reference for verification. If details are not shown, our team will send them shortly.",
   ],
   [
-    "Can I get help with an order?",
-    "Yes. Message us on WhatsApp with your order number, or open a request from the support page.",
+    "How fast is delivery?",
+    "Each listing shows its usual delivery time. Payment verification comes before delivery. Contact support if your order is later than the time shown.",
+  ],
+  [
+    "Where do my key or account details appear?",
+    "After delivery, check your order page and delivery email for your key, code or account details. Follow the activation instructions on the listing.",
+  ],
+  [
+    "Do subscriptions renew on their own?",
+    "Check the plan details on the listing for its duration and renewal terms. If those terms are not shown, ask support before ordering.",
+  ],
+  [
+    "What if my key does not activate?",
+    "Check the activation instructions and region on the listing. If it still does not work, contact support with your order number and the error message. Never send your password.",
   ],
 ];
 
