@@ -51,13 +51,14 @@ function CategoriesIndexPage() {
 
         {categories.length ? (
           <ul className="mt-6 grid gap-3 md:grid-cols-2">
-            {categories.map((category) => {
+            {[...categories].sort((a, b) => a.sort_order - b.sort_order).map((category) => {
               const count = products.filter((product) => product.category?.slug === category.slug).length;
               return (
                 <li key={category.slug} className="rounded-lg border border-border p-4">
                   <h2 className="font-display text-lg font-medium">
                     <Link to="/categories/$slug" params={{ slug: category.slug }} className="hover:text-primary">
                       {category.name}
+                      <span className="ml-2 text-sm text-muted-foreground">({count})</span>
                     </Link>
                   </h2>
                   <p className="mt-1 text-sm text-muted-foreground">{category.description}</p>
