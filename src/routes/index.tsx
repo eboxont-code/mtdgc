@@ -37,16 +37,16 @@ const FAQS = [
 export const Route = createFileRoute("/")({
   head: ({ loaderData }) => ({
     meta: [
-      { title: "MTDGC | Digital Marketplace for Nepal and Australia" },
+      { title: "MTDGC | Software and subscriptions in Nepal" },
       {
         name: "description",
         content:
-          "Subscriptions and gift cards for Nepal and Australia, plus digital deals and gift cards, with game top-ups too. Priced in NPR with on-site order tracking.",
+          "Software licences, subscriptions and digital deals in Nepal, priced in NPR. Pay by QR or bank transfer and track every order.",
       },
-      { property: "og:title", content: "MTDGC | Digital Marketplace for Nepal and Australia" },
+      { property: "og:title", content: "MTDGC | Software and subscriptions in Nepal" },
       {
         property: "og:description",
-        content: "Subscriptions and gift cards for Nepal and Australia, plus deals, gift cards and game top-ups. Priced in NPR.",
+        content: "Software licences, subscriptions and digital deals in Nepal, priced in NPR. Pay by QR or bank transfer and track every order.",
       },
       { property: "og:url", content: `${SITE_URL}/` },
       { property: "og:type", content: "website" },
@@ -54,10 +54,10 @@ export const Route = createFileRoute("/")({
       { property: "og:image", content: `${SITE_URL}/og/mtdgc.png` },
       { property: "og:image:alt", content: "MTDGC, the digital marketplace for Nepal and Australia" },
       { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
-      { name: "twitter:title", content: "MTDGC | Digital Marketplace for Nepal and Australia" },
+      { name: "twitter:title", content: "MTDGC | Software and subscriptions in Nepal" },
       {
         name: "twitter:description",
-        content: "Subscriptions and gift cards for Nepal and Australia, plus deals, gift cards and game top-ups. Priced in NPR.",
+        content: "Software licences, subscriptions and digital deals in Nepal, priced in NPR. Pay by QR or bank transfer and track every order.",
       },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/` }],
