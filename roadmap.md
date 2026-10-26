@@ -135,3 +135,7 @@ Body/input text and outline badges use foreground; muted text and inactive navig
 - [x] F18: skipped; product-help.ts is explicitly protected and prepaid renewal terms cannot be invented without listing data.
 - [ ] F20 onward, D2/D3, P/S, numbered, U and G items remain open in strict order.
 - [ ] F20: preserved developer's final five-step icon layout; added required-details rows, payment fallback and transaction reference guidance, activation/tracking links and matching WebPage description. Validation pending. Existing delivery promises unchanged.
+
+## 26 Oct ordered pack
+- [x] Prior F2-check, F3/F4, F7, F11 and F14/F17 preserved; F16/F18 remain skipped for the documented conflicts.
+- [ ] F13/F20 remaining verification, then F21 onward in the requested order. Preserve Sentry in protected router.tsx and all final developer changes.
