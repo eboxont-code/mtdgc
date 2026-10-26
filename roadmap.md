@@ -138,4 +138,6 @@ Body/input text and outline badges use foreground; muted text and inactive navig
 
 ## 26 Oct ordered pack
 - [x] Prior F2-check, F3/F4, F7, F11 and F14/F17 preserved; F16/F18 remain skipped for the documented conflicts.
-- [ ] F13/F20 remaining verification, then F21 onward in the requested order. Preserve Sentry in protected router.tsx and all final developer changes.
+- [x] F13: duration remains unavailable in the existing returned fields; omit it instead of changing server data. Prior delivery rows preserved.
+- [x] F20: existing required-details rows, payment fallback, screenshot/reference guidance and tracking link verified at 390px and desktop without overflow. Automatic build OK; prior five-step design preserved. Revision 5862e9f.
+- [ ] F21 onward in the requested order. Preserve Sentry in protected router.tsx and all final developer changes.
