@@ -135,3 +135,16 @@ Body/input text and outline badges use foreground; muted text and inactive navig
 - [x] F18: skipped; product-help.ts is explicitly protected and prepaid renewal terms cannot be invented without listing data.
 - [ ] F20 onward, D2/D3, P/S, numbered, U and G items remain open in strict order.
 - [ ] F20: preserved developer's final five-step icon layout; added required-details rows, payment fallback and transaction reference guidance, activation/tracking links and matching WebPage description. Validation pending. Existing delivery promises unchanged.
+
+## 26 Oct ordered pack
+- [x] Prior F2-check, F3/F4, F7, F11 and F14/F17 preserved; F16/F18 remain skipped for the documented conflicts.
+- [x] F13: duration remains unavailable in the existing returned fields; omit it instead of changing server data. Prior delivery rows preserved.
+- [x] F20: existing required-details rows, payment fallback, screenshot/reference guidance and tracking link verified at 390px and desktop without overflow. Automatic build OK; prior five-step design preserved. Revision 5862e9f.
+- [ ] F21 onward in the requested order. Preserve Sentry in protected router.tsx and all final developer changes.
+- [x] F21: existing description under heading preserved; empty category now invites a support request; other published categories use existing catalog data in sort_order, plus FAQ. Deals link deferred until D2 creates its route; no premature link or protected redesign. Automatic build OK, revision 2d1df76. Subscriptions navigation checked at 390px and desktop without overflow. Software currently unavailable as a public category, so its empty state was not verified against live data.
+- [x] F22: categories and products indexes explicitly use sort_order and show the live published-product count next to category names. Existing product tiles and hidden prices unchanged. Automatic build OK, revision 8ca3f9a; live counts verified (4 game top-ups, 2 gift cards, 1 subscription) at 390px and desktop without overflow.
+- [x] F23: additive type controls in the requested order, using existing category slugs and URL updates. Brand and tags already participate in search, preserved without touching listings or price visibility. Automatic build OK after matching the existing Button variants, revision 3565167. Real subscription filtering and reset verified at 390px and desktop without overflow.
+- [x] F24: requested software/subscriptions title and description applied to homepage head and matching social tags only. Nepal/Australia visible copy, carousel, layout and JSON-LD unchanged. Automatic build OK, revision 1ea3ac9; exact title and descriptions verified in server-rendered HTML.
+- [x] F25: dropped as requested; existing Matrix home rails preserved.
+- [x] F26 partial: home FAQs now cover payment, delivery timing, delivery location, renewal and activation help without WhatsApp ordering language. Unconditional prepaid renewal claim omitted without listing evidence. Organization/WebSite relocation deferred to avoid undoing final developer JSON-LD and touching protected root code. Validation pending.
+- [ ] Next: F27-F30, D2/D3, P8/P12/P15, S3/S4/S6/S7, numbered items, U2-U22 and G1-G6. F21 Deals link waits for D2; F13 duration waits for existing product data. Custom commit labels remain platform-managed.

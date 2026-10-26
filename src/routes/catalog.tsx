@@ -210,6 +210,21 @@ function CatalogPage() {
               <CategoryRail categories={categories} active={category} />
             </div>
 
+            <nav aria-label="Product types" className="mt-3 flex flex-wrap gap-2">
+              {([
+                ["all", "All"],
+                ["software", "Software"],
+                ["subscriptions", "Subscriptions"],
+                ["gift-cards", "Gift cards"],
+                ["game-top-ups", "Game top-ups"],
+              ] as const).map(([slug, label]) => (
+                <Button key={slug} variant={category === slug ? "primary" : "outline"} className="min-h-11" aria-pressed={category === slug} onClick={() => {
+                  setCategory(slug);
+                  syncUrl({ q: query, category: slug, sort, availability, price });
+                }}>{label}</Button>
+              ))}
+            </nav>
+
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <button type="button" onClick={() => setFiltersOpen(true)} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-card px-3 text-[13px] md:hidden">
                 <SlidersHorizontal className="size-4 text-primary" /> Filters{filterCount ? ` (${filterCount})` : ""}

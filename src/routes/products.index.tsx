@@ -54,9 +54,9 @@ function ProductsIndexPage() {
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Button asChild size="sm"><Link to="/catalog">Search the catalog</Link></Button>
-          {categories.map((category) => (
-            <Button key={category.slug} asChild variant="outline" size="sm">
-              <Link to="/categories/$slug" params={{ slug: category.slug }}>{category.name}</Link>
+          {[...categories].sort((a, b) => a.sort_order - b.sort_order).map((category) => (
+            <Button key={category.slug} asChild variant="outline" className="min-h-11">
+              <Link to="/categories/$slug" params={{ slug: category.slug }}>{category.name} ({products.filter((product) => product.category?.slug === category.slug).length})</Link>
             </Button>
           ))}
         </div>
