@@ -5,14 +5,15 @@ import { ProductCard } from "@/components/product-card";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
-import { getCategoryBySlug } from "@/lib/catalog.functions";
+import { getCategoryBySlug, listCatalog } from "@/lib/catalog.functions";
 import { SITE_URL } from "@/lib/format";
 
 export const Route = createFileRoute("/categories/$slug")({
   loader: async ({ params }) => {
     const result = await getCategoryBySlug({ data: { slug: params.slug } });
     if (!result.category) throw notFound();
-    return result;
+    const catalog = await listCatalog();
+    return { ...result, categories: catalog.categories };
   },
   head: ({ params, loaderData }) => {
     if (!loaderData?.category) {
@@ -90,7 +91,7 @@ const CATEGORY_INTROS: Record<string, string> = {
 };
 
 function CategoryPage() {
-  const { category, products } = Route.useLoaderData();
+  const { category, products, categories } = Route.useLoaderData();
   if (!category) return null;
 
   return (
@@ -127,12 +128,12 @@ function CategoryPage() {
           </>
         ) : (
           <div className="mt-8 rounded-lg border border-border py-14 text-center">
-            <p className="font-display font-medium">Nothing listed here yet</p>
+            <p className="font-display font-medium">We are adding listings here.</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              This category is being prepared and is not open for orders. Browse what is available today.
+              Tell us what you are looking for.
             </p>
-            <Button asChild variant="outline" size="sm" className="mt-3">
-              <Link to="/catalog">Go to the catalog</Link>
+            <Button asChild variant="outline" className="mt-3 min-h-11">
+              <Link to="/support">Contact support</Link>
             </Button>
           </div>
         )}
@@ -154,6 +155,12 @@ function CategoryPage() {
         <nav aria-label="Other categories" className="mt-8">
           <h2 className="font-display text-lg font-medium">Other ways to browse</h2>
           <div className="mt-3 flex flex-wrap gap-2">
+            {[...categories].sort((a, b) => a.sort_order - b.sort_order).filter((other) => other.slug !== category.slug).map((other) => (
+              <Button key={other.id} asChild variant="outline" className="min-h-11">
+                <Link to="/categories/$slug" params={{ slug: other.slug }}>{other.name}</Link>
+              </Button>
+            ))}
+            <Button asChild variant="outline" className="min-h-11"><Link to="/faq">FAQ</Link></Button>
             <Button asChild variant="outline" size="sm"><Link to="/categories">All categories</Link></Button>
             <Button asChild variant="outline" size="sm"><Link to="/products">All products</Link></Button>
             <Button asChild variant="outline" size="sm"><Link to="/support">Ask us on support</Link></Button>
