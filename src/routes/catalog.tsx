@@ -218,7 +218,7 @@ function CatalogPage() {
                 ["gift-cards", "Gift cards"],
                 ["game-top-ups", "Game top-ups"],
               ] as const).map(([slug, label]) => (
-                <Button key={slug} variant={category === slug ? "secondary" : "outline"} className="min-h-11" aria-pressed={category === slug} onClick={() => {
+                <Button key={slug} variant={category === slug ? "primary" : "outline"} className="min-h-11" aria-pressed={category === slug} onClick={() => {
                   setCategory(slug);
                   syncUrl({ q: query, category: slug, sort, availability, price });
                 }}>{label}</Button>
