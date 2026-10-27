@@ -21,7 +21,7 @@ import { AccordionList } from "@/components/sections/accordion-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/products/$slug")({
-  validateSearch: (search: Record<string, unknown>): { plan?: string } => ({
+  validateSearch: (search: Record<string, unknown>): { plan?: string | undefined } => ({
     plan: typeof search['plan'] === "string" ? search['plan'] : undefined,
   }),
   loader: async ({ params }) => {
