@@ -21,6 +21,9 @@ import { AccordionList } from "@/components/sections/accordion-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/products/$slug")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    plan: typeof search.plan === "string" ? search.plan : "",
+  }),
   loader: async ({ params }) => {
     const result = await getProductBySlug({ data: { slug: params.slug } });
     if (!result.product) throw notFound();
@@ -125,7 +128,8 @@ function ProductPage() {
   const { product, related, explore } = Route.useLoaderData();
   const { add, setDrawerOpen } = useCart();
   const defaultVariant = product!.variants.find((variant) => variant.is_default) ?? product!.variants[0];
-  const [selectedSku, setSelectedSku] = useState(defaultVariant?.sku ?? "");
+  const { plan } = Route.useSearch();
+  const selectedSku = product.variants.some((item) => item.sku === plan) ? plan : defaultVariant?.sku ?? "";
   const [fields, setFields] = useState<Record<string, string>>({});
   useEffect(() => {
     let saved: Record<string, string> = {};
@@ -333,7 +337,7 @@ function ProductPage() {
                           key={item.sku}
                           className={`relative flex cursor-pointer flex-col gap-1 rounded-xl border p-3 transition-colors ${selected ? "border-primary bg-primary/10" : "border-border bg-secondary/60 hover:border-primary/40"}`}
                         >
-                          <input type="radio" name="variant" value={item.sku} checked={selected} onChange={() => setSelectedSku(item.sku)} className="sr-only" />
+                          <input type="radio" name="variant" value={item.sku} checked={selected} onChange={() => void navigate({ to: "/products/$slug", params: { slug: product.slug }, search: (previous) => ({ ...previous, plan: item.sku }), replace: true })} className="sr-only" />
                           {selected && <Check className="absolute right-2 top-2 size-4 text-primary" aria-hidden="true" />}
                           <span className="pr-5 font-mono text-[13px] font-medium leading-tight">{item.name}</span>
                           <span className="font-mono text-sm font-bold text-price">{hidePrices ? PRICE_COMING_SOON : formatNpr(item.price_minor)}</span>
