@@ -12,23 +12,23 @@ import { breadcrumbLd, pageLd } from "@/lib/seo";
 const FAQS: [string, string][] = [
   [
     "How long does delivery take?",
-    "Every order is reviewed by a person first, so delivery time depends on the product and when you order. Each product page shows the expected delivery time, and we tell you if anything delays your order. We do not promise instant delivery, because our fulfilment is not automated.",
+    "Each listing shows its usual delivery time. We check your payment before preparing the order. If your order is taking longer than the time shown, contact support with your order number so we can check it.",
   ],
   [
     "What details do you need from me?",
-    "Game top-ups need your player ID, and some titles also need a zone or server. Gift cards and subscriptions need a delivery email. The exact list is shown on each product page.",
+    "The product page lists the details needed for your order. Software, subscriptions and gift cards usually need a delivery email. Game top-ups need the player details requested on the listing. Please check those details before ordering.",
   ],
   [
     "How do I pay?",
-    "Place your order through the checkout on this site. You get an order number and the payment details for your order. Pay, then upload a screenshot of the payment on your order page. We verify it and then deliver.",
+    "Place your order on this site, then pay using the QR or bank details shown for your order. If no payment details are shown, our team will send them shortly. Upload your payment screenshot and transaction reference on your order page. Our team verifies the payment before delivery. No card payments are taken on this site.",
   ],
   [
     "Why does region matter for gift cards?",
-    "Gift cards and wallet codes are issued for a specific store region. If the code region does not match your account region, the store will refuse the code. Each listing states the region it works in.",
+    "Gift cards and wallet codes work in the store region stated on the listing. Check that it matches your account before ordering. If you are unsure, contact support before paying.",
   ],
   [
     "Can I get a refund?",
-    "Refunds are reviewed before fulfilment. Once a code has been revealed or in-game currency has been credited, the order cannot be reversed. Full terms are in the refund policy.",
+    "Please contact support before delivery if you need to cancel an order. Codes that have been revealed and top-ups that have been credited cannot be reversed. The refund policy explains how requests are reviewed.",
   ],
   [
     "Do I need an account?",
@@ -36,7 +36,7 @@ const FAQS: [string, string][] = [
   ],
   [
     "Will MTDGC ever ask for my password or OTP?",
-    "No. Keep your password, one-time codes and payment PIN to yourself. If someone claiming to be MTDGC asks for them, stop and contact us through the support page.",
+    "No. You should keep your password, one-time codes and payment PIN private. If anyone asks for them while claiming to be MTDGC, contact us through the support page before continuing.",
   ],
 ];
 
