@@ -150,6 +150,6 @@ Body/input text and outline badges use foreground; muted text and inactive navig
 - [ ] Next: F27-F30, D2/D3, P8/P12/P15, S3/S4/S6/S7, numbered items, U2-U22 and G1-G6. F21 Deals link waits for D2; F13 duration waits for existing product data. Custom commit labels remain platform-managed.
 
 ## 27 Oct ordered pack (starting head 55f1f6c5)
-- [x] F27: helpful FAQ wording and QR/bank payment, missing-details fallback, screenshot/reference verification. FAQPage continues to derive directly from the visible answers. Icons, manifest links, Sentry, checkout and cart untouched. Responsive and automatic build checks pending.
+- [x] F27: helpful FAQ wording and QR/bank payment, missing-details fallback, screenshot/reference verification. FAQPage continues to derive directly from the visible answers. Icons, manifest links, Sentry, checkout and cart untouched. Automatic build OK; payment accordion and matching schema checked at 390px and desktop without overflow or browser errors. Revision f51f601; publishing requested, not yet confirmed.
 - [ ] F28-F30, D2/D3, P/S, numbered, U and G remain in strict order.
 - Custom Git operations are unavailable: revisions and commit messages are managed by Lovable.
