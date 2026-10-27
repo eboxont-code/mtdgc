@@ -16,6 +16,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as CheckoutRouteImport } from './routes/checkout'
+import { Route as DealsRouteImport } from './routes/deals'
 import { Route as DeliveryRouteImport } from './routes/delivery'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
@@ -72,6 +73,11 @@ const CatalogRoute = CatalogRouteImport.update({
 const CheckoutRoute = CheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DealsRoute = DealsRouteImport.update({
+  id: '/deals',
+  path: '/deals',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DeliveryRoute = DeliveryRouteImport.update({
@@ -197,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/cart': typeof CartRoute
   '/catalog': typeof CatalogRoute
   '/checkout': typeof CheckoutRoute
+  '/deals': typeof DealsRoute
   '/delivery': typeof DeliveryRoute
   '/faq': typeof FaqRoute
   '/how-it-works': typeof HowItWorksRoute
@@ -228,6 +235,7 @@ export interface FileRoutesByTo {
   '/cart': typeof CartRoute
   '/catalog': typeof CatalogRoute
   '/checkout': typeof CheckoutRoute
+  '/deals': typeof DealsRoute
   '/delivery': typeof DeliveryRoute
   '/faq': typeof FaqRoute
   '/how-it-works': typeof HowItWorksRoute
@@ -261,6 +269,7 @@ export interface FileRoutesById {
   '/cart': typeof CartRoute
   '/catalog': typeof CatalogRoute
   '/checkout': typeof CheckoutRoute
+  '/deals': typeof DealsRoute
   '/delivery': typeof DeliveryRoute
   '/faq': typeof FaqRoute
   '/how-it-works': typeof HowItWorksRoute
@@ -294,6 +303,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/catalog'
     | '/checkout'
+    | '/deals'
     | '/delivery'
     | '/faq'
     | '/how-it-works'
@@ -325,6 +335,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/catalog'
     | '/checkout'
+    | '/deals'
     | '/delivery'
     | '/faq'
     | '/how-it-works'
@@ -357,6 +368,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/catalog'
     | '/checkout'
+    | '/deals'
     | '/delivery'
     | '/faq'
     | '/how-it-works'
@@ -390,6 +402,7 @@ export interface RootRouteChildren {
   CartRoute: typeof CartRoute
   CatalogRoute: typeof CatalogRoute
   CheckoutRoute: typeof CheckoutRoute
+  DealsRoute: typeof DealsRoute
   DeliveryRoute: typeof DeliveryRoute
   FaqRoute: typeof FaqRoute
   HowItWorksRoute: typeof HowItWorksRoute
@@ -460,6 +473,13 @@ declare module '@tanstack/react-router' {
       path: '/checkout'
       fullPath: '/checkout'
       preLoaderRoute: typeof CheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/deals': {
+      id: '/deals'
+      path: '/deals'
+      fullPath: '/deals'
+      preLoaderRoute: typeof DealsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/delivery': {
@@ -651,6 +671,7 @@ const rootRouteChildren: RootRouteChildren = {
   CartRoute: CartRoute,
   CatalogRoute: CatalogRoute,
   CheckoutRoute: CheckoutRoute,
+  DealsRoute: DealsRoute,
   DeliveryRoute: DeliveryRoute,
   FaqRoute: FaqRoute,
   HowItWorksRoute: HowItWorksRoute,
