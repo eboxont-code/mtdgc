@@ -32,17 +32,18 @@ export const Route = createFileRoute("/products/$slug")({
     }
     const product = loaderData.product;
     const url = `${SITE_URL}/products/${product.slug}`;
+    const title = product.seo_title?.trim() || `${product.name} price in Nepal | MTDGC`;
     const image = product.image_url ? (product.image_url.startsWith("http") ? product.image_url : `${SITE_URL}${product.image_url}`) : undefined;
     const hidePrices = pricesHidden(product);
     const prices = hidePrices ? [] : product.variants.filter((variant) => variant.price_minor > 0 && variant.status !== "archived").map((variant) => variant.price_minor);
     const lowestPrice = prices.length ? Math.min(...prices) : 0;
     return {
       meta: [
-        { title: product.seo_title },
+        { title },
         { name: "description", content: product.seo_description },
-        { property: "og:title", content: product.seo_title },
+        { property: "og:title", content: title },
         { property: "og:description", content: product.seo_description },
-      { name: "twitter:title", content: product.seo_title  },
+      { name: "twitter:title", content: title },
       { name: "twitter:description", content: product.seo_description  },
         { property: "og:url", content: url },
         { property: "og:type", content: "product" },
