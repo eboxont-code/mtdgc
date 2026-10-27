@@ -79,15 +79,16 @@ function AboutPage() {
         </section>
 
         <section className="mt-10">
-          <h2 className="font-display text-lg font-medium">What we sell today</h2>
+          <h2 className="font-display text-lg font-medium">What we sell</h2>
           <ul className="mt-3 space-y-2 text-sm text-foreground/80">
-            <li>Game top-ups delivered to your player ID, including Free Fire, PUBG Mobile, Mobile Legends and Clash of Clans.</li>
-            <li>Digital gift cards and wallet codes, delivered to your email with the region clearly stated.</li>
-            <li>Subscription plans supplied for a set number of months.</li>
+            <li><Link to="/catalog" search={{ category: "software" }} className="text-primary">Software</Link>: licence keys and activations, when listings are available.</li>
+            <li><Link to="/categories/$slug" params={{ slug: "subscriptions" }} className="text-primary">Subscriptions</Link>: streaming, music, AI tools and cloud storage, subject to the available listings.</li>
+            <li>Deals: a place for software and subscription offers when sale prices are available.</li>
+            <li><Link to="/categories/$slug" params={{ slug: "gift-cards" }} className="text-primary">Gift cards</Link>: digital gift cards and wallet codes with the region stated on the listing.</li>
+            <li><Link to="/categories/$slug" params={{ slug: "game-top-ups" }} className="text-primary">Game top-ups</Link>: options delivered using the player details requested on each listing.</li>
           </ul>
           <p className="mt-3 text-sm text-muted-foreground">
-            Software, AI, mobile and business lines are being prepared and are not open for orders. We do not list a
-            category as available until we can actually fulfil it.
+            Available options and prices are shown on each listing. Coming-soon products are not open for orders.
           </p>
         </section>
 
