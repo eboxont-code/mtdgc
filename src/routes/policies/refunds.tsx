@@ -25,7 +25,7 @@ export const Route = createFileRoute("/policies/refunds")({
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/policies/refunds` }],
     scripts: [
-      pageLd("WebPage", "MTDGC Refund policy", "/policies/refunds", "Refund policy from MTDGC, the digital marketplace for Nepal and Australia."),
+      pageLd("WebPage", "MTDGC Refund policy", "/policies/refunds", "Full refunds when MTDGC cannot deliver, software key reveal limits, listing-specific subscription replacement periods, gift card code limits and credited top-up restrictions."),
       breadcrumbLd([{ name: "Home", path: "/" }, { name: "Refund policy", path: "/policies/refunds" }]),
     ],
   }),
@@ -38,7 +38,7 @@ function RefundsPage() {
       <SiteHeader />
       <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-3xl px-4 pb-16 pt-6">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Refund policy" }]} />
-        <PageHero eyebrow="Policy" title="Refund policy" intro="Last updated 4 October 2026" />
+        <PageHero eyebrow="Policy" title="Refund policy" intro="Last updated 27 October 2026" />
         <div className="mt-6 space-y-4 text-sm text-foreground/80">
           <p>
             Every MTDGC order is reviewed before it is fulfilled. If you need to cancel, tell us before fulfilment
@@ -60,6 +60,13 @@ function RefundsPage() {
             To request a refund, contact us on the support page with your order number and a short description of what
             went wrong.
           </p>
+        </div>
+        <div className="mt-8 space-y-6 text-sm text-foreground/80">
+          <section><h2 className="font-display text-lg font-medium text-foreground">Software</h2><p className="mt-2">Software keys are refundable until the key is revealed on your order page. After that, activation problems are handled under the replacement period stated on the listing. Contact support with your order number and the error you see; no additional replacement period is promised here.</p></section>
+          <section><h2 className="font-display text-lg font-medium text-foreground">Subscriptions</h2><p className="mt-2">Subscription problems follow the replacement period stated on the listing. Changes you make to a shared plan are not covered. If no replacement period is stated, contact support for clarification before ordering.</p></section>
+          <section><h2 className="font-display text-lg font-medium text-foreground">Deals</h2><p className="mt-2">The refund and replacement terms of each included product apply. We refund in full when we cannot deliver your order.</p></section>
+          <section><h2 className="font-display text-lg font-medium text-foreground">Gift cards</h2><p className="mt-2">A gift card cannot be refunded after its code is revealed. Check the listing region against your account before ordering.</p></section>
+          <section><h2 className="font-display text-lg font-medium text-foreground">Game top-ups</h2><p className="mt-2">Top-ups cannot be reversed after they are credited. A top-up delivered to the incorrect player details you supplied cannot be recovered.</p></section>
         </div>
       </main>
       <SiteFooter />
