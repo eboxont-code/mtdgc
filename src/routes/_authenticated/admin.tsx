@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 
 import { approveReview as approveReviewServer, archiveProduct as archiveProductServer, updateOrderStatus as updateOrderStatusServer } from "@/lib/admin.functions";
 
@@ -76,6 +77,7 @@ function AdminPage() {
       await updateOrderStatusFn({ data: { id, status: status as never } });
     } catch {
       setLoadError("Could not update that order status. Please try again.");
+      toast.error("Could not update that order status. Please try again.");
       return;
     }
     setOrders((rows) => rows.map((row) => (row.id === id ? { ...row, status } : row)));
@@ -86,6 +88,7 @@ function AdminPage() {
       await approveReviewFn({ data: { id } });
     } catch {
       setLoadError("Could not approve that review. Please try again.");
+      toast.error("Could not approve that review. Please try again.");
       return;
     }
     setPendingReviews((rows) => rows.filter((row) => row.id !== id));
@@ -233,6 +236,7 @@ function AdminPage() {
                                     setProducts((rows) => rows.map((r) => (r.id === product.id ? { ...r, status: "archived", is_published: false } : r)));
                                   } catch {
                                     setLoadError("Could not archive that product. Please try again.");
+                                    toast.error("Could not archive that product. Please try again.");
                                   }
                                 }}
                               >
