@@ -5,6 +5,7 @@ import { PageHero } from "@/components/sections/page-hero";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { SITE_URL } from "@/lib/format";
+import { breadcrumbLd, pageLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -28,10 +29,8 @@ export const Route = createFileRoute("/about")({
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/about` }],
     scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
+      pageLd("AboutPage", "About MTDGC", "/about", "Who MTDGC is, what we sell and how digital delivery works.", {
+        mainEntity: {
           "@type": "Organization",
           name: "MTDGC",
           legalName: "Matrix Digital Goods & Commerce",
@@ -39,8 +38,9 @@ export const Route = createFileRoute("/about")({
           areaServed: ["NP", "AU"],
           description:
             "Digital commerce company serving Nepal and Australia selling game top-ups, gift cards and subscriptions with manual order review before fulfilment.",
-        }),
-      },
+        },
+      }),
+      breadcrumbLd([{ name: "Home", path: "/" }, { name: "About", path: "/about" }]),
     ],
   }),
   component: AboutPage,
