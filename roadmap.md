@@ -1,5 +1,11 @@
 # MTDGC launch roadmap
 
+## 28 Oct ordered pack (starting head 01687045)
+- [x] D2 follow-ups / F4 / F21 / F28: add the waiting Deals links to footer Shop, category navigation and About. Existing styles and final developer copy preserved. Validation pending.
+- [ ] D3: confirm the existing plan selection passes automatic validation; product page unchanged.
+- [ ] Next: P8, P12, P15, S3, S4, S6, S7, numbered items, U and G in order. Protected-file conflicts must be recorded before advancing.
+- Revisions and commit labels are managed automatically by Lovable; no manual Git commits.
+
 ## October 18 strict gate
 - [x] R0.8: Matrix tokens, glass surfaces and 44px controls applied to account, orders, wishlist, order, tracking and admin. Classes and markup only. Build OK; all six pages checked at 390px with no horizontal overflow. Private pages correctly redirect to sign-in. Tracking rejects missing contact; an order number alone stays locked. Auth redirect has existing 40px inputs and 20px text buttons, outside this styling unit. Private populated states were not checked. Publishing requested. Code revision: 2ad3d0e (automatic Lovable commit; custom commit labels unavailable).
 - [x] R0.9: measured current Matrix tokens using browser Canvas sRGB conversion and WCAG relative luminance, compositing glass over background. All table pairs meet 4.5:1. Destructive badge foreground was 3.50:1; only its lightness changed from 0.98 to 0.22, preserving hue and chroma. No palette or layout redesign. Build OK; code revision 7971d60; publishing requested. Placeholder opacity and hover compositing remain unverified.

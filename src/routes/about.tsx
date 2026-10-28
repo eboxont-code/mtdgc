@@ -83,7 +83,7 @@ function AboutPage() {
           <ul className="mt-3 space-y-2 text-sm text-foreground/80">
             <li><Link to="/catalog" search={{ category: "software" }} className="text-primary">Software</Link>: licence keys and activations, when listings are available.</li>
             <li><Link to="/categories/$slug" params={{ slug: "subscriptions" }} className="text-primary">Subscriptions</Link>: streaming, music, AI tools and cloud storage, subject to the available listings.</li>
-            <li>Deals: a place for software and subscription offers when sale prices are available.</li>
+            <li><Link to="/deals" className="text-primary">Deals</Link>: a place for software and subscription offers when sale prices are available.</li>
             <li><Link to="/categories/$slug" params={{ slug: "gift-cards" }} className="text-primary">Gift cards</Link>: digital gift cards and wallet codes with the region stated on the listing.</li>
             <li><Link to="/categories/$slug" params={{ slug: "game-top-ups" }} className="text-primary">Game top-ups</Link>: options delivered using the player details requested on each listing.</li>
           </ul>
