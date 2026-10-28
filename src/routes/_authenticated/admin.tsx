@@ -13,6 +13,7 @@ import { ADMIN_ORDER_STATUSES, OrderDetailPanel } from "@/components/admin/order
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
+import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { formatNpr, STATUS_LABEL, SITE_URL } from "@/lib/format";
 
@@ -366,6 +367,7 @@ function AdminPage() {
         )}
       </main>
       <SiteFooter />
+      <Toaster position="top-center" />
       {allowed && <OrderDetailPanel orderId={selectedOrderId} onClose={() => setSelectedOrderId(null)} onUpdated={(id, status) => setOrders((rows) => rows.map((row) => row.id === id ? { ...row, status } : row))} />}
     </div>
   );
