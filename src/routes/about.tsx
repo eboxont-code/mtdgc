@@ -5,6 +5,7 @@ import { PageHero } from "@/components/sections/page-hero";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { SITE_URL } from "@/lib/format";
+import { breadcrumbLd, pageLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -28,10 +29,8 @@ export const Route = createFileRoute("/about")({
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/about` }],
     scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
+      pageLd("AboutPage", "About MTDGC", "/about", "Who MTDGC is, what we sell and how digital delivery works.", {
+        mainEntity: {
           "@type": "Organization",
           name: "MTDGC",
           legalName: "Matrix Digital Goods & Commerce",
@@ -39,8 +38,9 @@ export const Route = createFileRoute("/about")({
           areaServed: ["NP", "AU"],
           description:
             "Digital commerce company serving Nepal and Australia selling game top-ups, gift cards and subscriptions with manual order review before fulfilment.",
-        }),
-      },
+        },
+      }),
+      breadcrumbLd([{ name: "Home", path: "/" }, { name: "About", path: "/about" }]),
     ],
   }),
   component: AboutPage,
@@ -83,7 +83,7 @@ function AboutPage() {
           <ul className="mt-3 space-y-2 text-sm text-foreground/80">
             <li><Link to="/catalog" search={{ category: "software" }} className="text-primary">Software</Link>: licence keys and activations, when listings are available.</li>
             <li><Link to="/categories/$slug" params={{ slug: "subscriptions" }} className="text-primary">Subscriptions</Link>: streaming, music, AI tools and cloud storage, subject to the available listings.</li>
-            <li>Deals: a place for software and subscription offers when sale prices are available.</li>
+            <li><Link to="/deals" className="text-primary">Deals</Link>: a place for software and subscription offers when sale prices are available.</li>
             <li><Link to="/categories/$slug" params={{ slug: "gift-cards" }} className="text-primary">Gift cards</Link>: digital gift cards and wallet codes with the region stated on the listing.</li>
             <li><Link to="/categories/$slug" params={{ slug: "game-top-ups" }} className="text-primary">Game top-ups</Link>: options delivered using the player details requested on each listing.</li>
           </ul>

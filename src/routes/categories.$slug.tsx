@@ -160,6 +160,7 @@ function CategoryPage() {
                 <Link to="/categories/$slug" params={{ slug: other.slug }}>{other.name}</Link>
               </Button>
             ))}
+            <Button asChild variant="outline" className="min-h-11"><Link to="/deals">Deals</Link></Button>
             <Button asChild variant="outline" className="min-h-11"><Link to="/faq">FAQ</Link></Button>
             <Button asChild variant="outline" size="sm"><Link to="/categories">All categories</Link></Button>
             <Button asChild variant="outline" size="sm"><Link to="/products">All products</Link></Button>

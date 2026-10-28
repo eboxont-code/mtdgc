@@ -10,6 +10,7 @@ const GROUPS: { title: string; links: { to: string; label: string }[] }[] = [
     links: [
       { to: "/categories/software", label: "Software" },
       { to: "/categories/subscriptions", label: "Subscriptions" },
+      { to: "/deals", label: "Deals" },
       { to: "/categories/gift-cards", label: "Gift cards" },
       { to: "/categories/game-top-ups", label: "Game top-ups" },
       { to: "/catalog", label: "Full catalog" },

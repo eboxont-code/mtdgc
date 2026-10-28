@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 
 import { approveReview as approveReviewServer, archiveProduct as archiveProductServer, updateOrderStatus as updateOrderStatusServer } from "@/lib/admin.functions";
 
@@ -12,6 +13,7 @@ import { ADMIN_ORDER_STATUSES, OrderDetailPanel } from "@/components/admin/order
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
+import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { formatNpr, STATUS_LABEL, SITE_URL } from "@/lib/format";
 
@@ -76,6 +78,7 @@ function AdminPage() {
       await updateOrderStatusFn({ data: { id, status: status as never } });
     } catch {
       setLoadError("Could not update that order status. Please try again.");
+      toast.error("Could not update that order status. Please try again.");
       return;
     }
     setOrders((rows) => rows.map((row) => (row.id === id ? { ...row, status } : row)));
@@ -86,6 +89,7 @@ function AdminPage() {
       await approveReviewFn({ data: { id } });
     } catch {
       setLoadError("Could not approve that review. Please try again.");
+      toast.error("Could not approve that review. Please try again.");
       return;
     }
     setPendingReviews((rows) => rows.filter((row) => row.id !== id));
@@ -233,6 +237,7 @@ function AdminPage() {
                                     setProducts((rows) => rows.map((r) => (r.id === product.id ? { ...r, status: "archived", is_published: false } : r)));
                                   } catch {
                                     setLoadError("Could not archive that product. Please try again.");
+                                    toast.error("Could not archive that product. Please try again.");
                                   }
                                 }}
                               >
@@ -362,6 +367,7 @@ function AdminPage() {
         )}
       </main>
       <SiteFooter />
+      <Toaster position="top-center" />
       {allowed && <OrderDetailPanel orderId={selectedOrderId} onClose={() => setSelectedOrderId(null)} onUpdated={(id, status) => setOrders((rows) => rows.map((row) => row.id === id ? { ...row, status } : row))} />}
     </div>
   );
