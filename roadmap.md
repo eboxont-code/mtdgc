@@ -13,7 +13,7 @@
 - [x] Numbered 2 and 3: skipped explicit protected cart route conflict; developer's rebuilt cart unchanged.
 - [ ] Numbered 15 partial: failed order status, review approval and product archive actions now show sonner errors as well as existing inline errors; page-local themed Toaster added because no root Toaster exists. Existing server calls, role checks, Payments and Verify panels unchanged. Final automatic build OK, revision 54c0c41. Remaining catalog/orders/support/reviews extraction awaits continuation. Populated admin testing blocked: requesting user has no matching app account; no account selected or privileges changed. Do not advance to numbered 16 before finishing this unit.
 - Publishing requested for green changes. Live check: both origins returned HTTP 200, but neither served the updated AboutPage schema at the time checked; mtdgc.com also lacked the new Deals link. Custom-domain deployment not confirmed. Latest publish schedules the current revision for https://mtdgc.lovable.app; no domain or hosting changes made.
-- [ ] Next: P8, P12, P15, S3, S4, S6, S7, numbered items, U and G in order. Protected-file conflicts must be recorded before advancing.
+- [ ] Next: finish numbered 15, then numbered 16-18, 22-23, 26-27, 29-30, 32, 34-35, 38-42, then U and G in order. Item 33 is already shipped by the developer's final icons and manifest links; preserve them. Protected-file conflicts above remain skipped, not implemented.
 - Revisions and commit labels are managed automatically by Lovable; no manual Git commits.
 
 ## October 18 strict gate
