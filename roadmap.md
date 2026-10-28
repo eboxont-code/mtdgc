@@ -8,7 +8,9 @@
 - [x] P15: existing on-site copy preserved. Targeted order, tracking, drawer, how-it-works and FAQ check found only support-only WhatsApp links in order/tracking. Checkout and product-help remain protected; prior developer fixes not redone.
 - [x] S3: skipped protected cart route conflict; no recommendations or catalog rows invented.
 - [x] S4: skipped conflict with final developer disabled Coming soon labels; unavailable-product design preserved.
-- [x] S6: Support already has ContactPage, contactPoint and matching breadcrumbs, preserved. About now uses AboutPage with the existing Organization as mainEntity and visible Home > About breadcrumbs. Existing SEO helpers reused; no business facts added. Validation pending.
+- [x] S6: Support already has ContactPage, contactPoint and matching breadcrumbs, preserved. About now uses AboutPage with the existing Organization as mainEntity and visible Home > About breadcrumbs. Existing SEO helpers reused; no business facts added. Automatic build OK, revision ece3f75; schema and matching visible breadcrumbs checked at 390px and desktop with no overflow.
+- [x] S7 partial: existing WebPage helpers on how-it-works, tracking and four policy pages and existing FAQPage/breadcrumbs preserved. Each has matching visible Home > Page breadcrumbs. Policies middle destination omitted because no Policies index exists; do not invent a breadcrumb URL to an unavailable page. No final developer JSON-LD redone.
+- [x] Numbered 2 and 3: skipped explicit protected cart route conflict; developer's rebuilt cart unchanged.
 - [ ] Next: P8, P12, P15, S3, S4, S6, S7, numbered items, U and G in order. Protected-file conflicts must be recorded before advancing.
 - Revisions and commit labels are managed automatically by Lovable; no manual Git commits.
 
