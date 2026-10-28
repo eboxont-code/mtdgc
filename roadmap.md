@@ -1,8 +1,13 @@
 # MTDGC launch roadmap
 
 ## 28 Oct ordered pack (starting head 01687045)
-- [x] D2 follow-ups / F4 / F21 / F28: add the waiting Deals links to footer Shop, category navigation and About. Existing styles and final developer copy preserved. Validation pending.
-- [ ] D3: confirm the existing plan selection passes automatic validation; product page unchanged.
+- [x] D2 follow-ups / F4 / F21 / F28: waiting Deals links added to footer Shop, category navigation and About. Automatic build OK, revision a1b731a. Phone and desktop links reach the real Deals empty state; HTTP 200, no overflow or browser errors. Existing styles and final developer copy preserved.
+- [x] D3: automatic build OK including existing validated plan selection; product page unchanged. Prior real option/reload check preserved.
+- [x] P8: skipped protected checkout/cart conflict. Current Buy now uses the existing cart path; isolated checkout would require editing the explicitly protected checkout. No misleading half-implementation added.
+- [x] P12: skipped protected cart route and cart library conflict; no cart storage, eligibility or checkout changes.
+- [x] P15: existing on-site copy preserved. Targeted order, tracking, drawer, how-it-works and FAQ check found only support-only WhatsApp links in order/tracking. Checkout and product-help remain protected; prior developer fixes not redone.
+- [x] S3: skipped protected cart route conflict; no recommendations or catalog rows invented.
+- [x] S4: skipped conflict with final developer disabled Coming soon labels; unavailable-product design preserved.
 - [ ] Next: P8, P12, P15, S3, S4, S6, S7, numbered items, U and G in order. Protected-file conflicts must be recorded before advancing.
 - Revisions and commit labels are managed automatically by Lovable; no manual Git commits.
 
