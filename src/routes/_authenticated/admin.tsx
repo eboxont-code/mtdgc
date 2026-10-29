@@ -5,17 +5,20 @@ import { toast } from "sonner";
 
 import { approveReview as approveReviewServer, archiveProduct as archiveProductServer, updateOrderStatus as updateOrderStatusServer } from "@/lib/admin.functions";
 
-import { CategoriesPanel } from "@/components/admin/categories-panel";
+import { CatalogPanel } from "@/components/admin/catalog-panel";
+import { OrdersPanel } from "@/components/admin/orders-panel";
+import { SupportPanel } from "@/components/admin/support-panel";
+import { ReviewsPanel } from "@/components/admin/reviews-panel";
+import type { ProductRow, OrderRow, TicketRow, ReviewRow } from "@/components/admin/panel-types";
 import { PaymentsPanel } from "@/components/admin/payments-panel";
 import { VerifyPanel } from "@/components/admin/verify-panel";
-import { ProductForm } from "@/components/admin/product-form";
-import { ADMIN_ORDER_STATUSES, OrderDetailPanel } from "@/components/admin/order-detail-panel";
+import { OrderDetailPanel } from "@/components/admin/order-detail-panel";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { formatNpr, STATUS_LABEL, SITE_URL } from "@/lib/format";
+import { SITE_URL } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -36,23 +39,9 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
 });
 
-type ProductRow = {
-  id: string;
-  name: string;
-  slug: string;
-  status: string;
-  is_published: boolean;
-  product_variants: { sku: string; name: string; price_minor: number; stock_quantity: number | null; status: string }[] | null;
-};
-type OrderRow = { id: string; order_number: string; status: string; total_minor: number; created_at: string };
-type TicketRow = { id: string; order_number: string | null; issue_type: string; status: string; created_at: string };
-type ReviewRow = { id: string; rating: number; body: string; created_at: string };
-
-const LOW_STOCK = 5;
-
 function AdminPage() {
   const [allowed, setAllowed] = useState<boolean | null>(null);
-  const [tab, setTab] = useState<"overview" | "verify" | "payments">("overview");
+  const [tab, setTab] = useState<"overview" | "catalog" | "orders" | "support" | "reviews" | "verify" | "payments">("overview");
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [draftsOnly, setDraftsOnly] = useState(false);
   const [orderCount, setOrderCount] = useState(0);
@@ -66,9 +55,6 @@ function AdminPage() {
   const [editing, setEditing] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
-  const ORDER_STATUSES = ADMIN_ORDER_STATUSES;
-  const visibleOrders = orders.filter((o) => o.order_number.toLowerCase().includes(orderQuery.trim().toLowerCase()));
-
   const updateOrderStatusFn = useServerFn(updateOrderStatusServer);
   const archiveProductFn = useServerFn(archiveProductServer);
   const approveReviewFn = useServerFn(approveReviewServer);
@@ -146,12 +132,15 @@ function AdminPage() {
     };
   }, [reloadKey]);
 
-  const lowStock = products.flatMap((product) =>
-    (product.product_variants ?? [])
-      .filter((v) => v.status === "low_stock" || (v.stock_quantity !== null && v.stock_quantity <= LOW_STOCK))
-      .map((v) => ({ product: product.name, ...v })),
-  );
-
+  const archiveProduct = async (id: string) => {
+    try {
+      await archiveProductFn({ data: { id } });
+      setProducts((rows) => rows.map((r) => r.id === id ? { ...r, status: "archived", is_published: false } : r));
+    } catch {
+      setLoadError("Could not archive that product. Please try again.");
+      toast.error("Could not archive that product. Please try again.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
@@ -169,16 +158,16 @@ function AdminPage() {
 
         {allowed && (
           <>
-            <div role="tablist" aria-label="Admin sections" className="mt-6 flex flex-wrap gap-2">
-              {(["overview", "verify", "payments"] as const).map((t) => (
-                <Button key={t} role="tab" aria-selected={tab === t} variant={tab === t ? "primary" : "outline"} size="sm" className="min-h-11" onClick={() => setTab(t)}>
-                  {t === "overview" ? "Overview" : t === "verify" ? "Payments to verify" : "Payment settings"}
+            <div role="tablist" aria-label="Admin sections" className="mt-6 flex max-w-full gap-2 overflow-x-auto pb-2">
+              {(["overview", "catalog", "orders", "support", "reviews", "verify", "payments"] as const).map((t) => (
+                <Button key={t} role="tab" aria-selected={tab === t} variant={tab === t ? "primary" : "outline"} size="sm" className="min-h-11 shrink-0" aria-controls={`admin-${t}`} id={`admin-tab-${t}`} onClick={() => setTab(t)}>
+                  {t === "overview" ? "Overview" : t === "verify" ? "Payments to verify" : t === "payments" ? "Payment settings" : t === "catalog" ? "Catalog" : t === "orders" ? "Orders" : t === "support" ? "Support" : "Reviews"}
                 </Button>
               ))}
             </div>
-            {tab === "verify" && <div className="mt-6"><VerifyPanel /></div>}
-            {tab === "payments" && <div className="mt-6"><PaymentsPanel /></div>}
-            <div hidden={tab !== "overview"}>
+            {tab === "verify" && <div role="tabpanel" id="admin-verify" aria-labelledby="admin-tab-verify" className="mt-6"><VerifyPanel /></div>}
+            {tab === "payments" && <div role="tabpanel" id="admin-payments" aria-labelledby="admin-tab-payments" className="mt-6"><PaymentsPanel /></div>}
+            <div role="tabpanel" id="admin-overview" aria-labelledby="admin-tab-overview" hidden={tab !== "overview"}>
             <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
               {[
                 ["Products", String(products.length)],
@@ -193,176 +182,16 @@ function AdminPage() {
               ))}
             </div>
 
-            <section className="mt-8">
-              <h2 className="font-display text-lg font-medium">Catalog</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Products, categories, denominations and availability are stored in the database, so new lines can be
-                added without changing the site design.
-              </p>
-              <div className="mt-3 max-w-full overflow-x-auto">
-                <label className="mb-3 flex min-h-11 items-center gap-2 text-sm">
-                  <input type="checkbox" checked={draftsOnly} onChange={(event) => setDraftsOnly(event.target.checked)} />
-                  Drafts only
-                </label>
-                <table className="w-full text-left text-sm">
-                  <thead>
-                    <tr className="border-b border-border font-display text-xs uppercase tracking-[0.1em] text-muted-foreground">
-                      <th scope="col" className="py-2">Product</th>
-                      <th scope="col" className="py-2">Status</th>
-                      <th scope="col" className="py-2">Published</th>
-                      <th scope="col" className="py-2">Options</th>
-                     <th scope="col" className="py-2">From</th>
-                     <th scope="col" className="py-2">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {products.filter((product) => !draftsOnly || !product.is_published).map((product) => {
-                      const prices = (product.product_variants ?? []).map((variant) => variant.price_minor);
-                      return (
-                        <tr key={product.id} className="border-b border-border">
-                          <td className="py-2">{product.name}{!product.is_published && <span className="ml-2 inline-block rounded-md bg-secondary px-2 py-1 text-xs text-muted-foreground">Draft</span>}</td>
-                          <td className="py-2">{STATUS_LABEL[product.status] ?? product.status}</td>
-                          <td className="py-2">{product.is_published ? "Yes" : "No"}</td>
-                          <td className="py-2">{prices.length}</td>
-                          <td className="py-2">{prices.length ? formatNpr(Math.min(...prices)) : "Not set"}</td>
-                          <td className="py-2">
-                            <Button size="sm" variant="outline" className="mr-2" onClick={() => setEditing(product.id)}>Edit</Button>
-                            {product.status !== "archived" && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={async () => {
-                                  try {
-                                    await archiveProductFn({ data: { id: product.id } });
-                                    setProducts((rows) => rows.map((r) => (r.id === product.id ? { ...r, status: "archived", is_published: false } : r)));
-                                  } catch {
-                                    setLoadError("Could not archive that product. Please try again.");
-                                    toast.error("Could not archive that product. Please try again.");
-                                  }
-                                }}
-                              >
-                                Archive
-                              </Button>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-              {products.length === 0 && (
-                <p className="mt-3 text-sm text-muted-foreground">No products are in the catalog yet. Use Add product to create the first one.</p>
-              )}
-              {editing ? (
-                <ProductForm
-                  key={editing}
-                  productId={editing === "new" ? undefined : editing}
-                  onSaved={() => setReloadKey((k) => k + 1)}
-                  onCancel={() => setEditing(null)}
-                />
-              ) : (
-                <Button size="sm" className="mt-3" onClick={() => setEditing("new")}>Add product</Button>
-              )}
-              <CategoriesPanel />
-            </section>
-
-            {loadError && <p role="alert" className="mt-6 text-sm text-destructive">{loadError}</p>}
-
-            <section className="mt-8">
-              <h2 className="font-display text-lg font-medium">Low stock</h2>
-              {lowStock.length ? (
-                <ul className="mt-2 divide-y divide-border text-sm">
-                  {lowStock.map((v) => (
-                    <li key={v.sku} className="flex flex-col gap-2 py-2 sm:flex-row sm:justify-between">
-                      <span>{v.product}, {v.name} <span className="text-xs text-muted-foreground">({v.sku})</span></span>
-                      <span>{v.stock_quantity === null ? "Marked low" : `${v.stock_quantity} left`}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="mt-1 text-sm text-muted-foreground">No options are low on stock or marked low.</p>
-              )}
-            </section>
-
-            <section className="mt-8">
-              <h2 className="font-display text-lg font-medium">Latest orders</h2>
-              <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                {[["Awaiting payment", ["pending", "pending_payment"]], ["Processing", ["processing"]], ["Delivered", ["delivered", "completed", "fulfilled"]]].map(([label, statuses]) => <div key={String(label)} className="border-b border-border py-3"><p className="text-sm text-muted-foreground">{label}</p><p className="font-display text-2xl">{orders.filter((o) => (statuses as string[]).includes(o.status)).length}</p><p className="text-xs text-muted-foreground">In latest loaded orders</p></div>)}
-              </div>
-              <label className="mt-2 block">
-                <span className="sr-only">Search orders by MTD reference</span>
-                <input
-                  value={orderQuery}
-                  onChange={(e) => setOrderQuery(e.target.value)}
-                  placeholder="Search by MTD reference"
-                  className="min-h-11 w-full rounded-md border border-input bg-card px-3 font-display text-sm"
-                />
-              </label>
-              {visibleOrders.length ? (
-                <ul className="mt-2 divide-y divide-border text-sm">
-                  {visibleOrders.map((o) => (
-                    <li key={o.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
-                      <Button variant="ghost" className="min-h-11 font-display" onClick={() => setSelectedOrderId(o.id)}>{o.order_number}</Button>
-                      <label>
-                        <span className="sr-only">Status for {o.order_number}</span>
-                        <select
-                          value={o.status}
-                          onChange={(e) => updateOrderStatus(o.id, e.target.value)}
-                          className="min-h-11 rounded-md border border-input bg-card px-2 text-base"
-                        >
-                          {!ORDER_STATUSES.some((s) => s === o.status) && <option value={o.status} disabled>{o.status.replaceAll("_", " ")}</option>}
-                          {ORDER_STATUSES.map((s) => (
-                            <option key={s} value={s}>{s}</option>
-                          ))}
-                        </select>
-                      </label>
-                      <span>{formatNpr(o.total_minor)}</span>
-                      <span className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleDateString()}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {orders.length ? "No orders match that reference." : "No orders are recorded yet."}
-                </p>
-              )}
-            </section>
-
-            <section className="mt-8">
-              <h2 className="font-display text-lg font-medium">Support requests</h2>
-              {tickets.length ? (
-                <ul className="mt-2 divide-y divide-border text-sm">
-                  {tickets.map((t) => (
-                    <li key={t.id} className="flex flex-wrap justify-between gap-2 py-2">
-                      <span>{t.issue_type}</span>
-                      <span className="text-muted-foreground">{t.order_number ?? "No order number"}</span>
-                      <span>{t.status}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="mt-1 text-sm text-muted-foreground">No support requests yet.</p>
-              )}
-            </section>
-
-            <section className="mt-8">
-              <h2 className="font-display text-lg font-medium">Reviews awaiting approval</h2>
-              {pendingReviews.length ? (
-                <ul className="mt-2 space-y-3 text-sm">
-                  {pendingReviews.map((r) => (
-                    <li key={r.id} className="rounded-lg border border-glass-border bg-glass-bg p-3">
-                      <p className="font-display">{r.rating} out of 5</p>
-                      <p className="mt-1 text-muted-foreground">{r.body}</p>
-                      <Button size="sm" className="mt-2" onClick={() => approveReview(r.id)}>Approve</Button>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="mt-1 text-sm text-muted-foreground">Nothing to moderate.</p>
-              )}
-            </section>
             </div>
+            <div role="tabpanel" id="admin-catalog" aria-labelledby="admin-tab-catalog" hidden={tab !== "catalog"}>
+              <CatalogPanel products={products} draftsOnly={draftsOnly} setDraftsOnly={setDraftsOnly} editing={editing} setEditing={setEditing} onReload={() => setReloadKey((k) => k + 1)} onArchive={archiveProduct} />
+            </div>
+            <div role="tabpanel" id="admin-orders" aria-labelledby="admin-tab-orders" hidden={tab !== "orders"}>
+              <OrdersPanel orders={orders} orderQuery={orderQuery} setOrderQuery={setOrderQuery} onSelectOrder={setSelectedOrderId} onStatusChange={updateOrderStatus} />
+            </div>
+            <div role="tabpanel" id="admin-support" aria-labelledby="admin-tab-support" hidden={tab !== "support"}><SupportPanel tickets={tickets} /></div>
+            <div role="tabpanel" id="admin-reviews" aria-labelledby="admin-tab-reviews" hidden={tab !== "reviews"}><ReviewsPanel pendingReviews={pendingReviews} approveReview={approveReview} /></div>
+            {loadError && <p role="alert" className="mt-6 text-sm text-destructive">{loadError}</p>}
           </>
         )}
       </main>
