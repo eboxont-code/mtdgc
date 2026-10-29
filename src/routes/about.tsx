@@ -4,7 +4,8 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { PageHero } from "@/components/sections/page-hero";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { SITE_URL } from "@/lib/format";
+import { Button } from "@/components/ui/button";
+import { SITE_URL, whatsappLink } from "@/lib/format";
 import { breadcrumbLd, pageLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/about")({
@@ -47,6 +48,7 @@ export const Route = createFileRoute("/about")({
 });
 
 function AboutPage() {
+  const supportUrl = whatsappLink();
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
       <SiteHeader />
@@ -76,6 +78,15 @@ function AboutPage() {
             We publish only claims we can stand behind. There are no customer counts, ratings or review numbers on this
             site until real orders and real reviews exist to support them.
           </p>
+        </section>
+
+        <section className="mt-10" aria-labelledby="reach-us">
+          <h2 id="reach-us" className="font-display text-lg font-medium">How to reach us</h2>
+          <div className="mt-3 flex flex-col items-start gap-3 sm:flex-row sm:flex-wrap">
+            <Button asChild variant="outline" className="min-h-11"><Link to="/support">Contact support</Link></Button>
+            <Button asChild variant="outline" className="min-h-11"><Link to="/track-order">Track an order</Link></Button>
+            {supportUrl && <Button asChild variant="outline" className="min-h-11"><a href={supportUrl} target="_blank" rel="noreferrer">Message support on WhatsApp</a></Button>}
+          </div>
         </section>
 
         <section className="mt-10">

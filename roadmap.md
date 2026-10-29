@@ -1,6 +1,8 @@
 # MTDGC launch roadmap
 
 ## 28 Oct ordered pack (starting head 01687045)
+- [x] Numbered 26 (29 Oct): About contact block links Support and Track order, with a conditional support-only WhatsApp button using the existing helper. No contact details invented. Automatic validation pending.
+- 29 Oct checkpoints: automatic build OK for numbered 15 (f8830ed), 16 fallback (bd1bfe2), 17 (9ac458c), 18 partial (1f0afaf), 22 (2e25840) and 23 partial (10e6322). Support answers and honeypot tested at 390px and desktop without overflow. Private populated admin/account/orders/wishlist checks blocked by missing requester account. Publish requested; custom-domain deployment unconfirmed. Next is numbered 27, then the remaining numbered, U and G tasks; partial 16/18 require richer existing data, not invented matching.
 - [x] Numbered 23 partial (29 Oct): support-only hidden honeypot blocks client submission when filled. Checkout skipped because it is explicitly protected; no server action changed. Automatic validation pending.
 - [x] Numbered 22 (29 Oct): seven native support answers in the requested order, with listing-specific replacement terms, payment fallback and verification, privacy-safe tracking and no invented refund timing. Existing developer icon cards preserved. Automatic validation pending.
 - [x] Numbered 18 partial (29 Oct): wishlist loading, retryable load errors, empty state and failed-removal feedback; one-column phone rows, option/details product link and missing-product removal. Direct default-option addition omitted because existing wishlist rows contain no variants or requirements; product page safely handles eligibility and details. Automatic validation pending; private verification blocked by missing requester account.
