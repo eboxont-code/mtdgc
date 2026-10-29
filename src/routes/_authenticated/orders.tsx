@@ -103,6 +103,8 @@ function OrdersPage() {
                     <Link to="/order/$orderNumber" params={{ orderNumber: order.orderNumber }} className="mt-2 inline-flex min-h-11 items-center text-sm text-primary underline">
                       Open order page
                     </Link>
+                    <p className="mt-2 text-sm text-muted-foreground">To order again, find the current listing and check its available options. Saved order details are not added automatically.</p>
+                    <Button asChild variant="outline" className="mt-2 min-h-11"><Link to="/catalog">Find items to order again</Link></Button>
                   </details>
                 </li>
               );

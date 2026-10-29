@@ -15,3 +15,5 @@
 - Catalog display labels and pure duration/discount helpers live in format.ts; keep them independent of catalog records and price visibility so presentation never changes stored offers.
 - Client publication safeguards use publication-check.ts and saved variant rows reported by VariantsEditor; server saveProduct remains unchanged, so UI checks are not a replacement for server authorization.
 - The Deals route is a UI-only empty state until real sale data is available; never infer or invent deals from catalog prices.
+
+- Admin tabs render focused presentation panels with typed props; keep existing data reads, access checks and action callbacks in the admin route to preserve authorization behavior.

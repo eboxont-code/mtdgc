@@ -41,6 +41,7 @@ function AccountPage() {
   const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -79,15 +80,21 @@ function AccountPage() {
     if (saving) return;
     setSaving(true);
     setSaved(false);
-    const { data: userData } = await supabase.auth.getUser();
-    const user = userData.user;
-    if (user) {
-      await supabase
+    setSaveError(null);
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      const user = userData.user;
+      if (!user) throw new Error("Sign in again to save your profile.");
+      const { error } = await supabase
         .from("profiles")
-        .upsert({ id: user.id, display_name: displayName, phone, delivery_email: deliveryEmail });
+        .upsert({ id: user.id, display_name: displayName.trim(), phone: phone.trim(), delivery_email: deliveryEmail.trim() });
+      if (error) throw error;
       setSaved(true);
+    } catch {
+      setSaveError("Your profile could not be saved. Please try again.");
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   const signOut = async () => {
@@ -104,25 +111,31 @@ function AccountPage() {
           <Button variant="outline" className="min-h-11" onClick={signOut}>Sign out</Button>
         </div>
         <p className="mt-2 text-sm text-muted-foreground">{email}</p>
+        <nav aria-label="Account pages" className="mt-4 flex flex-wrap gap-4">
+          <Link to="/orders" className="inline-flex min-h-11 items-center text-sm text-primary underline">Orders</Link>
+          <Link to="/wishlist" className="inline-flex min-h-11 items-center text-sm text-primary underline">Wishlist</Link>
+          <Link to="/support" className="inline-flex min-h-11 items-center text-sm text-primary underline">Support</Link>
+        </nav>
 
         <section className="mt-8">
           <h2 className="font-display text-lg font-medium">Profile</h2>
           <form onSubmit={saveProfile} className="mt-3 grid gap-3 md:grid-cols-2">
             <label className="block">
               <span className="font-display text-xs text-muted-foreground">Display name</span>
-              <input value={displayName} onChange={(event) => setDisplayName(event.target.value)} className="mt-1 min-h-11 w-full rounded-md border border-input bg-card px-3 font-display text-sm focus:border-primary" />
+              <input value={displayName} autoComplete="name" onChange={(event) => { setDisplayName(event.target.value); setSaved(false); }} className="mt-1 min-h-11 w-full rounded-md border border-input bg-card px-3 font-display text-base focus:border-primary" />
             </label>
             <label className="block">
               <span className="font-display text-xs text-muted-foreground">Mobile number</span>
-              <input value={phone} onChange={(event) => setPhone(event.target.value)} inputMode="tel" className="mt-1 min-h-11 w-full rounded-md border border-input bg-card px-3 font-display text-sm focus:border-primary" />
+              <input value={phone} onChange={(event) => { setPhone(event.target.value); setSaved(false); }} type="tel" autoComplete="tel" inputMode="tel" className="mt-1 min-h-11 w-full rounded-md border border-input bg-card px-3 font-display text-base focus:border-primary" />
             </label>
             <label className="block md:col-span-2">
               <span className="font-display text-xs text-muted-foreground">Delivery email for codes and subscriptions</span>
-              <input value={deliveryEmail} onChange={(event) => setDeliveryEmail(event.target.value)} type="email" className="mt-1 min-h-11 w-full rounded-md border border-input bg-card px-3 font-display text-sm focus:border-primary" />
+              <input value={deliveryEmail} onChange={(event) => { setDeliveryEmail(event.target.value); setSaved(false); }} type="email" autoComplete="email" inputMode="email" className="mt-1 min-h-11 w-full rounded-md border border-input bg-card px-3 font-display text-base focus:border-primary" />
             </label>
             <div className="md:col-span-2">
               <Button type="submit" className="min-h-11" disabled={saving}>{saving ? "Saving" : "Save profile"}</Button>
-              {saved && <span className="ml-3 font-display text-xs text-success">Saved</span>}
+              {saved && <span role="status" className="ml-3 font-display text-sm text-success">Profile saved</span>}
+              {saveError && <p role="alert" className="mt-2 text-sm text-destructive">{saveError}</p>}
             </div>
           </form>
         </section>
