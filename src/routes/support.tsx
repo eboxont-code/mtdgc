@@ -50,8 +50,19 @@ const ISSUE_TYPES = [
   "Something else",
 ];
 
+const SUPPORT_ANSWERS = [
+  ["My key does not activate", "Check the activation steps and supported region on the listing. Send support the error message and your order number. Any replacement is subject to the replacement period shown on that listing."],
+  ["My subscription stopped working", "Check the plan and activation instructions on the listing, then send support your order number and the problem. Coverage follows the listing's replacement period; changes made to a shared plan are not covered."],
+  ["My delivery is delayed", "Compare the order with the delivery time shown on the listing. Payment checks or supplier downtime can cause delays. If it is later than the time shown, contact support with your order number."],
+  ["When will a refund arrive?", "Contact support to check the refund status. We do not promise a fixed refund time. If we cannot deliver, a full refund applies; other requests follow the refund policy and listing terms."],
+  ["Which details do you need?", "Send your order number and a description of the problem. Software, subscriptions and gift cards use a delivery email; game top-ups use the required player details. Never send passwords, OTPs or payment PINs."],
+  ["How do I pay and upload a screenshot?", "Place your order on the site. Use the QR or bank details shown, then upload the payment screenshot and transaction reference on your order page. If no payment details are shown, our team will send them shortly. Delivery follows payment verification."],
+  ["Where can I find my order number?", "Your order number is on the confirmation page and, for signed-in orders, in Your orders. Tracking also requires the contact details used for the order; the order number alone does not reveal it."],
+] as const;
+
 function SupportPage() {
-  const [issueType, setIssueType] = useState(ISSUE_TYPES[0]!);
+  const [issueType, setIssueType] = useState(ISSUE_TYPES[0] ?? "Something else");
+  const supportUrl = whatsappLink("Hello MTDGC, I need help with an order.");
   const [orderNumber, setOrderNumber] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "signin" | "error">("idle");
@@ -105,9 +116,9 @@ function SupportPage() {
           intro="Send your order number and a short description of the problem and our team will work through it with you."
         >
         <div className="mt-5 flex flex-wrap gap-2">
-          {whatsappLink() && (
+          {supportUrl && (
             <Button asChild size="lg">
-              <a href={whatsappLink("Hello MTDGC, I need help with an order.")!} target="_blank" rel="noreferrer">
+              <a href={supportUrl} target="_blank" rel="noreferrer">
                 Message MTDGC on WhatsApp
               </a>
             </Button>
@@ -132,6 +143,14 @@ function SupportPage() {
               <p className="mt-2 text-sm text-muted-foreground">{body}</p>
             </article>
           ))}
+        </section>
+
+        <section className="mt-10" aria-labelledby="support-answers">
+          <h2 id="support-answers" className="font-display text-lg font-medium">Order questions</h2>
+          <div className="mt-3 divide-y divide-border">
+            {SUPPORT_ANSWERS.map(([question, answer]) => <details key={question} className="py-2"><summary className="min-h-11 cursor-pointer py-3 font-display text-sm">{question}</summary><p className="pb-3 text-sm text-muted-foreground">{answer}</p></details>)}
+          </div>
+          <Link to="/policies/refunds" className="inline-flex min-h-11 items-center text-sm text-primary underline">Read the refund policy</Link>
         </section>
 
         <section className="mt-10 rounded-2xl border border-primary/30 bg-card p-4 md:p-6">
