@@ -1,6 +1,7 @@
 # MTDGC launch roadmap
 
 ## 28 Oct ordered pack (starting head 01687045)
+- [x] Numbered 16 partial (29 Oct): added an honest catalog fallback for reordering. Existing listMyOrders returns display names and totals, not product IDs, variant IDs, slugs or requirements. Safe cart reconstruction and direct product links cannot be supplied without a forbidden server change; no name-based matching or invented eligibility. Automatic validation pending.
 - [x] D2 follow-ups / F4 / F21 / F28: waiting Deals links added to footer Shop, category navigation and About. Automatic build OK, revision a1b731a. Phone and desktop links reach the real Deals empty state; HTTP 200, no overflow or browser errors. Existing styles and final developer copy preserved.
 - [x] D3: automatic build OK including existing validated plan selection; product page unchanged. Prior real option/reload check preserved.
 - [x] P8: skipped protected checkout/cart conflict. Current Buy now uses the existing cart path; isolated checkout would require editing the explicitly protected checkout. No misleading half-implementation added.
