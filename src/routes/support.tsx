@@ -65,6 +65,7 @@ function SupportPage() {
   const supportUrl = whatsappLink("Hello MTDGC, I need help with an order.");
   const [orderNumber, setOrderNumber] = useState("");
   const [description, setDescription] = useState("");
+  const [website, setWebsite] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "signin" | "error">("idle");
 
   useEffect(() => {
@@ -82,6 +83,7 @@ function SupportPage() {
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (status === "sending") return;
+    if (website) return;
     if (!description.trim()) {
       setStatus("error");
       return;
@@ -159,6 +161,7 @@ function SupportPage() {
             Support requests are stored on your MTDGC account, so you need to be signed in to send one.
           </p>
           <form onSubmit={submit} className="mt-4 grid gap-3 md:max-w-xl" noValidate>
+            <input name="website" value={website} onChange={(event) => setWebsite(event.target.value)} className="sr-only" tabIndex={-1} autoComplete="off" aria-hidden="true" />
             <label className="block">
               <span className="font-display text-xs text-muted-foreground">Issue type</span>
               <select
