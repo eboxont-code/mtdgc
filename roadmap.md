@@ -1,6 +1,7 @@
 # MTDGC launch roadmap
 
 ## 28 Oct ordered pack (starting head 01687045)
+- [x] Numbered 17 (29 Oct): existing profile form/save path retained; delivery email uses native email validation, optional phone uses tel input, trimmed values, save failures no longer show false success, saved feedback announced and cleared on edits. Orders/Wishlist/Support navigation added; existing empty states retained. Automatic validation pending; signed-in save verification blocked by absent requester account.
 - [x] Numbered 16 partial (29 Oct): added an honest catalog fallback for reordering. Existing listMyOrders returns display names and totals, not product IDs, variant IDs, slugs or requirements. Safe cart reconstruction and direct product links cannot be supplied without a forbidden server change; no name-based matching or invented eligibility. Automatic validation pending.
 - [x] D2 follow-ups / F4 / F21 / F28: waiting Deals links added to footer Shop, category navigation and About. Automatic build OK, revision a1b731a. Phone and desktop links reach the real Deals empty state; HTTP 200, no overflow or browser errors. Existing styles and final developer copy preserved.
 - [x] D3: automatic build OK including existing validated plan selection; product page unchanged. Prior real option/reload check preserved.
