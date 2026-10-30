@@ -120,9 +120,11 @@ function TrackOrderPage() {
         </p>
 
         <form onSubmit={submit} className="mt-6 grid gap-3 md:max-w-xl" noValidate>
-          <label className="block">
+          <label htmlFor="tracking-order-number" className="block">
             <span className="font-display text-xs text-muted-foreground">Order number</span>
             <input
+              id="tracking-order-number"
+              aria-describedby={error ? "tracking-error" : undefined}
               value={orderNumber}
               onChange={(event) => setOrderNumber(event.target.value)}
               placeholder="MT123456"
@@ -130,15 +132,19 @@ function TrackOrderPage() {
               className="mt-1 min-h-11 w-full rounded-md border border-input bg-card px-3 font-display text-sm focus:border-primary"
             />
           </label>
-          <label className="block">
+          <label htmlFor="tracking-contact" className="block">
             <span className="font-display text-xs text-muted-foreground">Email or phone number used on the order</span>
             <input
+              id="tracking-contact"
+              autoComplete="off"
+              aria-describedby={`tracking-contact-hint${error ? " tracking-error" : ""}`}
               value={contact}
               onChange={(event) => setContact(event.target.value)}
               className="mt-1 min-h-11 w-full rounded-md border border-input bg-card px-3 font-display text-sm focus:border-primary"
             />
           </label>
-          {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+          <p id="tracking-contact-hint" className="text-sm text-muted-foreground">Use the same email or phone number you entered when placing the order. Both details are required to check its status.</p>
+          {error && <p id="tracking-error" role="alert" className="text-sm text-destructive">{error}</p>}
           <div className="flex flex-wrap gap-2">
             <Button type="submit" disabled={loading}>{loading ? "Checking" : "Check my order"}</Button>
             <Button asChild variant="outline"><Link to="/support">Contact support</Link></Button>

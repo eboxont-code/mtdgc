@@ -43,7 +43,7 @@ function OpenCartDrawer() {
       <aside
         ref={dialogRef}
         tabIndex={-1}
-        className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-auto rounded-t-lg bg-background p-4 md:left-auto md:top-0 md:h-full md:w-[420px] md:rounded-none"
+        className="absolute inset-x-0 bottom-0 flex max-h-[85vh] flex-col overflow-hidden rounded-t-lg bg-background p-4 md:left-auto md:top-0 md:h-full md:w-[420px] md:rounded-none"
         role="dialog"
         aria-modal="true"
         aria-label="Shopping cart"
@@ -58,11 +58,11 @@ function OpenCartDrawer() {
 
         {count ? (
           <>
-            <ul className="space-y-3">
+            <ul className="min-h-0 flex-1 space-y-3 overflow-y-auto">
               {lines.map((line) => (
-                <li key={line.sku} className="flex items-center gap-3 border-b border-border pb-3">
+                <li key={line.sku} className="flex flex-wrap items-center gap-3 border-b border-border pb-3">
                   {line.image ? (
-                    <img src={line.image} alt="" className="size-12 rounded-md object-cover" />
+                    <img src={line.image} alt={line.productName} width={48} height={48} loading="lazy" className="size-12 shrink-0 rounded-md object-cover" />
                   ) : (
                     <span aria-hidden="true" className="size-12 rounded-md bg-secondary" />
                   )}
@@ -73,7 +73,7 @@ function OpenCartDrawer() {
                     </p>
                     <p className="mt-1 font-display text-xs">Subtotal {formatNpr(line.priceMinor * line.quantity)}</p>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex w-full items-center justify-end gap-1 sm:w-auto">
                     <Button
                       variant="outline"
                       size="icon"
@@ -106,6 +106,7 @@ function OpenCartDrawer() {
               ))}
             </ul>
 
+            <div className="shrink-0 bg-background">
             <div className="mt-5 flex items-center justify-between font-display">
               <span>Estimated total</span>
               <strong>{formatNpr(subtotalMinor)}</strong>
@@ -123,6 +124,7 @@ function OpenCartDrawer() {
             <Button asChild variant="ghost" className="mt-2 w-full" onClick={() => setDrawerOpen(false)}>
               <Link to="/catalog">Continue shopping</Link>
             </Button>
+            </div>
           </>
         ) : (
           <div className="py-16 text-center">
