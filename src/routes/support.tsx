@@ -161,35 +161,40 @@ function SupportPage() {
             Support requests are stored on your MTDGC account, so you need to be signed in to send one.
           </p>
           <form onSubmit={submit} className="mt-4 grid gap-3 md:max-w-xl" noValidate>
-            <input name="website" value={website} onChange={(event) => setWebsite(event.target.value)} className="sr-only" tabIndex={-1} autoComplete="off" aria-hidden="true" />
-            <label className="block">
+            <input id="support-website" name="website" value={website} onChange={(event) => setWebsite(event.target.value)} className="sr-only" tabIndex={-1} autoComplete="off" aria-hidden="true" />
+            <label htmlFor="support-issue" className="block">
               <span className="font-display text-xs text-muted-foreground">Issue type</span>
               <select
+                id="support-issue"
                 value={issueType}
                 onChange={(event) => setIssueType(event.target.value)}
-                className="mt-1 h-10 w-full rounded-md border border-border bg-card px-2 font-display text-sm"
+                className="mt-1 min-h-11 w-full rounded-md border border-border bg-card px-2 font-display text-sm"
               >
                 {ISSUE_TYPES.map((type) => (
                   <option key={type} value={type}>{type}</option>
                 ))}
               </select>
             </label>
-            <label className="block">
+            <label htmlFor="support-order" className="block">
               <span className="font-display text-xs text-muted-foreground">Order number, if you have one</span>
               <input
+                id="support-order"
                 value={orderNumber}
                 onChange={(event) => setOrderNumber(event.target.value)}
-                className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 font-display text-sm outline-none focus:border-primary"
+                className="mt-1 min-h-11 w-full rounded-md border border-border bg-card px-3 font-display text-sm focus:border-primary"
               />
             </label>
-            <label className="block">
+            <label htmlFor="support-description" className="block">
               <span className="font-display text-xs text-muted-foreground">What happened</span>
               <textarea
+                id="support-description"
+                aria-invalid={status === "error"}
+                aria-describedby={status === "error" ? "support-description-error" : undefined}
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
                 rows={4}
                 required
-                className="mt-1 w-full rounded-md border border-border bg-card p-3 font-display text-sm outline-none focus:border-primary"
+                className="mt-1 w-full rounded-md border border-border bg-card p-3 font-display text-sm focus:border-primary"
               />
             </label>
             <div>
@@ -204,7 +209,7 @@ function SupportPage() {
                 WhatsApp instead.
               </p>
             )}
-            {status === "error" && <p role="alert" className="text-sm text-destructive">Please describe the problem and try again.</p>}
+            {status === "error" && <p id="support-description-error" role="alert" className="text-sm text-destructive">Please describe the problem and try again.</p>}
           </form>
         </section>
 

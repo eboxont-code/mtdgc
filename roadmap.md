@@ -2,7 +2,8 @@
 
 ## 30 Oct ordered pack (starting head 6e83441a)
 - [x] Numbered 27: additive global keyboard focus outline uses the existing primary token, 2px width and 2px offset, outside utility layers so outline-none cannot suppress it. Matrix palette and all protected layouts unchanged. Automatic build OK, revision 63f9845; computed focus verified at 390px with no overflow, desktop captured. Publishing requested.
-- [x] Numbered 29: tracking inputs now have explicit IDs/labels, autocomplete off, contact guidance and associated error descriptions. Existing validation and privacy-protected lookup unchanged. Automatic validation pending.
+- [x] Numbered 29: tracking inputs now have explicit IDs/labels, autocomplete off, contact guidance and associated error descriptions. Existing validation and privacy-protected lookup unchanged. Automatic build OK, revision 1798616; missing-contact error and associations verified at 390px and desktop without horizontal overflow.
+- [x] Numbered 30: support form controls have explicit IDs and associated labels; textarea errors expose aria-invalid and aria-describedby. Visible input/select targets are 44px; unnecessary outline-none removed. Existing ticket submission unchanged. Automatic validation pending.
 - [ ] Next: numbered 29, 30, 32, 34, 35, 38-42, then U2-U22 and G1-G6. Numbered 28 dropped; 33 preserves final developer icons. Prior completed tasks are not reopened.
 - Starting credit balance: 5.00. Revisions and item commit labels are managed by Lovable; no manual Git operations.
 
