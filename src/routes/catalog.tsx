@@ -201,7 +201,7 @@ function CatalogPage() {
           <div className="min-w-0">
             <div className="flex items-end justify-between gap-3">
               <h1 className="font-display text-[22px] font-semibold md:text-3xl">{activeCategory?.name ?? "Catalog"}</h1>
-              <span className="pb-1 font-mono text-xs text-muted-foreground">
+              <span role="status" aria-live="polite" aria-atomic="true" className="pb-1 font-mono text-xs text-muted-foreground">
                 {visible.length} {visible.length === 1 ? "product" : "products"}
               </span>
             </div>
