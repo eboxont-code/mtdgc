@@ -7,7 +7,9 @@
 - [x] Numbered 32: cart drawer keeps full-width mobile shell, scrolls only line items and pins existing actions below; quantity tools wrap below details on phones. Line images now have explicit 48px dimensions and meaningful alt text. No cart logic or payment copy changed. Automatic build OK, revision f06c625; real product details and Add to cart verified at 360px and desktop, no order placed, no horizontal overflow.
 - [x] Numbered 33: already shipped by developer; icons, manifest and head links unchanged.
 - [x] Numbered 34: existing result count now announces filter changes politely and atomically. Existing stable filter controls and focus behavior retained; no listing restyle. Automatic build OK, revision cee5795; keyboard Subscriptions selection announced 1 product and retained focus at 390px without overflow.
-- [x] Numbered 35: empty catalog results now link each existing published category, alongside retained Clear filters, FAQ and Support actions. No records or categories invented. Automatic validation pending.
+- [x] Numbered 35: empty catalog results now link each existing published category, alongside retained Clear filters, FAQ and Support actions. No records or categories invented. Automatic build OK, revision 3ac5425; real category links verified for empty search at 390px without horizontal overflow.
+- [x] Numbered 38 partial: added missing delivery-location, renewal and activation-help answers using the existing accordion and shared FAQ/schema data. Unconditional prepaid renewal promise omitted because listing terms are not supplied. Existing payment, timing and guest-order answers preserved. Automatic validation pending.
+- [ ] Next is numbered 39-42, then U2-U22 and G1-G6; private order data and prior protected-file conflicts remain blocked as documented.
 - [ ] Next: numbered 29, 30, 32, 34, 35, 38-42, then U2-U22 and G1-G6. Numbered 28 dropped; 33 preserves final developer icons. Prior completed tasks are not reopened.
 - Starting credit balance: 5.00. Revisions and item commit labels are managed by Lovable; no manual Git operations.
 

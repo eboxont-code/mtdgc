@@ -23,6 +23,18 @@ const FAQS: [string, string][] = [
     "Place your order on this site, then pay using the QR or bank details shown for your order. If no payment details are shown, our team will send them shortly. Upload your payment screenshot and transaction reference on your order page. Our team verifies the payment before delivery. No card payments are taken on this site.",
   ],
   [
+    "Where do my key or account details appear?",
+    "Your delivery details appear on your order page and are sent by email. Follow the activation instructions on the listing. Contact support with your order number if you cannot find them.",
+  ],
+  [
+    "Does my subscription renew automatically?",
+    "Check the renewal terms on the listing. To continue a plan, review the available options and place another order when needed. Do not assume a renewal or recurring charge unless the listing states it.",
+  ],
+  [
+    "What if my key does not activate?",
+    "Check the listing's activation steps and supported region. Send support your order number and the error message. Any replacement follows the replacement period shown on that listing.",
+  ],
+  [
     "Why does region matter for gift cards?",
     "Gift cards and wallet codes work in the store region stated on the listing. Check that it matches your account before ordering. If you are unsure, contact support before paying.",
   ],
