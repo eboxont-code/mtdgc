@@ -1,5 +1,10 @@
 # MTDGC launch roadmap
 
+## 30 Oct ordered pack (starting head 6e83441a)
+- [x] Numbered 27: additive global keyboard focus outline uses the existing primary token, 2px width and 2px offset, outside utility layers so outline-none cannot suppress it. Matrix palette and all protected layouts unchanged. Automatic validation pending.
+- [ ] Next: numbered 29, 30, 32, 34, 35, 38-42, then U2-U22 and G1-G6. Numbered 28 dropped; 33 preserves final developer icons. Prior completed tasks are not reopened.
+- Starting credit balance: 5.00. Revisions and item commit labels are managed by Lovable; no manual Git operations.
+
 ## 28 Oct ordered pack (starting head 01687045)
 - [x] Numbered 26 (29 Oct): About contact block links Support and Track order, with a conditional support-only WhatsApp button using the existing helper. No contact details invented. Automatic validation pending.
 - 29 Oct checkpoints: automatic build OK for numbered 15 (f8830ed), 16 fallback (bd1bfe2), 17 (9ac458c), 18 partial (1f0afaf), 22 (2e25840) and 23 partial (10e6322). Support answers and honeypot tested at 390px and desktop without overflow. Private populated admin/account/orders/wishlist checks blocked by missing requester account. Publish requested; custom-domain deployment unconfirmed. Next is numbered 27, then the remaining numbered, U and G tasks; partial 16/18 require richer existing data, not invented matching.
