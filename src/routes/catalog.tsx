@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { SlidersHorizontal, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -258,6 +258,9 @@ function CatalogPage() {
                 <p className="font-display font-medium">No products match that search</p>
                 <p className="mt-1 text-sm text-muted-foreground">Try a different word, or clear the filters.</p>
                 <Button variant="ghost" size="sm" className="mt-3" onClick={clearAll}>Clear filters</Button>
+                <nav aria-label="Browse product categories" className="mt-3 flex flex-wrap justify-center gap-3 text-sm">
+                  {categories.map((item) => <Link key={item.id} to="/categories/$slug" params={{ slug: item.slug }} className="inline-flex min-h-11 items-center text-primary underline">{item.name}</Link>)}
+                </nav>
                 <div className="mt-3 flex flex-wrap justify-center gap-3 text-sm"><a href="/categories" className="underline">Browse categories</a><a href="/faq" className="underline">Read the FAQ</a><a href="/support" className="underline">Ask support</a></div>
               </div>
             )}
