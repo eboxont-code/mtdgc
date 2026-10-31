@@ -16,9 +16,8 @@ const STATUS_TEXT: Record<string, string> = { ...STATUS_LABEL, pending: "Placed"
 import { breadcrumbLd, pageLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/track-order")({
-  validateSearch: (search: Record<string, unknown>): { order?: string } => ({
-    order: typeof search.order === "string" ? search.order : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): { order?: string } =>
+    typeof search["order"] === "string" ? { order: search["order"] } : {},
   head: () => ({
     meta: [
       { title: "Track your MTDGC order" },
