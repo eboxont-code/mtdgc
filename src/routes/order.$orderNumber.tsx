@@ -101,6 +101,9 @@ function OrderPage() {
               {order.items.map((i) => <li key={i.name}>{i.quantity} × {i.name} · {formatNpr(i.totalMinor)}</li>)}
             </ul>
             <p className="mt-3 font-display">Total: {formatNpr(order.totalMinor)}</p>
+            <Button asChild variant="outline" className="mt-4 min-h-11">
+              <Link to="/track-order" search={{ order: order.orderNumber }}>Track this order</Link>
+            </Button>
             {order.status === "pending_payment" && (
               <>
                 <p className="mt-3">Thanks, we have your order. Pay using the details shown at checkout, or the details our team sends you, then upload your screenshot here.</p>

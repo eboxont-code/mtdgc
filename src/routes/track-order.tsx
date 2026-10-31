@@ -16,6 +16,9 @@ const STATUS_TEXT: Record<string, string> = { ...STATUS_LABEL, pending: "Placed"
 import { breadcrumbLd, pageLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/track-order")({
+  validateSearch: (search: Record<string, unknown>): { order?: string } => ({
+    order: typeof search.order === "string" ? search.order : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Track your MTDGC order" },
@@ -45,11 +48,17 @@ export const Route = createFileRoute("/track-order")({
 type Found = { orderNumber: string; status: string; createdAt: string; totalMinor: number; items: { name: string; quantity: number }[]; events: { status: string; at: string }[] };
 
 function TrackOrderPage() {
-  const [orderNumber, setOrderNumber] = useState("");
+  const { order: initialOrder } = Route.useSearch();
+  const [orderNumber, setOrderNumber] = useState(initialOrder ?? "");
   const [contact, setContact] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [found, setFound] = useState<Found | null>(null);
   const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    setOrderNumber(initialOrder ?? "");
+    setFound(null);
+    setError(null);
+  }, [initialOrder]);
   useEffect(() => {
     let active = true;
     void (async () => {
