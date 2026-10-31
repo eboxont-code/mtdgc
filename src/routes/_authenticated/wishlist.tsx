@@ -7,6 +7,8 @@ import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { SITE_URL } from "@/lib/format";
+import { EmptyState } from "@/components/empty-state";
+import { Heart } from "lucide-react";
 
 type Row = { product_id: string; products: { slug: string; name: string; summary: string; image_url: string | null } | null };
 
@@ -76,11 +78,7 @@ function WishlistPage() {
         {rows === null ? (
           !error && <p role="status" className="mt-6 text-sm text-muted-foreground">Loading your saved products.</p>
         ) : rows.length === 0 ? (
-          <div className="mt-8 rounded-lg border border-glass-border bg-glass-bg py-14 text-center">
-            <p className="font-display font-medium">Nothing saved yet</p>
-            <p className="mt-1 text-sm text-muted-foreground">Tap "Save to wishlist" on any product page to keep it here.</p>
-            <Button asChild className="mt-4"><Link to="/catalog">Browse the catalog</Link></Button>
-          </div>
+          <EmptyState icon={Heart} title="Nothing saved yet" text="Your saved products will appear here." action={<Button asChild className="min-h-11"><Link to="/catalog">Browse the catalog</Link></Button>} />
         ) : (
           <ul className="mt-6 space-y-3">
             {rows.map((row) =>

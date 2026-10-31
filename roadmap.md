@@ -1,5 +1,18 @@
 # MTDGC launch roadmap
 
+## 31 Oct ordered pack (starting head 33534ec1)
+- [x] Numbered 39: branded pending account state with a polite status and reduced-motion-aware spinner; existing session check and signed-out redirect unchanged. Automatic build OK, revision cdb348e. Desktop loading and phone signed-out redirect verified; loading is transient on phones. Publish requested.
+- [x] Numbered 40: skipped because root route is explicitly protected; final developer error presentation unchanged.
+- [x] Numbered 41: verified-order confirmation links to tracking with a validated order search parameter. Prefill never submits or bypasses required contact verification. Automatic build OK, revision 546229b; phone/desktop prefill, reload and missing-contact rejection verified without lookup requests. Populated confirmation remains unverified without an authorized real order.
+- [x] Numbered 42: saved-settings-only admin notice for missing QR and bank details, within the existing Payments tab. No settings or server calls changed. Rule test passed and automatic build OK, revision 5e39a35. Authorized admin UI verification remains blocked by missing requester account.
+- [x] U2: dropped; final header search remains unchanged.
+- [x] U3: protected Matrix catalog retained; prior F23 URL type controls and existing search/sort flow are not redone. Any additional chip changes skipped under the protected listing rule.
+- [x] U4 partial: shared order/track-result skeleton with stable placeholder dimensions and reduced-motion support, using the existing Skeleton component. Protected catalog/category/home/product surfaces skipped; admin tables deferred. Automatic build OK, revision e86be05; phone/desktop skeleton and contact gate verified without order exposure. Publish requested, completion unconfirmed.
+- [ ] Next U5-U22, then G1-G6; authorized private order/admin checks remain blocked by missing requester account.
+- [x] U5 partial: shared token-based EmptyState used by orders and wishlist, preserving their data reads and catalog action. Protected catalog/category/search surfaces skipped; admin lists deferred. Automatic validation pending; signed-in empty rows remain unverified without a requester account.
+- [ ] Numbered 40-42, then U2-U22 and G1-G6 in order. Protected-file conflicts remain skipped.
+- Starting credit balance: 5.00. Lovable manages revisions and item commit labels.
+
 ## 30 Oct ordered pack (starting head 6e83441a)
 - [x] Numbered 27: additive global keyboard focus outline uses the existing primary token, 2px width and 2px offset, outside utility layers so outline-none cannot suppress it. Matrix palette and all protected layouts unchanged. Automatic build OK, revision 63f9845; computed focus verified at 390px with no overflow, desktop captured. Publishing requested.
 - [x] Numbered 29: tracking inputs now have explicit IDs/labels, autocomplete off, contact guidance and associated error descriptions. Existing validation and privacy-protected lookup unchanged. Automatic build OK, revision 1798616; missing-contact error and associations verified at 390px and desktop without horizontal overflow.

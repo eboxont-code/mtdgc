@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { PageHero } from "@/components/sections/page-hero";
 import { PackageSearch } from "lucide-react";
+import { OrderLoading } from "@/components/order-loading";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,8 @@ const STATUS_TEXT: Record<string, string> = { ...STATUS_LABEL, pending: "Placed"
 import { breadcrumbLd, pageLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/track-order")({
+  validateSearch: (search: Record<string, unknown>): { order?: string } =>
+    typeof search["order"] === "string" ? { order: search["order"] } : {},
   head: () => ({
     meta: [
       { title: "Track your MTDGC order" },
@@ -45,11 +48,17 @@ export const Route = createFileRoute("/track-order")({
 type Found = { orderNumber: string; status: string; createdAt: string; totalMinor: number; items: { name: string; quantity: number }[]; events: { status: string; at: string }[] };
 
 function TrackOrderPage() {
-  const [orderNumber, setOrderNumber] = useState("");
+  const { order: initialOrder } = Route.useSearch();
+  const [orderNumber, setOrderNumber] = useState(initialOrder ?? "");
   const [contact, setContact] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [found, setFound] = useState<Found | null>(null);
   const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    setOrderNumber(initialOrder ?? "");
+    setFound(null);
+    setError(null);
+  }, [initialOrder]);
   useEffect(() => {
     let active = true;
     void (async () => {
@@ -164,6 +173,7 @@ function TrackOrderPage() {
           )}
         </form>
 
+        {loading && <div className="md:max-w-xl"><OrderLoading label="Checking your order" /></div>}
         {found && (
           <section role="status" className="mt-8 rounded-lg border border-input bg-card p-4 md:max-w-xl">
             <h2 className="font-display text-lg font-medium">Order {found.orderNumber}</h2>

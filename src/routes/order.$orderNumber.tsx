@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatNpr, whatsappLink, SITE_URL } from "@/lib/format";
 import { getOrderForViewer } from "@/lib/orders.functions";
 import { PaymentProofForm } from "@/components/payment-proof-form";
+import { OrderLoading } from "@/components/order-loading";
 
 export const Route = createFileRoute("/order/$orderNumber")({
   head: ({ params }) => ({
@@ -80,7 +81,7 @@ function OrderPage() {
       <SiteHeader />
       <main id="main-content" tabIndex={-1} className="mx-auto max-w-2xl px-4 pb-28 pt-8 focus:outline-none">
         <h1 className="font-display text-2xl font-medium">Order {orderNumber.toUpperCase()}</h1>
-        {state === "loading" && <p className="mt-4 text-sm text-muted-foreground">Loading your order.</p>}
+        {state === "loading" && <OrderLoading />}
         {(state === "locked" || state === "limited") && (
           <form
             className="mt-5 space-y-3 rounded-lg border border-input bg-card p-5"
@@ -101,6 +102,9 @@ function OrderPage() {
               {order.items.map((i) => <li key={i.name}>{i.quantity} × {i.name} · {formatNpr(i.totalMinor)}</li>)}
             </ul>
             <p className="mt-3 font-display">Total: {formatNpr(order.totalMinor)}</p>
+            <Button asChild variant="outline" className="mt-4 min-h-11">
+              <Link to="/track-order" search={{ order: order.orderNumber }}>Track this order</Link>
+            </Button>
             {order.status === "pending_payment" && (
               <>
                 <p className="mt-3">Thanks, we have your order. Pay using the details shown at checkout, or the details our team sends you, then upload your screenshot here.</p>
