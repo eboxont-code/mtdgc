@@ -1,7 +1,8 @@
 # MTDGC launch roadmap
 
 ## 31 Oct ordered pack (starting head 33534ec1)
-- [x] Numbered 39: branded pending account state with a polite status and reduced-motion-aware spinner; existing session check and signed-out redirect unchanged. Automatic validation pending.
+- [x] Numbered 39: branded pending account state with a polite status and reduced-motion-aware spinner; existing session check and signed-out redirect unchanged. Automatic build OK, revision cdb348e. Desktop loading and phone signed-out redirect verified; loading is transient on phones. Publish requested.
+- [x] Numbered 40: skipped because root route is explicitly protected; final developer error presentation unchanged.
 - [ ] Numbered 40-42, then U2-U22 and G1-G6 in order. Protected-file conflicts remain skipped.
 - Starting credit balance: 5.00. Lovable manages revisions and item commit labels.
 
