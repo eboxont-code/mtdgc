@@ -7,7 +7,7 @@
 - [x] Numbered 42: saved-settings-only admin notice for missing QR and bank details, within the existing Payments tab. No settings or server calls changed. Rule test passed and automatic build OK, revision 5e39a35. Authorized admin UI verification remains blocked by missing requester account.
 - [x] U2: dropped; final header search remains unchanged.
 - [x] U3: protected Matrix catalog retained; prior F23 URL type controls and existing search/sort flow are not redone. Any additional chip changes skipped under the protected listing rule.
-- [x] U4 partial: shared order/track-result skeleton with stable placeholder dimensions and reduced-motion support, using the existing Skeleton component. Protected catalog/category/home/product surfaces skipped; admin tables deferred. No order data invented. Automatic validation pending.
+- [x] U4 partial: shared order/track-result skeleton with stable placeholder dimensions and reduced-motion support, using the existing Skeleton component. Protected catalog/category/home/product surfaces skipped; admin tables deferred. Automatic build OK, revision e86be05; phone/desktop skeleton and contact gate verified without order exposure. Publish requested, completion unconfirmed.
 - [ ] Next U5-U22, then G1-G6; authorized private order/admin checks remain blocked by missing requester account.
 - [ ] Numbered 40-42, then U2-U22 and G1-G6 in order. Protected-file conflicts remain skipped.
 - Starting credit balance: 5.00. Lovable manages revisions and item commit labels.
