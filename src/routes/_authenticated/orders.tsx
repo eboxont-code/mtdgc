@@ -8,6 +8,8 @@ import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { ORDER_NOTICE, ORDER_STEPS, orderStepIndex, stepTime, formatNpr, SITE_URL } from "@/lib/format";
 import { listMyOrders } from "@/lib/orders.functions";
+import { EmptyState } from "@/components/empty-state";
+import { Package } from "lucide-react";
 
 type Order = Awaited<ReturnType<typeof listMyOrders>>[number];
 
@@ -60,11 +62,7 @@ function OrdersPage() {
         ) : orders === null ? (
           <p className="mt-6 text-sm text-muted-foreground">Loading your orders.</p>
         ) : orders.length === 0 ? (
-          <div className="mt-8 rounded-lg border border-glass-border bg-glass-bg py-14 text-center">
-            <p className="font-display font-medium">No orders on this account yet</p>
-            <p className="mt-1 text-sm text-muted-foreground">When you place an order it will be listed here.</p>
-            <Button asChild className="mt-4"><Link to="/catalog">Browse the catalog</Link></Button>
-          </div>
+          <EmptyState icon={Package} title="No orders on this account yet" text="When you place an order it will be listed here." action={<Button asChild className="min-h-11"><Link to="/catalog">Browse the catalog</Link></Button>} />
         ) : (
           <ul className="mt-6 space-y-3">
             {orders.map((order) => {
