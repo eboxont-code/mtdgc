@@ -4,6 +4,7 @@
 - [x] Numbered 39: branded pending account state with a polite status and reduced-motion-aware spinner; existing session check and signed-out redirect unchanged. Automatic build OK, revision cdb348e. Desktop loading and phone signed-out redirect verified; loading is transient on phones. Publish requested.
 - [x] Numbered 40: skipped because root route is explicitly protected; final developer error presentation unchanged.
 - [x] Numbered 41: verified-order confirmation links to tracking with a validated order search parameter. Prefill never submits or bypasses required contact verification. Automatic build OK, revision 546229b; phone/desktop prefill, reload and missing-contact rejection verified without lookup requests. Populated confirmation remains unverified without an authorized real order.
+- [x] Numbered 42: saved-settings-only admin notice for missing QR and bank details, within the existing Payments tab. No settings or server calls changed. Rule test added; automatic validation pending. Authorized admin UI verification remains blocked by missing requester account.
 - [ ] Numbered 40-42, then U2-U22 and G1-G6 in order. Protected-file conflicts remain skipped.
 - Starting credit balance: 5.00. Lovable manages revisions and item commit labels.
 

@@ -18,3 +18,4 @@
 
 - Admin tabs render focused presentation panels with typed props; keep existing data reads, access checks and action callbacks in the admin route to preserve authorization behavior.
 - Authenticated layout loading uses its route pending component so session checks retain existing redirects while showing accessible branded feedback.
+- The admin payment fallback notice derives from successfully loaded or saved settings, never unsaved input or a failed read, to avoid misreporting checkout configuration.
