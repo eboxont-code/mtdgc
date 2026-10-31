@@ -1,5 +1,10 @@
 # MTDGC launch roadmap
 
+## 31 Oct ordered pack (starting head 33534ec1)
+- [x] Numbered 39: branded pending account state with a polite status and reduced-motion-aware spinner; existing session check and signed-out redirect unchanged. Automatic validation pending.
+- [ ] Numbered 40-42, then U2-U22 and G1-G6 in order. Protected-file conflicts remain skipped.
+- Starting credit balance: 5.00. Lovable manages revisions and item commit labels.
+
 ## 30 Oct ordered pack (starting head 6e83441a)
 - [x] Numbered 27: additive global keyboard focus outline uses the existing primary token, 2px width and 2px offset, outside utility layers so outline-none cannot suppress it. Matrix palette and all protected layouts unchanged. Automatic build OK, revision 63f9845; computed focus verified at 390px with no overflow, desktop captured. Publishing requested.
 - [x] Numbered 29: tracking inputs now have explicit IDs/labels, autocomplete off, contact guidance and associated error descriptions. Existing validation and privacy-protected lookup unchanged. Automatic build OK, revision 1798616; missing-contact error and associations verified at 390px and desktop without horizontal overflow.

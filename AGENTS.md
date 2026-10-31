@@ -17,3 +17,4 @@
 - The Deals route is a UI-only empty state until real sale data is available; never infer or invent deals from catalog prices.
 
 - Admin tabs render focused presentation panels with typed props; keep existing data reads, access checks and action callbacks in the admin route to preserve authorization behavior.
+- Authenticated layout loading uses its route pending component so session checks retain existing redirects while showing accessible branded feedback.
