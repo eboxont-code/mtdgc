@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { WishlistButton } from "@/components/wishlist-button";
 import { getProductBySlug } from "@/lib/catalog.functions";
 import { PRICE_COMING_SOON, pricesHidden } from "@/lib/price-visibility";
+import { availabilityLabel, isPurchasable } from "@/lib/product-availability";
 import { useCart } from "@/lib/cart";
 import { categoryTypeFromSlug, formatNpr, isOrderable, SITE_URL, STATUS_LABEL, SUPPORT_MESSAGE, whatsappLink } from "@/lib/format";
 import { enabledProviders } from "@/lib/payments";
@@ -158,6 +159,9 @@ function ProductPage() {
   const variant = product.variants.find((item) => item.sku === selectedSku) ?? defaultVariant;
   const hidePrices = pricesHidden(product);
   const orderable = !hidePrices && isOrderable(product.status) && !!variant && isOrderable(variant.status) && variant.price_minor > 0;
+  const selectedAvailability = variant
+    ? availabilityLabel({ ...product, variants: [variant] })
+    : availabilityLabel(product);
 
   const navigate = useNavigate();
   const addToCart = (buyNow = false) => {
@@ -215,7 +219,7 @@ function ProductPage() {
   const addLabel = product.category?.slug === "gift-cards" ? "Get gift card" : product.category?.slug === "subscriptions" ? "Get subscription" : "Add to cart";
 
   const comingSoon = (
-    <Button size="lg" variant="outline" className="flex-1" disabled aria-disabled="true">Coming soon</Button>
+    <Button size="lg" variant="outline" className="flex-1" disabled aria-disabled="true">{selectedAvailability}</Button>
   );
 
   const actions = !orderable ? <div className="flex gap-2">{comingSoon}</div> : (
@@ -280,9 +284,7 @@ function ProductPage() {
             </div>
 
             <ul className="mt-1 flex flex-wrap gap-1.5 md:mt-4">
-              {!isOrderable(product.status) && (
-                <li className="rounded-full border border-warn/40 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.08em] text-warn">{STATUS_LABEL[product.status] ?? product.status}</li>
-              )}
+              <li className={`rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.08em] ${orderable ? "border-primary/40 text-primary" : "border-warn/40 text-warn"}`}>{selectedAvailability}</li>
               {!isPlan && deliveryMethod && <li className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-[11px]"><Zap className="size-3.5 text-primary" />{deliveryMethod}</li>}
               {!isPlan && product.region && <li className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-[11px]"><Globe className="size-3.5 text-primary" />{product.region}</li>}
               {!isPlan && deliveryTime && <li className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-[11px]"><Clock className="size-3.5 text-primary" />{deliveryTime}</li>}
@@ -331,7 +333,7 @@ function ProductPage() {
                     {product.variants.map((item) => {
                       const selected = selectedSku === item.sku;
                       const was = compareAt(item);
-                      const itemOrderable = isOrderable(item.status);
+                      const itemAvailability = availabilityLabel({ ...product, variants: [item] });
                       return (
                         <label
                           key={item.sku}
@@ -343,7 +345,7 @@ function ProductPage() {
                           <span className="font-mono text-sm font-bold text-price">{hidePrices ? PRICE_COMING_SOON : formatNpr(item.price_minor)}</span>
                           {!hidePrices && was && <span className="font-mono text-[11px] text-muted-foreground line-through">{formatNpr(was)}</span>}
                           {item.status === "low_stock" && <span className="font-mono text-[10px] uppercase text-warn">Limited</span>}
-                          {!hidePrices && !itemOrderable && item.status !== "low_stock" && <span className="font-mono text-[10px] uppercase text-warn">{STATUS_LABEL[item.status] ?? item.status}</span>}
+                          <span className="font-mono text-[10px] text-muted-foreground">{itemAvailability}</span>
                         </label>
                       );
                     })}
@@ -440,7 +442,7 @@ function ProductPage() {
             </a>
           )}
           {!orderable ? (
-            <Button variant="outline" className="h-11 shrink-0 px-5" disabled aria-disabled="true">Coming soon</Button>
+            <Button variant="outline" className="h-11 shrink-0 px-5" disabled aria-disabled="true">{selectedAvailability}</Button>
           ) : (<>
           <Button variant="outline" className="h-11 shrink-0 px-3" disabled={!orderable} onClick={() => addToCart(false)} aria-label={addLabel}>
             <ShoppingBag className="size-4" />

@@ -2,7 +2,8 @@ import { Link } from "@tanstack/react-router";
 
 import { ProductArt } from "@/components/product-art";
 import type { CatalogProduct } from "@/lib/catalog.functions";
-import { formatNpr, isOrderable, STATUS_LABEL } from "@/lib/format";
+import { formatNpr } from "@/lib/format";
+import { availabilityLabel, isPurchasable } from "@/lib/product-availability";
 import { bestDeal } from "@/lib/pricing";
 import { PRICE_COMING_SOON, pricesHidden } from "@/lib/price-visibility";
 
@@ -26,7 +27,7 @@ export function productMeta(product: CatalogProduct): string {
  */
 export function ProductTile({ product, priority = false, className = "" }: { product: CatalogProduct; priority?: boolean; className?: string }) {
   const price = lowestPrice(product);
-  const orderable = isOrderable(product.status);
+  const orderable = isPurchasable(product);
   const deal = orderable ? bestDeal(product) : null;
   const badge = orderable ? product.badges.find((b) => !HIDDEN_BADGES.has(b.toLowerCase())) : undefined;
 
@@ -42,7 +43,7 @@ export function ProductTile({ product, priority = false, className = "" }: { pro
           <span aria-hidden="true" className="tile-scan pointer-events-none absolute inset-x-0 top-0 h-px bg-primary/80" />
           {!orderable && (
             <span className="absolute left-2 top-2 rounded-full bg-background/85 px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-warn backdrop-blur">
-              {STATUS_LABEL[product.status] ?? product.status}
+              {availabilityLabel(product)}
             </span>
           )}
           {deal && (
@@ -59,6 +60,7 @@ export function ProductTile({ product, priority = false, className = "" }: { pro
         <div className="flex flex-1 flex-col px-1.5 pb-1.5 pt-2.5">
           <h3 className="line-clamp-1 font-display text-[13px] font-medium leading-snug md:text-sm">{product.name}</h3>
           <p className="mt-0.5 line-clamp-1 text-[11px] text-muted-foreground md:text-xs">{productMeta(product)}</p>
+          {orderable && <p className="mt-0.5 text-[11px] text-primary">Available now</p>}
           <p className="mt-auto pt-2 font-mono text-[13px] md:text-sm">
             {orderable && price !== null ? (
               <>
@@ -67,7 +69,7 @@ export function ProductTile({ product, priority = false, className = "" }: { pro
                 {deal && <span className="ml-1.5 text-[11px] text-muted-foreground line-through">{formatNpr(deal.was)}</span>}
               </>
             ) : (
-              <span className="text-muted-foreground">{pricesHidden(product) ? PRICE_COMING_SOON : "Not open yet"}</span>
+              <span className="text-muted-foreground">{pricesHidden(product) ? PRICE_COMING_SOON : availabilityLabel(product)}</span>
             )}
           </p>
         </div>
@@ -82,7 +84,7 @@ export const ProductCard = ProductTile;
 /** Compact row for lists: 48px art, name, meta and price. */
 export function ProductRow({ product }: { product: CatalogProduct }) {
   const price = lowestPrice(product);
-  const orderable = isOrderable(product.status);
+  const orderable = isPurchasable(product);
   return (
     <Link
       to="/products/$slug"
@@ -95,9 +97,10 @@ export function ProductRow({ product }: { product: CatalogProduct }) {
       <div className="min-w-0 flex-1">
         <p className="truncate font-display text-[13px] font-medium">{product.name}</p>
         <p className="truncate text-[11px] text-muted-foreground">{productMeta(product)}</p>
+        <p className="text-[11px] text-muted-foreground">{availabilityLabel(product)}</p>
       </div>
       <span className="shrink-0 font-mono text-xs">
-        {orderable && price !== null ? <span className="font-bold text-price">{formatNpr(price)}</span> : <span className="text-warn">{pricesHidden(product) ? PRICE_COMING_SOON : "Coming soon"}</span>}
+        {orderable && price !== null ? <span className="font-bold text-price">{formatNpr(price)}</span> : <span className="text-warn">{pricesHidden(product) ? PRICE_COMING_SOON : availabilityLabel(product)}</span>}
       </span>
     </Link>
   );

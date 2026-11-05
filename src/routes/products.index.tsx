@@ -7,6 +7,7 @@ import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { listCatalog } from "@/lib/catalog.functions";
 import { SITE_URL } from "@/lib/format";
+import { availabilityCounts } from "@/lib/product-availability";
 import { breadcrumbLd, itemListLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/products/")({
@@ -56,10 +57,12 @@ function ProductsIndexPage() {
           <Button asChild size="sm"><Link to="/catalog">Search the catalog</Link></Button>
           {[...categories].sort((a, b) => a.sort_order - b.sort_order).map((category) => (
             <Button key={category.slug} asChild variant="outline" className="min-h-11">
-              <Link to="/categories/$slug" params={{ slug: category.slug }}>{category.name} ({products.filter((product) => product.category?.slug === category.slug).length})</Link>
+              <Link to="/categories/$slug" params={{ slug: category.slug }}>{category.name} ({availabilityCounts(products.filter((product) => product.category?.slug === category.slug)).available} available now)</Link>
             </Button>
           ))}
         </div>
+
+        <p className="mt-4 text-xs text-muted-foreground">{availabilityCounts(products).available} available now / {availabilityCounts(products).comingSoon} coming soon</p>
 
         {products.length ? (
           <div className="mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4">

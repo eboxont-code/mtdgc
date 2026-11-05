@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { listCatalog } from "@/lib/catalog.functions";
 import { SITE_URL } from "@/lib/format";
+import { availabilityCounts } from "@/lib/product-availability";
 import { breadcrumbLd, itemListLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/categories/")({
@@ -45,25 +46,24 @@ function CategoriesIndexPage() {
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Categories" }]} />
         <h1 className="font-display text-[26px] font-medium md:text-4xl">Product categories</h1>
         <p className="mt-2 max-w-[62ch] text-sm text-muted-foreground">
-          Categories group the products MTDGC currently sells. Lines that are still being prepared are not listed here
-          and are not open for orders.
+          Browse available products and upcoming listings by category. Coming-soon listings are not open for orders.
         </p>
 
         {categories.length ? (
           <ul className="mt-6 grid gap-3 md:grid-cols-2">
             {[...categories].sort((a, b) => a.sort_order - b.sort_order).map((category) => {
-              const count = products.filter((product) => product.category?.slug === category.slug).length;
+              const counts = availabilityCounts(products.filter((product) => product.category?.slug === category.slug));
               return (
                 <li key={category.slug} className="rounded-lg border border-border p-4">
                   <h2 className="font-display text-lg font-medium">
                     <Link to="/categories/$slug" params={{ slug: category.slug }} className="hover:text-primary">
                       {category.name}
-                      <span className="ml-2 text-sm text-muted-foreground">({count})</span>
+                      <span className="ml-2 text-sm text-muted-foreground">({counts.available} available now)</span>
                     </Link>
                   </h2>
                   <p className="mt-1 text-sm text-muted-foreground">{category.description}</p>
                   <p className="mt-2 font-display text-xs text-muted-foreground">
-                    {count} {count === 1 ? "product" : "products"} listed
+                    {counts.available} available now / {counts.comingSoon} coming soon
                   </p>
                   <Button asChild variant="outline" size="sm" className="mt-3">
                     <Link to="/categories/$slug" params={{ slug: category.slug }}>View {category.name}</Link>

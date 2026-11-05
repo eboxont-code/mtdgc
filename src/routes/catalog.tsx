@@ -11,6 +11,7 @@ import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { listCatalog } from "@/lib/catalog.functions";
 import { SITE_URL } from "@/lib/format";
+import { availabilityCounts, isComingSoon, isPurchasable } from "@/lib/product-availability";
 import { breadcrumbLd, itemListLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/catalog")({
@@ -77,7 +78,7 @@ function CatalogPage() {
     const needle = query.trim().toLowerCase();
     const filtered = products.filter((product) => {
       const matchesCategory = category === "all" || product.category?.slug === category;
-      const matchesAvailability = availability === "all" || (availability === "available" ? ["available", "low_stock"].includes(product.status) : product.status === "coming_soon");
+      const matchesAvailability = availability === "all" || (availability === "available" ? isPurchasable(product) : isComingSoon(product));
       const lowest = lowestPrice(product);
       const matchesPrice = price === "all" || (lowest !== null && (price === "under-1000" ? lowest < 100000 : price === "1000-3000" ? lowest >= 100000 && lowest <= 300000 : lowest > 300000));
       const haystack = [
@@ -109,6 +110,7 @@ function CatalogPage() {
   };
 
   const activeCategory = categories.find((item) => item.slug === category);
+  const counts = availabilityCounts(visible);
   const filterCount = Number(availability !== "all") + Number(price !== "all");
   const setFilter = (next: { availability?: string; price?: string }) => {
     const a = next.availability ?? availability;
@@ -187,7 +189,7 @@ function CatalogPage() {
                       >
                         {item.name}
                         <span className="font-mono text-[11px] text-muted-foreground">
-                          {item.slug === "all" ? products.length : products.filter((p) => p.category?.slug === item.slug).length}
+                          {availabilityCounts(item.slug === "all" ? products : products.filter((p) => p.category?.slug === item.slug)).available} available now
                         </span>
                       </button>
                     </li>
@@ -199,10 +201,10 @@ function CatalogPage() {
           </aside>
 
           <div className="min-w-0">
-            <div className="flex items-end justify-between gap-3">
-              <h1 className="font-display text-[22px] font-semibold md:text-3xl">{activeCategory?.name ?? "Catalog"}</h1>
-              <span role="status" aria-live="polite" aria-atomic="true" className="pb-1 font-mono text-xs text-muted-foreground">
-                {visible.length} {visible.length === 1 ? "product" : "products"}
+            <div className="grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+              <h1 className="min-w-0 font-display text-[22px] font-semibold md:text-3xl">{activeCategory?.name ?? "Catalog"}</h1>
+              <span role="status" aria-live="polite" aria-atomic="true" className="min-w-0 pb-1 font-mono text-xs text-muted-foreground">
+                {visible.length} listed / {counts.available} available now / {counts.comingSoon} coming soon
               </span>
             </div>
 
