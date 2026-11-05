@@ -2,14 +2,14 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 1.0 · 5 November 2026
-**Purpose:** Build a reliable, profitable and expandable digital-commerce operation for Nepal first, with Australia and further markets introduced only when sourcing, payments, legal requirements and fulfilment are ready.
+**Version:** 1.1 · 5 November 2026
+**Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
 
 ## 1. Strategic direction
 
-MTDGC is not a neighbourhood directory or a website-lead funnel. It is a curated digital-goods retailer that sells game top-ups, gift cards, subscriptions and software, with room to add AI, cloud, mobile and business products when legitimate supply is secured.
+MTDGC is a curated digital-goods retailer that sells game top-ups, gift cards, subscriptions and software, with room to add AI, cloud, mobile and business products when legitimate supply is secured. It should operate one brand with three explicitly separate purchase journeys: Nepal domestic (NPR), Australia domestic (AUD for Australia-valid products), and Australia buyer to Nepal recipient (AUD payment for an eligible Nepal-delivered digital product). These journeys must not be treated as a currency toggle or as a money-remittance service.
 
 **North star:** completed orders that are correctly fulfilled, supported and profitable after product cost, currency conversion, payment costs, refunds and operating effort.
 
@@ -20,14 +20,14 @@ MTDGC is not a neighbourhood directory or a website-lead funnel. It is a curated
 1. Make the existing order-to-delivery operation dependable before adding volume.
 2. Secure legitimate, traceable suppliers and verify every product/region combination.
 3. Replace manual payment and fulfilment steps gradually, never by weakening verification.
-4. Build market-specific experiences for Nepal and Australia instead of assuming one currency or payment flow fits both.
+4. Build separate Nepal, Australia-local and Australia-to-Nepal purchase journeys; never assume buyer location, payer currency, delivery country and redemption region are the same.
 5. Grow the catalogue based on supplier quality, customer demand and contribution margin.
 6. Build customer trust through accurate policies, real reviews and honest delivery claims.
-7. Expand categories and countries only after operational launch gates are passed.
+7. Stabilise Nepal first, pilot Australia-to-Nepal gifting second, and launch Australian-local products only after their independent launch gates pass.
 
 ## 2. Current website baseline
 
-The live site currently presents MTDGC as Matrix Digital Goods & Commerce and describes Nepal and Australia as target customers. The catalog reports 36 product records across subscriptions, gift cards, game top-ups and software. The homepage and product listings show a mixture of orderable and coming-soon items; the currently visible orderable set must be rechecked before being used as an operational count.
+The live site currently presents MTDGC as Matrix Digital Goods & Commerce and mentions Nepal and Australia as target customers. A 26 October 2026 public-site audit recorded 26 catalogue entries and estimated around six appeared orderable in that snapshot; a separate 5 November 2026 recheck saw 36 product records. These are different dated public snapshots, not database evidence, and neither should be treated as the current live-SKU count. Reconcile public pages, database SKUs, variants, supplier availability and checkout eligibility before stating how many products can actually be purchased. The homepage and listings show a mixture of orderable and coming-soon items.
 
 The current customer journey is: choose product/variant → provide required player or delivery details → place order → receive order number and payment instructions → pay by QR/bank transfer → upload payment proof → manual verification → manual fulfilment → delivery to order page/email. The site explicitly says delivery is not automated and does not promise instant fulfilment.
 
@@ -50,6 +50,8 @@ The current customer journey is: choose product/variant → provide required pla
 - **Availability integrity:** product totals include coming-soon records. Product counts must distinguish total catalog records from purchasable products.
 - **Manual operations:** payment verification and fulfilment are human-run. Delivery promises must reflect measured capacity.
 - **Supplier proof:** every product needs a documented legitimate source and region compatibility before sale.
+- **Subscription clarity:** the current Netflix listing is described as an account-based subscription and asks for a delivery email; the exact fulfilment method, account ownership, supplier authority, country, renewal behaviour and customer control must be documented before this SKU is scaled.
+- **Three journeys:** Australia-local orders and Australia-paid gifts for Nepal recipients need distinct products, payments, taxes/receipts, customer data and fulfilment rules.
 
 ## 3. Business model and guardrails
 
@@ -68,12 +70,12 @@ The current customer journey is: choose product/variant → provide required pla
 
 | Window | Main outcome |
 |---|---|
-| First 48 hours | Reconcile product availability, test checkout/payment proof/order tracking, resolve market/legal inconsistency, audit active suppliers. |
-| Days 3–14 | Fix order-state defects, payment reconciliation, customer notifications, support and fulfilment checklists. |
-| Days 15–30 | Establish true product margins, supplier scorecards, pricing controls and product launch gates. |
-| Days 31–60 | Improve catalog UX, product data, SEO, mobile checkout and support knowledge base. |
-| Days 61–90 | Pilot safe automation, evaluate local payment integrations and decide whether Australia is operationally ready. |
-| After 90 days | Expand categories/markets only when profitability, supplier reliability, compliance and support capacity are proven. |
+| First 48 hours | Reconcile the current catalogue and orderable SKUs; test one real order per live product family; audit active suppliers; resolve unclear subscription fulfilment. |
+| Days 3–14 | Stabilise the Nepal domestic journey, payment reconciliation, delivery states, support process, legal seller identity and product-level region evidence. |
+| Days 15–30 | Design the Australia-to-Nepal gifting journey, map tax/legal/payment responsibilities, model AUD unit economics and complete privacy/data-flow review. Design is not permission to sell. |
+| Days 31–60 | Run a small Australia-to-Nepal pilot only if the legal, processor, supplier, recipient, refund and end-to-end test gates all pass. Otherwise keep the route disabled. |
+| Days 61–90 | Validate Australian-local SKUs, local settlement and consumer requirements independently; do not assume the diaspora pilot proves Australia-local readiness. |
+| After 90 days | Scale only the specific market/product paths that demonstrate profitable orders, reliable supply, compliant payment, clear policies and manageable support load. |
 
 ## 5. Core metrics
 
@@ -394,6 +396,81 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0239 · P2 · TODO** — Run quarterly disaster-recovery and supplier-outage exercises.
 - [ ] **MT-0240 · P2 · TODO** — Expand to another country only after the current market is profitable, compliant and operationally repeatable.
 
+### Workstream 13 · Dual-market architecture and Australia-to-Nepal gifting
+
+**Definition of done:** Nepal domestic, Australia-local and Australia-to-Nepal gifting are distinct, understandable and independently testable customer journeys.
+
+- [ ] **MT-0241 · P0 · TODO** — Define the three purchase journeys separately: Nepal domestic in NPR, Australia domestic in AUD for Australia-valid products, and Australia buyer to Nepal recipient with AUD payment.
+- [ ] **MT-0242 · P0 · TODO** — Choose the initial Australian audience (Nepali diaspora, mainstream Australian buyers or both) and validate its actual purchase problem before building a broad Australian catalogue.
+- [ ] **MT-0243 · P0 · TODO** — Model buyer location, billing country, payer identity, recipient country, delivery country and redemption region as separate fields; never infer one from another.
+- [ ] **MT-0244 · P1 · TODO** — Add a persistent, user-controlled market selector with a manual override; do not force a market solely from IP location.
+- [ ] **MT-0245 · P1 · TODO** — Create distinct market landing experiences with accurate local currency, eligible products, payment methods, support hours and delivery expectations.
+- [ ] **MT-0246 · P1 · TODO** — Set separate conversion, repeat-purchase, fulfilment, refund and contribution-margin metrics for Nepal, Australia-local and Australia-to-Nepal gifting.
+- [ ] **MT-0247 · P0 · TODO** — Define and publish the business boundary: MTDGC sells eligible digital products; it must not imply it is a remittance service, cash-out facility, stored-value wallet, product issuer or publisher unless separately authorised.
+- [ ] **MT-0248 · P1 · TODO** — Validate new category demand with customer interviews, search demand and completed-order evidence instead of adding products solely to make the catalogue look larger.
+- [ ] **MT-0249 · P0 · TODO** — Design an explicit Australia-paid, Nepal-recipient gifting route; never silently send an Australian buyer through an NPR-only domestic checkout.
+- [ ] **MT-0250 · P0 · TODO** — Ask whether an order is for the buyer or another recipient and collect only the recipient fields required by that exact product.
+- [ ] **MT-0251 · P0 · TODO** — Show payer currency, checkout amount, code/face-value currency, recipient market, delivery destination and redemption region together in the review and receipt.
+- [ ] **MT-0252 · P1 · TODO** — Allow an optional gift message or delivery notification without exposing payment proof, billing details or private buyer information to the recipient.
+- [ ] **MT-0253 · P0 · TODO** — Validate recipient email, player ID, zone ID, server and other product identifiers before charging; show a final confirmation for irreversible top-ups.
+- [ ] **MT-0254 · P1 · TODO** — Explain who receives the code or top-up notification, who receives order updates and what the payer can see later in order history.
+- [ ] **MT-0255 · P0 · TODO** — Define the resolution and refund owner for wrong recipient details, supplier stock-outs, failed delivery, duplicate delivery and undeliverable gifts.
+- [ ] **MT-0256 · P1 · TODO** — Separate buyer contact data from recipient delivery data in access controls, email templates, support views and order exports.
+- [ ] **MT-0257 · P1 · TODO** — Define the last safe cancellation/edit point for recipient details and lock irreversible fields after supplier submission, with an audited exception process.
+- [ ] **MT-0258 · P1 · TODO** — Make the responsible seller, payment recipient, invoice issuer, support contact and refund route clear for each of the three purchase journeys.
+- [ ] **MT-0259 · P1 · TODO** — Keep gifting as a purchase of a specified digital product; prohibit customer-facing wording that suggests cash transfer, remittance, cash withdrawal or transferable stored value.
+- [ ] **MT-0260 · P0 · TODO** — Execute independent end-to-end test orders for all three journeys, including successful payment, failure, refund, notification, order tracking and recipient hand-off.
+
+### Workstream 14 · Market-specific catalogue, legal and payment readiness
+
+**Definition of done:** Each market sells only products and payment methods that are eligible for that market, with accurate seller identity, consumer terms, tax treatment and settlement.
+
+- [ ] **MT-0261 · P0 · TODO** — Verify Australia redemption eligibility for every proposed Australian SKU using current issuer or supplier evidence and a legitimate test where possible.
+- [ ] **MT-0262 · P1 · TODO** — Approve Australian gift-card and digital-product candidates one SKU at a time; record account country, storefront, denomination, activation and delivery restrictions.
+- [ ] **MT-0263 · P0 · TODO** — Never describe a USD- or other foreign-denominated code as an Australian product merely because checkout accepts AUD.
+- [ ] **MT-0264 · P1 · TODO** — Store and display code denomination currency separately from customer payment currency, including on product pages, cart, receipt, refunds and support records.
+- [ ] **MT-0265 · P0 · TODO** — Verify third-party resale rights, territory permissions and distributor requirements for each brand, subscription and code before making it orderable.
+- [ ] **MT-0266 · P0 · TODO** — Confirm the legal seller name, trading name, jurisdiction, payment-receiving entity and customer invoice issuer for each market.
+- [ ] **MT-0267 · P0 · TODO** — Obtain qualified Australian legal review of consumer obligations for every offer made to Australian customers, including product claims, pricing, delivery, refunds and complaints.
+- [ ] **MT-0268 · P0 · TODO** — Add an explicit statement that digital-goods policies do not exclude or limit non-excludable statutory consumer rights; review any blanket “no refund after code reveal/credit” language.
+- [ ] **MT-0269 · P1 · TODO** — Classify each product against applicable gift-card rules and document expiry, activation and disclosure obligations individually; do not assume one rule applies to every code type.
+- [ ] **MT-0270 · P0 · TODO** — Obtain tax advice on GST and other tax treatment for the actual seller entity, supply type, customer market, platform role and cross-border digital supply before Australian sales.
+- [ ] **MT-0271 · P0 · TODO** — Have a qualified Nepalese professional confirm applicable business registration, tax, invoicing, consumer disclosures, refund and record-keeping requirements for the actual operating structure.
+- [ ] **MT-0272 · P0 · TODO** — Use properly licensed or otherwise authorised local payment partners where required; do not operate a wallet, stored-value or money-transfer service without the necessary authorisation.
+- [ ] **MT-0273 · P1 · TODO** — Reconcile Nepal QR/bank payments against transaction references and settlement records; treat screenshots as supporting evidence, not proof of cleared funds.
+- [ ] **MT-0274 · P0 · TODO** — Determine the seller/merchant-of-record role for each journey and document who is responsible for payment, tax, delivery, refunds, complaints and customer data.
+- [ ] **MT-0275 · P1 · TODO** — Maintain market-appropriate terms, refund and delivery policies; have governing-law and dispute wording reviewed and save the policy version accepted with each order.
+- [ ] **MT-0276 · P1 · TODO** — Generate receipts or tax invoices with the correct legal seller, transaction currency, tax details and order reference for each market.
+- [ ] **MT-0277 · P1 · TODO** — Publish a dependable support email, service hours, expected response window and complaint escalation route in addition to any messaging channel.
+- [ ] **MT-0278 · P1 · TODO** — Show all mandatory fees and the final payable amount before order confirmation, including payment, currency-conversion or delivery charges where applicable.
+- [ ] **MT-0279 · P0 · TODO** — Confirm that the chosen Australian payment processor explicitly permits MTDGC’s actual digital codes, game top-ups and subscription fulfilment model before activating production payments.
+- [ ] **MT-0280 · P1 · TODO** — Benchmark each Australian SKU on the full delivered AUD cost and contribution margin after fees, FX, supplier cost, fraud/refund provision and fulfilment effort.
+
+### Workstream 15 · Cross-border product data, operations and customer protection
+
+**Definition of done:** Product eligibility, subscription mechanics, privacy, fulfilment, fraud controls and reporting remain accurate across all buyer and recipient markets.
+
+- [ ] **MT-0281 · P0 · TODO** — Extend the canonical product model with buyer markets, supplier SKU, sourcing status, price by currency, code denomination currency, delivery country, redemption region, required customer fields, fulfilment method and last verification date.
+- [ ] **MT-0282 · P0 · TODO** — Resolve the current Netflix listing’s exact fulfilment method: official code, authorised membership/top-up, customer-owned account renewal or another method; document supplier authority, account ownership, country and customer control, and pause scaling until clear.
+- [ ] **MT-0283 · P1 · TODO** — For every subscription, state plan duration, billing model, renewal behaviour, account owner, household/seat restrictions, region, what the customer receives and what happens at expiry.
+- [ ] **MT-0284 · P1 · TODO** — Maintain a dated evidence record for each “Global” or region-specific claim, including issuer/supplier source, tested account or server region and known exclusions.
+- [ ] **MT-0285 · P1 · TODO** — Test name, email and phone validation for Nepal and Australia formats, including Nepali names and valid international phone numbers, without rejecting legitimate customers.
+- [ ] **MT-0286 · P0 · TODO** — Set a delivery and support SLA for each SKU and market using actual supplier times, manual staff capacity, payment confirmation, weekends and support hours; show it before payment.
+- [ ] **MT-0287 · P1 · TODO** — Measure manual staff minutes and exception workload per SKU so delivery promises and growth targets do not exceed real fulfilment capacity.
+- [ ] **MT-0288 · P0 · TODO** — Separate order states for creation, payment pending, payment verified, supplier processing, delivered, failed, refunded and chargeback; perform critical transitions server-side.
+- [ ] **MT-0289 · P1 · TODO** — Record supplier order references, delivery evidence, status timestamps and failure reasons; use idempotency and duplicate checks where supplier systems support them.
+- [ ] **MT-0290 · P1 · TODO** — Define supplier-outage fallback rules and automatically or manually disable new sales when stock, authenticity or delivery cannot be confirmed.
+- [ ] **MT-0291 · P1 · TODO** — Alert staff before or when a delivery SLA is breached and send the customer a truthful next-update time before they need to chase support.
+- [ ] **MT-0292 · P0 · TODO** — Map every personal-data field captured in checkout, accounts, tracking, support, analytics and payment proof; record which supplier or processor receives it, the purpose and the country of access/storage.
+- [ ] **MT-0293 · P1 · TODO** — Define retention periods or defensible retention criteria for orders, support records, payment evidence and account data, with a process for access, correction and deletion requests.
+- [ ] **MT-0294 · P0 · TODO** — Keep payment screenshots and delivered codes in private, access-controlled storage; validate file type/size, minimise visible bank details, restrict staff access and define deletion timing.
+- [ ] **MT-0295 · P0 · TODO** — Add proportionate fraud controls for rapid repeat orders, payment/market mismatch, stolen-card signals, order enumeration, account takeover, code reselling abuse and chargebacks.
+- [ ] **MT-0296 · P1 · TODO** — Audit sensitive changes to price, region, recipient, payment state, refund, code reveal and supplier fulfilment, including actor, timestamp and reason.
+- [ ] **MT-0297 · P1 · TODO** — Keep one durable support case record linked to the order, payment, supplier action and customer conversation; WhatsApp must not be the only record of a refund or promise.
+- [ ] **MT-0298 · P1 · TODO** — Localise currency, dates, number formats, receipts, phone fields and customer instructions for Nepal and Australia; decide Nepali-language coverage from customer evidence and maintain equivalent policy meaning.
+- [ ] **MT-0299 · P1 · TODO** — If market-specific URLs are introduced, implement distinct useful content, correct canonical and hreflang rules, and accurate availability/indexing; do not create thin pages by merely swapping currency labels.
+- [ ] **MT-0300 · P1 · TODO** — Build a weekly report segmented by journey, market, SKU and device for funnel conversion, verified payments, median and 95th-percentile delivery time, margin, wrong-region failures, refunds, chargebacks and support backlog.
+
 ## 7. Launch gates
 
 ### Product launch gate
@@ -411,16 +488,42 @@ A new country requires aligned legal terms, consumer disclosures, currency, taxe
 ### Trust and claims gate
 Delivery-speed claims, customer reviews, ratings, order counts, security claims and supplier-authorisation claims must be supported by current evidence.
 
-## 8. Immediate next actions
+## 8. Prioritised risk register
 
-1. Reconcile the 36 product records against actual orderability and supplier availability.
-2. Test one complete low-value order for each currently orderable product family.
-3. Resolve the Nepal/Australia positioning and Terms mismatch before expanding Australian promotion.
-4. Build a supplier and margin register for every orderable product.
-5. Verify order tracking, payment proof security, payment matching and status transitions.
-6. Record a baseline for margin, payment time, fulfilment time, failure rate and support burden.
+| Priority | Risk | Required control |
+|---|---|---|
+| P0 | Australian demand is promoted before a real Australia-specific purchase journey exists. | Keep Australia-local checkout disabled until AUD pricing, eligible products, payment, seller identity, policies, tax handling and support are proven. |
+| P0 | Australia-to-Nepal gifting is mistaken for remittance or a transfer of stored value. | Sell a clearly identified digital product only; validate the legal model and authorised payment route before the pilot. |
+| P0 | A code or top-up is sold for the wrong account region or server. | Require SKU-level evidence, dated compatibility checks, prominent warnings and a tested wrong-region support path. |
+| P0 | The Netflix/subscription fulfilment method or account ownership is unclear. | Document exactly what is delivered and the supplier’s authority; pause scaling until the offer is clear and supportable. |
+| P0 | Refund wording is inconsistent with customer rights in a market. | Obtain local legal review and preserve non-excludable statutory rights in market-specific policies. |
+| P0 | Supplier or processor terms do not permit resale or payment processing for the actual product. | Keep each SKU and payment route gated by written supplier/processor eligibility evidence. |
+| P0 | Payment screenshots are mistaken for confirmed settlement. | Match funds to the order using provider/bank settlement evidence before fulfilment. |
+| P1 | Catalogue size overstates real availability. | Separate live, unavailable and roadmap SKUs and reconcile counts with database and checkout. |
+| P1 | Manual operations create late deliveries or founder bottlenecks. | Measure labour, publish realistic SLAs, alert on overdue work and maintain supplier fallback procedures. |
+| P1 | Cross-border personal data is shared without a clear map or retention process. | Minimise collected fields, map recipients/processors and locations, disclose uses and apply retention controls. |
+| P1 | AUD/NPR conversion and payment costs erase apparent margin. | Calculate per-SKU, per-journey contribution after FX, fees, fraud, refunds and support labour. |
+| P1 | Wrong recipient details create irreversible loss or disputes. | Validate and confirm recipient details before charging; define cancellation cut-offs and exception ownership. |
+| P2 | Unavailable product pages weaken search quality and customer confidence. | Keep roadmap pages clearly marked and prevent unavailable items from appearing as purchasable offers. |
 
-## 9. Sources and verification
+## 9. Unit economics required before scaling
+
+For each SKU and each purchase journey, calculate:
+
+`Contribution per order = customer price excluding collected tax − supplier cost − payment fee − FX/settlement cost − expected fraud/chargeback cost − expected refund/failed-delivery cost − variable fulfilment labour − allocated support cost.`
+
+Run at least three cases per SKU: a normal successful order, a delayed or failed fulfilment, and a refund or chargeback. Keep separate models for NPR domestic orders, Australian-local AUD orders and Australia-paid gifts for Nepal recipients; they have different payment, settlement, FX, tax and support costs. Do not treat code face value as sales revenue or confuse revenue with retained profit.
+
+## 10. Immediate next actions
+
+1. Reconcile the current public catalogue, database SKUs, variants and actual checkout availability; explain the 26 October versus 5 November product-count snapshots.
+2. Resolve the exact Netflix/subscription fulfilment method and pause unsupported offers.
+3. Test one complete low-value Nepal order for each live product family and document the evidence.
+4. Confirm supplier legitimacy, resale rights, region, denomination and landed cost for every orderable SKU.
+5. Resolve seller identity, Nepal/Australia policy scope and the legal/payment boundary for a future Australia-to-Nepal gifting route.
+6. Map data flows, support ownership, payment states and realistic delivery SLAs before increasing order volume.
+
+## 11. Sources and verification
 
 This plan's live-site baseline was checked on 5 November 2026. Website content can change; recheck before implementation or public claims.
 
@@ -436,7 +539,15 @@ This plan's live-site baseline was checked on 5 November 2026. Website content c
 - Terms: https://mtdgc.com/policies/terms
 - Privacy: https://mtdgc.com/policies/privacy
 
+## 12. Research integration and limitations
+
+This revision incorporates the user-provided **26 October 2026 Australia + Nepal market-readiness audit**. Its 1,000 numbered checks expand the same controls across five scenarios (Nepal domestic, Australia-local, Australia-to-Nepal gifting, cross-market consistency and operations). Rather than importing repeated scenario copies, this plan preserves the original 240 tasks and adds 60 distinct MTDGC actions that strengthen the missing market architecture, compliance, payment, subscription, recipient, privacy and operational controls.
+
+The 26 October report was a public-evidence audit, not a completed 1,000-test execution. No live payment, order, supplier contract, database, security penetration test or registration verification was performed as part of that source audit. Its product counts are dated observations, not current inventory truth. All implementation and legal/tax tasks remain TODO until supported by recorded evidence and qualified review where required.
+
+Only MTDGC website URLs are retained as website references in this plan. Competitor-site references and unrelated website links from the source audit are intentionally not carried into the execution file.
+
 ---
 
-**Task count:** 240 original MTDGC tasks across 12 workstreams.
+**Task count:** 300 MTDGC tasks across 15 workstreams.
 **Rule:** This file is the MTDGC execution plan. Keep all work specific to MTDGC digital products, orders, payments, suppliers and fulfilment.
