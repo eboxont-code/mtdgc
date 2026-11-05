@@ -7,6 +7,7 @@ import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { getCategoryBySlug, listCatalog } from "@/lib/catalog.functions";
 import { SITE_URL } from "@/lib/format";
+import { availabilityCounts } from "@/lib/product-availability";
 
 export const Route = createFileRoute("/categories/$slug")({
   loader: async ({ params }) => {
@@ -93,6 +94,7 @@ const CATEGORY_INTROS: Record<string, string> = {
 function CategoryPage() {
   const { category, products, categories } = Route.useLoaderData();
   if (!category) return null;
+  const counts = availabilityCounts(products);
 
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
@@ -116,8 +118,8 @@ function CategoryPage() {
         {products.length ? (
           <>
             <p className="mt-6 font-display text-xs text-muted-foreground">
-              {products.length} {products.length === 1 ? "product" : "products"} in this category. Every price is in
-              Nepalese rupees and each product page lists the region, what we need from you and how delivery works.
+              {products.length} listed / {counts.available} available now / {counts.comingSoon} coming soon.
+              Each product page lists the region, required details and delivery method.
             </p>
             <h2 className="sr-only">Products in {category.name}</h2>
             <div className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4">

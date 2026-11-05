@@ -7,10 +7,11 @@ import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { SITE_URL } from "@/lib/format";
+import { availabilityLabel, isPurchasable } from "@/lib/product-availability";
 import { EmptyState } from "@/components/empty-state";
 import { Heart } from "lucide-react";
 
-type Row = { product_id: string; products: { slug: string; name: string; summary: string; image_url: string | null } | null };
+type Row = { product_id: string; products: { slug: string; name: string; summary: string; image_url: string | null; status: string; tags: string[]; product_variants: { status: string; price_minor: number }[] } | null };
 
 export const Route = createFileRoute("/_authenticated/wishlist")({
   head: () => ({
@@ -42,7 +43,7 @@ function WishlistPage() {
     try {
       const { data, error: loadError } = await supabase
       .from("wishlist_items")
-      .select("product_id, products(slug, name, summary, image_url)")
+      .select("product_id, products(slug, name, summary, image_url, status, tags, product_variants(status, price_minor))")
       .order("created_at", { ascending: false });
       if (loadError) throw loadError;
       setRows((data ?? []) as unknown as Row[]);
@@ -94,7 +95,8 @@ function WishlistPage() {
                       {row.products.name}
                     </Link>
                     <p className="text-sm text-muted-foreground">{row.products.summary}</p>
-                    <Button asChild variant="outline" className="mt-2 min-h-11"><Link to="/products/$slug" params={{ slug: row.products.slug }}>Choose option and order details</Link></Button>
+                    <p className="mt-1 text-xs text-muted-foreground">{availabilityLabel({ ...row.products, variants: row.products.product_variants ?? [] })}</p>
+                    <Button asChild variant="outline" className="mt-2 min-h-11"><Link to="/products/$slug" params={{ slug: row.products.slug }}>{isPurchasable({ ...row.products, variants: row.products.product_variants ?? [] }) ? "Choose option and order details" : "View product details"}</Link></Button>
                   </div>
                   <Button className="min-h-11 shrink-0" variant="ghost" size="sm" disabled={removing !== null} onClick={() => remove(row.product_id)}>{removing === row.product_id ? "Removing" : "Remove"}</Button>
                 </li>

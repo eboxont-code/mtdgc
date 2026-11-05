@@ -1,5 +1,8 @@
 # MTDGC launch roadmap
 
+## 5 Nov ordered pack
+- [x] MT-0182: consistent Available now / Coming soon labels on product cards, options, pages and wishlist; catalog/category purchasable counts exclude upcoming and hidden-price records; coming-soon purchase actions remain disabled; rule tests and 390px checks passed; protected cart/checkout/product-help/router and existing data preserved; not published.
+
 ## 31 Oct ordered pack (starting head 33534ec1)
 - [x] Numbered 39: branded pending account state with a polite status and reduced-motion-aware spinner; existing session check and signed-out redirect unchanged. Automatic build OK, revision cdb348e. Desktop loading and phone signed-out redirect verified; loading is transient on phones. Publish requested.
 - [x] Numbered 40: skipped because root route is explicitly protected; final developer error presentation unchanged.
