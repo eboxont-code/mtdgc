@@ -1,3 +1,8 @@
+# Local environment and secrets — keep real values out of Git
+.env
+.env.*
+!.env.example
+
 # Logs
 logs
 *.log
