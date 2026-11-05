@@ -1,5 +1,9 @@
 # MTDGC launch roadmap
 
+> **Current plan and task status:** [`MTDGC_MASTER_PLAN.md`](./MTDGC_MASTER_PLAN.md) is the single source of truth.
+>
+> This file is preserved as a dated implementation and verification history. Checkboxes below record the status claimed by each historical pack when it was written; they are not a second live TODO register. When an old pack conflicts with the Master Plan, use the Master Plan and refresh the implementation evidence before changing task status.
+
 ## 5 Nov ordered pack
 - [x] MT-0184: compact existing region, platform, delivery method and required customer details above desktop/mobile purchase actions; empty values omitted; Matrix design, protected files and listing data preserved; not published.
 - [x] MT-0182: consistent Available now / Coming soon labels on product cards, options, pages and wishlist; catalog/category purchasable counts exclude upcoming and hidden-price records; coming-soon purchase actions remain disabled; rule tests and 390px checks passed; protected cart/checkout/product-help/router and existing data preserved; not published.
