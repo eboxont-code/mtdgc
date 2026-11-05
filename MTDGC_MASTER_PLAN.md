@@ -125,7 +125,7 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Every purchasable listing is accurate, available, region-labelled, priced and clear about the exact item the customer receives.
 
-- [ ] **MT-0021 · P0 · TODO** — Audit all 36 currently indexed product records and classify each as orderable, coming soon, hidden, duplicate or obsolete.
+- [ ] **MT-0021 · P0 · IN PROGRESS** — Reconcile the product records against the current database and public storefront. The 26 October snapshot recorded 26 entries and the 5 November snapshot recorded 36; classify every current record as orderable, coming soon, hidden, duplicate or obsolete and record the verified count before using it in public claims.
 - [ ] **MT-0022 · P0 · TODO** — Reconcile the homepage, catalog, category pages and product records so product counts and availability labels agree.
 - [ ] **MT-0023 · P0 · TODO** — Confirm the exact six products currently shown as available before advertising them as in stock.
 - [x] **MT-0024 · P0 · DONE** — Ensure coming-soon products cannot be purchased or accidentally enter checkout.
@@ -326,9 +326,9 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** Customers can discover the right digital item, understand restrictions and complete an order without confusion.
 
 - [ ] **MT-0181 · P0 · TODO** — Test the full purchase journey on common Android phones and narrow mobile screens.
-- [ ] **MT-0182 · P0 · TODO** — Make the distinction between Available now and Coming soon unambiguous.
+- [ ] **MT-0182 · P0 · REVIEW** — Availability labels, purchasable counts and disabled coming-soon actions were implemented and rule-tested in the 5 November pack; confirm the current production page before marking complete because the roadmap pack recorded the change as not yet published.
 - [ ] **MT-0183 · P0 · TODO** — Ensure the product card, product page and checkout show matching prices and variants.
-- [ ] **MT-0184 · P0 · TODO** — Show region, platform, delivery method and required customer details above the purchase action.
+- [ ] **MT-0184 · P0 · REVIEW** — Product purchase summaries for region, platform, delivery method and required details were implemented in the 5 November pack; confirm the current production page before marking complete because the roadmap pack recorded the change as not yet published.
 - [ ] **MT-0185 · P1 · TODO** — Improve catalog search for brand, product, game, denomination and common abbreviations.
 - [ ] **MT-0186 · P1 · TODO** — Add clear sorting by relevance, price and availability.
 - [ ] **MT-0187 · P1 · TODO** — Make filters usable on mobile without hiding the product list behind oversized controls.
@@ -471,6 +471,20 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0299 · P1 · TODO** — If market-specific URLs are introduced, implement distinct useful content, correct canonical and hreflang rules, and accurate availability/indexing; do not create thin pages by merely swapping currency labels.
 - [ ] **MT-0300 · P1 · TODO** — Build a weekly report segmented by journey, market, SKU and device for funnel conversion, verified payments, median and 95th-percentile delivery time, margin, wrong-region failures, refunds, chargebacks and support backlog.
 
+
+### Workstream 16 · Repository security, release governance and project records
+
+**Purpose:** Keep the MTDGC repository, environment configuration, branch workflow and project plan safe and maintainable. These tasks supplement (and do not replace) the digital-commerce workstreams above.
+
+- [x] **MT-0301 · P0 · DONE** — Remove the tracked root `.env` from the current main tree, add ignore rules for local environment files, and provide a placeholder-only `.env.example`. Evidence: `.gitignore` commit `5d5dd9342c46611a8d69747181b9a534b68b2ecb`, `.env.example` commit `f39ec70656fa91006d89e96e75b149f8d792ce3f`, and `.env` removal commit `0763a9acbd47f7bdd770eafe931c1e12e91cee78`. No environment values were copied into the example.
+- [ ] **MT-0302 · P0 · BLOCKED** — Review the published Git history for the removed `.env` and rotate any real service-role, database or other private credentials that were ever stored there. Deleting the current file does not remove earlier commits. The old file was not opened or copied during this audit; a credential owner must complete the controlled review and rotation.
+- [ ] **MT-0303 · P0 · BLOCKED** — Complete the move to Boxont-controlled Supabase only after the target project, backup/restore, schema, data, auth, storage, RLS, grants, functions, secrets and migration-history plan are verified. Do not run the held migrations on the existing project.
+- [ ] **MT-0304 · P0 · BLOCKED** — Reconcile the held backend PR #1 against current `main` after the Supabase cutover; inspect migrations 0010–0017, regenerate Drizzle snapshots, validate migration order and permissions, and run full build and tests before merge or deployment.
+- [ ] **MT-0305 · P1 · TODO** — Add explicit package scripts for the existing `src/lib/*.test.ts` tests and TypeScript checking; run them locally and add a free GitHub Actions quality workflow for install, lint, test, typecheck and production build.
+- [ ] **MT-0306 · P1 · TODO** — Protect `main` with pull-request review and required passing quality checks after the workflow is proven; do not make branch-protection settings that block Lovable sync without validating the integration first.
+- [x] **MT-0307 · P1 · DONE** — Audit `redesign-matrix`: Git comparison shows zero commits ahead of `main` and 129 behind, with no unique branch commits to salvage. Leave the stale branch untouched until deliberate branch cleanup is approved.
+- [x] **MT-0308 · P1 · DONE** — Make `MTDGC_MASTER_PLAN.md` the single active task/status source, document the roadmap as dated implementation history, and update the README to point to the canonical plan. Evidence: README commit `e4138f950db65b96265b8ade29a4880712164dc3`; roadmap navigation note recorded in the current audit update.
+
 ## 7. Launch gates
 
 ### Product launch gate
@@ -516,12 +530,23 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-1. Reconcile the current public catalogue, database SKUs, variants and actual checkout availability; explain the 26 October versus 5 November product-count snapshots.
-2. Resolve the exact Netflix/subscription fulfilment method and pause unsupported offers.
-3. Test one complete low-value Nepal order for each live product family and document the evidence.
-4. Confirm supplier legitimacy, resale rights, region, denomination and landed cost for every orderable SKU.
-5. Resolve seller identity, Nepal/Australia policy scope and the legal/payment boundary for a future Australia-to-Nepal gifting route.
-6. Map data flows, support ownership, payment states and realistic delivery SLAs before increasing order volume.
+Only one numbered task is marked **IN PROGRESS**. Task statuses in the 308-task register are authoritative.
+
+| Order | Task | Status |
+|---:|---|---|
+| 1 | MT-0021 — reconcile current product records, availability and the conflicting 26 / 36 public snapshots | IN PROGRESS |
+| 2 | MT-0302 — review Git history for any credentials in the removed `.env` and rotate any real secrets | BLOCKED; controlled credential review required |
+| 3 | MT-0282 — resolve the exact Netflix/subscription fulfilment method and pause unsupported offers | TODO |
+| 4 | MT-0041–0046 — verify supplier legitimacy, resale rights, region, denomination and delivery evidence | TODO |
+| 5 | Test one complete low-value Nepal order for each live product family and document payment/fulfilment evidence | TODO |
+| 6 | Resolve seller identity, Nepal/Australia policy scope and the legal/payment boundary for Australia-to-Nepal gifting | TODO |
+| 7 | Complete Boxont-owned Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED |
+| 8 | Add a repeatable test/typecheck/CI quality gate and protect `main` after validating Lovable sync | TODO |
+
+**Repository security note:** The tracked root `.env` has been removed from the current `main` tree, local environment files are now ignored, and a placeholder-only `.env.example` has been added. This does not erase earlier commits. Do not assume old values are safe; rotate any private values found in Git history.
+
+**Release note:** The latest verified production build before the documentation/security cleanup was READY at `087f0ed5e9f94016dd14476b0c05218adce6e135` on `mtdgc.com`. Recheck the latest deployment after the current documentation commits. The backend PR remains on HOLD until the Supabase cutover.
+
 
 ## 11. Sources and verification
 
@@ -549,36 +574,74 @@ Only MTDGC website URLs are retained as website references in this plan. Competi
 
 ---
 
-**Task count:** 300 MTDGC tasks across 15 workstreams.
+**Task count:** 308 MTDGC tasks across 16 workstreams.
 **Rule:** This file is the MTDGC execution plan. Keep all work specific to MTDGC digital products, orders, payments, suppliers and fulfilment.
-## MTDGC bot list (synced 5 Nov 2026)
+## 13. Verified repository and release snapshot — 5 November 2026
 
-Evidence for items marked done above:
-- MT-0003: Matrix Digital Goods & Commerce branding is live (redesign 9360020).
-- MT-0024: coming-soon or unpriced products show a disabled "Coming soon" button and cannot reach checkout (f4364c7).
+### Repository state
 
-Done in code (not separate MT items):
-- [x] Sentry error tracking on mtdgc.com (a12db8e). Daily Bear burns report no new errors up to 31 Oct.
-- [x] Real favicon set replacing the Lovable default (55f1f6c).
-- [x] 10 sample Australian gift cards (Kmart, Supercheap Auto, Ticketmaster, DoorDash, Amart, JB Hi-Fi, Woolworths, Coles, Bunnings, Uber Eats), coming soon with no price (4850dee).
-- [x] Accessibility pass on forms and cart, Deals page, Support FAQ, track-order prefill (Bear burns 27 to 31 Oct, last 0de2f964).
+- Repository: `eboxont-code/mtdgc` (private); default branch: `main`.
+- Main commit at the initial audit: `087f0ed5e9f94016dd14476b0c05218adce6e135` (`Added product details block`).
+- Current issue search returned no GitHub issues.
+- Current PR search returned one PR: [#1 — Draft: backend code route (hold until Supabase move)](https://github.com/eboxont-code/mtdgc/pull/1).
+- Branches: `main`, `backend-code-route`, `redesign-matrix`.
+- `main` is currently unprotected. The repository has no `.github/workflows/` files.
+- `package.json` currently has `build` and `lint` scripts but no package-level `test` or `typecheck` script. Four focused `src/lib/*.test.ts` files exist. This is tracked by MT-0305 and MT-0306; do not claim CI coverage until it exists and passes.
 
-Blocked on Boxont:
-- [!] Real prices for all products, including Steam Wallet (MT-0061 to MT-0065).
-- [!] QR and bank details in admin Payments (MT-0088).
-- [!] eSewa merchant keys (MT-0093).
-- [!] Email sender choice for SPF/DMARC.
-- [!] Search Console handoff for mtdgc.com (verification and sitemap submit).
-- [!] Netflix fulfilment method explained on the listing (listing itself stays untouched until he says).
-- [!] Australian payment provider, AUD pricing, legal entity and ABN (MT-0017, MT-0067, MT-0094).
-- [?] Move to new GitHub, Vercel, Supabase and Sentry accounts: waiting for his own yes.
+### Backend route PR hold
 
-Next code fixes (no Lovable credits, waiting for his yes since 26 Oct):
-- [ ] Add an Australian Consumer Law rights line to the refund policy.
-- [ ] Tag each product "For Nepal" or "For Australia".
-- [ ] Change unverified "Global" region labels to "Check region".
-- [ ] Fix Terms, which still say sales to Nepal only (MT-0002).
+- PR #1 is an open draft and explicitly says **HOLD** until the move to Boxont-controlled Supabase.
+- Its branch `backend-code-route` is diverged from current `main`: 7 commits ahead, 165 behind, with merge base `f5ba97ddaabac709419cb78cadb8d8a4a9ab7ddc`.
+- The branch contains migrations 0010–0017, updated generated types, catalog/admin/order server functions and listing helpers.
+- PR text states migrations 0010–0017 have not been applied to any database and must not be applied to the existing Supabase project. Its Drizzle snapshots were not regenerated.
+- Do not merge, deploy, or apply these migrations before cutover and reconciliation. Keep PR #1 open on hold; no migration or production database action was performed in this audit.
 
-Ops:
-- [!] Daily Bear burn routine failed 1 to 5 Nov because Grok Bot usage ran out. Next pack: /workspace/burn-2026-11-01/bear-continue.txt (baseline 0de2f964).
-- [ ] mtdgc.art lapses 17 Nov 2026 as decided. mtdgc.com auto-renew is off (expires 1 Oct 2027).
+### Stale redesign branch
+
+- `redesign-matrix` is 129 commits behind `main`, zero commits ahead, and has no unique commits in the current comparison.
+- Its work is already represented in `main`; no changes need to be cherry-picked.
+- The branch was not deleted or rewritten. Branch cleanup can be considered separately.
+
+### Production deployment
+
+- Vercel project: `mtdgc`.
+- Latest verified production deployment at the initial audit: `dpl_BcEXaXLp6gne51k6xgYyed9U7vSh`, state `READY`.
+- Git source: `main` at `087f0ed5e9f94016dd14476b0c05218adce6e135`.
+- Verified custom domain: `mtdgc.com`.
+- `www.mtdgc.com` is configured to redirect to `mtdgc.com` with HTTP 308.
+- Vercel environment configuration contains the required named Supabase variables for the production runtime. Values were not decrypted or copied into repository documentation.
+
+### Environment-file security remediation
+
+- [x] [DONE] The tracked root `.env` file was removed from the current `main` tree.
+- [x] [DONE] `.gitignore` now ignores `.env` and `.env.*`, while allowing `.env.example`.
+- [x] [DONE] A placeholder-only `.env.example` was added for local setup.
+- [ ] [BLOCKED] Review historical commits for any genuine secrets and rotate any private credentials that were ever included. The old file was not opened or copied during this audit. Removing the latest version does not erase Git history.
+- Production Vercel environment values were not edited.
+
+### Current product and business constraints retained
+
+- Nepal domestic operations are the first stability priority.
+- Australia-to-Nepal gifting is a separate future route, not a currency toggle.
+- Australia-local sales remain gated on independent sourcing, payment settlement, consumer, tax and support readiness.
+- Current product counts (26 in the 26 October public snapshot; 36 in the 5 November public snapshot) are historical public observations, not a verified current database count.
+- Payment QR/bank details, eSewa merchant credentials, exact real selling prices, supplier costs, email sender/DNS configuration, Search Console verification and subscription fulfilment evidence remain owner or operational dependencies.
+- The existing bot note records `mtdgc.art` as intentionally lapsing on 17 November 2026 and `mtdgc.com` auto-renew as off with an expiry date of 1 October 2027. Reconfirm registrar state before relying on those dates; do not renew or purchase anything without approval.
+
+### Planning and repository records
+
+- [x] [DONE] `MTDGC_MASTER_PLAN.md` is the canonical current execution plan.
+- [x] [DONE] `roadmap.md` is retained as dated implementation history; its older pack checkboxes are not the active task register.
+- [x] [DONE] README now describes MTDGC and links the master plan, architecture and historical roadmap.
+- [x] [DONE] All 308 task IDs `MT-0001`–`MT-0308` are maintained in the master task register.
+
+## 14. Owner decisions and operating dependencies
+
+- [ ] [BLOCKED] Confirm the real supplier prices and landed costs before enabling price-sensitive products.
+- [ ] [BLOCKED] Provide approved QR/bank payment configuration and eSewa merchant credentials before presenting those methods as ready.
+- [ ] [BLOCKED] Choose an email sender and approve the DNS/SPF/DMARC setup.
+- [ ] [BLOCKED] Complete Search Console ownership verification and sitemap handoff.
+- [ ] [BLOCKED] Approve the exact Netflix/subscription fulfilment description only after the supply method and customer-control terms are verified.
+- [ ] [BLOCKED] Approve Australian seller entity, ABN, AUD pricing, payment provider and market-specific legal review before activating Australian-local sales.
+- [ ] [BLOCKED] Confirm whether account migration from current GitHub/Vercel/Supabase/Sentry ownership is wanted; no account move was started.
+
