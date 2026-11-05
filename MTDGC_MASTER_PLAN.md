@@ -102,7 +102,7 @@ Do not set numerical targets until a reliable baseline exists.
 
 - [ ] **MT-0001 · P0 · TODO** — Choose the primary launch market and define whether Nepal or Australia is the first operational priority.
 - [ ] **MT-0002 · P0 · TODO** — Resolve the public positioning discrepancy: About says Nepal and Australia, while Terms currently describe sales to Nepal.
-- [ ] **MT-0003 · P0 · TODO** — Define MTDGC as Matrix Digital Goods & Commerce, a multi-category digital commerce brand, not only a game top-up shop.
+- [x] **MT-0003 · P0 · DONE** — Define MTDGC as Matrix Digital Goods & Commerce, a multi-category digital commerce brand, not only a game top-up shop.
 - [ ] **MT-0004 · P0 · TODO** — Write a one-sentence customer promise based on verified sourcing, clear regions, transparent pricing and accountable delivery.
 - [ ] **MT-0005 · P0 · TODO** — Define the first customer segments separately: gamers, gift-card buyers, subscription users and software buyers.
 - [ ] **MT-0006 · P0 · TODO** — Define the primary commercial metric as fulfilled, profitable orders, not catalog size or website visits.
@@ -128,7 +128,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0021 · P0 · TODO** — Audit all 36 currently indexed product records and classify each as orderable, coming soon, hidden, duplicate or obsolete.
 - [ ] **MT-0022 · P0 · TODO** — Reconcile the homepage, catalog, category pages and product records so product counts and availability labels agree.
 - [ ] **MT-0023 · P0 · TODO** — Confirm the exact six products currently shown as available before advertising them as in stock.
-- [ ] **MT-0024 · P0 · TODO** — Ensure coming-soon products cannot be purchased or accidentally enter checkout.
+- [x] **MT-0024 · P0 · DONE** — Ensure coming-soon products cannot be purchased or accidentally enter checkout.
 - [ ] **MT-0025 · P0 · TODO** — For each orderable item, verify supplier, denomination, region, platform and delivery method.
 - [ ] **MT-0026 · P0 · TODO** — Show the exact product variant and amount in cart, checkout, confirmation and order history.
 - [ ] **MT-0027 · P0 · TODO** — Distinguish gift card face value from MTDGC selling price and any fees.
@@ -551,3 +551,34 @@ Only MTDGC website URLs are retained as website references in this plan. Competi
 
 **Task count:** 300 MTDGC tasks across 15 workstreams.
 **Rule:** This file is the MTDGC execution plan. Keep all work specific to MTDGC digital products, orders, payments, suppliers and fulfilment.
+## MTDGC bot list (synced 5 Nov 2026)
+
+Evidence for items marked done above:
+- MT-0003: Matrix Digital Goods & Commerce branding is live (redesign 9360020).
+- MT-0024: coming-soon or unpriced products show a disabled "Coming soon" button and cannot reach checkout (f4364c7).
+
+Done in code (not separate MT items):
+- [x] Sentry error tracking on mtdgc.com (a12db8e). Daily Bear burns report no new errors up to 31 Oct.
+- [x] Real favicon set replacing the Lovable default (55f1f6c).
+- [x] 10 sample Australian gift cards (Kmart, Supercheap Auto, Ticketmaster, DoorDash, Amart, JB Hi-Fi, Woolworths, Coles, Bunnings, Uber Eats), coming soon with no price (4850dee).
+- [x] Accessibility pass on forms and cart, Deals page, Support FAQ, track-order prefill (Bear burns 27 to 31 Oct, last 0de2f964).
+
+Blocked on Boxont:
+- [!] Real prices for all products, including Steam Wallet (MT-0061 to MT-0065).
+- [!] QR and bank details in admin Payments (MT-0088).
+- [!] eSewa merchant keys (MT-0093).
+- [!] Email sender choice for SPF/DMARC.
+- [!] Search Console handoff for mtdgc.com (verification and sitemap submit).
+- [!] Netflix fulfilment method explained on the listing (listing itself stays untouched until he says).
+- [!] Australian payment provider, AUD pricing, legal entity and ABN (MT-0017, MT-0067, MT-0094).
+- [?] Move to new GitHub, Vercel, Supabase and Sentry accounts: waiting for his own yes.
+
+Next code fixes (no Lovable credits, waiting for his yes since 26 Oct):
+- [ ] Add an Australian Consumer Law rights line to the refund policy.
+- [ ] Tag each product "For Nepal" or "For Australia".
+- [ ] Change unverified "Global" region labels to "Check region".
+- [ ] Fix Terms, which still say sales to Nepal only (MT-0002).
+
+Ops:
+- [!] Daily Bear burn routine failed 1 to 5 Nov because Grok Bot usage ran out. Next pack: /workspace/burn-2026-11-01/bear-continue.txt (baseline 0de2f964).
+- [ ] mtdgc.art lapses 17 Nov 2026 as decided. mtdgc.com auto-renew is off (expires 1 Oct 2027).
