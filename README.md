@@ -1,26 +1,56 @@
-# Mtdgc
+# MTDGC
 
-Topupmandu.com copy this website and upgrade it for me
+**Matrix Digital Goods & Commerce** is a digital-goods storefront for game top-ups, gift cards, subscriptions and software. The product strategy is to operate one brand with clearly separated purchase routes and honest region, availability and delivery information.
 
-This project was built with [Lovable](https://lovable.dev).
+**Live website:** https://mtdgc.com  
+**Live app preview:** https://mtdgc.lovable.app
 
-**Live app**: https://mtdgc.lovable.app
+## Product and market direction
 
-## Build with Lovable
+1. Stabilise the Nepal domestic order, payment-verification and fulfilment journey first.
+2. Design and validate Australia-paid gifting for Nepal recipients as a separate journey.
+3. Enable Australia-local products only after sourcing, AUD settlement, legal, tax, refund and support requirements are independently verified.
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/f63ad948-8fb1-42cb-8c2e-7d2f017688e1).
+A product must not become orderable until its supplier, resale rights, region, variant, price, margin, delivery method and refund handling are documented and a test order passes. Coming-soon products must remain out of checkout. Never claim instant delivery, authorised-reseller status or product compatibility without evidence.
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+## Project planning
+
+- [MTDGC Master Plan](./MTDGC_MASTER_PLAN.md) — canonical strategy, workstreams, status register, launch gates, risks and next actions.
+- [Roadmap history](./roadmap.md) — dated implementation notes and verification records; the Master Plan is authoritative for current task status.
+- [Data architecture](./MTDGC_DATA_ARCHITECTURE.md) — current order, payment, identity and access-control design.
+- [Repository working rules](./AGENTS.md) — Lovable sync and code-boundary guidance.
+
+Read the Master Plan before starting work. Update it with evidence when a task changes status. Do not maintain a competing TODO list.
 
 ## Development
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+The repository uses Bun and the committed `bun.lock` lockfile.
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+bun install --frozen-lockfile
+cp .env.example .env
+bun run dev
 ```
+
+Available package scripts:
+
+```sh
+bun run build
+bun run lint
+```
+
+Focused rule tests exist under `src/lib/*.test.ts`; a single documented package-level test/typecheck/CI gate remains a tracked engineering task.
+
+### Environment variables
+
+Copy `.env.example` to `.env` and populate only local values. Keep real `.env` files untracked. The service-role key and migration connection string are server/developer-only secrets and must never use a `VITE_` prefix or enter browser code.
+
+Production environment values are configured in the deployment environment. Never commit credentials, access tokens, database URLs or service-role keys.
+
+## Release and database safety
+
+- Do not merge or deploy the held backend migration branch before the documented move to Boxont-controlled Supabase is complete.
+- Back up and verify the target database, auth settings, storage, RLS, grants, functions and migration history before cutover.
+- Do not run migrations against the existing project simply to make the held branch build.
+- Test payment verification, order tracking, support and manual fulfilment before advertising new product or market routes.
+- Preserve a $0 additional-spend preference. **Ask for explicit approval before any action that could create a charge.**
