@@ -201,6 +201,23 @@ function ProductPage() {
   const deliveryTime = product.delivery_time.trim() === "Confirmed after order review" ? "" : product.delivery_time.trim();
   const deliveryMethod = product.delivery_method.trim() === "Confirmed after order review" ? "" : product.delivery_method.trim();
 
+  const purchaseDetails = [
+    { label: "Region", value: product.region?.trim() },
+    { label: "Platform", value: product.platform?.trim() },
+    { label: "Delivery method", value: deliveryMethod },
+    { label: "Required customer details", value: product.requirements.map((item) => item.trim()).filter(Boolean).join(", ") },
+  ].filter((item) => item.value);
+  const purchaseDetailsBlock = purchaseDetails.length > 0 ? (
+    <dl aria-label="Product purchase details" className="grid min-w-0 grid-cols-2 gap-x-3 gap-y-2 border-t border-border pt-3 text-xs">
+      {purchaseDetails.map((item) => (
+        <div key={item.label} className="min-w-0">
+          <dt className="text-muted-foreground">{item.label}</dt>
+          <dd className="mt-0.5 leading-snug [overflow-wrap:anywhere]">{item.value}</dd>
+        </div>
+      ))}
+    </dl>
+  ) : null;
+
   const StepTitle = ({ n, children }: { n: number; children: React.ReactNode }) => (
     <h2 className="flex items-center gap-2.5 font-display text-[16px] font-semibold md:text-lg">
       <span className="grid size-7 place-items-center rounded-full border border-primary/50 bg-primary/10 font-mono text-xs font-bold text-primary">{n}</span>
@@ -236,7 +253,7 @@ function ProductPage() {
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
       <SiteHeader />
-      <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-6xl px-4 pb-32 pt-3 md:pb-16 md:pt-6">
+      <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-6xl px-4 pb-72 pt-3 md:pb-16 md:pt-6">
         <Breadcrumbs
           items={[
             { label: "Home", to: "/" },
@@ -270,6 +287,7 @@ function ProductPage() {
                 </span>
               </div>
               {deliveryTime && <p className="mt-1 text-xs text-muted-foreground">{deliveryTime}</p>}
+              {purchaseDetailsBlock && <div className="mt-3">{purchaseDetailsBlock}</div>}
               <div className="mt-4">{actions}</div>
               <div className="mt-4 border-t border-border pt-4">{trust}</div>
             </div>
@@ -431,6 +449,7 @@ function ProductPage() {
 
       {/* Sticky buy bar on phones */}
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-3 pb-[calc(0.6rem+env(safe-area-inset-bottom))] pt-2.5 backdrop-blur-xl md:hidden">
+        {purchaseDetailsBlock && <div className="mb-3 max-h-[25vh] overflow-y-auto">{purchaseDetailsBlock}</div>}
         <div className="flex items-center gap-2.5">
           <div className="min-w-0 flex-1">
             <p className="truncate text-[11px] text-muted-foreground">{variant?.name ?? "Choose an option"}</p>
