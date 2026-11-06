@@ -1122,7 +1122,7 @@ A safe completion requires a maintained server-side image decoder/parser already
 - Vercel reported no runtime error clusters in the last 24 hours.
 - Open PR #1 remains explicitly held until the Boxont-controlled Supabase move; it was not changed.
 
-**Next P0 task to inspect:** MT-0085 — restrict payment-proof access to the customer who owns the order and authorised staff. First inspect all signed-URL/read paths and compare them with the existing private-bucket policy. Do not alter production RLS or storage configuration; if the missing guest-access design requires a new policy or migration, record that exact dependency and continue to the next independent task.
+MT-0085 was completed by read-only verification in section 28. **Next P0 task to inspect:** MT-0086 — prevent fulfilment until payment is independently matched to the correct amount and order. Inspect the current order-status transition functions and proof-verification flow. Do not change production data or merge/deploy the held backend branch.
 
 
 ## 28. Payment-proof access control verification — 7 November 2026
