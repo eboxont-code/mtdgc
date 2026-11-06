@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 1.7 · 6 November 2026
+**Version:** 1.8 · 7 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -200,7 +200,7 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Customers can understand how to pay, submit proof safely and see an accurate payment state without duplicate or fraudulent processing.
 
-- [ ] **MT-0081 · P0 · TODO** — Audit the current QR and bank-transfer payment flow from checkout through payment verification.
+- [x] **MT-0081 · P0 · DONE** — Audit completed against the current application code, production schema/data snapshot, storage configuration and access policies. Findings and follow-up gaps are recorded in section 24; this completes the audit task, not a claim that all payment controls are secure.
 - [ ] **MT-0082 · P0 · TODO** — Verify each order receives a unique, non-guessable order reference.
 - [ ] **MT-0083 · P0 · TODO** — Ensure payment proof is attached to the correct order and cannot be reassigned by another customer.
 - [ ] **MT-0084 · P0 · TODO** — Validate uploaded proof file type, size and content handling.
@@ -976,4 +976,60 @@ No product records, supplier assignments, prices, variants, order records, datab
 - Lovable's latest commit SHA matched GitHub `main` at `b5425b9873a23cba214412f5683fc932ee9abbcd`.
 - Vercel reported no runtime errors in the preceding 24-hour window.
 
-**Next P0 task:** MT-0081 — audit the current QR and bank-transfer payment flow. Supplier test transactions and supplier pricing tasks remain blocked by the evidence and owner-decision reasons recorded in the task register above.
+**Next P0 task:** MT-0082 — verify unique, non-guessable order references. MT-0081's payment-flow audit is complete; its control gaps remain assigned to the existing payment-proof, file-validation, access-control, payment-verification and duplicate-reference tasks. Supplier test transactions and supplier pricing tasks remain blocked by the evidence and owner-decision reasons recorded in the task register above.
+
+
+## 24. QR and bank-transfer payment-flow audit — 7 November 2026
+
+**Task:** MT-0081 · P0 · DONE — audit only. This status means the existing flow was traced and documented; it does not mean payment verification, reconciliation or fulfilment controls have all passed.
+
+### Scope and evidence reviewed
+
+- GitHub `main` source commit audited: `eef8d91d9c3eb68e434b098857b3bb48d18d6aa0`.
+- Customer path: `src/routes/checkout.tsx`, `src/components/payment-proof-form.tsx`, `src/routes/order.$orderNumber.tsx`, `src/routes/track-order.tsx`.
+- Server path: `src/lib/orders.functions.ts` — `placeOrder`, `getPaymentSettings`, `submitPaymentProof`.
+- Admin path: `src/routes/_authenticated/admin.tsx`, `src/components/admin/payments-panel.tsx`, `src/components/admin/verify-panel.tsx`, `src/components/admin/order-detail-panel.tsx`, `src/lib/admin.functions.ts` — `getAdminPaymentSettings`, `savePaymentSettings`, `uploadPaymentQr`, `listPaymentsToVerify`, `getPaymentProofUrl`, `reviewPayment`, `updateOrderStatus`.
+- Database migrations inspected: `0000_create_mtdgc_commerce_core.sql`, `0005_order_status_payment_values.sql`, `0006_order_flow.sql`, `0007_payment_settings.sql`, `0009_payment_qr_private_and_payment_proofs.sql`.
+- Read-only production checks: table definitions, RLS policies, storage bucket visibility/limits, payment/order counts, payment-related indexes, migration history and security/health advisors. No SQL writes were run.
+
+### Current flow traced
+
+1. **Payment configuration:** an admin can save one `payment_settings` row and upload a QR image through admin-only server functions. The QR bucket is private. Public checkout obtains bank details and, when present, a one-hour signed QR URL through the server-side `getPaymentSettings` function.
+2. **Checkout:** `src/lib/payments.ts` enables only manual `manual_qr` (QR or bank transfer). Khalti and eSewa are disabled placeholders; there is no live gateway SDK, payment API or webhook. The customer places the order first; the site does not charge a card.
+3. **Missing configuration fallback:** when no payment settings exist, checkout still permits order placement and tells the customer that the team will send payment details shortly. This is a manual follow-up, not an on-site payment instruction.
+4. **Order creation:** `placeOrder` reloads each SKU and current variant price server-side, creates the order with status `pending_payment`, and stores the order-item price snapshot. The order number has a database unique constraint; reference-strength is tracked separately under MT-0082.
+5. **Customer proof submission:** `submitPaymentProof` checks the order access token, authenticated owner token or rate-limited contact proof; requires the order to be `pending_payment`; limits the image to 5 MB; checks JPEG/PNG/WebP MIME type and file signature; uploads under an order-ID folder in the private `payment-proofs` bucket; then changes the order to `payment_submitted` and creates a proof record.
+6. **Manual verification:** the admin queue lists `payment_submitted` orders and their latest submitted proof. `getPaymentProofUrl` requires an admin role and returns a five-minute signed URL. `reviewPayment` lets an admin mark the order/proof verified or rejected, or return the order to `pending_payment` when a new proof is requested.
+
+### Read-only production snapshot — 7 November 2026
+
+- The MTDGC Supabase project was `ACTIVE_HEALTHY`.
+- `payment_settings` contained **0 rows**. No QR path, bank name, account name, account number or Fonepay-enabled setting was configured. The actual account details were not retrieved.
+- `payment_proofs` contained **0 rows**.
+- `orders` contained **8 rows**, all in `pending_payment`; no order was in `payment_submitted` or a verified/delivered state.
+- Both `payment-qr` and `payment-proofs` storage buckets were private. Their configured size limits were 2 MB and 5 MB respectively. Storage `allowed_mime_types` was null for both, so MIME/signature enforcement currently depends on application code.
+- RLS inspection showed payment settings readable by authenticated admins; payment proofs readable by the owning signed-in customer or admin; payment-proof objects readable by the registered order owner or admin; and QR objects readable by admins. Guest proof access is mediated by server-side order access checks, not direct guest RLS.
+- The payment-proof indexes include the primary key and `payment_proofs_order_idx`; there is **no unique index on `transaction_ref`**. The orders table has a unique index on `order_number`.
+- The live database migration history contains `0010_catchup_storage_buckets` and `0011_harden_grants`, which are not present in this repository's `drizzle/migrations` tree. This is a migration-history reconciliation item; do not create/apply migrations or change the live database as part of this audit.
+
+### Findings and required follow-up
+
+1. **Payment details are not configured.** With zero `payment_settings` rows, customers do not receive QR/bank details from checkout and must wait for staff to send them. No payment configuration was changed. Populate details only through the approved business process; do not invent bank/payment information.
+2. **Proof submission is not atomic and ignores write errors.** `submitPaymentProof` uploads the file, changes the order to `payment_submitted`, then inserts `payment_proofs` and `order_status_events`. The proof/event insert errors are not checked before returning success. A failed insert can leave a submitted order without a proof record and an orphaned storage object. The status transition and proof record should be made transactional or have verified compensation and explicit error handling.
+3. **Payment review is not atomic.** `reviewPayment` changes the order status first, then updates the proof and writes status events without checking all returned errors. The UI can report a successful review even if proof metadata or history writes fail. The order/proof/event changes need one transaction or robust checked compensation.
+4. **Admin status editing can bypass payment review.** `updateOrderStatus` accepts `paid`, `verified`, `processing` and `delivered` from the general Orders panel and order-detail selector without requiring a submitted proof or verified payment. This means an admin can move an order into fulfilment without using `reviewPayment`. MT-0086 must enforce the payment gate server-side before fulfilment; do not rely on hiding UI options.
+5. **Duplicate transaction references are not prevented.** The submitted reference is length-checked but is neither deduplicated in application code nor protected by a database unique constraint. The schema has no unique index for `transaction_ref`. Address under MT-0087, including concurrency-safe enforcement.
+6. **File validation is partial.** Customer proof upload checks declared MIME, size and leading file signature, but does not fully decode/re-encode the image. The private bucket has a 5 MB cap but no storage-level MIME allowlist. Keep MT-0084 open until the complete content-handling control is implemented and tested.
+7. **Access controls are present but need dedicated negative tests.** Server-side proof URL generation checks admin role; private storage and RLS limit direct reads. Guest submission uses order access-token/contact verification. Keep MT-0083/MT-0085 open until ownership, cross-order reassignment and guest/admin access paths have explicit tests.
+8. **No independent payment reconciliation exists in the app.** The admin verifies manually from the uploaded screenshot/reference. No bank statement import, payment provider callback or settlement integration was found. The proof's `amount_minor` is copied from the order total; the application does not independently confirm that the external account received that amount. Do not describe screenshot upload as payment confirmation; retain manual verification and complete MT-0086 before fulfilment.
+9. **Audit/history persistence is best-effort.** Order status-event inserts in order placement, proof submission and review are not all checked. This can leave the timeline incomplete even when the primary status update succeeded.
+
+### Verification and boundaries
+
+- GitHub Actions run [`42225520581`](https://github.com/eboxont-code/mtdgc/actions/runs/42225520581) passed lint, unit tests, TypeScript typecheck and production build for audited source commit `eef8d91d9c3eb68e434b098857b3bb48d18d6aa0`.
+- Vercel production deployment [`dpl_8Kn2vshSTuqgJXR6R5xVME4ccgvD`](https://vercel.com/boxont/mtdgc/8Kn2vshSTuqgJXR6R5xVME4ccgvD) was **READY**, sourced from the same `main` commit, with `mtdgc.com`, `www.mtdgc.com` and the project aliases assigned and no alias error.
+- Vercel's aggregated runtime-error check found no runtime errors in the preceding 24 hours; the most recent 50-minute production log query returned no error/fatal logs. Supabase's 24-hour log query contained no payment/proof/settings endpoint mentions. These are monitoring snapshots, not proof of a successful live payment.
+- No code, schema, migration, payment setting, order, payment-proof or storage object was changed. No order was created, no payment was made, and no supplier or third party was contacted.
+- Because this task was an audit/documentation task, no application source tests were added or run specifically for the findings. The plan-only commit will trigger the repository's standard GitHub quality workflow; verify that run and the resulting deployment before closing this documentation update.
+
+**Next P0 task:** MT-0082 — verify unique, non-guessable order references. The payment-control findings above remain open under their existing tasks; do not mark them complete based solely on this audit.
