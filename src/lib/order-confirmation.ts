@@ -4,8 +4,8 @@ export const ORDER_DETAILS_CONFIRMATION_REQUIRED_MESSAGE =
   "Please review and confirm the delivery details before placing this order.";
 
 export type OrderConfirmationLine = {
-  categorySlug?: string | null;
-  fields?: Record<string, string>;
+  categorySlug?: string | null | undefined;
+  fields?: Record<string, string> | undefined;
 };
 
 /** Categories whose current checkout data identifies game top-ups or emailed gift-card codes. */
