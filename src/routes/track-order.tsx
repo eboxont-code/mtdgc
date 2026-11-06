@@ -135,6 +135,7 @@ function TrackOrderPage() {
             <span className="font-display text-xs text-muted-foreground">Order number</span>
             <input
               id="tracking-order-number"
+              maxLength={40}
               aria-describedby={error ? "tracking-error" : undefined}
               value={orderNumber}
               onChange={(event) => setOrderNumber(event.target.value)}
