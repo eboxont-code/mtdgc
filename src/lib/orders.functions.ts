@@ -3,11 +3,12 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { findUnsafeCustomerRequirement, UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE } from "@/lib/supplier-safety";
-import { generateOrderReference } from "@/lib/order-reference";
+import { generateOrderReference, isSupportedOrderReference } from "@/lib/order-reference";
 import {
   buildPaymentProofAssociation,
   hasOrderAccessToken,
   hasOrderContactAccess,
+  isValidOrderLookupContact,
   isAuthenticatedOrderOwner,
   normaliseContact,
   sha256Hex as sha256,
@@ -140,7 +141,10 @@ export const placeOrder = createServerFn({ method: "POST" })
 
 export const lookupOrder = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>
-    z.object({ orderNumber: z.string().trim().min(4).max(40), contact: z.string().trim().min(3).max(120) }).parse(data),
+    z.object({
+      orderNumber: z.string().trim().min(4).max(40).refine(isSupportedOrderReference, "Enter a valid order number"),
+      contact: z.string().trim().min(3).max(120).refine(isValidOrderLookupContact, "Enter the email or phone number used on the order"),
+    }).parse(data),
   )
   .handler(async ({ data }) => {
     const { getRequestHeader } = await import("@tanstack/react-start/server");
@@ -149,15 +153,17 @@ export const lookupOrder = createServerFn({ method: "POST" })
     const ipHash = await sha256(`lookup:${ip.trim()}`);
     const now = Date.now();
     await supabaseAdmin.from("order_lookup_attempts").delete().lt("created_at", new Date(now - 86400000).toISOString());
-    const { count } = await supabaseAdmin
+    const { count, error: countError } = await supabaseAdmin
       .from("order_lookup_attempts")
       .select("id", { count: "exact", head: true })
       .eq("ip_hash", ipHash)
       .gte("created_at", new Date(now - 10 * 60 * 1000).toISOString());
+    if (countError) return { status: "unavailable" as const };
     if ((count ?? 0) >= 10) {
       return { status: "rate_limited" as const, message: "Too many attempts. Please wait a few minutes and try again." };
     }
-    await supabaseAdmin.from("order_lookup_attempts").insert({ ip_hash: ipHash });
+    const { error: attemptError } = await supabaseAdmin.from("order_lookup_attempts").insert({ ip_hash: ipHash });
+    if (attemptError) return { status: "unavailable" as const };
 
     const orderNumber = data.orderNumber.toUpperCase();
     const { data: order } = await supabaseAdmin
