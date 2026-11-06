@@ -136,3 +136,12 @@ The current customer-facing label for `payment_submitted` is “Payment received
 - **Payment**: Integration with eSewa/Khalti SDKs/Webhooks.
 - **Fulfillment**: Automated delivery for products with pre-loaded digital codes.
 
+## 7. Checkout second confirmation for top-ups and emailed codes
+
+- The current published product data identifies the `game-top-ups` and `gift-cards` categories. The inspected production records describe top-up fulfilment using player identifiers (and, for one listing, a Supercell ID email/player tag), while the available Roblox gift-card listing describes a digital code sent to a delivery email. These are the only current orderable categories in scope for the additional checkout confirmation.
+- Before creating an order in either category, checkout opens a final review dialog showing the product, selected variant/denomination, saved region when present, and exact customer delivery-field values. The customer must choose **Confirm details & place order** or return to edit the details.
+- Older cart entries without a saved category but with delivery fields are conservatively shown in the review dialog. The server independently resolves the selected SKU's product category from the database and rejects a top-up/gift-card order request unless the explicit `detailsConfirmed` acknowledgement is present; it does not trust the cart's category label for this check.
+- Software and subscription categories are not included because the inspected production listings in those categories are not currently orderable and their product records do not establish a code-release route.
+- The product schema has no explicit supplier irreversibility flag and the supplier register has no verified supplier-specific rules. This is therefore a factual final-details confirmation for the known top-up and emailed-code categories; it does **not** assert that a particular supplier action is irreversible, nor does it replace supplier verification, payment verification or fulfilment evidence.
+- The acknowledgement is a checkout interaction safeguard, not an authorization boundary or cryptographic proof that a human read the dialog. The server-side category check prevents ordinary/stale clients from silently omitting the acknowledgement, while deliberate direct API callers can still submit the acknowledgement flag.
+- No schema migration, production record update, supplier contact, payment action or deployment is required for this UI/server-input safeguard.
