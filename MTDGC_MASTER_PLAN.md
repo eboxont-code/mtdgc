@@ -480,7 +480,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [x] **MT-0302 · P0 · DONE** — Review the published Git history for the removed `.env` and rotate any real service-role, database or other private credentials that were ever stored there. Historical review completed on 6 November 2026; no private credentials were found, so no credential rotation was required.
 - [ ] **MT-0303 · P0 · BLOCKED** — Complete the move to Boxont-controlled Supabase only after the target project, backup/restore, schema, data, auth, storage, RLS, grants, functions, secrets and migration-history plan are verified. Do not run the held migrations on the existing project.
 - [ ] **MT-0304 · P0 · BLOCKED** — Reconcile the held backend PR #1 against current `main` after the Supabase cutover; inspect migrations 0010–0017, regenerate Drizzle snapshots, validate migration order and permissions, and run full build and tests before merge or deployment.
-- [ ] **MT-0305 · P1 · TODO** — Add explicit package scripts for the existing `src/lib/*.test.ts` tests and TypeScript checking; run them locally and add a free GitHub Actions quality workflow for install, lint, test, typecheck and production build.
+- [x] **MT-0305 · P1 · DONE** — Add explicit package scripts for the existing `src/lib/*.test.ts` tests and TypeScript checking; add a free GitHub Actions quality workflow for install, lint, test, typecheck and production build. Verified on 6 November 2026: GitHub Actions run `42205681370` passed lint, 12 tests across 4 files, `tsc --noEmit`, and the production Vite/Nitro build. The test/typecheck/build verification ran on the hosted CI runner; the agent's local container did not have Bun installed. Lint intentionally disables only the Prettier rule because the existing repository has widespread formatting drift; no mass reformat was applied.
 - [ ] **MT-0306 · P1 · TODO** — Protect `main` with pull-request review and required passing quality checks after the workflow is proven; do not make branch-protection settings that block Lovable sync without validating the integration first.
 - [x] **MT-0307 · P1 · DONE** — Audit `redesign-matrix`: Git comparison shows zero commits ahead of `main` and 129 behind, with no unique branch commits to salvage. Leave the stale branch untouched until deliberate branch cleanup is approved.
 - [x] **MT-0308 · P1 · DONE** — Make `MTDGC_MASTER_PLAN.md` the single active task/status source, document the roadmap as dated implementation history, and update the README to point to the canonical plan. Evidence: README commit `e4138f950db65b96265b8ade29a4880712164dc3`; roadmap navigation note recorded in the current audit update.
@@ -535,11 +535,12 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | Order | Task | Status |
 |---:|---|---|
 | 1 | MT-0042 — record the real source of every code, top-up and subscription in the supplier register | BLOCKED; source evidence not present in repo/database |
-| 2 | Add a repeatable test/typecheck/CI quality gate without changing the held backend migration branch | TODO |
-| 3 | Test one complete low-value Nepal order for each supported product family and document payment/fulfilment evidence | TODO; supplier source dependency |
-| 4 | Resolve seller identity, Nepal/Australia policy scope and the legal/payment boundary for Australia-to-Nepal gifting | TODO; owner/legal dependency |
-| 5 | Complete Boxont-owned Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED |
-| 6 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
+| 2 | MT-0022 — reconcile homepage, catalogue, category pages and product availability labels after the Netflix hold | TODO |
+| 3 | MT-0306 — validate Lovable sync compatibility, then choose branch-protection rules that will not block it | TODO |
+| 4 | Test one complete low-value Nepal order for each supported product family and document payment/fulfilment evidence | TODO; supplier source dependency |
+| 5 | Resolve seller identity, Nepal/Australia policy scope and the legal/payment boundary for Australia-to-Nepal gifting | TODO; owner/legal dependency |
+| 6 | Complete Boxont-owned Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED |
+| 7 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -801,4 +802,45 @@ Do not ask customers for passwords, OTPs or payment PINs. Do not describe a shar
 **MT-0042 is now BLOCKED** because the actual source for each code, top-up and subscription is not recorded in the repository or database. The next supplier tasks cannot be verified from product descriptions or catalogue pricing alone. They require the real supplier identity, supply route and evidence. No supplier was guessed or contacted, and no paid service or additional spend was initiated.
 
 **Verification:** `SUPPLIER_REGISTER.md` exists on `main`; README links to it; the register fields cover the supplier identity and verification status required by MT-0041. No supplier/product/price/database records were changed.
+
+
+
+## 19. Automated engineering quality gate implemented and verified — 6 November 2026
+
+**Task:** MT-0305 · P1 · DONE  
+**Workflow:** [Quality](https://github.com/eboxont-code/mtdgc/actions/workflows/quality.yml)  
+**Successful run:** [Run #3 — commit `04d600cc83bc9c12a85b7818ca21288a38f1e37e`](https://github.com/eboxont-code/mtdgc/actions/runs/42205681370)
+
+### Changes
+
+- Added `bun run test` using Bun's built-in runner for the existing `src/lib/*.test.ts` tests.
+- Added `bun run typecheck` using `tsc --noEmit`.
+- Added a GitHub Actions workflow for pushes to `main`, pull requests targeting `main`, and manual dispatch.
+- Workflow sequence: frozen-lockfile install → lint → unit tests → TypeScript typecheck → production build.
+- Uses GitHub's hosted runner and the official Bun setup action. Build-time Supabase environment values are deliberately non-secret placeholders; the workflow does not connect to production Supabase or use production credentials.
+- Documented the scripts and workflow in README.
+
+### CI verification
+
+The successful hosted run on 6 November 2026 confirms:
+
+| Check | Result |
+|---|---|
+| `bun install --frozen-lockfile` | Passed |
+| ESLint code rules | Passed |
+| Unit tests | **12 passed, 0 failed across 4 files** |
+| `tsc --noEmit` | Passed |
+| Vite client build | Passed |
+| Vite SSR build | Passed |
+| Nitro production build | Passed |
+
+The initial lint attempt exposed 2,202 Prettier-only formatting errors across the existing repository, plus 5 explicit-`any` errors and 3 conditional-hook errors. The genuine typing and hook-order issues were corrected. To avoid an unrelated, high-churn whole-repository reformat, the `lint` script now disables only the Prettier rule while retaining the other ESLint code checks. The separate `format` script remains available; repository-wide formatting has not been applied.
+
+The tests and typecheck were verified by the hosted CI runner, not run in the agent's local container because Bun was not installed there. CI is the authoritative executed result linked above.
+
+No dependencies were added and `bun.lock` was not changed. No production secrets, Supabase schema, migrations, deployment configuration or customer data were touched.
+
+### Next independent engineering task
+
+MT-0306 remains TODO: verify Lovable's ability to sync to `main` under any proposed branch rules before enabling branch protection. Do not apply a protection rule that could block the connected Lovable workflow.
 
