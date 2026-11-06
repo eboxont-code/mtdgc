@@ -1,0 +1,50 @@
+name: Quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mtdgc-quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint, test, typecheck and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Run unit tests
+        run: bun run test
+
+      - name: TypeScript typecheck
+        run: bun run typecheck
+
+      - name: Production build
+        run: bun run build
+        env:
+          # Non-secret placeholders allow build-time config validation without
+          # connecting to or exposing the production Supabase project.
+          VITE_SUPABASE_URL: https://ci-placeholder.invalid
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+          SUPABASE_URL: https://ci-placeholder.invalid
+          SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+          SUPABASE_SERVICE_ROLE_KEY: sb_secret_ci_placeholder
