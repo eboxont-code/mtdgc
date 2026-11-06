@@ -230,7 +230,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [!] **MT-0103 · P0 · BLOCKED** — The live `public.order_status` enum already contains `cancelled`, `failed` and `refunded`, but it has no `action_required` value. Adding a persisted action-required state requires a schema migration, and the repository explicitly holds migrations until the Boxont-controlled Supabase cutover; no approved cutover target/window is available. The owner must also approve which customer actions (for example, missing player details or delivery-email correction) create/clear this state and what terminal-state/refund handling means. Do not invent the workflow or write directly to production. Existing terminal values remain for legacy compatibility; generic admin updates no longer expose cancellation/refund until dedicated workflows are approved. Evidence: sections 29–31.
 - [x] **MT-0104 · P0 · DONE** — Enforced the generic admin fulfilment path server-side: only `verified` → `processing` and `processing` → `delivered` are accepted; the update uses a compare-and-swap status predicate to reject concurrent/stale transitions. Admin list/detail selectors expose only valid next states. Payment decisions remain in `reviewPayment`; generic edits cannot set legacy `paid`, `verified`, `rejected`, `cancelled` or `refunded`. Evidence and limits: section 31.
 - [x] **MT-0105 · P0 · DONE** — Require both a supported current/legacy order reference and a valid matching email or phone in the public tracking lookup; enforce the same contact validator in browser and server, preserve order-scoped hash/email matching and return generic not-found for mismatched pairs. Rate-limit database errors now fail closed. Evidence and concurrency limitation: section 32.
-- [x] **MT-0106 · P0 · DONE** — Consolidated customer-facing order status labels, notices and progress steps across account order history, authenticated order history, public guest tracking and the individual order page. All 13 production enum values have a safe label and notice; `payment_submitted`, legacy `paid`, manual `verified`, staff-marked delivery and legacy delivery aliases are explicitly distinguished. Evidence: section 33.
+- [!] **MT-0106 · P0 · BLOCKED** — Canonical status labels/notices/progress are implemented across account order history, authenticated order history, public guest tracking and the individual order page; focused tests (5/5) and strict helper typecheck pass. Full repository lint, Bun tests, project typecheck and production build remain unverified because this execution environment has no Bun runtime, local checkout or dependency tree. The repository's Quality workflow runs only on `main` pushes and PRs; opening a PR can trigger an automatic Vercel preview, while pushing/merging to `main` would violate the no-deploy/release boundary. Completion requires a free local Bun checkout/runner or an owner-approved CI path that does not publish/deploy. Evidence and exact limitation: section 33.
 - [ ] **MT-0107 · P1 · TODO** — Record a timestamp and actor for every status transition.
 - [ ] **MT-0108 · P1 · TODO** — Show customers what happens next at each stage and whether they need to act.
 - [ ] **MT-0109 · P1 · TODO** — Allow staff to add internal notes without exposing them to customers.
@@ -1324,7 +1324,7 @@ MT-0106 is completed in section 33. MT-0121 was reviewed and marked BLOCKED beca
 
 ## 33. Canonical customer order status presentation — 7 November 2026
 
-**Task:** MT-0106 · P0 · DONE — account order history, public guest tracking and individual order views now use one shared status-label/notice/progress definition.
+**Task:** MT-0106 · P0 · BLOCKED — the implementation is committed and focused verification passes, but the full repository quality gate cannot be executed in this environment; do not call the task complete until the missing checks pass.
 
 ### Implementation
 
@@ -1356,5 +1356,6 @@ MT-0106 is completed in section 33. MT-0121 was reviewed and marked BLOCKED beca
 
 ### Next task triage
 
+- MT-0106 is BLOCKED pending full repository validation: the working environment lacks Bun, a checkout and installed dependencies; the Quality workflow cannot be triggered for this branch without a PR or main push, neither of which is permitted under the current no-publish/release boundary. The code and focused test evidence are preserved on the working branch.
 - MT-0121 is BLOCKED: the supplier register is empty and no supplier-specific delivery route or fulfilment instructions are evidenced. The owner must provide verified source/product/region scope and actual fulfilment steps before a product-family runbook can be accurate. No supplier contact was made.
 - **Next eligible P0 task:** MT-0122 — create a pre-fulfilment checklist from the saved product requirements and order-item fields, showing only fields applicable to the selected order. Do not infer supplier instructions or require fields that were not collected at checkout.
