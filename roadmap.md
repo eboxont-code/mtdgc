@@ -5,6 +5,8 @@
 > This file is preserved as a dated implementation and verification history. Checkboxes below record the status claimed by each historical pack when it was written; they are not a second live TODO register. When an old pack conflicts with the Master Plan, use the Master Plan and refresh the implementation evidence before changing task status.
 
 ## 5 Nov ordered pack
+- [x] MT-0190: product page "How you pay" now lists the manual steps (QR/bank details at checkout, pay in NPR, upload screenshot/reference, verified then delivered); checkout is protected so it was left unchanged.
+- [x] MT-0192: gift card pages with a listing region show a region notice and a required confirm checkbox; add/buy is blocked with a message until ticked; protected cart/checkout unchanged.
 - [x] MT-0184: compact existing region, platform, delivery method and required customer details above desktop/mobile purchase actions; empty values omitted; Matrix design, protected files and listing data preserved; not published.
 - [x] MT-0183 Price/variant parity audit: page, cart and checkout already matched (same price_minor, variant.name, formatNpr); card "from" price now skips archived options like the product page. Not changed: cart WhatsApp text in protected cart.tsx uses its own number format.
 - [x] MT-0182: consistent Available now / Coming soon labels on product cards, options, pages and wishlist; catalog/category purchasable counts exclude upcoming and hidden-price records; coming-soon purchase actions remain disabled; rule tests and 390px checks passed; protected cart/checkout/product-help/router and existing data preserved; not published.
