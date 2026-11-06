@@ -21,10 +21,14 @@ describe("MT-0122 pre-fulfilment order-item snapshot", () => {
       "Zone ID": "9988",
       [ORDER_ITEM_SNAPSHOT_KEY]: {
         version: 1,
-        region: "Australia",
-        requiredFields: ["Mobile Legends user ID", "Zone ID", "Delivery email address"],
+        region: " Australia ",
+        requiredFields: ["Mobile Legends user ID", "Zone ID", " Delivery email address "],
       },
     });
+    const checklist = getPreFulfilmentChecklist(fields, " UC 325 ");
+    assert.equal(checklist.region, " Australia ");
+    assert.equal(checklist.selectedOption, " UC 325 ");
+    assert.deepEqual(checklist.requiredFields[2], { label: " Delivery email address ", value: "", missing: true });
   });
 
   test("rejects browser-supplied snapshot metadata and malformed product metadata", () => {
@@ -50,13 +54,13 @@ describe("MT-0122 pre-fulfilment order-item snapshot", () => {
     assert.equal(checklist.region, "Global");
     assert.equal(checklist.selectedOption, "UC 325");
     assert.deepEqual(checklist.requiredFields, [
-      { label: "PUBG Mobile player ID", value: "7654321", missing: false },
+      { label: "PUBG Mobile player ID", value: " 7654321 ", missing: false },
       { label: "Zone ID", value: "", missing: true },
       { label: "Server", value: "", missing: true },
       { label: "Delivery email address", value: "", missing: true },
     ]);
     assert.equal(checklist.missingRequiredCount, 3);
-    assert.deepEqual(checklist.capturedFields, [["PUBG Mobile player ID", "7654321"], ["Zone ID", ""]]);
+    assert.deepEqual(checklist.capturedFields, [["PUBG Mobile player ID", " 7654321 "], ["Zone ID", ""]]);
   });
 
   test("reports no missing fields when the saved product had no requirements", () => {

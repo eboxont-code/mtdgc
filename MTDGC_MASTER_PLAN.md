@@ -1378,7 +1378,7 @@ MT-0106 is completed in section 33. MT-0121 was reviewed and marked BLOCKED beca
 
 ### Focused verification
 
-- `node --experimental-strip-types --test src/lib/pre-fulfilment.test.ts` on Node `v22.16.0`: **6 passed, 0 failed**. Cases cover server-owned snapshot creation, reserved-key rejection, missing player/zone/server/email values, empty requirement sets, historical rows without snapshots and unknown snapshot versions.
+- Equivalent scratch Node 22.16 harness using the helper and same six assertions (with a Node-resolvable `.ts` import): **6 passed, 0 failed**. The repository test keeps the project-standard extensionless import for Bun; the exact Bun test command remains unavailable in this environment.
 - Strict helper typecheck passed with `tsc --noEmit --strict --noUncheckedIndexedAccess --noPropertyAccessFromIndexSignature --exactOptionalPropertyTypes --target ES2022 --module NodeNext --moduleResolution NodeNext src/lib/pre-fulfilment.ts`.
 - Full `bun run lint`, `bun run test`, `bun run typecheck` and `bun run build` were not run: Bun and a local MTDGC checkout/dependency tree are unavailable in this execution environment. The exact helper/test files were exercised in a scratch workspace; route/server integration has not been validated by the full project quality workflow.
 
@@ -1393,8 +1393,8 @@ MT-0106 is completed in section 33. MT-0121 was reviewed and marked BLOCKED beca
 
 - Work remains on `automation/mt-0104-order-transition-guard`, based on `main` SHA `1d948a818f056ec1ae1f630688070da6e8449fde`; before this task the branch was 39 commits ahead and 0 behind. The local working-tree status is unavailable because this environment has no MTDGC checkout.
 - The latest current-main Quality run `42251736215` passed install, lint, unit tests, typecheck and production build. It validates main SHA `1d948a818f056ec1ae1f630688070da6e8449fde`, not this working-branch commit.
-- The branch's existing combined Vercel status reports `failure` with the Hobby/free build-rate-limit target. No GitHub Actions run is configured for ordinary pushes to this non-main branch; the workflow runs on main pushes and pull requests. No PR was opened.
+- Git integration automatically created a preview for the task commit `b22c6b91807a7595320e9410f0a18ffa614e2c06`; it reached READY at `https://mtdgc-p5pteoa8u-boxont.vercel.app` with no production target. The GitHub Actions Quality workflow runs on main pushes and pull requests, so no branch workflow run exists; no PR was opened.
 - The latest observed production deployment remains READY on older commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`, not this working branch. Vercel reported no runtime errors in the preceding 24 hours.
-- No production order, customer record, payment record, database schema, storage policy, environment variable, billing setting or deployment was changed. No supplier or third party was contacted; no spend occurred.
+- No production order, customer record, payment record, database schema, storage policy, environment variable, billing setting or production deployment was changed. Vercel created an automatic preview for the working branch only; no production aliases were changed. No supplier or third party was contacted; no spend occurred.
 
 **Next P0 task:** MT-0123 — require a second confirmation for irreversible top-ups and code releases. Inspect the current checkout/category action paths and only classify actions supported by existing product data; do not invent supplier-side irreversibility or fulfilment rules.

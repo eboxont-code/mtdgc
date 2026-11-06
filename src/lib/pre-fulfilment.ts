@@ -39,7 +39,7 @@ function isStringArray(value: unknown): value is string[] {
 
 function normaliseRequiredFields(value: unknown): string[] {
   if (!isStringArray(value)) throw new Error("Product requirements are unavailable");
-  return [...new Set(value.map((field) => field.trim()).filter(Boolean))];
+  return [...new Set(value.filter((field) => field.trim().length > 0))];
 }
 
 export function hasReservedOrderItemField(fields: Record<string, string>): boolean {
@@ -65,7 +65,7 @@ export function buildOrderItemFieldsSnapshot(
 
   const snapshot: OrderItemSnapshot = {
     version: 1,
-    region: region.trim(),
+    region,
     requiredFields: normaliseRequiredFields(requirements),
   };
 
@@ -102,20 +102,20 @@ export function getPreFulfilmentChecklist(fields: unknown, variantName: unknown)
 
   const capturedFields = Object.entries(record)
     .filter(([key, value]) => key !== ORDER_ITEM_SNAPSHOT_KEY && typeof value === "string")
-    .map(([key, value]) => [key, (value as string).trim()] as [string, string]);
+    .map(([key, value]) => [key, value as string] as [string, string]);
 
   const requiredFields = snapshot
     ? snapshot.requiredFields.map((label) => {
         const raw = record[label];
-        const value = typeof raw === "string" ? raw.trim() : "";
-        return { label, value, missing: value.length === 0 };
+        const value = typeof raw === "string" ? raw : "";
+        return { label, value, missing: value.trim().length === 0 };
       })
     : [];
 
   return {
     snapshotStatus,
-    region: snapshot ? snapshot.region.trim() || null : null,
-    selectedOption: typeof variantName === "string" && variantName.trim() ? variantName.trim() : null,
+    region: snapshot ? (snapshot.region.trim() ? snapshot.region : null) : null,
+    selectedOption: typeof variantName === "string" && variantName.trim() ? variantName : null,
     requiredFields,
     capturedFields,
     missingRequiredCount: snapshot ? requiredFields.filter((field) => field.missing).length : null,
