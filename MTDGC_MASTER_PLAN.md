@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 1.2 · 6 November 2026
+**Version:** 1.3 · 6 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -126,7 +126,7 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** Every purchasable listing is accurate, available, region-labelled, priced and clear about the exact item the customer receives.
 
 - [x] **MT-0021 · P0 · DONE** — Reconcile the product records against the current database and public storefront. The 26 October snapshot recorded 26 entries and the 5 November snapshot recorded 36; classify every current record as orderable, coming soon, hidden, duplicate or obsolete and record the verified count before using it in public claims.
-- [ ] **MT-0022 · P0 · TODO** — Reconcile the homepage, catalog, category pages and product records so product counts and availability labels agree.
+- [x] **MT-0022 · P0 · DONE** — Reconcile the homepage, catalog, category pages and product records so product counts and availability labels agree. The shared availability counter now includes an unavailable bucket; category/product/catalog summaries and the catalog filter expose it. The production build is READY on `mtdgc.com` at commit `82ee56a8189b6808b9e9bf64487cd7e6f77361df`.
 - [ ] **MT-0023 · P0 · TODO** — Confirm the exact six products currently shown as available before advertising them as in stock.
 - [x] **MT-0024 · P0 · DONE** — Ensure coming-soon products cannot be purchased or accidentally enter checkout.
 - [ ] **MT-0025 · P0 · TODO** — For each orderable item, verify supplier, denomination, region, platform and delivery method.
@@ -535,12 +535,11 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | Order | Task | Status |
 |---:|---|---|
 | 1 | MT-0042 — record the real source of every code, top-up and subscription in the supplier register | BLOCKED; source evidence not present in repo/database |
-| 2 | MT-0022 — reconcile homepage, catalogue, category pages and product availability labels after the Netflix hold | TODO |
-| 3 | MT-0306 — validate Lovable sync compatibility, then choose branch-protection rules that will not block it | TODO |
-| 4 | Test one complete low-value Nepal order for each supported product family and document payment/fulfilment evidence | TODO; supplier source dependency |
-| 5 | Resolve seller identity, Nepal/Australia policy scope and the legal/payment boundary for Australia-to-Nepal gifting | TODO; owner/legal dependency |
-| 6 | Complete Boxont-owned Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED |
-| 7 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
+| 2 | MT-0306 — validate Lovable sync compatibility and select branch protection only if it will not block the connected editor | TODO; inspect before changing repository settings |
+| 3 | Test one complete low-value Nepal order for each supported product family and document payment/fulfilment evidence | TODO; supplier source dependency |
+| 4 | Resolve seller identity, Nepal/Australia policy scope and the legal/payment boundary for Australia-to-Nepal gifting | TODO; owner/legal dependency |
+| 5 | Complete Boxont-owned Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED |
+| 6 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -843,4 +842,46 @@ No dependencies were added and `bun.lock` was not changed. No production secrets
 ### Next independent engineering task
 
 MT-0306 remains TODO: verify Lovable's ability to sync to `main` under any proposed branch rules before enabling branch protection. Do not apply a protection rule that could block the connected Lovable workflow.
+
+
+
+## 20. Catalogue availability reconciliation after Netflix hold — 6 November 2026
+
+**Task:** MT-0022 · P0 · DONE  
+**Change:** Make every published catalogue summary account for products that are neither orderable nor coming soon, and expose an explicit unavailable filter.
+
+### Issue identified
+
+After MT-0282 placed Netflix on `temporarily_unavailable`, the published product remained correctly visible but the shared `availabilityCounts` helper counted only available and coming-soon products. As a result, summaries could report seven subscription listings, zero available and six coming soon without accounting for the seventh listing.
+
+### Implementation
+
+- Extended `src/lib/product-availability.ts` with `isUnavailable` and an `unavailable` count. The three counts now reconcile to the number of products passed to the helper.
+- Added the unavailable count to category detail pages, the category index, all-products page and catalog summary.
+- Added an explicit **Unavailable** choice to the catalog availability filter.
+- Kept product-card status labels tied to each actual product status; Netflix continues to display its temporarily unavailable state.
+- The homepage hero slide builder already filters its promotional slides to orderable product statuses, so the held Netflix listing is not promoted as an active hero offer. It remains visible in the relevant catalogue/category listing with its unavailable label.
+- Added a focused unit test for `out_of_stock` and `temporarily_unavailable` records, including the Netflix-style label and count reconciliation.
+
+### Verified current catalogue snapshot
+
+Read-only production database checks on 6 November 2026 confirm:
+
+| Category | Listed | Available now | Coming soon | Unavailable |
+|---|---:|---:|---:|---:|
+| Game Top-Ups | 6 | 4 | 2 | 0 |
+| Gift Cards | 12 | 1 | 11 | 0 |
+| Software | 11 | 0 | 11 | 0 |
+| Subscriptions | 7 | 0 | 6 | 1 |
+| **Total** | **36** | **5** | **30** | **1** |
+
+All 36 records are published; none are hidden or archived. The one unavailable product is Netflix Subscription, still held pending the MT-0282 supplier/account review.
+
+### CI and production verification
+
+- GitHub Actions run [`42206983140`](https://github.com/eboxont-code/mtdgc/actions/runs/42206983140) completed successfully: lint, unit tests, TypeScript typecheck and production build all passed.
+- The updated production deployment [`dpl_9oYeYAKTV3yEvabHj8msh1xjF7Qs`](https://vercel.com/boxont/mtdgc/9oYeYAKTV3yEvabHj8msh1xjF7Qs) is **READY**, sourced from `main` commit `82ee56a8189b6808b9e9bf64487cd7e6f77361df`, with `mtdgc.com` among its assigned aliases.
+- The public site HTML was not independently fetched in this audit because the available web/container routes returned cache/DNS access errors. The code paths, current production database records, successful CI run and Vercel deployment metadata were inspected directly; do not claim a browser-level regression test was performed.
+
+No product records, supplier assignments, prices, variants, order records, database schema or migration files were changed for MT-0022.
 
