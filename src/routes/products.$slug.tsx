@@ -163,9 +163,19 @@ function ProductPage() {
     ? availabilityLabel({ ...product, variants: [variant] })
     : availabilityLabel(product);
 
+  const regionText = product.region?.trim() ?? "";
+  const needsRegionConfirm = categoryTypeFromSlug(product.category?.slug ?? "") === "gift_card" && regionText.length > 0;
+  const [regionConfirmed, setRegionConfirmed] = useState(false);
+  const regionRef = useRef<HTMLInputElement>(null);
+
   const navigate = useNavigate();
   const addToCart = (buyNow = false) => {
     if (!variant || !orderable) return;
+    if (needsRegionConfirm && !regionConfirmed) {
+      setError(`Please confirm this code works in your ${regionText} account before continuing.`);
+      regionRef.current?.focus();
+      return;
+    }
     const missing = product.requirements.filter((requirement) => !(fields[requirement] ?? "").trim());
     if (missing.length) {
       setError(`Please fill in: ${missing.join(", ")}.`);
@@ -385,8 +395,29 @@ function ProductPage() {
                   </li>
                 ))}
               </ul>
-              <p className="mt-3 text-xs text-muted-foreground">You pay at checkout, after placing the order. Payment details are shown there.</p>
+              <ol aria-label="How manual payment works" className="mt-3 space-y-1.5 text-xs text-foreground/85">
+                <li className="flex gap-2"><span className="font-mono text-primary">1.</span><span>Place your order. Checkout then shows our QR code or bank details.</span></li>
+                <li className="flex gap-2"><span className="font-mono text-primary">2.</span><span>Pay the exact total in NPR, then upload your payment screenshot or transaction reference.</span></li>
+                <li className="flex gap-2"><span className="font-mono text-primary">3.</span><span>We check the payment by hand and deliver your order once it is verified.</span></li>
+              </ol>
             </section>
+
+            {orderable && needsRegionConfirm && (
+              <section aria-label="Region confirmation" className="mt-4 rounded-2xl border border-primary/40 bg-primary/5 p-4">
+                <p className="flex gap-2 text-sm"><Globe className="mt-0.5 size-4 shrink-0 text-primary" /><span>This code is for <strong>{regionText}</strong> accounts only. Codes for another region will not redeem and cannot be refunded once delivered.</span></p>
+                <label className="mt-3 flex min-h-11 cursor-pointer items-center gap-3 text-sm">
+                  <input
+                    ref={regionRef}
+                    type="checkbox"
+                    required
+                    checked={regionConfirmed}
+                    onChange={(e) => { setRegionConfirmed(e.target.checked); if (e.target.checked) setError(null); }}
+                    className="size-5 shrink-0 accent-primary"
+                  />
+                  <span>I confirm my account region is {regionText}.</span>
+                </label>
+              </section>
+            )}
 
             {error && <p role="alert" className="mt-4 text-sm text-destructive">{error}</p>}
 
