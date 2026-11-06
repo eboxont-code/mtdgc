@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 1.3 · 6 November 2026
+**Version:** 1.4 · 6 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -130,7 +130,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0023 · P0 · TODO** — Confirm the exact six products currently shown as available before advertising them as in stock.
 - [x] **MT-0024 · P0 · DONE** — Ensure coming-soon products cannot be purchased or accidentally enter checkout.
 - [ ] **MT-0025 · P0 · TODO** — For each orderable item, verify supplier, denomination, region, platform and delivery method.
-- [ ] **MT-0026 · P0 · TODO** — Show the exact product variant and amount in cart, checkout, confirmation and order history.
+- [x] **MT-0026 · P0 · DONE** — Verify the exact selected product variant and amount across cart, checkout, order confirmation and authenticated order history. Code-path audit completed 6 November 2026; evidence is recorded in section 21.
 - [ ] **MT-0027 · P0 · TODO** — Distinguish gift card face value from MTDGC selling price and any fees.
 - [ ] **MT-0028 · P1 · TODO** — Add consistent product attributes for region, currency, platform, validity, denomination and restrictions.
 - [ ] **MT-0029 · P1 · TODO** — Create separate templates for game top-ups, gift cards, subscriptions and software licences.
@@ -481,7 +481,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0303 · P0 · BLOCKED** — Complete the move to Boxont-controlled Supabase only after the target project, backup/restore, schema, data, auth, storage, RLS, grants, functions, secrets and migration-history plan are verified. Do not run the held migrations on the existing project.
 - [ ] **MT-0304 · P0 · BLOCKED** — Reconcile the held backend PR #1 against current `main` after the Supabase cutover; inspect migrations 0010–0017, regenerate Drizzle snapshots, validate migration order and permissions, and run full build and tests before merge or deployment.
 - [x] **MT-0305 · P1 · DONE** — Add explicit package scripts for the existing `src/lib/*.test.ts` tests and TypeScript checking; add a free GitHub Actions quality workflow for install, lint, test, typecheck and production build. Verified on 6 November 2026: GitHub Actions run `42205681370` passed lint, 12 tests across 4 files, `tsc --noEmit`, and the production Vite/Nitro build. The test/typecheck/build verification ran on the hosted CI runner; the agent's local container did not have Bun installed. Lint intentionally disables only the Prettier rule because the existing repository has widespread formatting drift; no mass reformat was applied.
-- [ ] **MT-0306 · P1 · TODO** — Protect `main` with pull-request review and required passing quality checks after the workflow is proven; do not make branch-protection settings that block Lovable sync without validating the integration first.
+- [!] **MT-0306 · P1 · BLOCKED** — Protect `main` with pull-request review and required passing quality checks only after Lovable sync is proven. On 6 November 2026, the private-repository rulesets API returned an explicit GitHub Pro upgrade requirement; the GitHub branch-protection read endpoint was unavailable to the connected integration (403). GitHub's current documentation also lists GitHub Pro as required for protected branches in private repositories. The $0 additional-spend constraint rules out upgrading. Lovable's MTDGC project `latest_commit_sha` matched the inspected `main` HEAD `86eebd496b6f9a8d056fba890ea818eeab8af33f`, confirming the current direct-sync state is aligned, but no protected-branch bypass or sync test is available. Do not enable PR-only or required-review rules until a no-cost supported route and Lovable bypass behavior can be verified. No repository protection setting was changed.
 - [x] **MT-0307 · P1 · DONE** — Audit `redesign-matrix`: Git comparison shows zero commits ahead of `main` and 129 behind, with no unique branch commits to salvage. Leave the stale branch untouched until deliberate branch cleanup is approved.
 - [x] **MT-0308 · P1 · DONE** — Make `MTDGC_MASTER_PLAN.md` the single active task/status source, document the roadmap as dated implementation history, and update the README to point to the canonical plan. Evidence: README commit `e4138f950db65b96265b8ade29a4880712164dc3`; roadmap navigation note recorded in the current audit update.
 
@@ -535,7 +535,7 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | Order | Task | Status |
 |---:|---|---|
 | 1 | MT-0042 — record the real source of every code, top-up and subscription in the supplier register | BLOCKED; source evidence not present in repo/database |
-| 2 | MT-0306 — validate Lovable sync compatibility and select branch protection only if it will not block the connected editor | TODO; inspect before changing repository settings |
+| 2 | MT-0306 — protect `main` only if GitHub branch rules can coexist with Lovable direct sync | BLOCKED; private branch protection requires a paid GitHub plan, which conflicts with the $0 constraint; integration cannot inspect protection settings |
 | 3 | Test one complete low-value Nepal order for each supported product family and document payment/fulfilment evidence | TODO; supplier source dependency |
 | 4 | Resolve seller identity, Nepal/Australia policy scope and the legal/payment boundary for Australia-to-Nepal gifting | TODO; owner/legal dependency |
 | 5 | Complete Boxont-owned Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED |
@@ -841,7 +841,7 @@ No dependencies were added and `bun.lock` was not changed. No production secrets
 
 ### Next independent engineering task
 
-MT-0306 remains TODO: verify Lovable's ability to sync to `main` under any proposed branch rules before enabling branch protection. Do not apply a protection rule that could block the connected Lovable workflow.
+MT-0306 was assessed on 6 November 2026 and is now BLOCKED: Lovable's current project SHA matches GitHub `main`, but private branch protection requires a paid GitHub plan and the connected integration cannot verify protection/bypass settings. See section 21. Do not change repository protection settings.
 
 
 
@@ -884,4 +884,37 @@ All 36 records are published; none are hidden or archived. The one unavailable p
 - The public site HTML was not independently fetched in this audit because the available web/container routes returned cache/DNS access errors. The code paths, current production database records, successful CI run and Vercel deployment metadata were inspected directly; do not claim a browser-level regression test was performed.
 
 No product records, supplier assignments, prices, variants, order records, database schema or migration files were changed for MT-0022.
+
+
+
+## 21. Lovable sync / branch-protection assessment and variant display audit — 6 November 2026
+
+### MT-0306 · P1 · BLOCKED — Branch protection
+
+**Current sync evidence**
+- GitHub repository: `eboxont-code/mtdgc`, default branch `main`.
+- GitHub `main` HEAD inspected from the recursive tree: `86eebd496b6f9a8d056fba890ea818eeab8af33f`.
+- Lovable project `Mtdgc` (project ID `f63ad948-8fb1-42cb-8c2e-7d2f017688e1`) reported `latest_commit_sha` as the exact same SHA. This confirms the connected project is currently aligned with the repository's `main` head.
+- `AGENTS.md` states that commits pushed to the connected branch sync back to Lovable and appear in the editor. The existing workflow therefore relies on pushes to the connected branch.
+
+**Protection constraints**
+- The GitHub branch-protection read request returned HTTP 403 from the connected integration, so current protection settings and any app-specific bypass permissions could not be independently inspected.
+- The repository rulesets endpoint returned GitHub's explicit message: upgrade to GitHub Pro or make the repository public. GitHub's current protected-branch documentation says private-repository branch protection requires GitHub Pro, Team or Enterprise: https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches
+- MTDGC is private and the project constraint is $0 additional spend. No plan upgrade or paid service is acceptable without a change to that constraint.
+- Requiring pull requests/reviews or limiting direct pushes could interrupt Lovable's existing direct-sync workflow. No bypass behavior was proven.
+
+**Decision:** Keep the current connected-branch workflow unchanged. Do not enable PR-only rules, mandatory reviews, or required checks on `main` unless a no-cost supported protection route and Lovable's bypass/sync behavior can first be verified. No GitHub settings were changed. This task remains BLOCKED rather than treating a paid upgrade or unverified protection configuration as complete.
+
+### MT-0026 · P0 · DONE — Exact variant and amount across the order journey
+
+**Code-path evidence inspected on `main` commit `86eebd496b6f9a8d056fba890ea818eeab8af33f`:**
+- `src/lib/cart.tsx`: cart lines retain the selected SKU, product name, variant name and price; cart subtotal is calculated from unit price × quantity.
+- `src/components/cart-drawer.tsx`: displays product name, variant name, unit price and line subtotal.
+- `src/routes/cart.tsx`: displays product name, selected variant, region, quantity controls and line total.
+- `src/routes/checkout.tsx`: checkout review displays product name, variant name, quantity and line amount before order submission.
+- `src/lib/orders.functions.ts`: the server resolves each submitted SKU against the current database variant, uses the database's product/variant names and price (not the client-supplied price), and stores `variant_name`, `unit_price_minor` and `line_total_minor` on each order item. `listMyOrders` returns the saved variant and line amount.
+- `src/routes/order.$orderNumber.tsx`: the order confirmation/detail page displays quantity, saved product + variant name and line amount.
+- `src/routes/_authenticated/orders.tsx`: authenticated order history displays the saved variant name, quantity and line amount.
+
+**Verification boundary:** This was a source-code path audit, not a live checkout or payment test. No order was created, no payment was submitted, and no production records were changed. The separate low-value end-to-end supplier/order test remains dependent on verified supply and operational evidence.
 
