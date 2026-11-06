@@ -530,7 +530,7 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-Only one numbered task is marked **IN PROGRESS**. Task statuses in the 308-task register are authoritative.
+No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-task register are authoritative.
 
 | Order | Task | Status |
 |---:|---|---|
