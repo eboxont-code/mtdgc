@@ -534,8 +534,8 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 
 | Order | Task | Status |
 |---:|---|---|
-| 2 | MT-0282 — resolve the exact Netflix/subscription fulfilment method and pause unsupported offers | TODO |
-| 3 | MT-0041–0046 — verify supplier legitimacy, resale rights, region, denomination and delivery evidence | TODO |
+| 1 | MT-0282 — resolve the exact Netflix/subscription fulfilment method and pause unsupported offers | TODO |
+| 2 | MT-0041–0046 — verify supplier legitimacy, resale rights, region, denomination and delivery evidence | TODO |
 | 4 | Test one complete low-value Nepal order for each live product family and document payment/fulfilment evidence | TODO |
 | 5 | Resolve seller identity, Nepal/Australia policy scope and the legal/payment boundary for Australia-to-Nepal gifting | TODO |
 | 6 | Complete Boxont-owned Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED |
