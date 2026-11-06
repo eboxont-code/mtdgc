@@ -203,8 +203,8 @@ Do not set numerical targets until a reliable baseline exists.
 - [x] **MT-0081 · P0 · DONE** — Audit completed against the current application code, production schema/data snapshot, storage configuration and access policies. Findings and follow-up gaps are recorded in section 24; this completes the audit task, not a claim that all payment controls are secure.
 - [x] **MT-0082 · P0 · DONE** — Generate new order references with 128 bits of cryptographic randomness, retain the database UNIQUE constraint as the collision guard, and keep legacy tracking formats working. Evidence: section 25; CI run `42241329123` passed lint, tests, typecheck and production build; Vercel deployment for code commit `d81e1fc51ed2e1203defb63ec6a71dbcd21e889b` reached READY.
 - [x] **MT-0083 · P0 · DONE** — Bind payment-proof authorization and storage/database association to the server-resolved order. Shared order-access helpers now cover access-token, authenticated-owner and rate-limited contact checks; proof storage path, order ID, transaction reference and amount are derived from the resolved order, not client-supplied identifiers. Four focused tests and the full quality workflow passed. Evidence and the separate production deployment blocker are recorded in section 26.
-- [ ] **MT-0084 · P0 · TODO** — Validate uploaded proof file type, size and content handling.
-- [ ] **MT-0085 · P0 · TODO** — Restrict payment-proof access to the customer who owns the order and authorised staff.
+- [!] **MT-0084 · P0 · BLOCKED** — Existing handler enforces a 5 MiB limit and MIME/signature matching, but only checks leading magic bytes; it does not decode or fully validate image containers. No server-side image decoder is present in `bun.lock`, and this run has no local Bun runtime to add/lock and test one. Evidence and exact blocker: section 27.
+- [x] **MT-0085 · P0 · DONE** — Verified the live `payment_proofs` and `storage.objects` RLS policies: both tables have RLS enabled; only authenticated order owners (`orders.user_id = auth.uid()`) or users with the `admin` role can read proof rows/objects; the bucket is private; the only application signed-URL endpoint is admin-middleware plus `assertAdmin` protected. Anonymous/public access is not granted. Guest customers cannot directly read stored proofs; retain this restrictive behaviour unless a separately approved token-gated guest access design is implemented. Evidence: section 28.
 - [ ] **MT-0086 · P0 · TODO** — Prevent fulfilment until payment is independently matched to the correct amount and order.
 - [ ] **MT-0087 · P0 · TODO** — Prevent the same transaction reference or screenshot from being accepted for multiple orders.
 - [ ] **MT-0088 · P1 · TODO** — Show exact payment amount, account details, expiry window and reference instructions on the order page.
@@ -1123,3 +1123,33 @@ A safe completion requires a maintained server-side image decoder/parser already
 - Open PR #1 remains explicitly held until the Boxont-controlled Supabase move; it was not changed.
 
 **Next P0 task to inspect:** MT-0085 — restrict payment-proof access to the customer who owns the order and authorised staff. First inspect all signed-URL/read paths and compare them with the existing private-bucket policy. Do not alter production RLS or storage configuration; if the missing guest-access design requires a new policy or migration, record that exact dependency and continue to the next independent task.
+
+
+## 28. Payment-proof access control verification — 7 November 2026
+
+**Task:** MT-0085 · P0 · DONE — existing production RLS and application access boundaries were verified read-only; no policy change was necessary for the authenticated-customer/admin access model.
+
+### Production schema and policy evidence
+
+- Supabase project `mtdgc` (`eaomkkswslqtfunkceuc`) was inspected with read-only SQL.
+- `public.payment_proofs` has row-level security enabled. Its only SELECT policy is `Owner or admin read proofs`, scoped to authenticated users and allows a row only when a linked order has `orders.user_id = auth.uid()` or `has_role(auth.uid(), 'admin')` is true. No anonymous SELECT policy was present.
+- `storage.objects` has row-level security enabled. The `Payment proofs owner or admin read` SELECT policy is scoped to the private `payment-proofs` bucket and allows reads only for an admin or an authenticated user whose ID matches the `user_id` of the order ID encoded as the first storage folder segment.
+- The `payment-proofs` bucket is private (`public = false`) with a 5 MiB storage limit.
+- `src/lib/admin.functions.ts` exposes `getPaymentProofUrl` only behind `requireSupabaseAuth` and `assertAdmin`; it selects the proof path by proof ID and returns a 5-minute signed URL. The staff queue is also admin protected.
+- The customer-facing order route does not expose a proof URL. The guest access-token/contact flow permits order viewing and proof submission, but does not grant direct proof-object read access.
+
+### Scope and limitation
+
+- Authenticated customers can read only proof rows/objects associated with their own account-owned orders; admins can read proofs for operational verification.
+- Anonymous users and guest-order holders have no direct proof read policy. This is intentionally restrictive and does not leak proof images. Do not add a guest signed-URL path without an explicit design for validating the guest order token/contact on every request and short-lived URL issuance.
+- This task verifies the existing access controls; it does not claim guest customers can view their uploaded screenshot.
+
+### Verification
+
+- Read-only policy query: `pg_policies` for `public.payment_proofs` and `storage.objects`.
+- Read-only RLS query: `pg_class.relrowsecurity` confirmed RLS enabled on both tables.
+- Read-only bucket query: `storage.buckets` confirmed `payment-proofs` is private and limited to 5 MiB.
+- Source inspection: `src/lib/admin.functions.ts` confirmed both the proof queue and signed-URL function require authenticated admin authorization.
+- No production writes, RLS changes, storage changes, signed URLs, migrations, application changes or deployments were performed. Automated test/lint/typecheck/build were not applicable because no code changed.
+
+**Next P0 task:** MT-0086 — prevent fulfilment until payment is independently matched to the correct amount and order. Inspect the current order-status transition functions and proof-verification flow. Do not change production data or merge/deploy the held backend branch.
