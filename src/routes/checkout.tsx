@@ -13,9 +13,23 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useCart } from "@/lib/cart";
 import { formatNpr, SITE_URL } from "@/lib/format";
 import { enabledProviders } from "@/lib/payments";
+import {
+  ORDER_DETAILS_CONFIRMATION_REQUIRED_MESSAGE,
+  requiresOrderDetailsConfirmation,
+} from "@/lib/order-confirmation";
 import { Check, ChevronDown, Lock, QrCode, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/checkout")({
@@ -57,6 +71,7 @@ function CheckoutPage() {
   const [errors, setErrors] = useState<Errors>({});
   const [sending, setSending] = useState(false);
   const [placeError, setPlaceError] = useState<string | null>(null);
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [placed, setPlaced] = useState<{ orderNumber: string; totalMinor: number; lines: typeof lines } | null>(null);
   const formRef = useRef<HTMLDivElement>(null);
   const restored = useRef(false);
@@ -136,7 +151,7 @@ function CheckoutPage() {
     formRef.current?.focus({ preventScroll: true });
   };
 
-  const submitOrder = async () => {
+  const submitOrder = async (detailsConfirmed = false) => {
     if (sending) return;
     const e = { ...validateContact(), ...validateDelivery() };
     if (Object.keys(e).length) {
@@ -157,6 +172,7 @@ function CheckoutPage() {
           note: note.trim(),
           bearer: sess.session?.access_token,
           lines: lines.map((l) => ({ sku: l.sku, quantity: l.quantity, fields: l.fields ?? {} })),
+          detailsConfirmed,
         },
       });
       const tokenKey = `mtdgc-order-${result.orderNumber.toUpperCase()}`;
@@ -166,8 +182,13 @@ function CheckoutPage() {
       clear();
       setStep(3);
       window.scrollTo({ top: 0 });
-    } catch {
-      setPlaceError("We could not save your order. Please check your connection and try again.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message.includes(ORDER_DETAILS_CONFIRMATION_REQUIRED_MESSAGE)) {
+        setConfirmationOpen(true);
+      } else {
+        setPlaceError("We could not save your order. Please check your connection and try again.");
+      }
     } finally {
       setSending(false);
     }
@@ -183,6 +204,8 @@ function CheckoutPage() {
   });
 
   const shownLines = placed?.lines ?? lines;
+  const confirmationLines = lines.filter((line) => requiresOrderDetailsConfirmation([line]));
+  const detailsToConfirm = confirmationLines.length > 0 ? confirmationLines : lines;
   const itemCount = shownLines.reduce((sum, line) => sum + line.quantity, 0);
   const totalMinor = placed?.totalMinor ?? subtotalMinor;
   const provider = enabledProviders()[0];
@@ -247,10 +270,18 @@ function CheckoutPage() {
     </ul>
   );
 
+  const requestPlaceOrder = () => {
+    if (requiresOrderDetailsConfirmation(lines)) {
+      setConfirmationOpen(true);
+      return;
+    }
+    void submitOrder(false);
+  };
+
   const primaryAction =
     step === 0 ? { label: "Continue to payment", onClick: next, disabled: false }
     : step === 1 ? { label: "Review order", onClick: next, disabled: false }
-    : step === 2 ? { label: sending ? "Placing your order" : placeError ? "Try again" : "Place order", onClick: submitOrder, disabled: sending }
+    : step === 2 ? { label: sending ? "Placing your order" : placeError ? "Try again" : "Place order", onClick: requestPlaceOrder, disabled: sending }
     : null;
 
   const contactText = (
@@ -412,7 +443,7 @@ function CheckoutPage() {
                     {totals}
                     {note.trim() && <p className="mt-3 text-xs text-muted-foreground">Note: {note}</p>}
                     {placeError && <p role="alert" className="mt-3 text-sm text-destructive">{placeError}</p>}
-                    <Button size="lg" className="mt-4 hidden w-full md:flex" disabled={sending} onClick={submitOrder}>
+                    <Button size="lg" className="mt-4 hidden w-full md:flex" disabled={sending} onClick={requestPlaceOrder}>
                       {sending ? "Placing your order" : placeError ? "Try again" : "Place order"}
                     </Button>
                     <p className="mt-3 text-xs text-muted-foreground">By placing the order you agree to our <Link to="/policies/terms" className="text-primary underline-offset-2 hover:underline">terms</Link> and <Link to="/policies/refunds" className="text-primary underline-offset-2 hover:underline">refund policy</Link>. No card payments are taken on this site.</p>
@@ -476,6 +507,47 @@ function CheckoutPage() {
           </div>
         </div>
       )}
+      <AlertDialog open={confirmationOpen} onOpenChange={setConfirmationOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm your delivery details</AlertDialogTitle>
+            <AlertDialogDescription>
+              Double-check game/player identifiers for top-ups and the delivery email and region for gift cards.
+              Your order will be submitted with the exact values shown below. If anything is wrong, go back and edit
+              your details before placing the order.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="max-h-64 space-y-3 overflow-y-auto">
+            {detailsToConfirm.map((line) => (
+              <section key={line.sku} className="rounded-xl border border-border bg-background/50 p-3 text-sm">
+                <p className="font-display font-semibold">{line.productName}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {isGiftCardCategory(line.categorySlug) ? "Face value / denomination" : "Selected option"}: {line.variantName} · Qty {line.quantity}
+                </p>
+                {line.region && <p className="mt-1 text-xs text-muted-foreground">Region: {line.region}</p>}
+                {Object.entries(line.fields ?? {}).length > 0 ? (
+                  <dl className="mt-2 space-y-1">
+                    {Object.entries(line.fields ?? {}).map(([label, value]) => (
+                      <div key={label} className="flex flex-wrap gap-x-2 text-xs">
+                        <dt className="text-muted-foreground">{label}:</dt>
+                        <dd className="break-all font-medium">{value.trim() ? value : "Not entered"}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                ) : (
+                  <p className="mt-2 text-xs text-muted-foreground">No additional delivery details were saved for this item.</p>
+                )}
+              </section>
+            ))}
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Go back and edit</AlertDialogCancel>
+            <AlertDialogAction disabled={sending} onClick={() => { void submitOrder(true); }}>
+              Confirm details &amp; place order
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <SiteFooter />
     </div>
   );
