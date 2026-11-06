@@ -79,30 +79,4 @@ export function categoryTypeFromSlug(slug: string): keyof typeof PRODUCT_TYPE_LA
 
 export const SITE_URL = "https://mtdgc.com";
 
-export const ORDER_STEPS: Array<{ title: string; body: string; statuses: string[] }> = [
-  { title: "Payment received", body: "We have your payment screenshot and will check it against our account.", statuses: ["payment_submitted", "paid"] },
-  { title: "Verified", body: "Your payment matched and the order is confirmed.", statuses: ["verified"] },
-  { title: "Processing", body: "We are preparing your key, account details or code.", statuses: ["processing"] },
-  { title: "Delivered", body: "Your order has been delivered to your order page and email.", statuses: ["delivered", "fulfilled", "completed"] },
-];
-
-export const ORDER_NOTICE: Record<string, string> = {
-  pending: "Waiting for payment.",
-  pending_payment: "Waiting for payment.",
-  rejected: "We could not match the payment. See the note and upload a new proof if asked.",
-  cancelled: "This order was cancelled.",
-  refunded: "This order was refunded.",
-};
-
-export function orderStepIndex(status: string): number {
-  return ORDER_STEPS.findIndex((step) => step.statuses.includes(status));
-}
-
-/** Latest time an order entered any status belonging to the given step. */
-export function stepTime(stepIndex: number, events: Array<{ status: string; at: string }>): string | null {
-  const step = ORDER_STEPS[stepIndex];
-  if (!step) return null;
-  const times = events.filter((e) => step.statuses.includes(e.status)).map((e) => e.at).sort();
-  const last = times[times.length - 1];
-  return last ? new Date(last).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }) : null;
-}
+export { ORDER_NOTICE, ORDER_STATUS_LABELS, ORDER_STEPS, orderStatusLabel, orderStepIndex, stepTime } from "./order-status";
