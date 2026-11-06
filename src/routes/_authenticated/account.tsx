@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { formatNpr, SITE_URL } from "@/lib/format";
+import { orderStatusLabel } from "@/lib/order-status";
 
 export const Route = createFileRoute("/_authenticated/account")({
   head: () => ({
@@ -155,7 +156,7 @@ function AccountPage() {
                   <div>
                     <p className="font-display text-sm font-medium">{order.order_number}</p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(order.created_at).toLocaleDateString()} · {order.status}
+                      {new Date(order.created_at).toLocaleDateString()} · {orderStatusLabel(order.status)}
                     </p>
                   </div>
                   <span className="font-display text-sm">{formatNpr(order.total_minor)}</span>
