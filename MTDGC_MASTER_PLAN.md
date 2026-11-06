@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.5 · 7 November 2026
+**Version:** 2.6 · 7 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -229,7 +229,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [x] **MT-0102 · P0 · DONE** — Defined the factual meaning of `payment_submitted`, legacy/manual `paid`, manually reviewed `verified`, staff-set `processing` and staff-marked `delivered`, explicitly distinguishing proof submission/review from independent settlement and delivery evidence. Evidence: section 30.
 - [!] **MT-0103 · P0 · BLOCKED** — The live `public.order_status` enum already contains `cancelled`, `failed` and `refunded`, but it has no `action_required` value. Adding a persisted action-required state requires a schema migration, and the repository explicitly holds migrations until the Boxont-controlled Supabase cutover; no approved cutover target/window is available. The owner must also approve which customer actions (for example, missing player details or delivery-email correction) create/clear this state and what terminal-state/refund handling means. Do not invent the workflow or write directly to production. Existing terminal values remain for legacy compatibility; generic admin updates no longer expose cancellation/refund until dedicated workflows are approved. Evidence: sections 29–31.
 - [x] **MT-0104 · P0 · DONE** — Enforced the generic admin fulfilment path server-side: only `verified` → `processing` and `processing` → `delivered` are accepted; the update uses a compare-and-swap status predicate to reject concurrent/stale transitions. Admin list/detail selectors expose only valid next states. Payment decisions remain in `reviewPayment`; generic edits cannot set legacy `paid`, `verified`, `rejected`, `cancelled` or `refunded`. Evidence and limits: section 31.
-- [ ] **MT-0105 · P0 · TODO** — Verify guest order tracking requires the order number plus the matching email or phone.
+- [x] **MT-0105 · P0 · DONE** — Require both a supported current/legacy order reference and a valid matching email or phone in the public tracking lookup; enforce the same contact validator in browser and server, preserve order-scoped hash/email matching and return generic not-found for mismatched pairs. Rate-limit database errors now fail closed. Evidence and concurrency limitation: section 32.
 - [ ] **MT-0106 · P0 · TODO** — Ensure account order history and guest tracking show the same canonical status.
 - [ ] **MT-0107 · P1 · TODO** — Record a timestamp and actor for every status transition.
 - [ ] **MT-0108 · P1 · TODO** — Show customers what happens next at each stage and whether they need to act.
@@ -531,17 +531,17 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 ## 10. Immediate next actions
 
 No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-task register are authoritative.
-
 | Order | Task | Status |
 |---:|---|---|
-| 1 | MT-0045 — test one low-value transaction per supplier/product family | BLOCKED; no identified/verified supplier or product scope; a real transaction and fulfilment would require external evidence and spend |
-| 2 | MT-0046 — document supplier delivery times, cut-off, failure process and escalation | BLOCKED; no supplier identity or documented operational terms/contact |
-| 3 | MT-0061–MT-0063 — build landed cost and order-level gross margin from source costs | BLOCKED; supplier costs, dated FX, payment/settlement fees, refunds and variable fulfilment/support costs are absent |
-| 4 | MT-0064 — approve minimum contribution-margin floor | BLOCKED; business-owner decision required |
-| 5 | MT-0065 — enforce a current-price/margin gate at checkout | BLOCKED; depends on the approved floor and trusted cost/price-expiry data; schema changes remain behind the Supabase cutover |
-| 6 | MT-0081 — audit the current QR and bank-transfer payment flow | TODO; next independent P0 task after the supplier and pricing blockers |
-| 7 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
-| 8 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
+| 1 | MT-0045 — low-value test per supplier/product family | BLOCKED; no identified/verified supplier or product scope, and a real transaction would require external evidence and spend |
+| 2 | MT-0046 — supplier delivery times, cut-off, failure process and escalation | BLOCKED; no supplier identity or documented operational terms/contact |
+| 3 | MT-0061–MT-0065 — landed cost, margin and checkout price gate | BLOCKED; supplier costs, dated FX, settlement fees and variable costs are absent; margin floor requires owner approval |
+| 4 | MT-0084 — full payment-image content validation | BLOCKED; no server-side decoder is locked and no local Bun runtime is available to add, lock and test one |
+| 5 | MT-0086 — independent payment settlement verification | BLOCKED; no gateway callback, bank-statement import, settlement feed or owner-approved receipt/reconciliation evidence is available |
+| 6 | MT-0087 — duplicate transaction-reference prevention | BLOCKED; production has no unique transaction-reference index; a concurrency-safe constraint requires a reviewed migration after Supabase cutover |
+| 7 | MT-0103 — action-required/cancellation/refund workflow | BLOCKED; exact customer triggers and terminal/refund handling require owner approval, and adding a persisted state requires the held migration gate |
+| 8 | MT-0106 — canonical status consistency between account history and guest tracking | NEXT ACTIONABLE P0; source-level comparison can be completed without production data or schema changes |
+| 9 | MT-0303/MT-0304 — Supabase cutover and held backend PR reconciliation | BLOCKED; target project, backup/restore, auth/storage/RLS/secrets and migration-history plan are not verified; PR #1 explicitly remains on HOLD |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -1279,4 +1279,42 @@ MT-0103 is BLOCKED by the missing action-required workflow definition and the he
 - Application server actions and both admin UI entry points now share the same transition guard. Database-level enforcement remains a separate release-gated task because production has no transition trigger and schema changes are held until the Supabase cutover.
 - `cancelled`, `failed` and `refunded` remain enum values; a dedicated action-required workflow is not defined. MT-0103 is BLOCKED until the owner approves the exact action-required triggers/clearance and terminal/refund workflow, and the Boxont-controlled Supabase migration target is approved.
 
-**Next P0 task:** MT-0105 — verify guest order tracking requires both the order number and matching email or phone, with negative tests for mismatched pairs. Do not create production test orders or weaken rate limiting.
+**Next P0 task:** MT-0106 — ensure authenticated account order history and public guest tracking show the same canonical status labels and operational meaning. Do not create production test orders.
+
+
+## 32. Guest order tracking contact verification — 7 November 2026
+
+**Task:** MT-0105 · P0 · DONE — public tracking now requires both a supported order reference and a valid contact value, with the same validation used by the browser and server.
+
+### Implementation
+
+- Added \`isValidOrderLookupContact\` in \`src/lib/order-access.ts\` and use it in both \`src/routes/track-order.tsx\` and the public \`lookupOrder\` server-function input validator. A contact must be a valid email-shaped value or contain 7–15 digits after phone formatting characters are removed.
+- The server also applies \`isSupportedOrderReference\`, preserving the current 128-bit \`MT\` + 32-hex format and supported legacy formats. Direct server-function calls cannot bypass the UI's order-reference/contact format checks.
+- \`lookupOrder\` requires both fields. It resolves the order by its reference and only returns the summary if the same order's \`verification_hash\` matches the reference + normalised contact, or the saved \`guest_email\` matches case-insensitively. Wrong order/contact pairs and unknown orders receive the same generic not-found response; the response does not include saved contact values or hashes.
+- When checkout saved both phone and email, the verification hash uses the primary phone (phone takes precedence); the saved-email comparison also allows that customer's email to be used for tracking. Phone formatting is normalised to digits only; no country code is guessed or added.
+- The existing per-derived-IP limit remains 10 attempts per 10 minutes. The handler now fails closed with an unavailable response if the attempt-count query or attempt insert fails, and the UI displays a temporary-service error rather than a false not-found message.
+- The attempt counter still uses a count-then-insert sequence, which is not atomic under concurrent requests. A database-atomic limiter would require a reviewed RPC/migration after the Supabase cutover; this run did not change production schema or weaken the existing limit.
+
+### Regression tests and verification
+
+- Added two tests for the shared contact validator: valid email/phone formats and missing, malformed or out-of-range values.
+- Existing order-access tests continue to cover matching phone/email, wrong order number, cross-order contact mismatch, unauthenticated/other-account access and proof association.
+- Existing order-reference tests cover the current 128-bit format, supported legacy formats and malformed references.
+- Focused Node \`v22.16.0\` scratch-harness results using TypeScript type stripping: \`src/lib/order-access.test.ts\` **6 passed, 0 failed**; \`src/lib/order-reference.test.ts\` **4 passed, 0 failed**. Total **10 passed, 0 failed**.
+- Global TypeScript strict check of the two changed pure helper modules (\`order-access.ts\` and \`order-reference.ts\`) passed.
+- The environment has Node and global TypeScript but no Bun and no local repository checkout/dependency tree. Full \`bun run lint\`, full \`bun run test\`, project \`bun run typecheck\` and \`bun run build\` were **not run**. The GitHub workflow-run lookup for the exact branch commit returned no workflow runs (the available wrapper only returns PR-triggered runs); no PR was opened because the Vercel Git integration can automatically create a preview.
+
+### Production schema and access evidence (read-only)
+
+- The production \`orders\` table has non-null \`order_number\` and \`verification_hash\`, nullable \`user_id\`, \`guest_email\`, \`guest_phone\` and \`access_token_hash\`.
+- \`order_lookup_attempts\` has non-null \`ip_hash\` and \`created_at\`, RLS enabled, no direct role policies, and index \`order_lookup_attempts_ip_time\` on \`(ip_hash, created_at)\`. The server-side lookup uses the existing server-only Supabase admin client.
+- No production order was created, read by identifier, updated or deleted for this task. No customer contact values were queried. Only column metadata, RLS flags, policy metadata and index definitions were inspected.
+
+### CI, deployment and repository state
+
+- \`main\` HEAD observed: \`1d948a818f056ec1ae1f630688070da6e8449fde\`. Work remains on \`automation/mt-0104-order-transition-guard\`, which was 19 commits ahead and 0 behind \`main\` before this task's commits; it is not merged and no PR was opened.
+- GitHub combined status for \`main\` and the final task code commit reports Vercel \`failure\` with the Hobby/free build-rate-limit target. This is not a passing quality check. No GitHub Actions workflow run was returned for the exact code commit.
+- Vercel has no deployment record for the task code commit. The latest observed production deployment remains READY but is sourced from intermediate commit \`779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7\`, not this working branch. Vercel reported no runtime errors in the preceding 24 hours.
+- Open PR #1 remains explicitly held until the Boxont-controlled Supabase move; no open issues were returned. No production deployment, migration, billing change, paid service, third-party contact or production data write occurred.
+
+**Next P0 task:** MT-0106 — compare the canonical status wording and display logic in authenticated order history, guest tracking and the order-detail route; consolidate only the shared presentation logic while preserving existing status meanings and legacy aliases.
