@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 1.5 · 6 November 2026
+**Version:** 1.6 · 6 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -931,7 +931,7 @@ No product records, supplier assignments, prices, variants, order records, datab
 
 ### Implementation
 - Product detail labels each gift-card option as Face value and its NPR amount as MTDGC selling price.
-- Product summary, mobile buy bar, product cards, cart drawer, cart, checkout, guest order page, order tracking and authenticated order history use explicit face-value / selling-price labels for gift-card items.
+- Product summary, denomination selector and mobile buy bar distinguish face value from MTDGC selling price. Product cards label their starting amount as an MTDGC price. Cart drawer, cart, checkout, guest order page, order tracking and authenticated order history show the gift-card face value and NPR selling price separately.
 - Gift-card disclosure states that the NPR amount is MTDGC’s selling price, that checkout adds no separate MTDGC fee in the current implementation, and that a bank/payment provider may charge separately.
 - Admin variant editing instructs the operator to enter the issuer denomination and currency in the option name (for example, USD 10 Card) and keep the NPR price as MTDGC’s selling price.
 - Added unit tests for gift-card category classification and required disclosure wording.
@@ -939,4 +939,7 @@ No product records, supplier assignments, prices, variants, order records, datab
 ### Verification boundary
 - This is a code/UI clarification using existing records only. No product price, denomination, fee, stock flag, supplier record or production database row was changed.
 - No supplier denomination or resale authority was verified. The existing option name is displayed as supplied; it is not treated as independently verified issuer evidence.
-- No checkout was submitted and no payment was made. Automated GitHub Actions lint/test/typecheck/build is the authoritative verification for this commit.
+- No checkout was submitted and no payment was made. No production database records, prices, supplier data, payment settings or deployment configuration were changed.
+- The first CI run (42216599904) caught a missing unit_price_minor field in the guest order-detail query. The nested select was corrected in follow-up commit 079722e9dae76ef278b1985dd4c428f334db8f57; the final GitHub Actions run 42216789779 passed lint, all 14 tests across 5 files, TypeScript typecheck and the production build.
+- Vercel production deployment dpl_EnJoRv11UhXsJBbpzJCJjM9HhUwg for commit 079722e9dae76ef278b1985dd4c428f334db8f57 reached READY with mtdgc.com, www.mtdgc.com and the project aliases attached. The public Roblox gift-card page returned HTTP 200 and its rendered HTML contained the Face value, MTDGC selling price and bank/payment-provider fee disclosure.
+- Vercel reported no runtime errors in the preceding 30-minute window. Lovable’s latest commit SHA matched the final GitHub main SHA.
