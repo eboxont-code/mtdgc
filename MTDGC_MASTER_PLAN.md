@@ -536,10 +536,10 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 |---:|---|---|
 | 1 | MT-0282 — resolve the exact Netflix/subscription fulfilment method and pause unsupported offers | TODO |
 | 2 | MT-0041–0046 — verify supplier legitimacy, resale rights, region, denomination and delivery evidence | TODO |
-| 4 | Test one complete low-value Nepal order for each live product family and document payment/fulfilment evidence | TODO |
-| 5 | Resolve seller identity, Nepal/Australia policy scope and the legal/payment boundary for Australia-to-Nepal gifting | TODO |
-| 6 | Complete Boxont-owned Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED |
-| 7 | Add a repeatable test/typecheck/CI quality gate and protect `main` after validating Lovable sync | TODO |
+| 3 | Test one complete low-value Nepal order for each live product family and document payment/fulfilment evidence | TODO |
+| 4 | Resolve seller identity, Nepal/Australia policy scope and the legal/payment boundary for Australia-to-Nepal gifting | TODO |
+| 5 | Complete Boxont-owned Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED |
+| 6 | Add a repeatable test/typecheck/CI quality gate and protect `main` after validating Lovable sync | TODO |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
