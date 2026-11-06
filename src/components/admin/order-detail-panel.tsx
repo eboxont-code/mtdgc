@@ -97,7 +97,7 @@ export function OrderDetailPanel({ orderId, onClose, onUpdated }: { orderId: str
                                     <div className="min-w-0">
                                       <p className="font-medium">{field.label}</p>
                                       <p className="break-words text-muted-foreground">
-                                        {field.value || "Missing — confirm with the customer before fulfilment"}
+                                        {field.missing ? "Missing — confirm with the customer before fulfilment" : field.value}
                                       </p>
                                     </div>
                                     <span className={field.missing ? "shrink-0 text-destructive" : "shrink-0 text-success"}>
@@ -119,7 +119,7 @@ export function OrderDetailPanel({ orderId, onClose, onUpdated }: { orderId: str
                                 {additionalFields.map(([label, value]) => (
                                   <div key={label}>
                                     <dt className="text-muted-foreground">{label}</dt>
-                                    <dd className="break-words">{value || "No value recorded"}</dd>
+                                    <dd className="break-words">{value.trim() ? value : "No value recorded"}</dd>
                                   </div>
                                 ))}
                               </dl>
@@ -138,7 +138,7 @@ export function OrderDetailPanel({ orderId, onClose, onUpdated }: { orderId: str
                               {checklist.capturedFields.map(([label, value]) => (
                                 <div key={label}>
                                   <dt className="text-muted-foreground">{label}</dt>
-                                  <dd className="break-words">{value || "No value recorded"}</dd>
+                                  <dd className="break-words">{value.trim() ? value : "No value recorded"}</dd>
                                 </div>
                               ))}
                             </dl>

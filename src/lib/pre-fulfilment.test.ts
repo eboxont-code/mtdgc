@@ -44,7 +44,7 @@ describe("MT-0122 pre-fulfilment order-item snapshot", () => {
 
   test("shows only order-time requirements and flags missing player, zone and email values", () => {
     const fields = buildOrderItemFieldsSnapshot(
-      { "PUBG Mobile player ID": " 7654321 ", "Zone ID": "" },
+      { "PUBG Mobile player ID": " 7654321 ", "Zone ID": "   " },
       "Global",
       ["PUBG Mobile player ID", "Zone ID", "Server", "Delivery email address"],
     );
@@ -55,12 +55,12 @@ describe("MT-0122 pre-fulfilment order-item snapshot", () => {
     assert.equal(checklist.selectedOption, "UC 325");
     assert.deepEqual(checklist.requiredFields, [
       { label: "PUBG Mobile player ID", value: " 7654321 ", missing: false },
-      { label: "Zone ID", value: "", missing: true },
+      { label: "Zone ID", value: "   ", missing: true },
       { label: "Server", value: "", missing: true },
       { label: "Delivery email address", value: "", missing: true },
     ]);
     assert.equal(checklist.missingRequiredCount, 3);
-    assert.deepEqual(checklist.capturedFields, [["PUBG Mobile player ID", " 7654321 "], ["Zone ID", ""]]);
+    assert.deepEqual(checklist.capturedFields, [["PUBG Mobile player ID", " 7654321 "], ["Zone ID", "   "]]);
   });
 
   test("reports no missing fields when the saved product had no requirements", () => {
