@@ -76,6 +76,14 @@ The live order table has the enum type, primary key, unique order-number constra
 
 The current customer-facing label for `payment_submitted` is “Payment received, being checked”; operationally it means only that proof was submitted and awaits review. Do not interpret it as bank settlement confirmation.
  
+### 4.1 Canonical customer-facing status presentation
+
+- `src/lib/order-status.ts` is the single source for customer-facing order-status labels, explanatory notices and progress-step membership.
+- Account summary, authenticated order history, public guest tracking and the individual order page use `orderStatusLabel` and the shared `ORDER_NOTICE` map. The older exports remain re-exported from `format.ts` for compatibility with existing callers.
+- All 13 production enum values are mapped. `payment_submitted` means proof submitted and awaiting manual review; legacy `paid` means staff marked payment received; `verified` means an administrator accepted the submitted proof. None of these labels implies automatic bank settlement reconciliation.
+- `delivered`, `fulfilled` and `completed` display as `Delivered`, while legacy values remain unchanged in storage. The customer copy says staff marked the order delivered and does not claim automatic email or order-page delivery.
+- Unknown enum values use a generic `Status update` label rather than exposing raw internal status text.
+- This is a presentation-only change. It does not add status values, alter transitions, write production data or change payment/fulfilment evidence requirements.
 ## 5. Guest Checkout and Order Tracking Architecture
 
 ### Order identity at creation
