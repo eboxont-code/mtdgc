@@ -531,6 +531,7 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 ## 10. Immediate next actions
 
 No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-task register are authoritative.
+
 | Order | Task | Status |
 |---:|---|---|
 | 1 | MT-0045 — low-value test per supplier/product family | BLOCKED; no identified/verified supplier or product scope, and a real transaction would require external evidence and spend |
@@ -545,7 +546,7 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
-**Release note:** The latest verified production build before the documentation/security cleanup was READY at `087f0ed5e9f94016dd14476b0c05218adce6e135` on `mtdgc.com`. Recheck the latest deployment after the current documentation commits. The backend PR remains on HOLD until the Supabase cutover.
+**Release note:** The latest observed production deployment is READY but is sourced from intermediate commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`, not the current working branch. The current `main` combined status reports Vercel failure with the Hobby/free build-rate-limit target; no deployment was requested. The backend PR remains on HOLD until the Supabase cutover.
 
 
 ## 11. Sources and verification
@@ -1288,9 +1289,9 @@ MT-0103 is BLOCKED by the missing action-required workflow definition and the he
 
 ### Implementation
 
-- Added \`isValidOrderLookupContact\` in \`src/lib/order-access.ts\` and use it in both \`src/routes/track-order.tsx\` and the public \`lookupOrder\` server-function input validator. A contact must be a valid email-shaped value or contain 7–15 digits after phone formatting characters are removed.
-- The server also applies \`isSupportedOrderReference\`, preserving the current 128-bit \`MT\` + 32-hex format and supported legacy formats. Direct server-function calls cannot bypass the UI's order-reference/contact format checks.
-- \`lookupOrder\` requires both fields. It resolves the order by its reference and only returns the summary if the same order's \`verification_hash\` matches the reference + normalised contact, or the saved \`guest_email\` matches case-insensitively. Wrong order/contact pairs and unknown orders receive the same generic not-found response; the response does not include saved contact values or hashes.
+- Added `isValidOrderLookupContact` in `src/lib/order-access.ts` and use it in both `src/routes/track-order.tsx` and the public `lookupOrder` server-function input validator. A contact must be a valid email-shaped value or contain 7–15 digits after phone formatting characters are removed.
+- The server also applies `isSupportedOrderReference`, preserving the current 128-bit `MT` + 32-hex format and supported legacy formats. Direct server-function calls cannot bypass the UI's order-reference/contact format checks.
+- `lookupOrder` requires both fields. It resolves the order by its reference and only returns the summary if the same order's `verification_hash` matches the reference + normalised contact, or the saved `guest_email` matches case-insensitively. Wrong order/contact pairs and unknown orders receive the same generic not-found response; the response does not include saved contact values or hashes.
 - When checkout saved both phone and email, the verification hash uses the primary phone (phone takes precedence); the saved-email comparison also allows that customer's email to be used for tracking. Phone formatting is normalised to digits only; no country code is guessed or added.
 - The existing per-derived-IP limit remains 10 attempts per 10 minutes. The handler now fails closed with an unavailable response if the attempt-count query or attempt insert fails, and the UI displays a temporary-service error rather than a false not-found message.
 - The attempt counter still uses a count-then-insert sequence, which is not atomic under concurrent requests. A database-atomic limiter would require a reviewed RPC/migration after the Supabase cutover; this run did not change production schema or weaken the existing limit.
@@ -1300,21 +1301,21 @@ MT-0103 is BLOCKED by the missing action-required workflow definition and the he
 - Added two tests for the shared contact validator: valid email/phone formats and missing, malformed or out-of-range values.
 - Existing order-access tests continue to cover matching phone/email, wrong order number, cross-order contact mismatch, unauthenticated/other-account access and proof association.
 - Existing order-reference tests cover the current 128-bit format, supported legacy formats and malformed references.
-- Focused Node \`v22.16.0\` scratch-harness results using TypeScript type stripping: \`src/lib/order-access.test.ts\` **6 passed, 0 failed**; \`src/lib/order-reference.test.ts\` **4 passed, 0 failed**. Total **10 passed, 0 failed**.
-- Global TypeScript strict check of the two changed pure helper modules (\`order-access.ts\` and \`order-reference.ts\`) passed.
-- The environment has Node and global TypeScript but no Bun and no local repository checkout/dependency tree. Full \`bun run lint\`, full \`bun run test\`, project \`bun run typecheck\` and \`bun run build\` were **not run**. The GitHub workflow-run lookup for the exact branch commit returned no workflow runs (the available wrapper only returns PR-triggered runs); no PR was opened because the Vercel Git integration can automatically create a preview.
+- Focused Node `v22.16.0` scratch-harness results using TypeScript type stripping: `src/lib/order-access.test.ts` **6 passed, 0 failed**; `src/lib/order-reference.test.ts` **4 passed, 0 failed**. Total **10 passed, 0 failed**.
+- Global TypeScript strict check of the two changed pure helper modules (`order-access.ts` and `order-reference.ts`) passed.
+- The environment has Node and global TypeScript but no Bun and no local repository checkout/dependency tree. Full `bun run lint`, full `bun run test`, project `bun run typecheck` and `bun run build` were **not run**. The GitHub workflow-run lookup for the exact branch commit returned no workflow runs (the available wrapper only returns PR-triggered runs); no PR was opened because the Vercel Git integration can automatically create a preview.
 
 ### Production schema and access evidence (read-only)
 
-- The production \`orders\` table has non-null \`order_number\` and \`verification_hash\`, nullable \`user_id\`, \`guest_email\`, \`guest_phone\` and \`access_token_hash\`.
-- \`order_lookup_attempts\` has non-null \`ip_hash\` and \`created_at\`, RLS enabled, no direct role policies, and index \`order_lookup_attempts_ip_time\` on \`(ip_hash, created_at)\`. The server-side lookup uses the existing server-only Supabase admin client.
+- The production `orders` table has non-null `order_number` and `verification_hash`, nullable `user_id`, `guest_email`, `guest_phone` and `access_token_hash`.
+- `order_lookup_attempts` has non-null `ip_hash` and `created_at`, RLS enabled, no direct role policies, and index `order_lookup_attempts_ip_time` on `(ip_hash, created_at)`. The server-side lookup uses the existing server-only Supabase admin client.
 - No production order was created, read by identifier, updated or deleted for this task. No customer contact values were queried. Only column metadata, RLS flags, policy metadata and index definitions were inspected.
 
 ### CI, deployment and repository state
 
-- \`main\` HEAD observed: \`1d948a818f056ec1ae1f630688070da6e8449fde\`. Work remains on \`automation/mt-0104-order-transition-guard\`, which was 19 commits ahead and 0 behind \`main\` before this task's commits; it is not merged and no PR was opened.
-- GitHub combined status for \`main\` and the final task code commit reports Vercel \`failure\` with the Hobby/free build-rate-limit target. This is not a passing quality check. No GitHub Actions workflow run was returned for the exact code commit.
-- Vercel has no deployment record for the task code commit. The latest observed production deployment remains READY but is sourced from intermediate commit \`779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7\`, not this working branch. Vercel reported no runtime errors in the preceding 24 hours.
+- `main` HEAD observed: `1d948a818f056ec1ae1f630688070da6e8449fde`. Work remains on `automation/mt-0104-order-transition-guard`, which was 19 commits ahead and 0 behind `main` before this task's commits; it is not merged and no PR was opened.
+- GitHub combined status for `main` and the final task code commit reports Vercel `failure` with the Hobby/free build-rate-limit target. This is not a passing quality check. No GitHub Actions workflow run was returned for the exact code commit.
+- Vercel has no deployment record for the task code commit. The latest observed production deployment remains READY but is sourced from intermediate commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`, not this working branch. Vercel reported no runtime errors in the preceding 24 hours.
 - Open PR #1 remains explicitly held until the Boxont-controlled Supabase move; no open issues were returned. No production deployment, migration, billing change, paid service, third-party contact or production data write occurred.
 
 **Next P0 task:** MT-0106 — compare the canonical status wording and display logic in authenticated order history, guest tracking and the order-detail route; consolidate only the shared presentation logic while preserving existing status meanings and legacy aliases.
