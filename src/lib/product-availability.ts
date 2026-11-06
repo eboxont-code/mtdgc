@@ -19,6 +19,11 @@ export function isComingSoon(product: AvailabilityProduct): boolean {
     product.variants.some((variant) => variant.status === "coming_soon"));
 }
 
+/** Published products that are neither currently orderable nor marked as coming soon. */
+export function isUnavailable(product: AvailabilityProduct): boolean {
+  return !isPurchasable(product) && !isComingSoon(product);
+}
+
 export function availabilityLabel(product: AvailabilityProduct): string {
   if (isPurchasable(product)) return "Available now";
   if (isComingSoon(product)) return "Coming soon";
@@ -26,8 +31,11 @@ export function availabilityLabel(product: AvailabilityProduct): string {
 }
 
 export function availabilityCounts(products: readonly AvailabilityProduct[]) {
+  const available = products.filter(isPurchasable).length;
+  const comingSoon = products.filter(isComingSoon).length;
   return {
-    available: products.filter(isPurchasable).length,
-    comingSoon: products.filter(isComingSoon).length,
+    available,
+    comingSoon,
+    unavailable: products.length - available - comingSoon,
   };
 }
