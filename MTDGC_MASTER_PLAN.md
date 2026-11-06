@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 1.1 · 5 November 2026
+**Version:** 1.2 · 6 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -150,8 +150,8 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Every product has a traceable, authorised supply route and a tested fulfilment procedure before it is sold.
 
-- [ ] **MT-0041 · P0 · TODO** — Build a supplier register with legal name, country, contact, product scope and verification status.
-- [ ] **MT-0042 · P0 · TODO** — Record the source of every code, top-up and subscription before making the listing orderable.
+- [x] **MT-0041 · P0 · DONE** — Build a supplier register with legal name, country, contact, product scope and verification status. Created `SUPPLIER_REGISTER.md` with supplier identity, product-scope authority, commercial/operational controls, verification statuses and an initial product sourcing queue. No supplier identities or approvals were invented.
+- [!] **MT-0042 · P0 · BLOCKED** — Record the source of every code, top-up and subscription before making the listing orderable. The repository and current database contain no supplier identity/source records; actual source details and evidence are not available to populate the register. Do not infer or fabricate a source.
 - [ ] **MT-0043 · P0 · TODO** — Verify that each supplier is authorised to resell or distribute the relevant product.
 - [ ] **MT-0044 · P0 · TODO** — Reject suppliers who require customer passwords, OTPs, payment PINs or unsafe account access.
 - [ ] **MT-0045 · P0 · TODO** — Test one low-value transaction per supplier and product family before scaling orders.
@@ -534,11 +534,11 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 
 | Order | Task | Status |
 |---:|---|---|
-| 1 | MT-0041–0046 — verify supplier legitimacy, resale rights, region, denomination and delivery evidence | TODO |
-| 2 | Test one complete low-value Nepal order for each supported product family and document payment/fulfilment evidence | TODO |
-| 3 | Resolve seller identity, Nepal/Australia policy scope and the legal/payment boundary for Australia-to-Nepal gifting | TODO |
-| 4 | Complete Boxont-owned Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED |
-| 5 | Add a repeatable test/typecheck/CI quality gate and protect `main` after validating Lovable sync | TODO |
+| 1 | MT-0042 — record the real source of every code, top-up and subscription in the supplier register | BLOCKED; source evidence not present in repo/database |
+| 2 | Add a repeatable test/typecheck/CI quality gate without changing the held backend migration branch | TODO |
+| 3 | Test one complete low-value Nepal order for each supported product family and document payment/fulfilment evidence | TODO; supplier source dependency |
+| 4 | Resolve seller identity, Nepal/Australia policy scope and the legal/payment boundary for Australia-to-Nepal gifting | TODO; owner/legal dependency |
+| 5 | Complete Boxont-owned Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED |
 | 6 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
@@ -771,4 +771,34 @@ Do not ask customers for passwords, OTPs or payment PINs. Do not describe a shar
 **No supplier or account arrangement has been inferred.** The product should remain unavailable until the evidence above is supplied and reviewed. Reopening this task is a deliberate owner decision after the evidence and test order exist.
 
 **Evidence sources:** read-only inspection of `public.products`, `public.product_variants`, `public.order_items` and `public.orders`; inspection of `src/routes/products.$slug.tsx`, `src/lib/catalog.functions.ts`, `src/lib/orders.functions.ts` and `src/lib/admin.functions.ts`; production status update and verification query; official Netflix Help Center pages linked above. No customer contact details, passwords, or payment data were copied into this plan.
+
+
+
+## 18. Supplier register created — 6 November 2026
+
+**Task:** MT-0041 · P0 · DONE  
+**Canonical register:** [`SUPPLIER_REGISTER.md`](./SUPPLIER_REGISTER.md)
+
+### What was created
+
+- Supplier identity register fields: legal entity, trading name, registration/operating country, official domain, primary contact, business email/phone, product scope, verification status, evidence reference, reviewer and review date.
+- Product-scope register fields: supplier, MTDGC product/SKU, issuer/brand, source type, issuing and customer regions, denomination, delivery method, resale-authority evidence, source-of-origin evidence, terms and scope status.
+- Commercial and operational fields: supplier cost/currency, quote source and date, expiry, settlement route, delivery time, cut-off, failure/refund process, escalation contact and data-sharing/retention.
+- Defined evidence-based statuses from NOT ASSESSED through VERIFIED / VERIFIED — LIMITED SCOPE, REJECTED, SUSPENDED and EXPIRED.
+- Added safeguards against unsupported reseller claims, unverified region compatibility, unsafe credential requests and putting secrets or customer data in Git.
+- Added a product sourcing queue for the five currently catalogue-orderable product families and the Netflix product now on production hold.
+
+### Initial findings and boundaries
+
+- No supplier register, supplier identity records or supplier integration was found in the inspected repository.
+- The current product/order database schema contains no supplier table or supplier foreign key; the data architecture document does not define one.
+- No supplier legal name, country, business contact, distribution authority or product-origin evidence could be established from the available project records.
+- The supplier identity table is intentionally empty. This is a register build, not a claim that MTDGC has verified or approved a supplier.
+- No database DDL or production supplier table was added. The master plan continues to hold backend migrations until the Boxont-controlled Supabase cutover and database reconciliation are complete.
+
+### Dependency
+
+**MT-0042 is now BLOCKED** because the actual source for each code, top-up and subscription is not recorded in the repository or database. The next supplier tasks cannot be verified from product descriptions or catalogue pricing alone. They require the real supplier identity, supply route and evidence. No supplier was guessed or contacted, and no paid service or additional spend was initiated.
+
+**Verification:** `SUPPLIER_REGISTER.md` exists on `main`; README links to it; the register fields cover the supplier identity and verification status required by MT-0041. No supplier/product/price/database records were changed.
 
