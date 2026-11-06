@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.0 · 7 November 2026
+**Version:** 2.1 · 7 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -202,7 +202,7 @@ Do not set numerical targets until a reliable baseline exists.
 
 - [x] **MT-0081 · P0 · DONE** — Audit completed against the current application code, production schema/data snapshot, storage configuration and access policies. Findings and follow-up gaps are recorded in section 24; this completes the audit task, not a claim that all payment controls are secure.
 - [x] **MT-0082 · P0 · DONE** — Generate new order references with 128 bits of cryptographic randomness, retain the database UNIQUE constraint as the collision guard, and keep legacy tracking formats working. Evidence: section 25; CI run `42241329123` passed lint, tests, typecheck and production build; Vercel deployment for code commit `d81e1fc51ed2e1203defb63ec6a71dbcd21e889b` reached READY.
-- [ ] **MT-0083 · P0 · TODO** — Ensure payment proof is attached to the correct order and cannot be reassigned by another customer.
+- [x] **MT-0083 · P0 · DONE** — Bind payment-proof authorization and storage/database association to the server-resolved order. Shared order-access helpers now cover access-token, authenticated-owner and rate-limited contact checks; proof storage path, order ID, transaction reference and amount are derived from the resolved order, not client-supplied identifiers. Four focused tests and the full quality workflow passed. Evidence and the separate production deployment blocker are recorded in section 26.
 - [ ] **MT-0084 · P0 · TODO** — Validate uploaded proof file type, size and content handling.
 - [ ] **MT-0085 · P0 · TODO** — Restrict payment-proof access to the customer who owns the order and authorised staff.
 - [ ] **MT-0086 · P0 · TODO** — Prevent fulfilment until payment is independently matched to the correct amount and order.
@@ -1057,3 +1057,39 @@ No product records, supplier assignments, prices, variants, order records, datab
 - The code changes do not alter existing order numbers, payment state, database schema, storage, supplier records or billing. No test order, payment or production write was performed.
 
 **Next P0 task:** MT-0083 — ensure payment proof is attached to the correct order and cannot be reassigned by another customer. Preserve the existing guest access-token/contact and signed-in owner flows; add focused negative tests before considering that control complete.
+
+
+
+## 26. Payment proof ownership and order association — 7 November 2026
+
+**Task:** MT-0083 · P0 · DONE at repository/code level. Production rollout remains separately blocked; do not describe this control as active on the live site until the latest commit is deployed.
+
+### Implementation
+
+- Added `src/lib/order-access.ts` to centralise the existing order access checks used by both `getOrderForViewer` and `submitPaymentProof`: order-specific access-token hash, authenticated account-owner match, and the existing contact fallback.
+- Contact fallback remains behind the existing per-IP lookup-attempt limit. The refactor preserves guest access-token, contact and signed-in owner paths while ensuring the same tested checks are used for order viewing and proof submission.
+- Added `buildPaymentProofAssociation`. It receives the order record resolved server-side from the submitted order number and builds the storage path and proof row from that record: the storage folder and `payment_proofs.order_id` use the same resolved order ID, the amount comes from `orders.total_minor`, and the transaction reference comes from the validated form input.
+- The customer form does not supply an order ID, storage path or amount. The server does not accept those values from the request; it derives them after authorising the resolved order.
+- No database schema, RLS policy, storage configuration, payment setting, order, proof or production data was changed.
+
+### Tests and CI evidence
+
+- Added `src/lib/order-access.test.ts` with four tests:
+  1. An access token for one order does not authorise another order.
+  2. An authenticated customer can access only an order belonging to that account.
+  3. Contact fallback is bound to the order number and saved customer contact.
+  4. Storage path, proof order ID, transaction reference and amount are derived from the resolved order.
+- Final GitHub Actions run [`42251069775`](https://github.com/eboxont-code/mtdgc/actions/runs/42251069775) passed on 7 November 2026 for commit `26a69301856a715a2cbd293da2cf88227d694ca5`: ESLint passed, **25 tests across 8 files passed**, TypeScript `tsc --noEmit` passed, and the production build passed.
+- Two earlier CI attempts exposed and corrected test/typing issues before the final successful run: run `42250860331` caught a contact-normalisation test-fixture mismatch; run `42250912631` passed all tests but caught a missing `transactionRef` argument in the new association helper. The final commit contains both corrections.
+
+### Production deployment blocker — do not bypass or pay to resolve
+
+- The latest repository `main` commit is `26a69301856a715a2cbd293da2cf88227d694ca5`.
+- Vercel's current production aliases `mtdgc.com` and `www.mtdgc.com` still point to READY deployment [`dpl_4nELrLJ21wEGvAAtVbs2g6UPsNhC`](https://vercel.com/boxont/mtdgc/4nELrLJ21wEGvAAtVbs2g6UPsNhC), sourced from intermediate commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`, not the final tested `main` commit.
+- A production deployment request for `26a69301856a715a2cbd293da2cf88227d694ca5` was rejected by Vercel with **HTTP 402 `payment_required`**, error code `api-deployments-free-per-day`: the free deployment API limit had exceeded 100 deployments for the day and Vercel returned `retryAfter: 86400` (24 hours). The available execution environment has no Vercel CLI binary or local Vercel CLI credentials for the suggested CLI fallback. No plan upgrade, billing change or alternate paid service was attempted.
+- The intermediate production deployment `779d2da` contains the initial association-helper call without the validated transaction-reference argument. Because `payment_proofs.transaction_ref` is NOT NULL and the existing handler does not check the proof-insert error (separately recorded in section 24), that intermediate build could fail to persist proof metadata while the order status has already changed. Treat this as a production release risk until commit `26a6930` is deployed.
+- Read-only production SQL after the intermediate deployment found: **8 total orders, 0 payment proofs, 0 orders created since that deployment, 0 submitted orders since that deployment, and 0 submitted orders without a proof**. No affected order was found in that snapshot; no production data was changed.
+- Vercel's last-hour runtime-error query found no runtime-error clusters, and the last-30-minute production error/fatal log query returned no entries. These monitoring results do not prove a payment submission succeeded; there were no orders created after the intermediate deployment in the read-only snapshot.
+- **Release action:** wait until the Vercel free deployment API quota has reset (the returned retry window was 24 hours), then deploy the latest tested `main` commit `26a69301856a715a2cbd293da2cf88227d694ca5` to production and verify both aliases before treating MT-0083 as live. Do not upgrade the plan or change billing to bypass the limit.
+
+**Next P0 task:** MT-0084 — validate uploaded proof file type, size and content handling. The source-level MT-0083 implementation is committed and CI-verified; its production rollout remains subject to the Vercel deployment quota above.
