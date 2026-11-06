@@ -6,6 +6,7 @@ import { formatNpr } from "@/lib/format";
 import { availabilityLabel, isPurchasable } from "@/lib/product-availability";
 import { bestDeal } from "@/lib/pricing";
 import { PRICE_COMING_SOON, pricesHidden } from "@/lib/price-visibility";
+import { isGiftCardCategory } from "@/lib/gift-card-pricing";
 
 /** Lowest real price, or null for sample and coming-soon items (their prices are never shown). */
 export function lowestPrice(product: CatalogProduct): number | null {
@@ -67,7 +68,7 @@ export function ProductTile({ product, priority = false, className = "" }: { pro
           <p className="mt-auto pt-2 font-mono text-[13px] md:text-sm">
             {orderable && price !== null ? (
               <>
-                <span className="text-muted-foreground">From </span>
+                <span className="text-muted-foreground">{isGiftCardCategory(product.category?.slug) ? "MTDGC price from " : "From "}</span>
                 <span className="font-bold text-price">{formatNpr(deal ? deal.variant.price_minor : price)}</span>
                 {deal && <span className="ml-1.5 text-[11px] text-muted-foreground line-through">{formatNpr(deal.was)}</span>}
               </>

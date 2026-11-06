@@ -7,6 +7,7 @@ import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { formatNpr, whatsappLink, SITE_URL } from "@/lib/format";
+import { GIFT_CARD_PRICE_DISCLOSURE } from "@/lib/gift-card-pricing";
 import { getOrderForViewer } from "@/lib/orders.functions";
 import { PaymentProofForm } from "@/components/payment-proof-form";
 import { OrderLoading } from "@/components/order-loading";
@@ -29,7 +30,7 @@ export const Route = createFileRoute("/order/$orderNumber")({
   component: OrderPage,
 });
 
-type Found = { orderNumber: string; status: string; createdAt: string; totalMinor: number; items: { name: string; quantity: number; totalMinor: number }[] };
+type Found = { orderNumber: string; status: string; createdAt: string; totalMinor: number; items: { name: string; variantName: string; isGiftCard: boolean; quantity: number; unitPriceMinor: number; totalMinor: number }[] };
 
 const STATUS_TEXT: Record<string, string> = {
   pending: "Waiting for payment",
@@ -99,9 +100,16 @@ function OrderPage() {
             <p className="font-display">Status: <strong>{STATUS_TEXT[order.status] ?? order.status}</strong></p>
             <p className="mt-1 text-muted-foreground">Placed {new Date(order.createdAt).toLocaleString("en-NP")}</p>
             <ul className="mt-3 space-y-1">
-              {order.items.map((i) => <li key={i.name}>{i.quantity} × {i.name} · {formatNpr(i.totalMinor)}</li>)}
+              {order.items.map((i) => (
+                <li key={i.name + "-" + i.variantName}>
+                  <p>{i.quantity} × {i.name}</p>
+                  <p className="text-xs text-muted-foreground">{i.isGiftCard ? "Face value: " + i.variantName : i.variantName}</p>
+                  <p className="text-xs">{i.isGiftCard ? "MTDGC selling price: " + formatNpr(i.unitPriceMinor) + " each · " : ""}Line total: {formatNpr(i.totalMinor)}</p>
+                </li>
+              ))}
             </ul>
             <p className="mt-3 font-display">Total: {formatNpr(order.totalMinor)}</p>
+            {order.items.some((item) => item.isGiftCard) && <p className="mt-2 text-xs text-muted-foreground">{GIFT_CARD_PRICE_DISCLOSURE}</p>}
             <Button asChild variant="outline" className="mt-4 min-h-11">
               <Link to="/track-order" search={{ order: order.orderNumber }}>Track this order</Link>
             </Button>

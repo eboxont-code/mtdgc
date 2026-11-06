@@ -11,7 +11,7 @@ type Row = { id?: string; sku: string; name: string; price: string; stock: strin
 
 const blank = (): Row => ({ sku: "", name: "", price: "", stock: "", status: "available", is_default: false, sort_order: "0" });
 
-export function VariantsEditor({ productId, onVariantsChange }: { productId: string; onVariantsChange?: (variants: { status: string; price_minor: number }[]) => void }) {
+export function VariantsEditor({ productId, isGiftCard = false, onVariantsChange }: { productId: string; isGiftCard?: boolean; onVariantsChange?: (variants: { status: string; price_minor: number }[]) => void }) {
   const [rows, setRows] = useState<Row[]>([]);
   const [message, setMessage] = useState<string | null>(null);
   const [reload, setReload] = useState(0);
@@ -66,19 +66,20 @@ export function VariantsEditor({ productId, onVariantsChange }: { productId: str
   return (
     <div className="min-w-0 md:col-span-2">
       <h3 className="font-display text-sm font-medium">Options</h3>
+      {isGiftCard && <p className="mt-1 max-w-3xl text-xs text-muted-foreground">Enter the issuer denomination and currency in Name (for example, USD 10 Card). Price (NPR) is MTDGC’s selling price, not the card’s face value. Checkout adds no separate MTDGC fee; bank or payment-provider charges may still apply.</p>}
       <div className="mt-2 max-w-full overflow-x-auto">
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead>
             <tr className="text-xs text-muted-foreground">
-              <th className="py-1">SKU</th><th>Name</th><th>Price (NPR)</th><th>Stock</th><th>Status</th><th>Default</th><th>Order</th><th>Actions</th>
+              <th className="py-1">SKU</th><th>{isGiftCard ? "Face value / denomination" : "Name"}</th><th>{isGiftCard ? "MTDGC price (NPR)" : "Price (NPR)"}</th><th>Stock</th><th>Status</th><th>Default</th><th>Order</th><th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((row, i) => (
               <tr key={row.id ?? "new"}>
                 <td className="pr-1"><input aria-label="SKU" className={cell} value={row.sku} onChange={(e) => update(i, { sku: e.target.value })} /></td>
-                <td className="pr-1"><input aria-label="Name" className={cell} value={row.name} onChange={(e) => update(i, { name: e.target.value })} /></td>
-                <td className="pr-1"><input aria-label="Price in NPR" inputMode="decimal" className={cell} value={row.price} onChange={(e) => update(i, { price: e.target.value })} /></td>
+                <td className="pr-1"><input aria-label={isGiftCard ? "Face value / denomination" : "Name"} className={cell} value={row.name} onChange={(e) => update(i, { name: e.target.value })} /></td>
+                <td className="pr-1"><input aria-label={isGiftCard ? "MTDGC selling price in NPR" : "Price in NPR"} inputMode="decimal" className={cell} value={row.price} onChange={(e) => update(i, { price: e.target.value })} /></td>
                 <td className="pr-1"><input aria-label="Stock, empty for untracked" inputMode="numeric" className={cell} value={row.stock} onChange={(e) => update(i, { stock: e.target.value })} /></td>
                 <td className="pr-1">
                   <select aria-label="Status" className={cell} value={row.status} onChange={(e) => update(i, { status: e.target.value as Status })}>

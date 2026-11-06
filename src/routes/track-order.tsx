@@ -11,6 +11,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { ORDER_NOTICE, ORDER_STEPS, orderStepIndex, stepTime, formatNpr, SITE_URL, STATUS_LABEL, whatsappLink } from "@/lib/format";
+import { GIFT_CARD_PRICE_DISCLOSURE } from "@/lib/gift-card-pricing";
 import { lookupOrder } from "@/lib/orders.functions";
 
 const STATUS_TEXT: Record<string, string> = { ...STATUS_LABEL, pending: "Placed", paid: "Payment confirmed", processing: "Processing", fulfilled: "Fulfilled", completed: "Completed", cancelled: "Cancelled", failed: "Failed", refunded: "Refunded" };
@@ -45,7 +46,7 @@ export const Route = createFileRoute("/track-order")({
 });
 
 
-type Found = { orderNumber: string; status: string; createdAt: string; totalMinor: number; items: { name: string; quantity: number }[]; events: { status: string; at: string }[] };
+type Found = { orderNumber: string; status: string; createdAt: string; totalMinor: number; items: { name: string; variantName: string; isGiftCard: boolean; quantity: number; unitPriceMinor: number; totalMinor: number }[]; events: { status: string; at: string }[] };
 
 function TrackOrderPage() {
   const { order: initialOrder } = Route.useSearch();
@@ -181,8 +182,15 @@ function TrackOrderPage() {
               Placed {new Date(found.createdAt).toLocaleDateString("en-GB")} · {formatNpr(found.totalMinor)} · Status: {STATUS_TEXT[found.status] ?? found.status}
             </p>
             <ul className="mt-2 text-sm">
-              {found.items.map((i) => <li key={i.name}>{i.quantity} × {i.name}</li>)}
+              {found.items.map((i) => (
+                <li key={i.name + "-" + i.variantName}>
+                  <p>{i.quantity} × {i.name}</p>
+                  <p className="text-xs text-muted-foreground">{i.isGiftCard ? "Face value: " + i.variantName : i.variantName}</p>
+                  {i.isGiftCard && <p className="text-xs text-muted-foreground">MTDGC selling price: {formatNpr(i.unitPriceMinor)} each · Line total: {formatNpr(i.totalMinor)}</p>}
+                </li>
+              ))}
             </ul>
+            {found.items.some((item) => item.isGiftCard) && <p className="mt-2 text-xs text-muted-foreground">{GIFT_CARD_PRICE_DISCLOSURE}</p>}
           </section>
         )}
 

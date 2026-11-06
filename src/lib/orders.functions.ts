@@ -40,6 +40,28 @@ export function normaliseContact(contact: string): string {
   return v.includes("@") ? v : v.replace(/\D/g, "");
 }
 
+type OrderItemSummarySource = {
+  product_name: string;
+  variant_name: string;
+  quantity: number;
+  unit_price_minor: number;
+  line_total_minor: number;
+  products?: unknown;
+};
+
+function summariseOrderItem(item: OrderItemSummarySource) {
+  const product = item.products as { categories?: { slug?: string } | null } | null;
+  const isGiftCard = product?.categories?.slug === "gift-cards";
+  return {
+    name: item.product_name,
+    variantName: item.variant_name,
+    isGiftCard,
+    quantity: item.quantity,
+    unitPriceMinor: item.unit_price_minor,
+    totalMinor: item.line_total_minor,
+  };
+}
+
 async function sha256(text: string): Promise<string> {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
   return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
@@ -140,7 +162,7 @@ export const lookupOrder = createServerFn({ method: "POST" })
     const orderNumber = data.orderNumber.toUpperCase();
     const { data: order } = await supabaseAdmin
       .from("orders")
-      .select("id, status, created_at, total_minor, verification_hash, guest_email, order_items(product_name, variant_name, quantity), order_status_events(status, created_at)")
+      .select("id, status, created_at, total_minor, verification_hash, guest_email, order_items(product_name, variant_name, quantity, unit_price_minor, line_total_minor, products(categories(slug))), order_status_events(status, created_at)")
       .eq("order_number", orderNumber)
       .maybeSingle();
     if (!order) return { status: "not_found" as const };
@@ -155,7 +177,7 @@ export const lookupOrder = createServerFn({ method: "POST" })
         status: order.status,
         createdAt: order.created_at,
         totalMinor: order.total_minor,
-        items: (order.order_items ?? []).map((i) => ({ name: `${i.product_name}, ${i.variant_name}`, quantity: i.quantity })),
+        items: (order.order_items ?? []).map((i) => summariseOrderItem(i)),
         events: (order.order_status_events ?? []).map((e) => ({ status: e.status, at: e.created_at })),
       },
     };
@@ -166,7 +188,7 @@ export const listMyOrders = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase
       .from("orders")
-      .select("id, order_number, status, total_minor, created_at, order_items(product_name, variant_name, quantity, line_total_minor), order_status_events(status, created_at)")
+      .select("id, order_number, status, total_minor, created_at, order_items(product_name, variant_name, quantity, unit_price_minor, line_total_minor, products(categories(slug))), order_status_events(status, created_at)")
       .eq("user_id", context.userId)
       .order("created_at", { ascending: false });
     if (error) throw new Error("We could not load your orders.");
@@ -176,7 +198,7 @@ export const listMyOrders = createServerFn({ method: "GET" })
       status: o.status as string,
       totalMinor: o.total_minor,
       createdAt: o.created_at,
-      items: (o.order_items ?? []).map((i) => ({ name: `${i.product_name}, ${i.variant_name}`, quantity: i.quantity, totalMinor: i.line_total_minor })),
+      items: (o.order_items ?? []).map((i) => summariseOrderItem(i)),
       events: (o.order_status_events ?? []).map((e) => ({ status: e.status, at: e.created_at })),
     }));
   });
@@ -232,7 +254,7 @@ export const getOrderForViewer = createServerFn({ method: "POST" })
         status: order.status as string,
         createdAt: order.created_at,
         totalMinor: order.total_minor,
-        items: (order.order_items ?? []).map((i) => ({ name: `${i.product_name}, ${i.variant_name}`, quantity: i.quantity, totalMinor: i.line_total_minor })),
+        items: (order.order_items ?? []).map((i) => summariseOrderItem(i)),
       },
     };
   });

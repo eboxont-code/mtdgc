@@ -17,6 +17,7 @@ import { useCart } from "@/lib/cart";
 import { categoryTypeFromSlug, formatNpr, isOrderable, SITE_URL, SUPPORT_MESSAGE, whatsappLink } from "@/lib/format";
 import { enabledProviders } from "@/lib/payments";
 import { compareAt } from "@/lib/pricing";
+import { GIFT_CARD_PRICE_DISCLOSURE, isGiftCardCategory } from "@/lib/gift-card-pricing";
 import { productFaqs, requirementHelp } from "@/lib/product-help";
 import { AccordionList } from "@/components/sections/accordion-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -207,6 +208,7 @@ function ProductPage() {
   const variantWas = variant ? compareAt(variant) : null;
   const productType = categoryTypeFromSlug(product.category?.slug ?? "");
   const isPlan = productType === "software" || productType === "subscription";
+  const isGiftCard = isGiftCardCategory(product.category?.slug);
   const deliveryTime = product.delivery_time.trim() === "Confirmed after order review" ? "" : product.delivery_time.trim();
   const deliveryMethod = product.delivery_method.trim() === "Confirmed after order review" ? "" : product.delivery_method.trim();
 
@@ -288,12 +290,18 @@ function ProductPage() {
 
             <div className="mt-5 hidden rounded-2xl border border-border bg-card p-5 md:block">
               <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Order summary</p>
-              <div className="mt-3 flex items-baseline justify-between gap-3">
-                <span className="font-display text-sm">{variant?.name ?? "Choose an option"}</span>
-                <span className="font-mono text-xl font-bold text-price">
-                  {hidePrices ? PRICE_COMING_SOON : variant ? formatNpr(variant.price_minor) : ""}
-                  {!hidePrices && variantWas && <span className="ml-2 text-sm font-normal text-muted-foreground line-through">{formatNpr(variantWas)}</span>}
-                </span>
+              <div className="mt-3 flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">{isGiftCard ? "Face value / denomination" : "Selected option"}</p>
+                  <p className="mt-1 font-display text-sm">{variant?.name ?? "Choose an option"}</p>
+                </div>
+                <div className="shrink-0 text-right">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">{isGiftCard ? "MTDGC selling price" : "Price"}</p>
+                  <p className="font-mono text-xl font-bold text-price">
+                    {hidePrices ? PRICE_COMING_SOON : variant ? formatNpr(variant.price_minor) : ""}
+                    {!hidePrices && variantWas && <span className="ml-2 text-sm font-normal text-muted-foreground line-through">{formatNpr(variantWas)}</span>}
+                  </p>
+                </div>
               </div>
               {deliveryTime && <p className="mt-1 text-xs text-muted-foreground">{deliveryTime}</p>}
               {purchaseDetailsBlock && <div className="mt-3">{purchaseDetailsBlock}</div>}
@@ -355,7 +363,7 @@ function ProductPage() {
             {product.variants.length > 0 && (
               <section className="mt-4 rounded-2xl border border-border bg-card p-4 md:p-5">
                 <fieldset>
-                  <legend className="contents"><StepTitle n={packStep}>Choose an option</StepTitle></legend>
+                  <legend className="contents"><StepTitle n={packStep}>{isGiftCard ? "Choose a denomination" : "Choose an option"}</StepTitle></legend>
                   <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
                     {product.variants.map((item) => {
                       const selected = selectedSku === item.sku;
@@ -368,7 +376,9 @@ function ProductPage() {
                         >
                           <input type="radio" name="variant" value={item.sku} checked={selected} onChange={() => void navigate({ to: "/products/$slug", params: { slug: product.slug }, search: (previous) => ({ ...previous, plan: item.sku }), replace: true })} className="sr-only" />
                           {selected && <Check className="absolute right-2 top-2 size-4 text-primary" aria-hidden="true" />}
+                          <span className="pr-5 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">{isGiftCard ? "Face value" : "Option"}</span>
                           <span className="pr-5 font-mono text-[13px] font-medium leading-tight">{item.name}</span>
+                          <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">{isGiftCard ? "MTDGC selling price" : "Price"}</span>
                           <span className="font-mono text-sm font-bold text-price">{hidePrices ? PRICE_COMING_SOON : formatNpr(item.price_minor)}</span>
                           {!hidePrices && was && <span className="font-mono text-[11px] text-muted-foreground line-through">{formatNpr(was)}</span>}
                           {item.status === "low_stock" && <span className="font-mono text-[10px] uppercase text-warn">Limited</span>}
@@ -378,6 +388,7 @@ function ProductPage() {
                     })}
                   </div>
                 </fieldset>
+                {isGiftCard && <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{GIFT_CARD_PRICE_DISCLOSURE}</p>}
                 {variant?.status === "low_stock" && (
                   <p className="mt-3 text-xs text-muted-foreground">Limited supply on this option. If it runs out after you order, we tell you and refund your payment.</p>
                 )}
@@ -482,8 +493,8 @@ function ProductPage() {
         {purchaseDetailsBlock && <div className="mb-3 max-h-[25vh] overflow-y-auto">{purchaseDetailsBlock}</div>}
         <div className="flex items-center gap-2.5">
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[11px] text-muted-foreground">{variant?.name ?? "Choose an option"}</p>
-            <p className={`font-mono font-bold leading-tight text-price ${hidePrices ? "text-[13px]" : "text-[17px]"}`}>{hidePrices ? PRICE_COMING_SOON : variant ? formatNpr(variant.price_minor) : ""}</p>
+            <p className="truncate text-[10px] text-muted-foreground">{isGiftCard ? "Face value: " + (variant?.name ?? "Choose a denomination") : variant?.name ?? "Choose an option"}</p>
+            <p className={`font-mono font-bold leading-tight text-price ${hidePrices ? "text-[13px]" : "text-[15px]"}`}>{hidePrices ? PRICE_COMING_SOON : variant ? (isGiftCard ? "MTDGC price " : "") + formatNpr(variant.price_minor) : ""}</p>
           </div>
           {wa && (
             <a href={wa} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp support (opens in a new tab)" className="grid size-11 shrink-0 place-items-center rounded-xl border border-border text-primary">

@@ -39,7 +39,7 @@ function validate(f: Form): Partial<Record<keyof Form, string>> {
 
 export function ProductForm({ productId, onSaved, onCancel }: { productId?: string | undefined; onSaved: () => void; onCancel: () => void }) {
   const [form, setForm] = useState<Form>(EMPTY);
-  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+  const [categories, setCategories] = useState<{ id: string; name: string; slug: string }[]>([]);
   const [errors, setErrors] = useState<Partial<Record<keyof Form, string>>>({});
   const [message, setMessage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -48,7 +48,7 @@ export function ProductForm({ productId, onSaved, onCancel }: { productId?: stri
   const save = useServerFn(saveProduct);
 
   useEffect(() => {
-    supabase.from("categories").select("id, name").order("sort_order").then(({ data }) => setCategories(data ?? []));
+    supabase.from("categories").select("id, name, slug").order("sort_order").then(({ data }) => setCategories(data ?? []));
     if (!productId) return;
     supabase.from("products").select("*").eq("id", productId).single().then(({ data }) => {
       if (!data) return;
@@ -144,7 +144,7 @@ export function ProductForm({ productId, onSaved, onCancel }: { productId?: stri
         <Button type="button" size="sm" variant="outline" onClick={onCancel}>Close</Button>
         {message && <span role="status" className="text-sm">{message}</span>}
       </div>
-      {productId && <VariantsEditor productId={productId} onVariantsChange={setVariants} />}
+      {productId && <VariantsEditor productId={productId} isGiftCard={categories.some((category) => category.id === form.category_id && category.slug === "gift-cards")} onVariantsChange={setVariants} />}
     </form>
   );
 }

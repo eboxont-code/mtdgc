@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { ORDER_NOTICE, ORDER_STEPS, orderStepIndex, stepTime, formatNpr, SITE_URL } from "@/lib/format";
+import { GIFT_CARD_PRICE_DISCLOSURE } from "@/lib/gift-card-pricing";
 import { listMyOrders } from "@/lib/orders.functions";
 import { EmptyState } from "@/components/empty-state";
 import { Package } from "lucide-react";
@@ -92,12 +93,17 @@ function OrdersPage() {
                     <summary className="flex min-h-11 cursor-pointer items-center font-display text-sm">Order details</summary>
                     <ul className="mt-1 space-y-1 text-sm">
                       {order.items.map((item, i) => (
-                        <li key={i} className="flex justify-between gap-3">
-                          <span>{item.quantity} × {item.name}</span>
-                          <span className="font-display">{formatNpr(item.totalMinor)}</span>
+                        <li key={i} className="flex flex-col gap-0.5 sm:flex-row sm:justify-between sm:gap-3">
+                          <span>
+                            {item.quantity} × {item.name}
+                            <span className="block text-xs text-muted-foreground">{item.isGiftCard ? "Face value: " + item.variantName : item.variantName}</span>
+                            {item.isGiftCard && <span className="block text-xs text-muted-foreground">MTDGC selling price: {formatNpr(item.unitPriceMinor)} each</span>}
+                          </span>
+                          <span className="font-display">Line total: {formatNpr(item.totalMinor)}</span>
                         </li>
                       ))}
                     </ul>
+                    {order.items.some((item) => item.isGiftCard) && <p className="mt-2 text-xs text-muted-foreground">{GIFT_CARD_PRICE_DISCLOSURE}</p>}
                     <Link to="/order/$orderNumber" params={{ orderNumber: order.orderNumber }} className="mt-2 inline-flex min-h-11 items-center text-sm text-primary underline">
                       Open order page
                     </Link>

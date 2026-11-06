@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 
 import { contactKind } from "@/lib/product-help";
+import { GIFT_CARD_PRICE_DISCLOSURE, isGiftCardCategory } from "@/lib/gift-card-pricing";
 
 import { supabase } from "@/integrations/supabase/client";
 import { getPaymentSettings, placeOrder } from "@/lib/orders.functions";
@@ -219,9 +220,10 @@ function CheckoutPage() {
           )}
           <span className="min-w-0 flex-1 text-sm">
             <span className="block truncate font-display font-medium">{line.productName}</span>
-            <span className="block text-xs text-muted-foreground">{line.variantName} · Qty {line.quantity}</span>
+            <span className="block text-xs text-muted-foreground">{isGiftCardCategory(line.categorySlug) ? "Face value: " + line.variantName : line.variantName} · Qty {line.quantity}</span>
+            {isGiftCardCategory(line.categorySlug) && <span className="block text-xs text-muted-foreground">MTDGC selling price: {formatNpr(line.priceMinor)} each</span>}
           </span>
-          <span className="shrink-0 font-mono text-sm font-bold text-price">{formatNpr(line.priceMinor * line.quantity)}</span>
+          <span className="shrink-0 text-right font-mono text-sm font-bold text-price">{formatNpr(line.priceMinor * line.quantity)}{isGiftCardCategory(line.categorySlug) && <span className="block text-[10px] font-normal text-muted-foreground">Line total</span>}</span>
         </li>
       ))}
     </ul>
@@ -234,6 +236,7 @@ function CheckoutPage() {
         <span className="font-semibold">Total</span>
         <strong className="font-mono text-xl text-price">{formatNpr(totalMinor)}</strong>
       </div>
+      {shownLines.some((line) => isGiftCardCategory(line.categorySlug)) && <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{GIFT_CARD_PRICE_DISCLOSURE}</p>}
     </div>
   );
 

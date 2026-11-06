@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 1.4 · 6 November 2026
+**Version:** 1.5 · 6 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -100,13 +100,13 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** A clear operating model explains who MTDGC serves, what it sells, how it earns, and which product lines are deliberately excluded until proven.
 
-- [ ] **MT-0001 · P0 · TODO** — Choose the primary launch market and define whether Nepal or Australia is the first operational priority.
-- [ ] **MT-0002 · P0 · TODO** — Resolve the public positioning discrepancy: About says Nepal and Australia, while Terms currently describe sales to Nepal.
+- [x] **MT-0001 · P0 · DONE** — Primary stability/launch priority is Nepal domestic operations. Australia-to-Nepal gifting is a separate future journey; Australia-local sales remain gated on independent sourcing, payments, legal/tax and support readiness. Evidence: current product and business constraints in section 14.
+- [!] **MT-0002 · P0 · BLOCKED** — Resolve the public positioning discrepancy between About and Terms. The safe market scope is recorded as Nepal-first, but changing customer-facing market claims or legal Terms requires the owner’s approved operating-market decision and qualified review; do not rewrite legal copy from assumptions.
 - [x] **MT-0003 · P0 · DONE** — Define MTDGC as Matrix Digital Goods & Commerce, a multi-category digital commerce brand, not only a game top-up shop.
-- [ ] **MT-0004 · P0 · TODO** — Write a one-sentence customer promise based on verified sourcing, clear regions, transparent pricing and accountable delivery.
-- [ ] **MT-0005 · P0 · TODO** — Define the first customer segments separately: gamers, gift-card buyers, subscription users and software buyers.
-- [ ] **MT-0006 · P0 · TODO** — Define the primary commercial metric as fulfilled, profitable orders, not catalog size or website visits.
-- [ ] **MT-0007 · P0 · TODO** — Separate revenue, gross margin, supplier cost, payment cost, refunds and support cost in reporting.
+- [!] **MT-0004 · P0 · BLOCKED** — Write the customer promise only after actual sourcing, region compatibility and delivery performance are verified. The supplier register currently has no verified supplier/product-scope records, so a promise about legitimate sourcing or accountable delivery would be unsubstantiated.
+- [!] **MT-0005 · P0 · BLOCKED** — Prioritise customer segments using owner-approved target-market/customer evidence. No validated customer research, sales mix or owner segment choice is recorded; do not infer priority from catalogue categories.
+- [!] **MT-0006 · P0 · BLOCKED** — Approve the primary commercial KPI and its reporting definition with the business owner. The plan suggests fulfilled, profitable orders, but no owner-approved target or measurement window is recorded.
+- [!] **MT-0007 · P0 · BLOCKED** — Implement trusted unit-economics reporting after supplier cost, payment fee, refund and support-cost sources are available. Current supplier costs and payment fee records are not populated; no actual margin figures can be calculated without inventing inputs.
 - [ ] **MT-0008 · P1 · TODO** — Define MTDGC’s own customer value through legitimate sourcing, regional compatibility, clear delivery and reliable support.
 - [ ] **MT-0009 · P1 · TODO** — Define the role of Matrix as the umbrella brand and the role of each product category beneath it.
 - [ ] **MT-0010 · P1 · TODO** — Decide whether the initial experience is marketplace-style retail or a curated single-operator digital store.
@@ -127,11 +127,11 @@ Do not set numerical targets until a reliable baseline exists.
 
 - [x] **MT-0021 · P0 · DONE** — Reconcile the product records against the current database and public storefront. The 26 October snapshot recorded 26 entries and the 5 November snapshot recorded 36; classify every current record as orderable, coming soon, hidden, duplicate or obsolete and record the verified count before using it in public claims.
 - [x] **MT-0022 · P0 · DONE** — Reconcile the homepage, catalog, category pages and product records so product counts and availability labels agree. The shared availability counter now includes an unavailable bucket; category/product/catalog summaries and the catalog filter expose it. The production build is READY on `mtdgc.com` at commit `82ee56a8189b6808b9e9bf64487cd7e6f77361df`.
-- [ ] **MT-0023 · P0 · TODO** — Confirm the exact six products currently shown as available before advertising them as in stock.
+- [!] **MT-0023 · P0 · BLOCKED** — The current production snapshot has five catalogue listings flagged as orderable, but the repository/database contains no supplier stock confirmations or dated availability evidence. Internal status flags are not proof of live stock; do not advertise them as in stock until supplier evidence is recorded.
 - [x] **MT-0024 · P0 · DONE** — Ensure coming-soon products cannot be purchased or accidentally enter checkout.
-- [ ] **MT-0025 · P0 · TODO** — For each orderable item, verify supplier, denomination, region, platform and delivery method.
+- [!] **MT-0025 · P0 · BLOCKED** — Product records contain descriptive fields, but the supplier register is empty and no supplier/issuer evidence or test-order evidence is available for the five currently orderable listings. Exact supplier, denomination, region compatibility and delivery route cannot be verified without external evidence.
 - [x] **MT-0026 · P0 · DONE** — Verify the exact selected product variant and amount across cart, checkout, order confirmation and authenticated order history. Code-path audit completed 6 November 2026; evidence is recorded in section 21.
-- [ ] **MT-0027 · P0 · TODO** — Distinguish gift card face value from MTDGC selling price and any fees.
+- [x] **MT-0027 · P0 · DONE** — Distinguish gift-card face value/denomination from MTDGC selling price across product, cart, checkout and order views; disclose that the current checkout adds no separate MTDGC fee and that payment providers may charge separately. Evidence: section 22 and the linked code changes.
 - [ ] **MT-0028 · P1 · TODO** — Add consistent product attributes for region, currency, platform, validity, denomination and restrictions.
 - [ ] **MT-0029 · P1 · TODO** — Create separate templates for game top-ups, gift cards, subscriptions and software licences.
 - [ ] **MT-0030 · P1 · TODO** — Show required customer information before checkout, not after payment.
@@ -152,7 +152,7 @@ Do not set numerical targets until a reliable baseline exists.
 
 - [x] **MT-0041 · P0 · DONE** — Build a supplier register with legal name, country, contact, product scope and verification status. Created `SUPPLIER_REGISTER.md` with supplier identity, product-scope authority, commercial/operational controls, verification statuses and an initial product sourcing queue. No supplier identities or approvals were invented.
 - [!] **MT-0042 · P0 · BLOCKED** — Record the source of every code, top-up and subscription before making the listing orderable. The repository and current database contain no supplier identity/source records; actual source details and evidence are not available to populate the register. Do not infer or fabricate a source.
-- [ ] **MT-0043 · P0 · TODO** — Verify that each supplier is authorised to resell or distribute the relevant product.
+- [!] **MT-0043 · P0 · BLOCKED** — No supplier identities or issuer/distributor authorisation documents are present in the supplier register. Verification requires source evidence from the actual supplier/rights holder; no supplier will be invented or contacted during this run.
 - [ ] **MT-0044 · P0 · TODO** — Reject suppliers who require customer passwords, OTPs, payment PINs or unsafe account access.
 - [ ] **MT-0045 · P0 · TODO** — Test one low-value transaction per supplier and product family before scaling orders.
 - [ ] **MT-0046 · P0 · TODO** — Document supplier delivery time, cut-off hours, failure process and escalation contact.
@@ -841,7 +841,7 @@ No dependencies were added and `bun.lock` was not changed. No production secrets
 
 ### Next independent engineering task
 
-MT-0306 was assessed on 6 November 2026 and is now BLOCKED: Lovable's current project SHA matches GitHub `main`, but private branch protection requires a paid GitHub plan and the connected integration cannot verify protection/bypass settings. See section 21. Do not change repository protection settings.
+MT-0306 was assessed on 6 November 2026 and is now BLOCKED: Lovable's current project SHA matches GitHub `main`, but private branch protection requires a paid GitHub plan and the connected integration cannot verify protection/bypass settings. See section 21. Do not change repository protection settings. The next independent P0 catalogue task, MT-0027, was completed in section 22.
 
 
 
@@ -918,3 +918,25 @@ No product records, supplier assignments, prices, variants, order records, datab
 
 **Verification boundary:** This was a source-code path audit, not a live checkout or payment test. No order was created, no payment was submitted, and no production records were changed. The separate low-value end-to-end supplier/order test remains dependent on verified supply and operational evidence.
 
+
+## 22. Gift-card denomination and selling-price clarity — 6 November 2026
+
+**Task:** MT-0027 · P0 · DONE
+
+### Data audit
+- The product-variant schema stores an option name, numeric price and currency; it has no separate face-value, denomination-currency or fee columns.
+- The current Roblox gift-card options are named USD 10 Card and USD 25 Card. Their numeric option prices are MTDGC NPR selling prices (the current admin editor labels the price input Price (NPR); the variant currency defaults to NPR).
+- Order creation uses the saved variant price for subtotal_minor and total_minor; there is no separate MTDGC checkout-fee calculation or payment-fee field. A bank/payment provider may still charge independently; its fee is not controlled by this site.
+- No face value has been parsed from free-form names, converted, or inferred into a new numeric field. The issuer denomination remains the exact option name until a structured denomination field can be introduced safely with the approved database migration path.
+
+### Implementation
+- Product detail labels each gift-card option as Face value and its NPR amount as MTDGC selling price.
+- Product summary, mobile buy bar, product cards, cart drawer, cart, checkout, guest order page, order tracking and authenticated order history use explicit face-value / selling-price labels for gift-card items.
+- Gift-card disclosure states that the NPR amount is MTDGC’s selling price, that checkout adds no separate MTDGC fee in the current implementation, and that a bank/payment provider may charge separately.
+- Admin variant editing instructs the operator to enter the issuer denomination and currency in the option name (for example, USD 10 Card) and keep the NPR price as MTDGC’s selling price.
+- Added unit tests for gift-card category classification and required disclosure wording.
+
+### Verification boundary
+- This is a code/UI clarification using existing records only. No product price, denomination, fee, stock flag, supplier record or production database row was changed.
+- No supplier denomination or resale authority was verified. The existing option name is displayed as supplied; it is not treated as independently verified issuer evidence.
+- No checkout was submitted and no payment was made. Automated GitHub Actions lint/test/typecheck/build is the authoritative verification for this commit.

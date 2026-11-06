@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { MAX_QTY, useCart } from "@/lib/cart";
 import { formatNpr } from "@/lib/format";
+import { GIFT_CARD_PRICE_DISCLOSURE, isGiftCardCategory } from "@/lib/gift-card-pricing";
 
 export function CartDrawer() {
   const { lines, count, subtotalMinor, drawerOpen, setDrawerOpen, setQuantity, remove } = useCart();
@@ -69,9 +70,9 @@ function OpenCartDrawer() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-display text-sm font-medium">{line.productName}</p>
                     <p className="text-xs text-muted-foreground">
-                      {line.variantName} · {formatNpr(line.priceMinor)}
+                      {isGiftCardCategory(line.categorySlug) ? "Face value: " + line.variantName : line.variantName} · {isGiftCardCategory(line.categorySlug) ? "MTDGC price " + formatNpr(line.priceMinor) + " each" : formatNpr(line.priceMinor)}
                     </p>
-                    <p className="mt-1 font-display text-xs">Subtotal {formatNpr(line.priceMinor * line.quantity)}</p>
+                    <p className="mt-1 font-display text-xs">Line total {formatNpr(line.priceMinor * line.quantity)}</p>
                   </div>
                   <div className="flex w-full items-center justify-end gap-1 sm:w-auto">
                     <Button
@@ -111,6 +112,7 @@ function OpenCartDrawer() {
               <span>Estimated total</span>
               <strong>{formatNpr(subtotalMinor)}</strong>
             </div>
+            {lines.some((line) => isGiftCardCategory(line.categorySlug)) && <p className="mt-3 rounded-md bg-secondary p-3 text-xs text-muted-foreground">{GIFT_CARD_PRICE_DISCLOSURE}</p>}
             <p className="mt-3 rounded-md bg-secondary p-3 text-xs text-muted-foreground">
               Check out on this site to get your order number and payment details, then upload your payment
               screenshot. We deliver once it is verified.

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { MAX_QTY, useCart } from "@/lib/cart";
 import { requirementHelp } from "@/lib/product-help";
 import { formatNpr, SITE_URL } from "@/lib/format";
+import { GIFT_CARD_PRICE_DISCLOSURE, isGiftCardCategory } from "@/lib/gift-card-pricing";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/cart")({
 
 function CartPage() {
   const { lines, count, subtotalMinor, setQuantity, remove, updateFields, clear, hydrated } = useCart();
+  const hasGiftCard = lines.some((line) => isGiftCardCategory(line.categorySlug));
 
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
@@ -60,8 +62,9 @@ function CartPage() {
                     <Link to="/products/$slug" params={{ slug: line.productSlug }} className="font-display text-sm font-medium hover:text-primary">
                       {line.productName}
                     </Link>
-                    <p className="text-xs text-muted-foreground">{line.variantName} · Region: {line.region ?? "See product"}</p>
-                    <p className="mt-1 font-display text-sm">{formatNpr(line.priceMinor * line.quantity)}</p>
+                    <p className="text-xs text-muted-foreground">{isGiftCardCategory(line.categorySlug) ? "Face value: " + line.variantName : line.variantName} · Region: {line.region ?? "See product"}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{isGiftCardCategory(line.categorySlug) ? "MTDGC selling price: " + formatNpr(line.priceMinor) + " each" : "Unit price: " + formatNpr(line.priceMinor)}</p>
+                    <p className="mt-1 font-display text-sm">Line total: {formatNpr(line.priceMinor * line.quantity)}</p>
                     {line.fields && Object.keys(line.fields).length > 0 && (
                       <details className="mt-3">
                         <summary className="cursor-pointer font-display text-xs font-medium">Edit order details</summary>
@@ -94,6 +97,7 @@ function CartPage() {
                 <span>Estimated total</span>
                 <strong className="font-mono text-lg text-price">{formatNpr(subtotalMinor)}</strong>
               </div>
+              {hasGiftCard && <p className="mt-2 text-xs text-muted-foreground">{GIFT_CARD_PRICE_DISCLOSURE}</p>}
               <p className="mt-2 text-xs text-muted-foreground">
                 No card is charged on this site. After you place the order you pay by QR code or bank transfer, then upload
                 your payment screenshot.
