@@ -95,8 +95,6 @@ export const placeOrder = createServerFn({ method: "POST" })
       const product = variant?.products as { categories?: { slug?: string } | null } | null | undefined;
       return product?.categories?.slug;
     });
-    assertOrderDetailsConfirmed(productCategorySlugs, data.detailsConfirmed);
-
     const items = data.lines.map((line) => {
       const v = variants?.find((x) => x.sku === line.sku);
       const p = v?.products as { id: string; name: string; is_published: boolean; status: string; region: string; requirements: unknown } | null | undefined;
@@ -114,6 +112,7 @@ export const placeOrder = createServerFn({ method: "POST" })
         fields: buildOrderItemFieldsSnapshot(line.fields, p.region, p.requirements),
       };
     });
+    assertOrderDetailsConfirmed(productCategorySlugs, data.detailsConfirmed);
     const subtotal = items.reduce((s, i) => s + i.line_total_minor, 0);
     const email = data.email || null;
     const contactKey = normaliseContact(data.phone || data.email || "");
