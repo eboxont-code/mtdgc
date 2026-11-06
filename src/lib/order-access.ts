@@ -16,8 +16,8 @@ export type PaymentProofOrder = {
  */
 export function isValidOrderLookupContact(contact: string): boolean {
   const value = contact.trim();
-  if (/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value)) return true;
-  const digits = value.replace(/\\D/g, "");
+  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return true;
+  const digits = value.replace(/\D/g, "");
   return digits.length >= 7 && digits.length <= 15;
 }
 
