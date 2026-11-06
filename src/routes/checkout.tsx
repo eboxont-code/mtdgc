@@ -243,7 +243,7 @@ function CheckoutPage() {
   const reassurance = (
     <ul className="mt-4 space-y-2 border-t border-border pt-4 text-xs text-muted-foreground">
       <li className="flex gap-2"><ShieldCheck className="size-4 shrink-0 text-primary" />We check every order before delivery.</li>
-      <li className="flex gap-2"><Lock className="size-4 shrink-0 text-primary" />We never ask for your password, OTP or payment PIN.</li>
+      <li className="flex gap-2"><Lock className="size-4 shrink-0 text-primary" />We never ask for your password, OTP, recovery code or payment PIN.</li>
     </ul>
   );
 

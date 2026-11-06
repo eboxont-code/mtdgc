@@ -1,7 +1,7 @@
 # MTDGC Supplier Register
 
 **Owner:** MTDGC  
-**Register version:** 1.0  
+**Register version:** 1.1  
 **Created:** 6 November 2026  
 **Canonical use:** Supplier identity, authority, product scope and verification evidence for MTDGC digital goods.
 
@@ -13,10 +13,25 @@
 2. Verify at the narrowest practical scope: supplier + product family/SKU + issuing region + denomination + delivery method. A supplier verified for one product or country is not automatically verified for another.
 3. Never invent missing legal names, contacts, reseller status, contracts, product origins, delivery times or supplier prices. Use `Not supplied`, `Not verified` or `Not applicable`.
 4. Do not mark a supplier or product scope `VERIFIED` without current evidence of authority, regional compatibility, supply origin, commercial terms and an accountable operational contact.
-5. Do not request or store customer passwords, one-time passwords (OTPs), payment PINs or unnecessary account access. Reject a supplier workflow that requires these.
+5. Never request or store customer passwords, passcodes, one-time passwords (OTPs), authenticator/2FA codes, recovery or backup codes, payment/bank/card PINs, session cookies, access tokens or unnecessary account access. Reject any supplier workflow that requires these.
 6. Keep private credentials, API keys, bank credentials and customer data out of this Markdown file and Git history. Store operational secrets only in the approved secret manager once an owner-approved integration exists.
 7. A completed register does not itself approve a product for sale. Product, pricing, legal, payment, region and test-order launch gates still apply.
 8. Preserve published Git history. Correct records with a forward commit; never rewrite shared history to conceal or alter supplier evidence.
+
+
+### 1.1 Automatic rejection — customer credentials and unsafe account access
+
+A supplier and the affected product scope must be marked `REJECTED` if fulfilment requires the customer to disclose or transfer any of the following:
+
+- Account, game, subscription or email passwords/passcodes.
+- OTPs, one-time/verification codes, authenticator or 2FA codes.
+- Payment, bank, card or other account PINs; card security codes; or bank/card login credentials.
+- Recovery/backup codes or phrases, session cookies, access tokens, private keys or other authentication secrets.
+- Remote access/control of a customer's device or account, or handing over account ownership/control when that is not an issuer-authorised product flow.
+
+Do not onboard or test that workflow, and do not ask the customer to send the credential to MTDGC or the supplier. Record only the non-sensitive evidence reference and rejection reason; never copy the credential itself into the register, a support ticket or Git history. If the supplier's requirements are unclear, keep the scope `NOT ASSESSED` and do not make it orderable until clarified through legitimate evidence.
+
+Only product identifiers and delivery contact details that are strictly necessary for the exact product's official fulfilment route may be requested. A customer email address for delivery is not permission to request the email account password.
 
 ## 2. Supplier identity register
 
@@ -70,7 +85,7 @@ Before approving a product scope, record references to evidence for all applicab
 - [ ] Product origin and chain of supply are traceable; unusually discounted or high-risk digital codes have proof of origin.
 - [ ] Supplier terms permit the proposed resale, marketing, payment method, fulfilment and customer support model.
 - [ ] Customer data shared with the supplier is necessary, disclosed, protected and subject to documented retention/deletion controls.
-- [ ] Supplier does not require customer passwords, OTPs, payment PINs, recovery codes or unsafe account access.
+- [ ] Supplier does not require customer passwords, OTPs/2FA codes, payment/bank/card PINs, recovery/backup codes, session cookies, access tokens or unsafe account access. If any are required, mark the supplier and affected scope REJECTED and stop; do not run a test transaction.
 - [ ] Unit cost, currency, quote date/expiry, settlement route, fees and refund/failure allocation are recorded.
 - [ ] Delivery steps, realistic service window, cut-off hours, outage process and escalation path are documented.
 - [ ] A low-value end-to-end test passes for this exact product family and region, with the evidence recorded in the operational test log.
@@ -108,4 +123,4 @@ Coming-soon listings are not sourcing approvals. Add each one to the product-sco
 - This register is therefore created with an empty supplier identity table and an explicit product sourcing queue. It does not invent supplier names or convert existing catalogue products into verified supply.
 - A persistent supplier table/migration was not added. The repository master plan holds backend migrations until the Boxont-controlled Supabase cutover and database reconciliation are complete. Keep this register in Git until that migration gate is formally cleared.
 
-**Initial status:** Register structure created. Actual supplier population and verification remain separate evidence-dependent tasks under MT-0042–MT-0046 and MT-0043 in particular.
+**Initial status:** Register structure and mandatory credential-rejection policy created. No supplier has been screened or rejected because the supplier identity register remains empty; actual supplier population, evidence review and test transactions remain separate dependency-gated tasks under MT-0042–MT-0046.

@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { findUnsafeCustomerRequirement, UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE } from "@/lib/supplier-safety";
 
 type Ctx = { supabase: SupabaseClient<Database>; userId: string };
 
@@ -59,7 +60,10 @@ const productSchema = z.object({
   platform: z.string().trim().max(60).nullable(),
   delivery_method: z.string().trim().min(1).max(120),
   delivery_time: z.string().trim().min(1).max(120),
-  requirements: z.array(z.string().trim().min(1).max(60)).max(8),
+  requirements: z.array(z.string().trim().min(1).max(60)).max(8).refine(
+    (requirements) => !findUnsafeCustomerRequirement(requirements),
+    { message: UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE },
+  ),
   image_url: z.string().trim().url().max(500).nullable(),
   seo_title: z.string().trim().min(1).max(70),
   seo_description: z.string().trim().min(1).max(170),

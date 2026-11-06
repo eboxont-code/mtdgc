@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { saveProduct } from "@/lib/admin.functions";
 import { VariantsEditor } from "./variants-editor";
 import { publicationBlockReason } from "@/lib/publication-check";
+import { findUnsafeCustomerRequirement, UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE } from "@/lib/supplier-safety";
 
 const STATUSES = ["available", "low_stock", "coming_soon", "out_of_stock", "temporarily_unavailable", "archived"] as const;
 
@@ -31,6 +32,8 @@ function validate(f: Form): Partial<Record<keyof Form, string>> {
   if (!f.region.trim()) e.region = "Add a region.";
   if (!f.delivery_method.trim()) e.delivery_method = "Add a delivery method.";
   if (!f.delivery_time.trim()) e.delivery_time = "Add a delivery time.";
+  const requestedDetails = f.requirements.split(",").map((item) => item.trim()).filter(Boolean);
+  if (findUnsafeCustomerRequirement(requestedDetails)) e.requirements = UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE;
   if (f.image_url.trim() && !/^https?:\/\//.test(f.image_url.trim())) e.image_url = "Use a full https link or leave empty.";
   if (!f.seo_title.trim() || f.seo_title.length > 70) e.seo_title = "Add an SEO title of up to 70 characters.";
   if (!f.seo_description.trim() || f.seo_description.length > 170) e.seo_description = "Add an SEO description of up to 170 characters.";
@@ -124,7 +127,10 @@ export function ProductForm({ productId, onSaved, onCancel }: { productId?: stri
       {field("platform", "Platform")}
       {field("delivery_method", "Delivery method")}
       {field("delivery_time", "Delivery time")}
-      {field("requirements", "Required details, separated by commas")}
+      <div className="md:col-span-2">
+        {field("requirements", "Required details, separated by commas")}
+        <p className="mt-1 text-xs text-muted-foreground">Request only product identifiers and necessary delivery contact details. Passwords, OTPs, PINs, recovery codes and account-access credentials are not permitted.</p>
+      </div>
       {field("image_url", "Image URL")}
       {field("seo_title", "SEO title")}
       {field("seo_description", "SEO description", true)}
