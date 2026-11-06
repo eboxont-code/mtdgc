@@ -125,7 +125,7 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Every purchasable listing is accurate, available, region-labelled, priced and clear about the exact item the customer receives.
 
-- [ ] **MT-0021 · P0 · IN PROGRESS** — Reconcile the product records against the current database and public storefront. The 26 October snapshot recorded 26 entries and the 5 November snapshot recorded 36; classify every current record as orderable, coming soon, hidden, duplicate or obsolete and record the verified count before using it in public claims.
+- [x] **MT-0021 · P0 · DONE** — Reconcile the product records against the current database and public storefront. The 26 October snapshot recorded 26 entries and the 5 November snapshot recorded 36; classify every current record as orderable, coming soon, hidden, duplicate or obsolete and record the verified count before using it in public claims.
 - [ ] **MT-0022 · P0 · TODO** — Reconcile the homepage, catalog, category pages and product records so product counts and availability labels agree.
 - [ ] **MT-0023 · P0 · TODO** — Confirm the exact six products currently shown as available before advertising them as in stock.
 - [x] **MT-0024 · P0 · DONE** — Ensure coming-soon products cannot be purchased or accidentally enter checkout.
@@ -534,14 +534,13 @@ Only one numbered task is marked **IN PROGRESS**. Task statuses in the 308-task 
 
 | Order | Task | Status |
 |---:|---|---|
-| 1 | MT-0021 — reconcile current product records, availability and the conflicting 26 / 36 public snapshots | IN PROGRESS |
-| 2 | MT-0302 — review Git history for any credentials in the removed `.env` and rotate any real secrets | BLOCKED; controlled credential review required |
-| 3 | MT-0282 — resolve the exact Netflix/subscription fulfilment method and pause unsupported offers | TODO |
-| 4 | MT-0041–0046 — verify supplier legitimacy, resale rights, region, denomination and delivery evidence | TODO |
-| 5 | Test one complete low-value Nepal order for each live product family and document payment/fulfilment evidence | TODO |
-| 6 | Resolve seller identity, Nepal/Australia policy scope and the legal/payment boundary for Australia-to-Nepal gifting | TODO |
-| 7 | Complete Boxont-owned Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED |
-| 8 | Add a repeatable test/typecheck/CI quality gate and protect `main` after validating Lovable sync | TODO |
+| 1 | MT-0302 — review Git history for any credentials in the removed `.env` and rotate any real secrets | BLOCKED; controlled credential review required |
+| 2 | MT-0282 — resolve the exact Netflix/subscription fulfilment method and pause unsupported offers | TODO |
+| 3 | MT-0041–0046 — verify supplier legitimacy, resale rights, region, denomination and delivery evidence | TODO |
+| 4 | Test one complete low-value Nepal order for each live product family and document payment/fulfilment evidence | TODO |
+| 5 | Resolve seller identity, Nepal/Australia policy scope and the legal/payment boundary for Australia-to-Nepal gifting | TODO |
+| 6 | Complete Boxont-owned Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED |
+| 7 | Add a repeatable test/typecheck/CI quality gate and protect `main` after validating Lovable sync | TODO |
 
 **Repository security note:** The tracked root `.env` has been removed from the current `main` tree, local environment files are now ignored, and a placeholder-only `.env.example` has been added. This does not erase earlier commits. Do not assume old values are safe; rotate any private values found in Git history.
 
@@ -644,4 +643,58 @@ Only MTDGC website URLs are retained as website references in this plan. Competi
 - [ ] [BLOCKED] Approve the exact Netflix/subscription fulfilment description only after the supply method and customer-control terms are verified.
 - [ ] [BLOCKED] Approve Australian seller entity, ABN, AUD pricing, payment provider and market-specific legal review before activating Australian-local sales.
 - [ ] [BLOCKED] Confirm whether account migration from current GitHub/Vercel/Supabase/Sentry ownership is wanted; no account move was started.
+
+
+
+## 15. Product catalogue reconciliation — 6 November 2026
+
+**Task:** MT-0021 · P0 · DONE  
+**Result:** The live public catalogue and the connected MTDGC production database agree on the current catalogue count and availability classification.
+
+### Verified totals
+
+| Classification | Database records | Public catalogue |
+|---|---:|---:|
+| Total listed products | 36 | 36 |
+| Orderable by current catalogue rules | 6 | 6 |
+| Coming soon | 30 | 30 |
+| Unpublished / hidden | 0 | 0 |
+| Archived / obsolete state | 0 archived | Not separately represented |
+
+All 36 rows in `public.products` are published. Six products have a parent status of `available` and at least one positively priced variant with an `available` or `low_stock` status. The remaining 30 have a `coming_soon` parent status and no orderable variants. The public catalogue reports **36 listed / 6 available now / 30 coming soon**.
+
+### Category reconciliation
+
+| Category | Database | Public catalogue | Available now | Coming soon |
+|---|---:|---:|---:|---:|
+| Game Top-Ups | 6 | 6 | 4 | 2 |
+| Gift Cards | 12 | 12 | 1 | 11 |
+| Software | 11 | 11 | 0 | 11 |
+| Subscriptions | 7 | 7 | 1 | 6 |
+| **Total** | **36** | **36** | **6** | **30** |
+
+### Record classification
+
+**Orderable by current catalogue flags (6):**
+- Game Top-Ups: Free Fire Diamonds; PUBG Mobile UC; Mobile Legends Diamonds; Clash of Clans Passes.
+- Gift Cards: Roblox Gift Card.
+- Subscriptions: Netflix Subscription.
+
+**Coming soon (30):**
+- Game Top-Ups: Genshin Impact Genesis Crystals; Valorant Points.
+- Gift Cards: Steam Wallet Code; Amart Furniture Gift Card (Australia); Bunnings Gift Card (Australia); Coles Gift Card (Australia); DoorDash Gift Card (Australia); JB Hi-Fi Gift Card (Australia); Kmart Gift Card (Australia); Supercheap Auto Gift Card (Australia); Ticketmaster Gift Card (Australia); Uber Eats Gift Card (Australia); Woolworths Gift Card (Australia).
+- Software: Adobe Creative Cloud; Canva Pro; CapCut Pro; ChatGPT Plus; Grammarly Premium; Kaspersky Standard; Microsoft 365; NordVPN; Office 2021 Professional Plus; Windows 11 Pro; Windows 11 Pro and Office 2021 Bundle.
+- Subscriptions: Disney+ Hotstar; Google One 100 GB; Prime Video; Spotify and YouTube Premium Bundle; Spotify Premium; YouTube Premium.
+
+**Hidden:** None. All 36 product rows currently have `is_published = true` and appear in the public catalogue.
+**Duplicates:** No exact duplicate product names were returned by a normalized-name check. Product slugs are also protected by a unique database constraint.
+**Obsolete:** No product is marked `archived`. No product could be confirmed obsolete from the available record fields; do not infer that a coming-soon product is obsolete.
+
+### Scope and safeguards
+
+This reconciliation verifies database catalogue state, variant eligibility and public listing counts only. It does **not** prove supplier authorisation, live supplier inventory, region compatibility, price validity, margin or successful fulfilment. The six products shown as available must still pass the supplier and test-order gates before any stronger stock or availability claims. In particular, the Netflix fulfilment method and account-ownership description remain a separate open task (MT-0282).
+
+No product, variant, category, price, availability flag or database record was changed as part of this audit.
+
+**Evidence sources:** read-only query of the MTDGC `public.products`, `public.product_variants` and `public.categories` tables on 6 November 2026; public pages [Catalog](https://mtdgc.com/catalog), [All products](https://mtdgc.com/products), [Game Top-Ups](https://mtdgc.com/categories/game-top-ups) and [Gift Cards](https://mtdgc.com/categories/gift-cards).
 
