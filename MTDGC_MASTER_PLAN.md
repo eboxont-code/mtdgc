@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.8 · 7 November 2026
+**Version:** 2.9 · 7 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -252,7 +252,7 @@ Do not set numerical targets until a reliable baseline exists.
 
 - [!] **MT-0121 · P0 · BLOCKED** — The supplier register has no verified supplier/product-scope records, no approved delivery route and no supplier-specific fulfilment instructions for the currently listed product families. The repository records product requirements but does not establish how an authorised supplier actually fulfils each SKU. The owner must provide verified supplier/source, region-scope and delivery-step evidence before a product-family runbook can be accurate. Do not invent steps or contact suppliers. Revisit when that evidence is supplied.
 - [x] **MT-0122 · P0 · DONE** — Snapshot each order item's product region and required customer-field labels at order creation in the existing `order_items.fields` JSONB, retain the selected variant/denomination in `variant_name`, and show an admin pre-fulfilment checklist that flags missing captured values. Historical items without the snapshot explicitly show region/requirements as not captured; no current catalog values or supplier instructions are inferred. Evidence: section 34.
-- [ ] **MT-0123 · P0 · TODO** — Require a second confirmation for irreversible top-ups and code releases.
+- [x] **MT-0123 · P0 · DONE** — Add a final customer review for the current `game-top-ups` and `gift-cards` categories. Checkout displays the exact selected product/option, region when present and saved delivery fields; the customer must explicitly confirm before order creation. The server resolves category from the selected SKU and rejects requests missing the acknowledgement. No supplier-side irreversibility claim is made because no supplier-specific evidence exists. Evidence: section 35.
 - [ ] **MT-0124 · P0 · TODO** — Record the supplier transaction or redemption reference for each completed order.
 - [ ] **MT-0125 · P0 · TODO** — Capture delivery evidence and attach it to the correct order.
 - [ ] **MT-0126 · P0 · TODO** — Never request a customer's game password, subscription password, OTP or payment PIN.
@@ -1397,4 +1397,52 @@ MT-0106 is completed in section 33. MT-0121 was reviewed and marked BLOCKED beca
 - The latest observed production deployment remains READY on older commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`, not this working branch. Vercel reported no runtime errors in the preceding 24 hours. The final branch commit's Vercel check is blocked by the free build-rate limit; no paid upgrade or retry was attempted.
 - Existing `order_items` RLS already permits an authenticated order owner or admin to read the corresponding order item JSONB; this change adds no policy or grant. The guest order-summary function does not select `fields`, so it does not return the snapshot. No production order, customer record, payment record, database schema, storage policy, environment variable, billing setting or production deployment was changed. Vercel created an automatic preview for the earlier working-branch commit only; no production aliases were changed. No supplier or third party was contacted; no spend occurred.
 
-**Next P0 task:** MT-0123 — require a second confirmation for irreversible top-ups and code releases. Inspect the current checkout/category action paths and only classify actions supported by existing product data; do not invent supplier-side irreversibility or fulfilment rules.
+**Next P0 task:** MT-0124 — record the supplier transaction or redemption reference for each completed order. Inspect existing order/status-event fields and admin fulfilment actions first; do not invent supplier reference formats or add a production schema migration before the Supabase cutover.
+
+
+## 35. Checkout second confirmation for top-ups and emailed codes — 7 November 2026
+
+**Task:** MT-0123 · P0 · DONE — added a second, explicit review step for product categories whose current production data identifies game top-ups or emailed gift-card codes.
+
+### Scope selected from existing product data
+
+- A read-only production query against Supabase project `mtdgc` (`eaomkkswslqtfunkceuc`) showed currently available products in `game-top-ups`: Clash of Clans Passes (Supercell ID email and player tag), Free Fire Diamonds (player ID and nickname), Mobile Legends Diamonds (user ID and Zone ID), and PUBG Mobile UC (player ID and nickname).
+- The same query showed the currently available `gift-cards` product, Roblox Gift Card, with delivery method `Digital code sent to your delivery email` and the required delivery-email field.
+- Other gift-card listings were `coming_soon`; software and subscription listings were `coming_soon`, and Netflix was `temporarily_unavailable`. They were not treated as current code-release actions.
+- The production product schema has category, region, delivery method and requirements, but no explicit supplier-side `irreversible` property. The supplier register still contains no verified supplier/product-scope evidence. No supplier irreversibility, redemption rule or reversal policy was inferred.
+
+### Implementation
+
+- Added `src/lib/order-confirmation.ts` with one shared category policy for `game-top-ups` and `gift-cards`. Older saved cart entries that lack a category slug but contain delivery fields are conservatively prompted for confirmation.
+- Added a checkout `AlertDialog` before order creation. It displays product name, selected option/face value, region when present and the exact saved delivery-field values. The customer can return to edit or explicitly choose **Confirm details & place order**.
+- Both the desktop review button and mobile sticky checkout action use the same confirmation path.
+- Extended `placeOrder` with a `detailsConfirmed` acknowledgement. Before creating an order, the server resolves the selected SKU's product/category from the database and rejects a `game-top-ups` or `gift-cards` order if the acknowledgement is absent. The server does not trust the cart's category label for this decision.
+- No supplier-specific reversibility claim is displayed. The prompt accurately asks the customer to verify the submitted values; it does not say that every supplier action is irreversible.
+- This acknowledgement is a checkout mistake-prevention safeguard, not an authorization boundary or cryptographic proof that a human read the dialog. A deliberate direct API caller can still submit the acknowledgement flag; supplier/payment verification and fulfilment controls remain separate.
+
+### Files and commits
+
+- `src/lib/order-confirmation.ts` — category policy and server assertion.
+- `src/lib/order-confirmation.test.ts` — five focused tests.
+- `src/lib/orders.functions.ts` — authoritative category resolution and required acknowledgement before order insert.
+- `src/routes/checkout.tsx` — final review dialog used by desktop and mobile checkout actions.
+- `MTDGC_DATA_ARCHITECTURE.md` — section 7 documents the confirmation boundary and limitations.
+- Implementation commits: [helper `c66f1c0`](https://github.com/eboxont-code/mtdgc/commit/c66f1c07aba07a4b64d79474a7d816e9b799996d), [tests `3494bf2`](https://github.com/eboxont-code/mtdgc/commit/3494bf25a36c12c1b43adb50a00cdfe86a7808f2), [server enforcement `a0d23a6`](https://github.com/eboxont-code/mtdgc/commit/a0d23a658312533e84ecda2230c7d5822231ac01), [checkout confirmation UI `56b3442`](https://github.com/eboxont-code/mtdgc/commit/56b344204b56ebbb597a5564135b233235089baf), [exact optional-property compatibility `18f8411`](https://github.com/eboxont-code/mtdgc/commit/18f8411db9e6ea277e02c0d7e503c7956a8f4d6a), and [architecture note `5bd2238`](https://github.com/eboxont-code/mtdgc/commit/5bd223888dd4267b9ce2749ed2222f2c4d462e38).
+
+### Verification
+
+- Focused test file `src/lib/order-confirmation.test.ts`: **5 passed, 0 failed**, run with Node 22.16 using `node --experimental-strip-types --test` in a scratch workspace containing the exact helper/test source.
+- Strict TypeScript check of the helper passed with `tsc --noEmit --strict --exactOptionalPropertyTypes --noUncheckedIndexedAccess --target ES2022 --module ESNext --moduleResolution Bundler`.
+- The tests cover category selection, unrelated categories, conservative handling of older carts without category metadata, rejection when server-resolved top-up/code categories lack acknowledgement, and acceptance when acknowledgement is present.
+- Full `bun run lint`, `bun run test`, `bun run typecheck` and `bun run build` were not run: this environment has no Bun installation or local MTDGC checkout/dependency tree. The route/server integration therefore has not received the full project quality workflow.
+
+### CI, deployment and production safety
+
+- Current `main` remains at `1d948a818f056ec1ae1f630688070da6e8449fde`; its plan remains v2.1. The active working branch is `automation/mt-0104-order-transition-guard`, carrying this v2.9 plan. No PR was opened and `main` was not modified.
+- Current-main GitHub Actions Quality run [`42251736215`](https://github.com/eboxont-code/mtdgc/actions/runs/42251736215) succeeded: locked install, ESLint, unit tests, TypeScript typecheck and production build all passed. This run validates `main`, not the current working branch.
+- The latest working-branch commit's Vercel status is `failure` with target `https://vercel.com/boxont?upgradeToPro=build-rate-limit`; no successful final branch preview is evidenced. No deployment was requested and no paid upgrade was attempted.
+- The latest production deployment remains READY on older commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`, not this working branch. Vercel reported no runtime-error clusters in the preceding 24 hours.
+- Supabase project `mtdgc` reported `ACTIVE_HEALTHY`. Product/category/variant data and schema were queried read-only. No production order, payment, customer or product records were changed; no schema, RLS, storage, environment, billing or authentication setting was changed.
+- The GitHub connector provides remote repository file operations but no local working tree; local `git status` is unavailable. No supplier or third party was contacted and no money was spent.
+
+**Next P0 task:** MT-0124 — record the supplier transaction or redemption reference for each completed order. Inspect existing order/status-event fields and admin fulfilment actions first; do not invent supplier reference formats or add a production schema migration before the Supabase cutover.
