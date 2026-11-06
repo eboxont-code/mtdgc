@@ -84,6 +84,16 @@ The current customer-facing label for `payment_submitted` is “Payment received
 - `delivered`, `fulfilled` and `completed` display as `Delivered`, while legacy values remain unchanged in storage. The customer copy says staff marked the order delivered and does not claim automatic email or order-page delivery.
 - Unknown enum values use a generic `Status update` label rather than exposing raw internal status text.
 - This is a presentation-only change. It does not add status values, alter transitions, write production data or change payment/fulfilment evidence requirements.
+### 4.2 Order-time pre-fulfilment snapshot
+
+- New order items store a versioned `__mtdgc_snapshot` object inside the existing `order_items.fields` JSONB. The snapshot contains the product's server-read `region` and the product's exact `requirements` labels at order creation.
+- Customer-provided values remain top-level string fields. The server fetches region/requirements through the selected variant's product relation; the browser cannot supply or overwrite the reserved snapshot key.
+- `order_items.variant_name` already records the selected option/denomination, so no extra denomination column or migration is introduced.
+- The admin order detail sheet builds a per-item checklist from the saved snapshot: selected option, order-time product region, each required field and recorded/missing state. Extra saved customer fields remain visible.
+- The checklist never joins the current product record to reconstruct historical requirements or region. An item without a valid snapshot is explicitly marked as not captured/unrecognised; missing historical requirements are not guessed.
+- The snapshot is rendered only in the admin order detail view. Existing public order-summary responses do not expose the customer fields or internal snapshot.
+- This is an order-data snapshot and review aid, not a supplier runbook or proof of fulfilment readiness. Supplier-specific instructions remain blocked until independently verified evidence exists.
+
 ## 5. Guest Checkout and Order Tracking Architecture
 
 ### Order identity at creation

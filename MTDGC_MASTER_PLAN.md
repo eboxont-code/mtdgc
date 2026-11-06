@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.7 · 7 November 2026
+**Version:** 2.8 · 7 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -251,7 +251,7 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** Orders are delivered accurately and on time, while manual checks are gradually replaced only by safe, tested automation.
 
 - [!] **MT-0121 · P0 · BLOCKED** — The supplier register has no verified supplier/product-scope records, no approved delivery route and no supplier-specific fulfilment instructions for the currently listed product families. The repository records product requirements but does not establish how an authorised supplier actually fulfils each SKU. The owner must provide verified supplier/source, region-scope and delivery-step evidence before a product-family runbook can be accurate. Do not invent steps or contact suppliers. Revisit when that evidence is supplied.
-- [ ] **MT-0122 · P0 · TODO** — Create a pre-fulfilment checklist for player ID, zone, server, region, denomination and email.
+- [x] **MT-0122 · P0 · DONE** — Snapshot each order item's product region and required customer-field labels at order creation in the existing `order_items.fields` JSONB, retain the selected variant/denomination in `variant_name`, and show an admin pre-fulfilment checklist that flags missing captured values. Historical items without the snapshot explicitly show region/requirements as not captured; no current catalog values or supplier instructions are inferred. Evidence: section 34.
 - [ ] **MT-0123 · P0 · TODO** — Require a second confirmation for irreversible top-ups and code releases.
 - [ ] **MT-0124 · P0 · TODO** — Record the supplier transaction or redemption reference for each completed order.
 - [ ] **MT-0125 · P0 · TODO** — Capture delivery evidence and attach it to the correct order.
@@ -541,8 +541,10 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 5 | MT-0086 — independent payment settlement verification | BLOCKED; no gateway callback, bank-statement import, settlement feed or owner-approved receipt/reconciliation evidence is available |
 | 6 | MT-0087 — duplicate transaction-reference prevention | BLOCKED; production has no unique transaction-reference index; a concurrency-safe constraint requires a reviewed migration after Supabase cutover |
 | 7 | MT-0103 — action-required/cancellation/refund workflow | BLOCKED; exact customer triggers and terminal/refund handling require owner approval, and adding a persisted state requires the held migration gate |
-| 8 | MT-0106 — canonical status consistency between account history and guest tracking | NEXT ACTIONABLE P0; source-level comparison can be completed without production data or schema changes |
-| 9 | MT-0303/MT-0304 — Supabase cutover and held backend PR reconciliation | BLOCKED; target project, backup/restore, auth/storage/RLS/secrets and migration-history plan are not verified; PR #1 explicitly remains on HOLD |
+| 8 | MT-0121 — supplier-specific manual fulfilment runbooks | BLOCKED; verified supplier/product/region scope and actual delivery-step evidence are missing |
+| 9 | MT-0122 — pre-fulfilment checklist | DONE; order-time region and required fields are snapshotted; selected option is retained; historical items are explicitly marked as lacking a snapshot |
+| 10 | MT-0123 — second confirmation for irreversible top-ups and code releases | NEXT ACTIONABLE P0; inspect the current product/category and checkout action paths; do not infer supplier-side irreversibility |
+| 11 | MT-0303/MT-0304 — Supabase cutover and held backend PR reconciliation | BLOCKED; target project, backup/restore, auth/storage/RLS/secrets and migration-history plan are not verified; PR #1 explicitly remains on HOLD |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -1357,4 +1359,42 @@ MT-0106 is completed in section 33. MT-0121 was reviewed and marked BLOCKED beca
 ### Next task triage
 
 - MT-0121 is BLOCKED: the supplier register is empty and no supplier-specific delivery route or fulfilment instructions are evidenced. The owner must provide verified source/product/region scope and actual fulfilment steps before a product-family runbook can be accurate. No supplier contact was made.
-- **Next eligible P0 task:** MT-0122 — create a pre-fulfilment checklist from the saved product requirements and order-item fields, showing only fields applicable to the selected order. Do not infer supplier instructions or require fields that were not collected at checkout.
+- MT-0122 is completed in section 34. **Next eligible P0 task:** MT-0123 — require a second confirmation for irreversible top-ups and code releases. Inspect the current checkout/category action paths and classify only what is supported by existing product data; do not invent supplier-side irreversibility or delivery instructions.
+
+
+## 34. Pre-fulfilment checklist and order-time snapshot — 7 November 2026
+
+**Task:** MT-0122 · P0 · DONE — order-time product metadata is stored in the existing order-item JSONB, the admin sheet renders a per-item checklist, six focused tests pass and the pure helper passes strict TypeScript checking.
+
+### Implementation
+
+- Added `src/lib/pre-fulfilment.ts` with a versioned, server-owned metadata key `__mtdgc_snapshot` inside the existing `order_items.fields` JSONB.
+- At order creation, `placeOrder` now loads `products.region` and `products.requirements` through the selected variant's server-resolved product relation and stores those values with the customer-provided item fields. Region and required-field labels are not accepted from the browser.
+- The checkout line validator rejects the reserved metadata key, preventing a customer request from forging the order-time snapshot.
+- Existing `order_items.variant_name` remains the selected option/denomination snapshot; no new column or migration is required.
+- The admin order detail sheet shows the selected option/denomination, product region at order time, each required customer field and whether its value was recorded or is missing. Extra saved fields remain visible separately.
+- Items without a valid snapshot show that the region and requirements were not captured; the checklist does not substitute today's product catalog values for historical order-time facts. Unknown snapshot versions are treated as unrecognised and require manual review.
+- The checklist uses only saved product/customer fields. It does not add supplier instructions or claim that a product is ready to fulfil; MT-0121 remains blocked pending verified supplier/product/region evidence.
+
+### Focused verification
+
+- `node --experimental-strip-types --test src/lib/pre-fulfilment.test.ts` on Node `v22.16.0`: **6 passed, 0 failed**. Cases cover server-owned snapshot creation, reserved-key rejection, missing player/zone/server/email values, empty requirement sets, historical rows without snapshots and unknown snapshot versions.
+- Strict helper typecheck passed with `tsc --noEmit --strict --noUncheckedIndexedAccess --noPropertyAccessFromIndexSignature --exactOptionalPropertyTypes --target ES2022 --module NodeNext --moduleResolution NodeNext src/lib/pre-fulfilment.ts`.
+- Full `bun run lint`, `bun run test`, `bun run typecheck` and `bun run build` were not run: Bun and a local MTDGC checkout/dependency tree are unavailable in this execution environment. The exact helper/test files were exercised in a scratch workspace; route/server integration has not been validated by the full project quality workflow.
+
+### Production schema and data evidence (read-only)
+
+- Supabase project `mtdgc` (`eaomkkswslqtfunkceuc`) reports `ACTIVE_HEALTHY`.
+- `order_items.fields` is an existing non-null JSONB column; `order_items.variant_name` already stores the selected variant/denomination; `products.region` is text and `products.requirements` is JSONB.
+- A read-only aggregate query found 8 existing order items and 0 with the new snapshot key. No customer field values or order identifiers were queried. These existing rows will be presented as having no order-time snapshot; their region and missing requirements will not be inferred from current product records.
+- Published product metadata includes real requirement labels such as player ID, Zone ID, delivery email address and account region. The checklist displays only the exact labels saved for each new order item.
+
+### Repository, CI and release evidence
+
+- Work remains on `automation/mt-0104-order-transition-guard`, based on `main` SHA `1d948a818f056ec1ae1f630688070da6e8449fde`; before this task the branch was 39 commits ahead and 0 behind. The local working-tree status is unavailable because this environment has no MTDGC checkout.
+- The latest current-main Quality run `42251736215` passed install, lint, unit tests, typecheck and production build. It validates main SHA `1d948a818f056ec1ae1f630688070da6e8449fde`, not this working-branch commit.
+- The branch's existing combined Vercel status reports `failure` with the Hobby/free build-rate-limit target. No GitHub Actions run is configured for ordinary pushes to this non-main branch; the workflow runs on main pushes and pull requests. No PR was opened.
+- The latest observed production deployment remains READY on older commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`, not this working branch. Vercel reported no runtime errors in the preceding 24 hours.
+- No production order, customer record, payment record, database schema, storage policy, environment variable, billing setting or deployment was changed. No supplier or third party was contacted; no spend occurred.
+
+**Next P0 task:** MT-0123 — require a second confirmation for irreversible top-ups and code releases. Inspect the current checkout/category action paths and only classify actions supported by existing product data; do not invent supplier-side irreversibility or fulfilment rules.

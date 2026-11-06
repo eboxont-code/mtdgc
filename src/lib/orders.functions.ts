@@ -4,6 +4,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { findUnsafeCustomerRequirement, UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE } from "@/lib/supplier-safety";
 import { generateOrderReference, isSupportedOrderReference } from "@/lib/order-reference";
+import { buildOrderItemFieldsSnapshot, hasReservedOrderItemField } from "@/lib/pre-fulfilment";
 import {
   buildPaymentProofAssociation,
   hasOrderAccessToken,
@@ -23,6 +24,9 @@ const lineSchema = z.object({
 }).refine(
   (line) => !findUnsafeCustomerRequirement(Object.keys(line.fields)),
   { message: UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE },
+).refine(
+  (line) => !hasReservedOrderItemField(line.fields),
+  { message: "Reserved order metadata cannot be supplied as a customer detail" },
 );
 
 const orderSchema = z
@@ -80,13 +84,13 @@ export const placeOrder = createServerFn({ method: "POST" })
     const skus = data.lines.map((l) => l.sku);
     const { data: variants, error } = await supabaseAdmin
       .from("product_variants")
-      .select("id, sku, name, price_minor, status, product_id, products(id, name, is_published, status)")
+      .select("id, sku, name, price_minor, status, product_id, products(id, name, is_published, status, region, requirements)")
       .in("sku", skus);
     if (error) throw new Error("Could not load products");
 
     const items = data.lines.map((line) => {
       const v = variants?.find((x) => x.sku === line.sku);
-      const p = v?.products as { id: string; name: string; is_published: boolean; status: string } | null | undefined;
+      const p = v?.products as { id: string; name: string; is_published: boolean; status: string; region: string; requirements: unknown } | null | undefined;
       const ok = v && p?.is_published && ["available", "low_stock"].includes(v.status) && ["available", "low_stock"].includes(p.status);
       if (!ok || !v || !p) throw new Error(`An item in your cart is no longer available (${line.sku}).`);
       return {
@@ -98,7 +102,7 @@ export const placeOrder = createServerFn({ method: "POST" })
         quantity: line.quantity,
         unit_price_minor: v.price_minor,
         line_total_minor: v.price_minor * line.quantity,
-        fields: line.fields,
+        fields: buildOrderItemFieldsSnapshot(line.fields, p.region, p.requirements),
       };
     });
     const subtotal = items.reduce((s, i) => s + i.line_total_minor, 0);
