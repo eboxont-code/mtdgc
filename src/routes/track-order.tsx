@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { ORDER_NOTICE, ORDER_STEPS, orderStepIndex, stepTime, formatNpr, SITE_URL, STATUS_LABEL, whatsappLink } from "@/lib/format";
 import { GIFT_CARD_PRICE_DISCLOSURE } from "@/lib/gift-card-pricing";
 import { lookupOrder } from "@/lib/orders.functions";
+import { isSupportedOrderReference } from "@/lib/order-reference";
 
 const STATUS_TEXT: Record<string, string> = { ...STATUS_LABEL, pending: "Placed", paid: "Payment confirmed", processing: "Processing", fulfilled: "Fulfilled", completed: "Completed", cancelled: "Cancelled", failed: "Failed", refunded: "Refunded" };
 import { breadcrumbLd, pageLd } from "@/lib/seo";
@@ -83,8 +84,8 @@ function TrackOrderPage() {
       setError("Please enter your order number and the email or phone number used on the order.");
       return;
     }
-    if (!/^(MT\d{6}|(MTD|MTDGC)-[A-Z0-9-]{4,})$/.test(order)) {
-      setError("That order number does not look right. MTDGC order numbers look like MT123456.");
+    if (!isSupportedOrderReference(order)) {
+      setError("That order number does not look right. New MTDGC references start with MT followed by 32 hexadecimal characters. Older references are still accepted.");
       return;
     }
     const digits = who.replace(/\D/g, "");
@@ -137,7 +138,7 @@ function TrackOrderPage() {
               aria-describedby={error ? "tracking-error" : undefined}
               value={orderNumber}
               onChange={(event) => setOrderNumber(event.target.value)}
-              placeholder="MT123456"
+              placeholder="MT + 32 hex characters"
               autoComplete="off"
               className="mt-1 min-h-11 w-full rounded-md border border-input bg-card px-3 font-display text-sm focus:border-primary"
             />
