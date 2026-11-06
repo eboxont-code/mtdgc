@@ -4,6 +4,16 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { findUnsafeCustomerRequirement, UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE } from "@/lib/supplier-safety";
 import { generateOrderReference } from "@/lib/order-reference";
+import {
+  buildPaymentProofAssociation,
+  hasOrderAccessToken,
+  hasOrderContactAccess,
+  isAuthenticatedOrderOwner,
+  normaliseContact,
+  sha256Hex as sha256,
+} from "@/lib/order-access";
+
+export { normaliseContact };
 
 const lineSchema = z.object({
   sku: z.string().min(1).max(80),
@@ -35,11 +45,6 @@ const orderSchema = z
   })
   .refine((d) => Boolean(d.phone) || Boolean(d.email), "Add a mobile number or an email");
 
-export function normaliseContact(contact: string): string {
-  const v = contact.trim().toLowerCase();
-  return v.includes("@") ? v : v.replace(/\D/g, "");
-}
-
 type OrderItemSummarySource = {
   product_name: string;
   variant_name: string;
@@ -60,11 +65,6 @@ function summariseOrderItem(item: OrderItemSummarySource) {
     unitPriceMinor: item.unit_price_minor,
     totalMinor: item.line_total_minor,
   };
-}
-
-async function sha256(text: string): Promise<string> {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
-  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 export const placeOrder = createServerFn({ method: "POST" })
@@ -222,13 +222,10 @@ export const getOrderForViewer = createServerFn({ method: "POST" })
       .select("id, user_id, status, created_at, total_minor, verification_hash, access_token_hash, guest_email, order_items(product_name, variant_name, quantity, unit_price_minor, line_total_minor, products(categories(slug)))")
       .eq("order_number", orderNumber)
       .maybeSingle();
-    let allowed = false;
-    if (order && data.accessToken && order.access_token_hash) {
-      allowed = (await sha256(data.accessToken)) === order.access_token_hash;
-    }
+    let allowed = order ? await hasOrderAccessToken(order, data.accessToken) : false;
     if (order && !allowed && data.bearer && order.user_id) {
       const { data: u } = await supabaseAdmin.auth.getUser(data.bearer);
-      allowed = u.user?.id === order.user_id;
+      allowed = isAuthenticatedOrderOwner(order, u.user?.id);
     }
     if (!allowed && data.contact) {
       const { getRequestHeader } = await import("@tanstack/react-start/server");
@@ -241,10 +238,7 @@ export const getOrderForViewer = createServerFn({ method: "POST" })
         .gte("created_at", new Date(Date.now() - 600000).toISOString());
       if ((count ?? 0) >= 10) return { status: "rate_limited" as const };
       await supabaseAdmin.from("order_lookup_attempts").insert({ ip_hash: ipHash });
-      if (order) {
-        const c = normaliseContact(data.contact);
-        allowed = (await sha256(orderNumber + c)) === order.verification_hash || (c.includes("@") && order.guest_email?.toLowerCase() === c);
-      }
+      if (order) allowed = await hasOrderContactAccess(order, orderNumber, data.contact);
     }
     if (!order || !allowed) return { status: "locked" as const };
     return {
@@ -279,7 +273,7 @@ function sniffImage(bytes: Uint8Array): "jpg" | "png" | "webp" | null {
   return null;
 }
 
-const MIME_EXT: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
+const MIME_EXT: Record<string, "jpg" | "png" | "webp"> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
 
 export const submitPaymentProof = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => {
@@ -311,11 +305,10 @@ export const submitPaymentProof = createServerFn({ method: "POST" })
       .select("id, user_id, status, total_minor, verification_hash, access_token_hash, guest_email")
       .eq("order_number", orderNumber)
       .maybeSingle();
-    let allowed = false;
-    if (order && data.accessToken && order.access_token_hash) allowed = (await sha256(data.accessToken)) === order.access_token_hash;
+    let allowed = order ? await hasOrderAccessToken(order, data.accessToken) : false;
     if (order && !allowed && data.bearer && order.user_id) {
       const { data: u } = await supabaseAdmin.auth.getUser(data.bearer);
-      allowed = u.user?.id === order.user_id;
+      allowed = isAuthenticatedOrderOwner(order, u.user?.id);
     }
     if (order && !allowed && data.contact) {
       const { getRequestHeader } = await import("@tanstack/react-start/server");
@@ -324,8 +317,7 @@ export const submitPaymentProof = createServerFn({ method: "POST" })
       const { count } = await supabaseAdmin.from("order_lookup_attempts").select("id", { count: "exact", head: true }).eq("ip_hash", ipHash).gte("created_at", new Date(Date.now() - 600000).toISOString());
       if ((count ?? 0) >= 10) return { ok: false as const, error: "Too many attempts. Please wait 10 minutes and try again." };
       await supabaseAdmin.from("order_lookup_attempts").insert({ ip_hash: ipHash });
-      const c = normaliseContact(data.contact);
-      allowed = (await sha256(orderNumber + c)) === order.verification_hash || (c.includes("@") && order.guest_email?.toLowerCase() === c);
+      allowed = await hasOrderContactAccess(order, orderNumber, data.contact);
     }
     if (!order || !allowed) return { ok: false as const, error: "We could not open this order." };
     if (order.status !== "pending_payment") return { ok: false as const, error: "This order is not waiting for payment." };
@@ -341,16 +333,16 @@ export const submitPaymentProof = createServerFn({ method: "POST" })
     if (!ext || !sniffed || sniffed !== ext) return { ok: false as const, error: "Please upload a JPG, PNG or WebP image." };
 
     const rand = [...crypto.getRandomValues(new Uint8Array(16))].map((b) => b.toString(16).padStart(2, "0")).join("");
-    const path = `${order.id}/${rand}.${ext}`;
-    const up = await supabaseAdmin.storage.from("payment-proofs").upload(path, buffer, { contentType: file.type });
+    const association = buildPaymentProofAssociation(order, rand, ext);
+    const up = await supabaseAdmin.storage.from("payment-proofs").upload(association.storagePath, buffer, { contentType: file.type });
     if (up.error) return { ok: false as const, error: "Upload failed. Please try again." };
 
-    const { data: moved } = await supabaseAdmin.from("orders").update({ status: "payment_submitted", updated_at: new Date().toISOString() }).eq("id", order.id).eq("status", "pending_payment").select("id");
+    const { data: moved } = await supabaseAdmin.from("orders").update({ status: "payment_submitted", updated_at: new Date().toISOString() }).eq("id", association.proof.order_id).eq("status", "pending_payment").select("id");
     if (!moved?.length) {
-      await supabaseAdmin.storage.from("payment-proofs").remove([path]);
+      await supabaseAdmin.storage.from("payment-proofs").remove([association.storagePath]);
       return { ok: false as const, error: "This order is not waiting for payment." };
     }
-    await supabaseAdmin.from("payment_proofs").insert({ order_id: order.id, storage_path: path, transaction_ref: data.transactionRef, amount_minor: order.total_minor });
+    await supabaseAdmin.from("payment_proofs").insert({ ...association.proof, storage_path: association.storagePath });
     await supabaseAdmin.from("order_status_events").insert({ order_id: order.id, status: "payment_submitted", note: "Payment proof submitted by customer" });
     return { ok: true as const };
   });
