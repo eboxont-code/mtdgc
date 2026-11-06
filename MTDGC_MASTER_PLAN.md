@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 1.6 · 6 November 2026
+**Version:** 1.7 · 6 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -153,9 +153,9 @@ Do not set numerical targets until a reliable baseline exists.
 - [x] **MT-0041 · P0 · DONE** — Build a supplier register with legal name, country, contact, product scope and verification status. Created `SUPPLIER_REGISTER.md` with supplier identity, product-scope authority, commercial/operational controls, verification statuses and an initial product sourcing queue. No supplier identities or approvals were invented.
 - [!] **MT-0042 · P0 · BLOCKED** — Record the source of every code, top-up and subscription before making the listing orderable. The repository and current database contain no supplier identity/source records; actual source details and evidence are not available to populate the register. Do not infer or fabricate a source.
 - [!] **MT-0043 · P0 · BLOCKED** — No supplier identities or issuer/distributor authorisation documents are present in the supplier register. Verification requires source evidence from the actual supplier/rights holder; no supplier will be invented or contacted during this run.
-- [ ] **MT-0044 · P0 · TODO** — Reject suppliers who require customer passwords, OTPs, payment PINs or unsafe account access.
-- [ ] **MT-0045 · P0 · TODO** — Test one low-value transaction per supplier and product family before scaling orders.
-- [ ] **MT-0046 · P0 · TODO** — Document supplier delivery time, cut-off hours, failure process and escalation contact.
+- [x] **MT-0044 · P0 · DONE** — Establish and enforce an automatic supplier/product-scope rejection rule for customer passwords/passcodes, OTP/2FA/authenticator codes, payment PINs, recovery/backup codes, authentication secrets and unsafe account/device access. Added supplier-register policy, admin and server-side product-requirement validation, an order-submission field guard, checkout reassurance and unit tests. Evidence: section 23. No actual supplier was assessed because the supplier register remains empty.
+- [!] **MT-0045 · P0 · BLOCKED** — A low-value test requires an identified supplier, verified product/region scope and a real transaction/fulfilment. `SUPPLIER_REGISTER.md` contains no supplier or approved product-scope records, and this run is not permitted to contact third parties or spend money. Do not invent test evidence.
+- [!] **MT-0046 · P0 · BLOCKED** — No supplier identity, delivery-time evidence, cut-off hours, failure/refund process or accountable escalation contact is recorded. These facts require the actual supplier's documented terms or owner-provided evidence; do not invent or contact suppliers during this run.
 - [ ] **MT-0047 · P1 · TODO** — Record supplier cost and currency per denomination with a dated source.
 - [ ] **MT-0048 · P1 · TODO** — Create a supplier reliability score based on successful fulfilment, accuracy and response time.
 - [ ] **MT-0049 · P1 · TODO** — Keep a backup supplier only where the alternative is legitimate and region-compatible.
@@ -175,11 +175,11 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Prices are explainable and profitable after supplier cost, FX movement, payment fees, refunds and operating effort.
 
-- [ ] **MT-0061 · P0 · TODO** — Create a landed-cost calculation for every active product and denomination.
-- [ ] **MT-0062 · P0 · TODO** — Record supplier currency, exchange rate, conversion timestamp and NPR selling price.
-- [ ] **MT-0063 · P0 · TODO** — Calculate gross profit and gross margin per order, not only markup percentage.
-- [ ] **MT-0064 · P0 · TODO** — Set a minimum contribution-margin rule with the owner before enabling automatic price updates.
-- [ ] **MT-0065 · P0 · TODO** — Prevent checkout when the current price is missing, expired or below the approved margin floor.
+- [!] **MT-0061 · P0 · BLOCKED** — No verified supplier unit costs by active SKU/denomination, settlement charges, dated FX inputs, payment fees, refund/failure costs or variable fulfilment/support costs are recorded. A per-product landed cost cannot be calculated without those source inputs.
+- [!] **MT-0062 · P0 · BLOCKED** — No supplier quote/source currency, quote date, verifiable FX source/rate or conversion timestamp exists in the supplier register or current product schema. Do not fabricate rates or supplier costs.
+- [!] **MT-0063 · P0 · BLOCKED** — Gross profit/margin requires actual supplier cost, payment/settlement fees, FX, refunds/chargebacks and variable fulfilment/support costs. These source records are not populated, so any reported margin would be invented.
+- [!] **MT-0064 · P0 · BLOCKED** — The minimum contribution-margin floor and its measurement basis require an explicit business-owner decision. No approved threshold or definition is recorded; do not choose one on the owner's behalf.
+- [!] **MT-0065 · P0 · BLOCKED** — A safe checkout margin gate depends on the owner-approved floor plus trusted supplier-cost and price-expiry data. Those inputs/fields are absent, and the held database migrations remain gated on the Supabase cutover; do not invent a floor or add an ungrounded production block.
 - [ ] **MT-0066 · P1 · TODO** — Separate market-facing currency from supplier settlement currency.
 - [ ] **MT-0067 · P1 · TODO** — Resolve whether Australia will use AUD pricing and a separate market checkout rather than NPR-only pricing.
 - [ ] **MT-0068 · P1 · TODO** — Show all fees before the customer commits to an order.
@@ -534,12 +534,14 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 
 | Order | Task | Status |
 |---:|---|---|
-| 1 | MT-0042 — record the real source of every code, top-up and subscription in the supplier register | BLOCKED; source evidence not present in repo/database |
-| 2 | MT-0306 — protect `main` only if GitHub branch rules can coexist with Lovable direct sync | BLOCKED; private branch protection requires a paid GitHub plan, which conflicts with the $0 constraint; integration cannot inspect protection settings |
-| 3 | Test one complete low-value Nepal order for each supported product family and document payment/fulfilment evidence | TODO; supplier source dependency |
-| 4 | Resolve seller identity, Nepal/Australia policy scope and the legal/payment boundary for Australia-to-Nepal gifting | TODO; owner/legal dependency |
-| 5 | Complete Boxont-owned Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED |
-| 6 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
+| 1 | MT-0045 — test one low-value transaction per supplier/product family | BLOCKED; no identified/verified supplier or product scope; a real transaction and fulfilment would require external evidence and spend |
+| 2 | MT-0046 — document supplier delivery times, cut-off, failure process and escalation | BLOCKED; no supplier identity or documented operational terms/contact |
+| 3 | MT-0061–MT-0063 — build landed cost and order-level gross margin from source costs | BLOCKED; supplier costs, dated FX, payment/settlement fees, refunds and variable fulfilment/support costs are absent |
+| 4 | MT-0064 — approve minimum contribution-margin floor | BLOCKED; business-owner decision required |
+| 5 | MT-0065 — enforce a current-price/margin gate at checkout | BLOCKED; depends on the approved floor and trusted cost/price-expiry data; schema changes remain behind the Supabase cutover |
+| 6 | MT-0081 — audit the current QR and bank-transfer payment flow | TODO; next independent P0 task after the supplier and pricing blockers |
+| 7 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
+| 8 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -943,3 +945,35 @@ No product records, supplier assignments, prices, variants, order records, datab
 - The first CI run (42216599904) caught a missing unit_price_minor field in the guest order-detail query. The nested select was corrected in follow-up commit 079722e9dae76ef278b1985dd4c428f334db8f57; the final GitHub Actions run 42216789779 passed lint, all 14 tests across 5 files, TypeScript typecheck and the production build.
 - Vercel production deployment dpl_EnJoRv11UhXsJBbpzJCJjM9HhUwg for commit 079722e9dae76ef278b1985dd4c428f334db8f57 reached READY with mtdgc.com, www.mtdgc.com and the project aliases attached. The public Roblox gift-card page returned HTTP 200 and its rendered HTML contained the Face value, MTDGC selling price and bank/payment-provider fee disclosure.
 - Vercel reported no runtime errors in the preceding 30-minute window. Lovable’s latest commit SHA matched the final GitHub main SHA.
+
+
+## 23. Supplier credential rejection and customer-input safeguards — 6 November 2026
+
+**Task:** MT-0044 · P0 · DONE
+
+### Mandatory supplier rejection rule
+- Updated `SUPPLIER_REGISTER.md` to version 1.1 with an explicit automatic-rejection rule. A supplier and the affected product scope must be marked `REJECTED` if fulfilment requires customer passwords/passcodes, OTPs or verification codes, authenticator/2FA codes, payment/bank/card PINs, recovery/backup codes or phrases, session cookies, access tokens, private keys, card security codes, remote account/device access or unauthorised account handover.
+- The rule prohibits onboarding or test transactions for such a workflow. Only non-sensitive evidence references and rejection reasons may be recorded; never copy the credential into the register, support records or Git history.
+- This is a policy and application-control completion, not a claim that a supplier has already been screened or rejected. The supplier identity register remains empty.
+
+### Application enforcement
+- Added `src/lib/supplier-safety.ts` with a shared detector and customer-safe rejection message.
+- Added `src/lib/supplier-safety.test.ts` with tests for unsafe credential/access labels and safe product identifiers/delivery contact labels.
+- `src/components/admin/product-form.tsx` blocks unsafe required-detail labels and explains the allowed information.
+- `src/lib/admin.functions.ts` repeats the same validation server-side in `saveProduct`, so a direct request cannot bypass the admin form.
+- `src/lib/orders.functions.ts` rejects order submissions if a cart line contains an unsafe credential/access field key, covering stale or manipulated cart payloads.
+- `src/routes/checkout.tsx` now explicitly reassures customers that MTDGC will never ask for recovery codes as well as passwords, OTPs or payment PINs.
+
+### Current catalogue check and boundaries
+- A read-only query against the current MTDGC Supabase project `eaomkkswslqtfunkceuc` checked every published product's `requirements` labels for password/passcode, OTP/verification/2FA, PIN, recovery/backup, session/access-token, remote-access, bank/card-login and card-security terms. The query returned **zero matching requirement labels**.
+- No product records, customer/order/payment rows, supplier records, database schema, migrations, payment settings or production configuration were changed. No supplier was contacted and no credential was collected or stored.
+- Existing published requirements are limited to product identifiers and delivery contact information (for example player/zone IDs, delivery email and account region). Supplier legitimacy, product authority and fulfilment remain unverified under MT-0042/MT-0043.
+
+### Verification
+- The first CI attempt for the initial code commit (`42225067947`) failed in unit tests because the new regex word-boundary escapes were over-escaped. The matcher was corrected in commit `9dde237c722c1ed69db33342d7f59ebee78389d5`; the final code commit is `b5425b9873a23cba214412f5683fc932ee9abbcd`.
+- GitHub Actions run [`42225332691`](https://github.com/eboxont-code/mtdgc/actions/runs/42225332691) completed successfully: lint, unit tests, TypeScript typecheck and production build all passed.
+- Vercel production deployment [`dpl_CVTCqR2dQ6JtKyhHqAJaHKvQk6ch`](https://vercel.com/boxont/mtdgc/CVTCqR2dQ6JtKyhHqAJaHKvQk6ch) reached **READY** for commit `b5425b9873a23cba214412f5683fc932ee9abbcd`, with `mtdgc.com` and `www.mtdgc.com` assigned and no alias error.
+- Lovable's latest commit SHA matched GitHub `main` at `b5425b9873a23cba214412f5683fc932ee9abbcd`.
+- Vercel reported no runtime errors in the preceding 24-hour window.
+
+**Next P0 task:** MT-0081 — audit the current QR and bank-transfer payment flow. Supplier test transactions and supplier pricing tasks remain blocked by the evidence and owner-decision reasons recorded in the task register above.
