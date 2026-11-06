@@ -1,9 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-type Ctx = { supabase: any; userId: string };
+type Ctx = { supabase: SupabaseClient<Database>; userId: string };
 
 async function assertAdmin(context: Ctx) {
   const { data, error } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
@@ -196,11 +198,11 @@ export const listPaymentsToVerify = createServerFn({ method: "POST" })
       .order("updated_at", { ascending: true });
     if (error) throw new Error("Could not load payments to verify");
     const ids = (orders ?? []).map((o) => o.id);
-    const { data: proofs } = ids.length
-      ? await supabaseAdmin.from("payment_proofs").select("id, order_id, transaction_ref, amount_minor, created_at, status").in("order_id", ids).eq("status", "submitted")
-      : { data: [] as any[] };
+    const proofs = ids.length
+      ? (await supabaseAdmin.from("payment_proofs").select("id, order_id, transaction_ref, amount_minor, created_at, status").in("order_id", ids).eq("status", "submitted")).data ?? []
+      : [];
     return (orders ?? []).map((o) => {
-      const proof = (proofs ?? []).filter((p: any) => p.order_id === o.id).sort((a: any, b: any) => b.created_at.localeCompare(a.created_at))[0] ?? null;
+      const proof = proofs.filter((p) => p.order_id === o.id).sort((a, b) => b.created_at.localeCompare(a.created_at))[0] ?? null;
       return { ...o, proof: proof ? { id: proof.id, transaction_ref: proof.transaction_ref, created_at: proof.created_at } : null };
     });
   });
