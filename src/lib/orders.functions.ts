@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { findUnsafeCustomerRequirement, UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE } from "@/lib/supplier-safety";
+import { generateOrderReference } from "@/lib/order-reference";
 
 const lineSchema = z.object({
   sku: z.string().min(1).max(80),
@@ -33,11 +34,6 @@ const orderSchema = z
     lines: z.array(lineSchema).min(1).max(20),
   })
   .refine((d) => Boolean(d.phone) || Boolean(d.email), "Add a mobile number or an email");
-
-function makeReference(): string {
-  const bytes = crypto.getRandomValues(new Uint32Array(1));
-  return `MT${String(100000 + (bytes[0]! % 900000))}`;
-}
 
 export function normaliseContact(contact: string): string {
   const v = contact.trim().toLowerCase();
@@ -113,7 +109,7 @@ export const placeOrder = createServerFn({ method: "POST" })
     let orderNumber = "";
     let order: { id: string } | null = null;
     for (let attempt = 0; attempt < 5 && !order; attempt += 1) {
-      orderNumber = makeReference();
+      orderNumber = generateOrderReference();
       const { data: row, error: orderError } = await supabaseAdmin
         .from("orders")
         .insert({
