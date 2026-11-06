@@ -404,7 +404,7 @@ function ProductPage() {
 
             {orderable && needsRegionConfirm && (
               <section aria-label="Region confirmation" className="mt-4 rounded-2xl border border-primary/40 bg-primary/5 p-4">
-                <p className="flex gap-2 text-sm"><Globe className="mt-0.5 size-4 shrink-0 text-primary" /><span>This code is for <strong>{regionText}</strong> accounts only. Codes for another region will not redeem and cannot be refunded once delivered.</span></p>
+                <p className="flex gap-2 text-sm"><Globe className="mt-0.5 size-4 shrink-0 text-primary" /><span>This code is for <strong>{regionText}</strong> accounts only. A code for another region will not redeem on your account.</span></p>
                 <label className="mt-3 flex min-h-11 cursor-pointer items-center gap-3 text-sm">
                   <input
                     ref={regionRef}
