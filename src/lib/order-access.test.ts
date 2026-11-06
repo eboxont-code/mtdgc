@@ -4,11 +4,27 @@ import { strict as assert } from "node:assert";
 import {
   buildPaymentProofAssociation,
   hasOrderAccessToken,
+  isValidOrderLookupContact,
   hasOrderContactAccess,
   isAuthenticatedOrderOwner,
   normaliseContact,
   sha256Hex,
 } from "./order-access";
+
+describe("guest order lookup contact validation", () => {
+  test("accepts a valid email or a phone number with 7 to 15 digits", () => {
+    assert.equal(isValidOrderLookupContact("buyer@example.com"), true);
+    assert.equal(isValidOrderLookupContact(" BUYER@EXAMPLE.COM "), true);
+    assert.equal(isValidOrderLookupContact("+977 980-123-4567"), true);
+    assert.equal(isValidOrderLookupContact("(415) 555-2671"), true);
+  });
+
+  test("rejects missing, malformed and out-of-range contacts", () => {
+    for (const contact of ["", "   ", "not-an-email", "buyer@", "123456", "1234567890123456"]) {
+      assert.equal(isValidOrderLookupContact(contact), false, contact);
+    }
+  });
+});
 
 describe("MT-0083 payment proof ownership and association", () => {
   test("an access token authorises only the order whose hash it matches", async () => {
