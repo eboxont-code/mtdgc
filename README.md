@@ -40,7 +40,7 @@ bun run build
 bun run lint
 ```
 
-Focused rule tests exist under `src/lib/*.test.ts`; a single documented package-level test/typecheck/CI gate remains a tracked engineering task.
+Focused rule tests live under `src/lib/*.test.ts`. Run `bun run test` and `bun run typecheck` locally. The free GitHub Actions quality workflow at `.github/workflows/quality.yml` runs install, lint, tests, typecheck and production build for pushes to `main` and pull requests.
 
 ### Environment variables
 
