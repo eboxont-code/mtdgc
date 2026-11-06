@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 1.9 · 7 November 2026
+**Version:** 2.0 · 7 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -201,7 +201,7 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** Customers can understand how to pay, submit proof safely and see an accurate payment state without duplicate or fraudulent processing.
 
 - [x] **MT-0081 · P0 · DONE** — Audit completed against the current application code, production schema/data snapshot, storage configuration and access policies. Findings and follow-up gaps are recorded in section 24; this completes the audit task, not a claim that all payment controls are secure.
-- [ ] **MT-0082 · P0 · TODO** — Verify each order receives a unique, non-guessable order reference.
+- [x] **MT-0082 · P0 · DONE** — Generate new order references with 128 bits of cryptographic randomness, retain the database UNIQUE constraint as the collision guard, and keep legacy tracking formats working. Evidence: section 25; CI run `42241329123` passed lint, tests, typecheck and production build; Vercel deployment for code commit `d81e1fc51ed2e1203defb63ec6a71dbcd21e889b` reached READY.
 - [ ] **MT-0083 · P0 · TODO** — Ensure payment proof is attached to the correct order and cannot be reassigned by another customer.
 - [ ] **MT-0084 · P0 · TODO** — Validate uploaded proof file type, size and content handling.
 - [ ] **MT-0085 · P0 · TODO** — Restrict payment-proof access to the customer who owns the order and authorised staff.
@@ -976,7 +976,7 @@ No product records, supplier assignments, prices, variants, order records, datab
 - Lovable's latest commit SHA matched GitHub `main` at `b5425b9873a23cba214412f5683fc932ee9abbcd`.
 - Vercel reported no runtime errors in the preceding 24-hour window.
 
-**Next P0 task:** MT-0082 — verify unique, non-guessable order references. MT-0081's payment-flow audit is complete; its control gaps remain assigned to the existing payment-proof, file-validation, access-control, payment-verification and duplicate-reference tasks. Supplier test transactions and supplier pricing tasks remain blocked by the evidence and owner-decision reasons recorded in the task register above.
+**Next P0 task:** MT-0083 — ensure payment proof is attached to the correct order and cannot be reassigned by another customer. MT-0081's payment-flow audit is complete; its control gaps remain assigned to the existing payment-proof, file-validation, access-control, payment-verification and duplicate-reference tasks. Supplier test transactions and supplier pricing tasks remain blocked by the evidence and owner-decision reasons recorded in the task register above.
 
 
 ## 24. QR and bank-transfer payment-flow audit — 7 November 2026
@@ -997,7 +997,7 @@ No product records, supplier assignments, prices, variants, order records, datab
 1. **Payment configuration:** an admin can save one `payment_settings` row and upload a QR image through admin-only server functions. The QR bucket is private. Public checkout obtains bank details and, when present, a one-hour signed QR URL through the server-side `getPaymentSettings` function.
 2. **Checkout:** `src/lib/payments.ts` enables only manual `manual_qr` (QR or bank transfer). Khalti and eSewa are disabled placeholders; there is no live gateway SDK, payment API or webhook. The customer places the order first; the site does not charge a card.
 3. **Missing configuration fallback:** when no payment settings exist, checkout still permits order placement and tells the customer that the team will send payment details shortly. This is a manual follow-up, not an on-site payment instruction.
-4. **Order creation:** `placeOrder` reloads each SKU and current variant price server-side, creates the order with status `pending_payment`, and stores the order-item price snapshot. The order number has a database unique constraint; reference-strength is tracked separately under MT-0082.
+4. **Order creation:** `placeOrder` reloads each SKU and current variant price server-side, creates the order with status `pending_payment`, and stores the order-item price snapshot. The database enforces a UNIQUE constraint on `orders.order_number`; MT-0082 now strengthens newly generated references with 128 bits of cryptographic randomness (section 25).
 5. **Customer proof submission:** `submitPaymentProof` checks the order access token, authenticated owner token or rate-limited contact proof; requires the order to be `pending_payment`; limits the image to 5 MB; checks JPEG/PNG/WebP MIME type and file signature; uploads under an order-ID folder in the private `payment-proofs` bucket; then changes the order to `payment_submitted` and creates a proof record.
 6. **Manual verification:** the admin queue lists `payment_submitted` orders and their latest submitted proof. `getPaymentProofUrl` requires an admin role and returns a five-minute signed URL. `reviewPayment` lets an admin mark the order/proof verified or rejected, or return the order to `pending_payment` when a new proof is requested.
 
@@ -1032,4 +1032,28 @@ No product records, supplier assignments, prices, variants, order records, datab
 - No code, schema, migration, payment setting, order, payment-proof or storage object was changed. No order was created, no payment was made, and no supplier or third party was contacted.
 - Because this task was an audit/documentation task, no application source files or tests were changed. The documentation commit `380099fa08291870791cf104525974acb79c8e99` triggered GitHub Actions run [`42232921172`](https://github.com/eboxont-code/mtdgc/actions/runs/42232921172), which passed lint, unit tests, TypeScript typecheck and production build. Vercel production deployment [`dpl_2eGMLium1BZLEPAaprpjhEqnvyaR`](https://vercel.com/boxont/mtdgc/2eGMLium1BZLEPAaprpjhEqnvyaR) reached **READY** from the same commit with `mtdgc.com` and `www.mtdgc.com` assigned and no alias error. Lovable's `latest_commit_sha` also matched `main` at `380099fa08291870791cf104525974acb79c8e99`. Vercel's last-hour runtime-error check found no errors.
 
-**Next P0 task:** MT-0082 — verify unique, non-guessable order references. The payment-control findings above remain open under their existing tasks; do not mark them complete based solely on this audit.
+**Next P0 task:** MT-0083 — ensure payment proof is attached to the correct order and cannot be reassigned by another customer. The payment-control findings above remain open under their existing tasks; do not mark them complete based solely on this audit.
+
+
+## 25. High-entropy order references — 7 November 2026
+
+**Task:** MT-0082 · P0 · DONE.
+
+### Findings and implementation
+
+- Before this change, `placeOrder` generated customer-facing references from one cryptographically random 32-bit value reduced modulo 900,000 and formatted as `MT` plus six digits. This offered only about 19.8 bits of reference space, which was not a sufficiently strong non-guessable identifier.
+- Added `src/lib/order-reference.ts`. `generateOrderReference()` now obtains 16 bytes from Web Crypto `getRandomValues` and formats all 128 random bits as 32 uppercase hexadecimal characters after the `MT` prefix. New references are 34 characters total, with 128 bits of cryptographic randomness and no modulo reduction.
+- Updated `placeOrder` to use the generator. The existing five-attempt retry for PostgreSQL unique-violation code `23505` remains in place.
+- Verified the live MTDGC Supabase schema read-only on 7 November 2026: `public.orders.order_number` is marked `unique`. The live table had 8 rows at the time of inspection. No order values were retrieved or changed. This database constraint is the final uniqueness guarantee; random generation alone is not claimed to guarantee mathematical uniqueness.
+- Updated the tracking page to accept the new `MT` + 32 hexadecimal format while retaining the existing historical `MT123456`, `MTD-...` and `MTDGC-...` formats. The input is capped at the existing server-supported maximum of 40 characters. No migration or production data change was required.
+- Existing order access remains protected separately by the 32-byte access token and contact/owner checks. The new public reference is not treated as an authentication credential.
+
+### Tests and verification
+
+- Added `src/lib/order-reference.test.ts` with four focused tests: 128-bit output format/length, 1,000-reference batch uniqueness, compatibility with historical formats, and malformed-reference rejection.
+- GitHub Actions run [`42241329123`](https://github.com/eboxont-code/mtdgc/actions/runs/42241329123) completed **successfully** on 7 November 2026: dependency installation, ESLint, unit tests, TypeScript typecheck and production build all passed.
+- Vercel production deployment [`dpl_Dsh4h5neyBT8WikUJv6cPaScwGfH`](https://vercel.com/boxont/mtdgc/Dsh4h5neyBT8WikUJv6cPaScwGfH) reached **READY** for code commit `d81e1fc51ed2e1203defb63ec6a71dbcd21e889b`, with `mtdgc.com` and `www.mtdgc.com` aliases assigned and no alias error.
+- Vercel's production runtime-error query for the preceding hour returned no runtime errors.
+- The code changes do not alter existing order numbers, payment state, database schema, storage, supplier records or billing. No test order, payment or production write was performed.
+
+**Next P0 task:** MT-0083 — ensure payment proof is attached to the correct order and cannot be reassigned by another customer. Preserve the existing guest access-token/contact and signed-in owner flows; add focused negative tests before considering that control complete.
