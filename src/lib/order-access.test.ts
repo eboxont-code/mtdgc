@@ -40,9 +40,9 @@ describe("MT-0083 payment proof ownership and association", () => {
       guest_email: "buyer-b@example.com",
     };
 
-    assert.equal(await hasOrderContactAccess(orderA, "MTA", "0412345678"), true);
+    assert.equal(await hasOrderContactAccess(orderA, "MTA", "+61 412 345 678"), true);
     assert.equal(await hasOrderContactAccess(orderA, "MTA", "BUYER-A@example.com"), true);
-    assert.equal(await hasOrderContactAccess(orderA, "MTB", "0412345678"), false);
+    assert.equal(await hasOrderContactAccess(orderA, "MTB", "+61 412 345 678"), false);
     assert.equal(await hasOrderContactAccess(orderB, "MTB", "buyer-a@example.com"), false);
     assert.equal(await hasOrderContactAccess(orderA, "MTA", "attacker@example.com"), false);
   });
