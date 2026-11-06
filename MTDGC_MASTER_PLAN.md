@@ -477,7 +477,7 @@ Do not set numerical targets until a reliable baseline exists.
 **Purpose:** Keep the MTDGC repository, environment configuration, branch workflow and project plan safe and maintainable. These tasks supplement (and do not replace) the digital-commerce workstreams above.
 
 - [x] **MT-0301 · P0 · DONE** — Remove the tracked root `.env` from the current main tree, add ignore rules for local environment files, and provide a placeholder-only `.env.example`. Evidence: `.gitignore` commit `5d5dd9342c46611a8d69747181b9a534b68b2ecb`, `.env.example` commit `f39ec70656fa91006d89e96e75b149f8d792ce3f`, and `.env` removal commit `0763a9acbd47f7bdd770eafe931c1e12e91cee78`. No environment values were copied into the example.
-- [ ] **MT-0302 · P0 · BLOCKED** — Review the published Git history for the removed `.env` and rotate any real service-role, database or other private credentials that were ever stored there. Deleting the current file does not remove earlier commits. The old file was not opened or copied during this audit; a credential owner must complete the controlled review and rotation.
+- [x] **MT-0302 · P0 · DONE** — Review the published Git history for the removed `.env` and rotate any real service-role, database or other private credentials that were ever stored there. Historical review completed on 6 November 2026; no private credentials were found, so no credential rotation was required.
 - [ ] **MT-0303 · P0 · BLOCKED** — Complete the move to Boxont-controlled Supabase only after the target project, backup/restore, schema, data, auth, storage, RLS, grants, functions, secrets and migration-history plan are verified. Do not run the held migrations on the existing project.
 - [ ] **MT-0304 · P0 · BLOCKED** — Reconcile the held backend PR #1 against current `main` after the Supabase cutover; inspect migrations 0010–0017, regenerate Drizzle snapshots, validate migration order and permissions, and run full build and tests before merge or deployment.
 - [ ] **MT-0305 · P1 · TODO** — Add explicit package scripts for the existing `src/lib/*.test.ts` tests and TypeScript checking; run them locally and add a free GitHub Actions quality workflow for install, lint, test, typecheck and production build.
@@ -534,7 +534,6 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 
 | Order | Task | Status |
 |---:|---|---|
-| 1 | MT-0302 — review Git history for any credentials in the removed `.env` and rotate any real secrets | BLOCKED; controlled credential review required |
 | 2 | MT-0282 — resolve the exact Netflix/subscription fulfilment method and pause unsupported offers | TODO |
 | 3 | MT-0041–0046 — verify supplier legitimacy, resale rights, region, denomination and delivery evidence | TODO |
 | 4 | Test one complete low-value Nepal order for each live product family and document payment/fulfilment evidence | TODO |
@@ -542,7 +541,7 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 6 | Complete Boxont-owned Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED |
 | 7 | Add a repeatable test/typecheck/CI quality gate and protect `main` after validating Lovable sync | TODO |
 
-**Repository security note:** The tracked root `.env` has been removed from the current `main` tree, local environment files are now ignored, and a placeholder-only `.env.example` has been added. This does not erase earlier commits. Do not assume old values are safe; rotate any private values found in Git history.
+**Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
 **Release note:** The latest verified production build before the documentation/security cleanup was READY at `087f0ed5e9f94016dd14476b0c05218adce6e135` on `mtdgc.com`. Recheck the latest deployment after the current documentation commits. The backend PR remains on HOLD until the Supabase cutover.
 
@@ -697,4 +696,30 @@ This reconciliation verifies database catalogue state, variant eligibility and p
 No product, variant, category, price, availability flag or database record was changed as part of this audit.
 
 **Evidence sources:** read-only query of the MTDGC `public.products`, `public.product_variants` and `public.categories` tables on 6 November 2026; public pages [Catalog](https://mtdgc.com/catalog), [All products](https://mtdgc.com/products), [Game Top-Ups](https://mtdgc.com/categories/game-top-ups) and [Gift Cards](https://mtdgc.com/categories/gift-cards).
+
+
+
+## 16. Historical environment-file credential review — 6 November 2026
+
+**Task:** MT-0302 · P0 · DONE  
+**Scope:** Review the published Git history for the removed root `.env`, identify any private values without reproducing them, and determine whether rotation is required.
+
+### Findings
+
+- Git history contains two commits affecting the root `.env`: the original addition on 17 September 2026 and its removal from `main` on 5 November 2026.
+- The historical file contains six entries: two project-ID entries, two Supabase URL entries and two copies of the same `sb_publishable_` key.
+- The key is a Supabase **publishable** key, intended for browser/client use; it is not a secret key. Supabase's key migration guide distinguishes publishable keys from server-side secret keys and maps publishable keys to the legacy `anon` role: https://supabase.com/docs/guides/getting-started/migrating-to-new-api-keys
+- No `service_role` key, `sb_secret_` key, database password/URL, migration connection string, Sentry auth token or other private credential was present in the historical `.env`.
+- The historical project identifier and endpoint do not match the currently connected MTDGC Supabase project. Treat this configuration as stale; do not reuse it.
+- `.env.example` on current `main` contains placeholders only.
+- The same historical 361-byte `.env` blob remains referenced by `backend-code-route` and `redesign-matrix`. These branch copies contain the same public configuration, not private credentials. The backend branch remains on hold pending the Supabase cutover; the redesign branch is stale. Do not merge, deploy or reactivate either branch without removing the tracked `.env` from its branch tip and revalidating the branch configuration.
+- Current MTDGC Supabase API-key inventory exposes a publishable key and legacy anon key; no historical value was found to match those current keys.
+
+### Decision and actions
+
+**No private credential was found, so no credential rotation was required for MT-0302.** The task is complete based on the historical file contents and current key inventory. This review did not rotate keys or change any Supabase settings.
+
+The stale branch copies are recorded as a release/branch-cleanup condition, not as evidence of a leaked private secret. Preserve Git history; do not force-push, rewrite or amend published commits. Remove the tracked `.env` in a normal forward commit before either stale branch is ever reused.
+
+**Evidence:** GitHub path history for `.env`; historical blob at commit `99672865ce0977e767dfaa952f2c29d39813a9ce`; removal commit `0763a9acbd47f7bdd770eafe931c1e12e91cee78`; branch-tip `.env` blobs on `backend-code-route` and `redesign-matrix`; current `.env.example`; current MTDGC Supabase publishable-key inventory. Values and full key material were intentionally not copied into this plan.
 
