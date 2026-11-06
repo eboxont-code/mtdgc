@@ -39,19 +39,19 @@ describe("canonical customer order status presentation", () => {
     assert.equal(orderStatusLabel("payment_submitted"), "Payment proof submitted");
     assert.equal(orderStatusLabel("paid"), "Payment marked received");
     assert.equal(orderStatusLabel("verified"), "Payment proof reviewed");
-    assert.match(ORDER_NOTICE.payment_submitted, /manual review/i);
-    assert.match(ORDER_NOTICE.payment_submitted, /does not confirm that funds have settled/i);
-    assert.match(ORDER_NOTICE.paid, /legacy status/i);
-    assert.match(ORDER_NOTICE.verified, /manual review/i);
-    assert.match(ORDER_NOTICE.verified, /not an automatic bank-settlement confirmation/i);
+    assert.match(ORDER_NOTICE["payment_submitted"], /manual review/i);
+    assert.match(ORDER_NOTICE["payment_submitted"], /does not confirm that funds have settled/i);
+    assert.match(ORDER_NOTICE["paid"], /legacy status/i);
+    assert.match(ORDER_NOTICE["verified"], /manual review/i);
+    assert.match(ORDER_NOTICE["verified"], /not an automatic bank-settlement confirmation/i);
   });
 
   test("normalises legacy delivery aliases without changing their stored values", () => {
     assert.equal(orderStatusLabel("delivered"), "Delivered");
     assert.equal(orderStatusLabel("fulfilled"), "Delivered");
     assert.equal(orderStatusLabel("completed"), "Delivered");
-    assert.match(ORDER_NOTICE.fulfilled, /legacy status/i);
-    assert.match(ORDER_NOTICE.completed, /legacy status/i);
+    assert.match(ORDER_NOTICE["fulfilled"], /legacy status/i);
+    assert.match(ORDER_NOTICE["completed"], /legacy status/i);
   });
 
   test("uses the same safe fallback for unknown values instead of exposing raw enum text", () => {
@@ -66,7 +66,7 @@ describe("canonical customer order status presentation", () => {
     assert.equal(orderStepIndex("delivered"), 3);
     assert.equal(orderStepIndex("cancelled"), -1);
     assert.equal(orderStepIndex("refunded"), -1);
-    assert.match(ORDER_STEPS[0].body, /screenshot alone does not confirm/i);
-    assert.match(ORDER_STEPS[3].body, /Staff have marked/i);
+    assert.match(ORDER_STEPS[0]?.body ?? "", /screenshot alone does not confirm/i);
+    assert.match(ORDER_STEPS[3]?.body ?? "", /Staff have marked/i);
   });
 });
