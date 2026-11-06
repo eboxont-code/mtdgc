@@ -11,7 +11,7 @@ import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { listCatalog } from "@/lib/catalog.functions";
 import { SITE_URL } from "@/lib/format";
-import { availabilityCounts, isComingSoon, isPurchasable } from "@/lib/product-availability";
+import { availabilityCounts, isComingSoon, isPurchasable, isUnavailable } from "@/lib/product-availability";
 import { breadcrumbLd, itemListLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/catalog")({
@@ -78,7 +78,7 @@ function CatalogPage() {
     const needle = query.trim().toLowerCase();
     const filtered = products.filter((product) => {
       const matchesCategory = category === "all" || product.category?.slug === category;
-      const matchesAvailability = availability === "all" || (availability === "available" ? isPurchasable(product) : isComingSoon(product));
+      const matchesAvailability = availability === "all" || (availability === "available" ? isPurchasable(product) : availability === "coming_soon" ? isComingSoon(product) : isUnavailable(product));
       const lowest = lowestPrice(product);
       const matchesPrice = price === "all" || (lowest !== null && (price === "under-1000" ? lowest < 100000 : price === "1000-3000" ? lowest >= 100000 && lowest <= 300000 : lowest > 300000));
       const haystack = [
@@ -134,7 +134,7 @@ function CatalogPage() {
       <fieldset>
         <legend className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Availability</legend>
         <div className="mt-2 flex flex-wrap gap-2">
-          {([["all", "All"], ["available", "Available now"], ["coming_soon", "Coming soon"]] as const).map(([value, label]) => (
+          {([["all", "All"], ["available", "Available now"], ["coming_soon", "Coming soon"], ["unavailable", "Unavailable"]] as const).map(([value, label]) => (
             <button key={value} type="button" aria-pressed={availability === value} className={chip(availability === value)} onClick={() => setFilter({ availability: value })}>{label}</button>
           ))}
         </div>
@@ -204,7 +204,7 @@ function CatalogPage() {
             <div className="grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
               <h1 className="min-w-0 font-display text-[22px] font-semibold md:text-3xl">{activeCategory?.name ?? "Catalog"}</h1>
               <span role="status" aria-live="polite" aria-atomic="true" className="min-w-0 pb-1 font-mono text-xs text-muted-foreground">
-                {visible.length} listed / {counts.available} available now / {counts.comingSoon} coming soon
+                {visible.length} listed / {counts.available} available now / {counts.comingSoon} coming soon / {counts.unavailable} unavailable
               </span>
             </div>
 
