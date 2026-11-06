@@ -128,7 +128,7 @@ export const Route = createFileRoute("/products/$slug")({
 function ProductPage() {
   const { product, related, explore } = Route.useLoaderData();
   const { add, setDrawerOpen } = useCart();
-  const defaultVariant = product!.variants.find((variant) => variant.is_default) ?? product!.variants[0];
+  const defaultVariant = product.variants.find((variant) => variant.is_default) ?? product.variants[0];
   const { plan } = Route.useSearch();
   const selectedSku = product.variants.some((item) => item.sku === plan) ? plan : defaultVariant?.sku ?? "";
   const [fields, setFields] = useState<Record<string, string>>({});
@@ -155,7 +155,6 @@ function ProductPage() {
   const fieldRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const [invalidFields, setInvalidFields] = useState<string[]>([]);
 
-  if (!product) return null;
   const variant = product.variants.find((item) => item.sku === selectedSku) ?? defaultVariant;
   const hidePrices = pricesHidden(product);
   const orderable = !hidePrices && isOrderable(product.status) && !!variant && isOrderable(variant.status) && variant.price_minor > 0;
