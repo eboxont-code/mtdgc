@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.6 · 7 November 2026
+**Version:** 2.7 · 7 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -230,7 +230,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [!] **MT-0103 · P0 · BLOCKED** — The live `public.order_status` enum already contains `cancelled`, `failed` and `refunded`, but it has no `action_required` value. Adding a persisted action-required state requires a schema migration, and the repository explicitly holds migrations until the Boxont-controlled Supabase cutover; no approved cutover target/window is available. The owner must also approve which customer actions (for example, missing player details or delivery-email correction) create/clear this state and what terminal-state/refund handling means. Do not invent the workflow or write directly to production. Existing terminal values remain for legacy compatibility; generic admin updates no longer expose cancellation/refund until dedicated workflows are approved. Evidence: sections 29–31.
 - [x] **MT-0104 · P0 · DONE** — Enforced the generic admin fulfilment path server-side: only `verified` → `processing` and `processing` → `delivered` are accepted; the update uses a compare-and-swap status predicate to reject concurrent/stale transitions. Admin list/detail selectors expose only valid next states. Payment decisions remain in `reviewPayment`; generic edits cannot set legacy `paid`, `verified`, `rejected`, `cancelled` or `refunded`. Evidence and limits: section 31.
 - [x] **MT-0105 · P0 · DONE** — Require both a supported current/legacy order reference and a valid matching email or phone in the public tracking lookup; enforce the same contact validator in browser and server, preserve order-scoped hash/email matching and return generic not-found for mismatched pairs. Rate-limit database errors now fail closed. Evidence and concurrency limitation: section 32.
-- [ ] **MT-0106 · P0 · TODO** — Ensure account order history and guest tracking show the same canonical status.
+- [x] **MT-0106 · P0 · DONE** — Consolidated customer-facing order status labels, notices and progress steps across account order history, authenticated order history, public guest tracking and the individual order page. All 13 production enum values have a safe label and notice; `payment_submitted`, legacy `paid`, manual `verified`, staff-marked delivery and legacy delivery aliases are explicitly distinguished. Evidence: section 33.
 - [ ] **MT-0107 · P1 · TODO** — Record a timestamp and actor for every status transition.
 - [ ] **MT-0108 · P1 · TODO** — Show customers what happens next at each stage and whether they need to act.
 - [ ] **MT-0109 · P1 · TODO** — Allow staff to add internal notes without exposing them to customers.
@@ -250,7 +250,7 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Orders are delivered accurately and on time, while manual checks are gradually replaced only by safe, tested automation.
 
-- [ ] **MT-0121 · P0 · TODO** — Document the current manual fulfilment steps for each active product family.
+- [!] **MT-0121 · P0 · BLOCKED** — The supplier register has no verified supplier/product-scope records, no approved delivery route and no supplier-specific fulfilment instructions for the currently listed product families. The repository records product requirements but does not establish how an authorised supplier actually fulfils each SKU. The owner must provide verified supplier/source, region-scope and delivery-step evidence before a product-family runbook can be accurate. Do not invent steps or contact suppliers. Revisit when that evidence is supplied.
 - [ ] **MT-0122 · P0 · TODO** — Create a pre-fulfilment checklist for player ID, zone, server, region, denomination and email.
 - [ ] **MT-0123 · P0 · TODO** — Require a second confirmation for irreversible top-ups and code releases.
 - [ ] **MT-0124 · P0 · TODO** — Record the supplier transaction or redemption reference for each completed order.
@@ -1319,4 +1319,41 @@ MT-0103 is BLOCKED by the missing action-required workflow definition and the he
 - Vercel has no deployment record for the task code commit. The latest observed production deployment remains READY but is sourced from intermediate commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`, not this working branch. Vercel reported no runtime errors in the preceding 24 hours.
 - Open PR #1 remains explicitly held until the Boxont-controlled Supabase move; no open issues were returned. No production deployment, migration, billing change, paid service, third-party contact or production data write occurred.
 
-**Next P0 task:** MT-0106 — compare the canonical status wording and display logic in authenticated order history, guest tracking and the order-detail route; consolidate only the shared presentation logic while preserving existing status meanings and legacy aliases.
+MT-0106 is completed in section 33. MT-0121 was reviewed and marked BLOCKED because verified supplier/product-scope and delivery-step evidence is absent. **Next eligible P0 task:** MT-0122 — create a pre-fulfilment checklist using only the customer/product fields already recorded on each order item; include only fields applicable to that saved order and do not infer supplier instructions.
+
+
+## 33. Canonical customer order status presentation — 7 November 2026
+
+**Task:** MT-0106 · P0 · DONE — account order history, public guest tracking and individual order views now use one shared status-label/notice/progress definition.
+
+### Implementation
+
+- Added `src/lib/order-status.ts` as the single customer-facing source for labels, status notices, progress steps, step indexing and event timestamps.
+- Replaced the duplicated status map in `src/routes/track-order.tsx` and the separate `STATUS_TEXT` map in `src/routes/order.$orderNumber.tsx` with `orderStatusLabel`.
+- Updated `src/routes/_authenticated/account.tsx` so the account summary no longer exposes raw enum values.
+- Updated `src/routes/_authenticated/orders.tsx` to use the same canonical label and the same explanatory notice as public tracking and the individual order page.
+- Kept `format.ts` backwards-compatible by re-exporting the existing `ORDER_NOTICE`, `ORDER_STEPS`, `orderStepIndex` and `stepTime` names from the new helper.
+- All 13 live `public.order_status` enum values have an explicit customer label and notice. `fulfilled` and `completed` remain stored unchanged but share the customer label `Delivered`; unknown values render a safe `Status update` label instead of leaking raw enum text.
+- Corrected the previous misleading copy: `payment_submitted` now says proof was submitted and awaits manual review; legacy `paid` is labelled as manually marked received; `verified` explicitly describes administrator review rather than automatic bank reconciliation; delivery wording no longer claims an automatic email/order-page delivery channel; `refunded` is described as a recorded status rather than proof of a refund settlement.
+- `pending` and `pending_payment` are included in the payment progress step. Terminal/rejected states do not appear as completed fulfilment steps.
+
+### Regression tests and verification
+
+- Added `src/lib/order-status.test.ts` with five focused cases covering every production enum label/notice, payment-proof versus legacy/manual payment distinctions, delivery aliases, unknown-status fallback and progress-step mapping.
+- Focused Node `v22.16.0` run using TypeScript type stripping: **5 tests passed, 0 failed**.
+- Global TypeScript strict check of the pure helper with `--strict`, `--noUncheckedIndexedAccess`, `--noPropertyAccessFromIndexSignature` and `--exactOptionalPropertyTypes`: **passed**.
+- Full Bun test suite, ESLint, project typecheck and production build were **not run**. Bun, project dependencies and a local repository checkout are not present in this execution environment. The exact helper and test source were exercised in the scratch harness; route integration was verified by re-fetching the committed files and checking the imports/render paths.
+
+### Repository and release evidence
+
+- Work is on `automation/mt-0104-order-transition-guard`, based on current `main` SHA `1d948a818f056ec1ae1f630688070da6e8449fde`; the branch was 26 commits ahead and 0 behind before this task. No merge or PR was created.
+- Code commits: `240457b5bbfe042f176c76e1ce4062f0e31e10b0` (helper), `050de3a12e27d6f7934017d64708eb29c5584ff1` (tests), `dd47462a9dd7c66d1588a3d0f14cc9877f198537` (format re-export), `6be939a320fb420de7dad00f6dd3b7ed48707339` (account summary), `3b4b2ab14a8c29b6f556a41934befa906f39f96d` (account orders), `9c2f2d4fd581890c6ad44a5c15520760be20130d` (public tracking), `013e71a2e1a82195dc4bd34122c3763707a66caa` (individual order page), and `0f5ce2a633ca98ffbf5673cf1c004b82bea46bd7` (strict-indexed-access test correction).
+- GitHub Actions workflow-run lookup for the branch commit returned no runs; the wrapper exposes PR-triggered runs only. No PR was opened because repository instructions warn that Git integration can automatically create Vercel previews.
+- Current `main` combined status reports Vercel `failure` with the Hobby/free build-rate-limit target. The latest observed production deployment remains READY but is sourced from older commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`, not this branch. Vercel reported no runtime error clusters in the preceding 24 hours.
+- Supabase project `mtdgc` reports `ACTIVE_HEALTHY`; a read-only query reconfirmed the production `public.order_status` enum has the same 13 values. No production records, schema, policies, storage, environment variables or settings were changed.
+- The local working-tree status is unavailable because this execution environment has no MTDGC checkout. GitHub branch/ref and file contents were inspected instead.
+
+### Next task triage
+
+- MT-0121 is BLOCKED: the supplier register is empty and no supplier-specific delivery route or fulfilment instructions are evidenced. The owner must provide verified source/product/region scope and actual fulfilment steps before a product-family runbook can be accurate. No supplier contact was made.
+- **Next eligible P0 task:** MT-0122 — create a pre-fulfilment checklist from the saved product requirements and order-item fields, showing only fields applicable to the selected order. Do not infer supplier instructions or require fields that were not collected at checkout.
