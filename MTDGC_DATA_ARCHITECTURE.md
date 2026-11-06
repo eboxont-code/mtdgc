@@ -76,11 +76,36 @@ The live order table has the enum type, primary key, unique order-number constra
 
 The current customer-facing label for `payment_submitted` is “Payment received, being checked”; operationally it means only that proof was submitted and awaits review. Do not interpret it as bank settlement confirmation.
  
-## 5. Guest Checkout Architecture
-- **No Account Required**: Orders are created with `user_id = NULL`.
-- **Identity**: `guest_email` and `guest_whatsapp` are captured.
-- **Security**: A unique `guest_access_token` (UUID) is generated for each order.
-- **Tracking**: Users can view order status via a URL containing the `order_id` and `guest_access_token`.
+## 5. Guest Checkout and Order Tracking Architecture
+
+### Order identity at creation
+
+- Guest checkout does not require an account; `orders.user_id` may be NULL. Authenticated checkout can associate the order with the resolved user ID.
+- Checkout stores the supplied `guest_email` and `guest_phone` values where provided. At least one contact is required by the order input schema.
+- The server creates a high-entropy order number and a separate 256-bit guest access token. The order stores SHA-256 hashes (`verification_hash` and `access_token_hash`), not the raw access token.
+- `verification_hash` is derived from the order number plus the normalised primary contact (phone when supplied, otherwise email). The raw access token is returned to the customer at order creation and is kept in browser local/session storage for the order confirmation route; it is not embedded in the readable order-number URL.
+
+### Public tracking lookup
+
+- The public `/track-order` form requires both an order number and the email address or phone number used at checkout.
+- The browser and server share the same contact-format validator: a syntactically valid email or a phone-like value containing 7–15 digits after removing formatting characters.
+- The server also validates the order reference against the supported current and historical formats; browser-only validation is not relied upon.
+- The lookup loads the order by its order number and returns order details only when the supplied contact matches that same order. It checks the hash of the upper-cased order number plus the normalised contact, and supports a case-insensitive saved-email match when email was also collected. A wrong order/contact pair returns the same generic not-found result as an unknown order.
+- Phone matching normalises punctuation and spacing to digits. It does not infer or add a missing country calling code; customers should use the same underlying number supplied at checkout.
+- The lookup response contains order status, timestamps, total and item summaries; it does not return the stored email, phone, access-token hash or verification hash.
+
+### Separate order-confirmation access
+
+- `/order/:orderNumber` can also resolve an order using the raw high-entropy access token held in browser storage, an authenticated account-owner check, or the rate-limited contact fallback. The readable order number alone is not sufficient.
+- The guest access token is a bearer secret scoped by its stored hash. Do not place it in a public URL, analytics event, support message or log.
+- Stored payment-proof images remain private; the guest tracking permission does not grant direct proof-image access.
+
+### Rate limiting and storage controls
+
+- Public tracking hashes the request IP and records attempts in `order_lookup_attempts`. The current threshold is 10 attempts per 10 minutes per derived IP hash; old rows are cleaned up after 24 hours.
+- If the attempt-count query or attempt insert fails, the lookup returns an unavailable response instead of proceeding without a working rate-limit record. The count-plus-insert sequence is not atomic, so concurrent requests can still exceed the threshold; database-atomic enforcement requires a reviewed migration/RPC after the documented Supabase cutover.
+- Production inspection confirmed `orders` and `order_lookup_attempts` have RLS enabled. The lookup-attempt table has no direct role policies; the server-side service-role function performs its access. Its `(ip_hash, created_at)` index supports the time-window count.
+- No production test order was created for this verification.
 
 ## 6. Launch Strategy (Separation)
 
