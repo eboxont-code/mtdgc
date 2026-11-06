@@ -63,7 +63,7 @@ function CategoriesIndexPage() {
                   </h2>
                   <p className="mt-1 text-sm text-muted-foreground">{category.description}</p>
                   <p className="mt-2 font-display text-xs text-muted-foreground">
-                    {counts.available} available now / {counts.comingSoon} coming soon
+                    {counts.available} available now / {counts.comingSoon} coming soon / {counts.unavailable} unavailable
                   </p>
                   <Button asChild variant="outline" size="sm" className="mt-3">
                     <Link to="/categories/$slug" params={{ slug: category.slug }}>View {category.name}</Link>
