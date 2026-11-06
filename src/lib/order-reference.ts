@@ -12,7 +12,7 @@ export function generateOrderReference(): string {
   return `${ORDER_REFERENCE_PREFIX}${suffix}`;
 }
 
-const ORDER_REFERENCE_PATTERN = /^(?:MT[0-9A-F]{32}|MT\\d{6}|(?:MTD|MTDGC)-[A-Z0-9-]{4,})$/;
+const ORDER_REFERENCE_PATTERN = /^(?:MT[0-9A-F]{32}|MT\d{6}|(?:MTD|MTDGC)-[A-Z0-9-]{4,})$/;
 
 /** Accept new references and historical formats already used by the storefront. */
 export function isSupportedOrderReference(value: string): boolean {
