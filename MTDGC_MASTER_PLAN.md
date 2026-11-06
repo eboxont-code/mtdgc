@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 1.8 · 7 November 2026
+**Version:** 1.9 · 7 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -1030,6 +1030,6 @@ No product records, supplier assignments, prices, variants, order records, datab
 - Vercel production deployment [`dpl_8Kn2vshSTuqgJXR6R5xVME4ccgvD`](https://vercel.com/boxont/mtdgc/8Kn2vshSTuqgJXR6R5xVME4ccgvD) was **READY**, sourced from the same `main` commit, with `mtdgc.com`, `www.mtdgc.com` and the project aliases assigned and no alias error.
 - Vercel's aggregated runtime-error check found no runtime errors in the preceding 24 hours; the most recent 50-minute production log query returned no error/fatal logs. Supabase's 24-hour log query contained no payment/proof/settings endpoint mentions. These are monitoring snapshots, not proof of a successful live payment.
 - No code, schema, migration, payment setting, order, payment-proof or storage object was changed. No order was created, no payment was made, and no supplier or third party was contacted.
-- Because this task was an audit/documentation task, no application source tests were added or run specifically for the findings. The plan-only commit will trigger the repository's standard GitHub quality workflow; verify that run and the resulting deployment before closing this documentation update.
+- Because this task was an audit/documentation task, no application source files or tests were changed. The documentation commit `380099fa08291870791cf104525974acb79c8e99` triggered GitHub Actions run [`42232921172`](https://github.com/eboxont-code/mtdgc/actions/runs/42232921172), which passed lint, unit tests, TypeScript typecheck and production build. Vercel production deployment [`dpl_2eGMLium1BZLEPAaprpjhEqnvyaR`](https://vercel.com/boxont/mtdgc/2eGMLium1BZLEPAaprpjhEqnvyaR) reached **READY** from the same commit with `mtdgc.com` and `www.mtdgc.com` assigned and no alias error. Lovable's `latest_commit_sha` also matched `main` at `380099fa08291870791cf104525974acb79c8e99`. Vercel's last-hour runtime-error check found no errors.
 
 **Next P0 task:** MT-0082 — verify unique, non-guessable order references. The payment-control findings above remain open under their existing tasks; do not mark them complete based solely on this audit.
