@@ -2,12 +2,16 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { findUnsafeCustomerRequirement, UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE } from "@/lib/supplier-safety";
 
 const lineSchema = z.object({
   sku: z.string().min(1).max(80),
   quantity: z.number().int().min(1).max(10),
   fields: z.record(z.string().max(80), z.string().max(200)).default({}),
-});
+}).refine(
+  (line) => !findUnsafeCustomerRequirement(Object.keys(line.fields)),
+  { message: UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE },
+);
 
 const orderSchema = z
   .object({
