@@ -1406,8 +1406,8 @@ MT-0106 is completed in section 33. MT-0121 was reviewed and marked BLOCKED beca
 
 ### Scope selected from existing product data
 
-- A read-only production query against Supabase project `mtdgc` (`eaomkkswslqtfunkceuc`) showed currently available products in `game-top-ups`: Clash of Clans Passes (Supercell ID email and player tag), Free Fire Diamonds (player ID and nickname), Mobile Legends Diamonds (user ID and Zone ID), and PUBG Mobile UC (player ID and nickname).
-- The same query showed the currently available `gift-cards` product, Roblox Gift Card, with delivery method `Digital code sent to your delivery email` and the required delivery-email field.
+- A read-only production query against Supabase project `mtdgc` (`eaomkkswslqtfunkceuc`) confirmed `is_published = true`, product status `available`, and variant status `available` for the current `game-top-ups` products: Clash of Clans Passes (Supercell ID email and player tag), Free Fire Diamonds (player ID and nickname), Mobile Legends Diamonds (user ID and Zone ID), and PUBG Mobile UC (player ID and nickname).
+- The same query confirmed the `gift-cards` product with published/available product and variant statuses is Roblox Gift Card, with delivery method `Digital code sent to your delivery email` and the required delivery-email field. Other gift-card variants were `coming_soon`.
 - Other gift-card listings were `coming_soon`; software and subscription listings were `coming_soon`, and Netflix was `temporarily_unavailable`. They were not treated as current code-release actions.
 - The production product schema has category, region, delivery method and requirements, but no explicit supplier-side `irreversible` property. The supplier register still contains no verified supplier/product-scope evidence. No supplier irreversibility, redemption rule or reversal policy was inferred.
 
@@ -1431,7 +1431,7 @@ MT-0106 is completed in section 33. MT-0121 was reviewed and marked BLOCKED beca
 
 ### Verification
 
-- Focused test file `src/lib/order-confirmation.test.ts`: **5 passed, 0 failed**, run with Node 22.16 using `node --experimental-strip-types --test` in a scratch workspace containing the exact helper/test source.
+- Focused test file `src/lib/order-confirmation.test.ts`: **5 passed, 0 failed**, run with Node 22.16 using `node --experimental-strip-types --test` in a scratch workspace containing the same helper and assertions; the scratch test import used an explicit `.ts` extension for Node resolution, while the repository test retains the extensionless import used by the Bun test runner.
 - Strict TypeScript check of the helper passed with `tsc --noEmit --strict --exactOptionalPropertyTypes --noUncheckedIndexedAccess --target ES2022 --module ESNext --moduleResolution Bundler`.
 - The tests cover category selection, unrelated categories, conservative handling of older carts without category metadata, rejection when server-resolved top-up/code categories lack acknowledgement, and acceptance when acknowledgement is present.
 - Full `bun run lint`, `bun run test`, `bun run typecheck` and `bun run build` were not run: this environment has no Bun installation or local MTDGC checkout/dependency tree. The route/server integration therefore has not received the full project quality workflow.
