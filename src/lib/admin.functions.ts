@@ -5,6 +5,7 @@ import type { Database } from "@/integrations/supabase/types";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { findUnsafeCustomerRequirement, UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE } from "@/lib/supplier-safety";
+import { canAdminTransitionOrder } from "@/lib/order-transitions";
 
 type Ctx = { supabase: SupabaseClient<Database>; userId: string };
 
@@ -22,8 +23,24 @@ export const updateOrderStatus = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid(), status: orderStatus, note: z.string().trim().max(500).optional() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context as Ctx);
-    const { error } = await context.supabase.from("orders").update({ status: data.status, updated_at: new Date().toISOString() }).eq("id", data.id);
+    const { data: current, error: readError } = await context.supabase
+      .from("orders")
+      .select("status")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (readError) throw new Error("Could not load the order status");
+    if (!current) throw new Error("Order not found");
+    if (!canAdminTransitionOrder(current.status, data.status)) {
+      throw new Error("Invalid order transition. Payment must be verified before processing, and an order must be processing before delivery.");
+    }
+    const { data: moved, error } = await context.supabase
+      .from("orders")
+      .update({ status: data.status, updated_at: new Date().toISOString() })
+      .eq("id", data.id)
+      .eq("status", current.status)
+      .select("id");
     if (error) throw new Error("Could not update the order");
+    if (!moved?.length) throw new Error("The order status changed. Refresh and try again.");
     await context.supabase.from("order_status_events").insert({ order_id: data.id, status: data.status, note: data.note ?? null, created_by: context.userId });
     return { ok: true };
   });
