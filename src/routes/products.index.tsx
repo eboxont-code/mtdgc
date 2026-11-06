@@ -62,7 +62,7 @@ function ProductsIndexPage() {
           ))}
         </div>
 
-        <p className="mt-4 text-xs text-muted-foreground">{availabilityCounts(products).available} available now / {availabilityCounts(products).comingSoon} coming soon</p>
+        <p className="mt-4 text-xs text-muted-foreground">{products.length} listed / {availabilityCounts(products).available} available now / {availabilityCounts(products).comingSoon} coming soon / {availabilityCounts(products).unavailable} unavailable</p>
 
         {products.length ? (
           <div className="mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4">
