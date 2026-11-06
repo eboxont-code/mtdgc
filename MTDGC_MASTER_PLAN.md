@@ -451,7 +451,7 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** Product eligibility, subscription mechanics, privacy, fulfilment, fraud controls and reporting remain accurate across all buyer and recipient markets.
 
 - [ ] **MT-0281 · P0 · TODO** — Extend the canonical product model with buyer markets, supplier SKU, sourcing status, price by currency, code denomination currency, delivery country, redemption region, required customer fields, fulfilment method and last verification date.
-- [ ] **MT-0282 · P0 · TODO** — Resolve the current Netflix listing’s exact fulfilment method: official code, authorised membership/top-up, customer-owned account renewal or another method; document supplier authority, account ownership, country and customer control, and pause scaling until clear.
+- [!] **MT-0282 · P0 · BLOCKED** — Confirm the exact Netflix fulfilment method, supplier authority, account ownership, country and customer control. The current listing does not document these points and has been set to `temporarily_unavailable` in production on 6 November 2026; reopen only after written supplier/issuer evidence and a successful end-to-end test prove an authorised, region-compatible offer.
 - [ ] **MT-0283 · P1 · TODO** — For every subscription, state plan duration, billing model, renewal behaviour, account owner, household/seat restrictions, region, what the customer receives and what happens at expiry.
 - [ ] **MT-0284 · P1 · TODO** — Maintain a dated evidence record for each “Global” or region-specific claim, including issuer/supplier source, tested account or server region and known exclusions.
 - [ ] **MT-0285 · P1 · TODO** — Test name, email and phone validation for Nepal and Australia formats, including Nepali names and valid international phone numbers, without rejecting legitimate customers.
@@ -534,12 +534,12 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 
 | Order | Task | Status |
 |---:|---|---|
-| 1 | MT-0282 — resolve the exact Netflix/subscription fulfilment method and pause unsupported offers | TODO |
-| 2 | MT-0041–0046 — verify supplier legitimacy, resale rights, region, denomination and delivery evidence | TODO |
-| 3 | Test one complete low-value Nepal order for each live product family and document payment/fulfilment evidence | TODO |
-| 4 | Resolve seller identity, Nepal/Australia policy scope and the legal/payment boundary for Australia-to-Nepal gifting | TODO |
-| 5 | Complete Boxont-owned Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED |
-| 6 | Add a repeatable test/typecheck/CI quality gate and protect `main` after validating Lovable sync | TODO |
+| 1 | MT-0041–0046 — verify supplier legitimacy, resale rights, region, denomination and delivery evidence | TODO |
+| 2 | Test one complete low-value Nepal order for each supported product family and document payment/fulfilment evidence | TODO |
+| 3 | Resolve seller identity, Nepal/Australia policy scope and the legal/payment boundary for Australia-to-Nepal gifting | TODO |
+| 4 | Complete Boxont-owned Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED |
+| 5 | Add a repeatable test/typecheck/CI quality gate and protect `main` after validating Lovable sync | TODO |
+| 6 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -722,4 +722,53 @@ No product, variant, category, price, availability flag or database record was c
 The stale branch copies are recorded as a release/branch-cleanup condition, not as evidence of a leaked private secret. Preserve Git history; do not force-push, rewrite or amend published commits. Remove the tracked `.env` in a normal forward commit before either stale branch is ever reused.
 
 **Evidence:** GitHub path history for `.env`; historical blob at commit `99672865ce0977e767dfaa952f2c29d39813a9ce`; removal commit `0763a9acbd47f7bdd770eafe931c1e12e91cee78`; branch-tip `.env` blobs on `backend-code-route` and `redesign-matrix`; current `.env.example`; current MTDGC Supabase publishable-key inventory. Values and full key material were intentionally not copied into this plan.
+
+
+
+## 17. Netflix subscription fulfilment review and production hold — 6 November 2026
+
+**Task:** MT-0282 · P0 · BLOCKED  
+**Decision:** Do not accept new Netflix subscription orders until the product's supply and account model are evidenced.
+
+### What is recorded today
+
+The `netflix-subscription` product is published for Nepal in NPR and described as an account-based subscription. It asks the buyer for a delivery email and tells the customer to sign in to Netflix with details sent after fulfilment. Three one-, three- and twelve-month variants are marked available.
+
+The product and variant records do not identify a supplier, issuer authority, exact subscription mechanism, account owner, billing country or the customer's continuing control of the account. No supplier register or supplier/issuer authority fields were found in the current application schema or repository search. The described flow is therefore not sufficiently specified to prove that it is a legitimate, authorised offer.
+
+### Customer-policy and regional considerations
+
+Netflix's current Help Center guidance states:
+- A Netflix account is for one household; extra-member eligibility depends on plan and country, and the extra member must be activated in the country where the account owner created the account: https://help.netflix.com/en/node/123277
+- Netflix warns customers not to buy accounts or shared sign-in information from third-party sites and says accounts offered for sale may be stolen: https://help.netflix.com/en/node/13243
+- Netflix says an account bought from an unauthorised retailer may not work in the country where it is used: https://help.netflix.com/en/node/113661
+- Gift-card redemption is also country/currency-sensitive and may be unavailable for some billing methods: https://help.netflix.com/en/node/59987
+
+These official policies do not establish that MTDGC's current product is authorised or unauthorised. They show why the precise supply route, region and account control must be documented before sale.
+
+### Production safeguard applied
+
+On 6 November 2026, the production row for `netflix-subscription` was updated from `available` to `temporarily_unavailable`. The product remains published so its page can explain its unavailable state, but the existing product-page availability logic and server-side `placeOrder` validator both require the parent product status to be `available` or `low_stock`. A follow-up read-only database check confirmed:
+- Product status: `temporarily_unavailable`
+- Published: `true`
+- Variants: 3, with their prices and statuses unchanged
+- Checkout-eligible variants: 0
+
+Two historical orders containing this product remain in `pending_payment`; no order rows or customer details were changed. An operator must check whether either payment was received and handle any customer communication or refund decision under the existing policy. Do not fulfil these orders merely because they exist.
+
+### Evidence required to unblock
+
+Before restoring availability, record:
+1. Supplier/issuer legal identity and contact, plus written authority or contractual permission to distribute this exact Netflix product.
+2. Exact offer: official redemption code, authorised extra-member slot, renewal on the customer's own account, authorised partner bundle, or another specifically evidenced mechanism.
+3. Issuing and billing country, currency, recipient country, redemption restrictions and compatibility for Nepal.
+4. Account ownership and control: who owns the account, who controls its email and recovery methods, whether the customer uses their own account, and whether any password/profile is shared.
+5. Term length, recurring billing/cancellation behaviour, delivery steps, failure escalation and refund treatment.
+6. A successful low-value end-to-end test using the exact production supplier route, with evidence retained without exposing customer passwords, OTPs or other secrets.
+
+Do not ask customers for passwords, OTPs or payment PINs. Do not describe a shared login as a private subscription or imply Netflix authorisation without documentary evidence.
+
+**No supplier or account arrangement has been inferred.** The product should remain unavailable until the evidence above is supplied and reviewed. Reopening this task is a deliberate owner decision after the evidence and test order exist.
+
+**Evidence sources:** read-only inspection of `public.products`, `public.product_variants`, `public.order_items` and `public.orders`; inspection of `src/routes/products.$slug.tsx`, `src/lib/catalog.functions.ts`, `src/lib/orders.functions.ts` and `src/lib/admin.functions.ts`; production status update and verification query; official Netflix Help Center pages linked above. No customer contact details, passwords, or payment data were copied into this plan.
 
