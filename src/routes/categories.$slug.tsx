@@ -118,7 +118,7 @@ function CategoryPage() {
         {products.length ? (
           <>
             <p className="mt-6 font-display text-xs text-muted-foreground">
-              {products.length} listed / {counts.available} available now / {counts.comingSoon} coming soon.
+              {products.length} listed / {counts.available} available now / {counts.comingSoon} coming soon / {counts.unavailable} unavailable.
               Each product page lists the region, required details and delivery method.
             </p>
             <h2 className="sr-only">Products in {category.name}</h2>
