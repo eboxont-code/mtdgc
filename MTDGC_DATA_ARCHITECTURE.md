@@ -91,7 +91,7 @@ The current customer-facing label for `payment_submitted` is “Payment received
 - `order_items.variant_name` already records the selected option/denomination, so no extra denomination column or migration is introduced.
 - The admin order detail sheet builds a per-item checklist from the saved snapshot: selected option, order-time product region, each required field and recorded/missing state. Extra saved customer fields remain visible.
 - The checklist never joins the current product record to reconstruct historical requirements or region. An item without a valid snapshot is explicitly marked as not captured/unrecognised; missing historical requirements are not guessed.
-- The snapshot is rendered only in the admin order detail view. Existing public order-summary responses do not expose the customer fields or internal snapshot.
+- The checklist UI is rendered only in the admin order detail view. Existing authenticated-owner/admin RLS on `order_items` remains unchanged and allows each order owner to read their own order-item JSONB, including this non-secret snapshot; the public guest order-summary function does not select `fields` or return the snapshot. No new access policy or grant was added.
 - This is an order-data snapshot and review aid, not a supplier runbook or proof of fulfilment readiness. Supplier-specific instructions remain blocked until independently verified evidence exists.
 
 ## 5. Guest Checkout and Order Tracking Architecture
