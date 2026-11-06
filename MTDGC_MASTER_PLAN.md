@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.1 · 7 November 2026
+**Version:** 2.2 · 7 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -1093,3 +1093,33 @@ No product records, supplier assignments, prices, variants, order records, datab
 - **Release action:** wait until the Vercel free deployment API quota has reset (the returned retry window was 24 hours), confirm the latest documentation-only `main` HEAD has a passing quality run, then deploy that current `main` commit (which includes the tested application-code commit `26a69301856a715a2cbd293da2cf88227d694ca5`) to production and verify both aliases before treating MT-0083 as live. Do not upgrade the plan or change billing to bypass the limit.
 
 **Next P0 task:** MT-0084 — validate uploaded proof file type, size and content handling. The source-level MT-0083 implementation is committed and CI-verified; its production rollout remains subject to the Vercel deployment quota above.
+
+
+## 27. Payment-proof file validation review — 7 November 2026
+
+**Task:** MT-0084 · P0 · BLOCKED — existing basic checks are present, but full image-content validation cannot be completed safely in the current repository-editing environment.
+
+### Evidence inspected
+
+- `src/lib/orders.functions.ts` already enforces a 5 MiB application limit, maps only `image/jpeg`, `image/png` and `image/webp`, and compares the declared MIME-derived extension with a basic magic-byte signature.
+- The production `payment-proofs` storage bucket is private and has a 5 MiB storage limit. Its `allowed_mime_types` setting is currently NULL, so the server-side checks remain the effective MIME gate.
+- The current signature helper only checks a few leading bytes (and RIFF/WEBP marker bytes). It does not fully parse or decode image data, verify complete container structure, or prove the payload is a valid decodable image.
+- `bun.lock` contains no direct image-decoding package such as Sharp, Jimp, ImageScript, or an equivalent server-side decoder.
+- The available GitHub connector can read and write repository files but does not provide a local checkout/runtime to install and lock a new decoder dependency or execute Bun tests locally. No package or lockfile change was attempted without the ability to generate and verify it.
+- The production storage bucket configuration and RLS policies were inspected read-only. No production settings or records were changed.
+
+### Exact blocker
+
+A safe completion requires a maintained server-side image decoder/parser already approved for this project, with its exact version locked and tests proving that malformed, truncated, mismatched and oversized files are rejected while valid JPEG/PNG/WebP files remain accepted. No such decoder is currently present, and this run has no local Bun environment to add/lock and execute the dependency's tests. The existing magic-byte checks are not being misrepresented as full content validation.
+
+**No deployment, migration, production configuration change, package installation, paid service or production data write was performed.**
+
+### Current release and CI observations
+
+- `main` HEAD at inspection: `1d948a818f056ec1ae1f630688070da6e8449fde`.
+- GitHub combined status for that SHA reports Vercel state `failure`, target URL indicates the Hobby/free build-rate limit. The connector's commit-workflow-run lookup returned no workflow runs for this SHA; GitHub Actions quality status for this exact HEAD is therefore unavailable from the inspected evidence.
+- Latest production deployment returned by Vercel is READY but sourced from intermediate commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`, not current `main`. No new deployment was requested.
+- Vercel reported no runtime error clusters in the last 24 hours.
+- Open PR #1 remains explicitly held until the Boxont-controlled Supabase move; it was not changed.
+
+**Next P0 task to inspect:** MT-0085 — restrict payment-proof access to the customer who owns the order and authorised staff. First inspect all signed-URL/read paths and compare them with the existing private-bucket policy. Do not alter production RLS or storage configuration; if the missing guest-access design requires a new policy or migration, record that exact dependency and continue to the next independent task.
