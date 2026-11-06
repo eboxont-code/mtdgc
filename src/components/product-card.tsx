@@ -10,7 +10,10 @@ import { PRICE_COMING_SOON, pricesHidden } from "@/lib/price-visibility";
 /** Lowest real price, or null for sample and coming-soon items (their prices are never shown). */
 export function lowestPrice(product: CatalogProduct): number | null {
   if (pricesHidden(product)) return null;
-  const prices = product.variants.map((variant) => variant.price_minor).filter((value) => value > 0);
+  const prices = product.variants
+    .filter((variant) => variant.status !== "archived")
+    .map((variant) => variant.price_minor)
+    .filter((value) => value > 0);
   return prices.length ? Math.min(...prices) : null;
 }
 
