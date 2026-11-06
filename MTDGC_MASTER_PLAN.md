@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.4 · 7 November 2026
+**Version:** 2.5 · 7 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -227,8 +227,8 @@ Do not set numerical targets until a reliable baseline exists.
 
 - [x] **MT-0101 · P0 · DONE** — Mapped all 13 values in the live `public.order_status` enum, the current order/proof writers, generic admin override paths, legacy display aliases and the absence of database transition enforcement. Updated `MTDGC_DATA_ARCHITECTURE.md` section 4 and recorded the verified transition map and bypass risk in section 29.
 - [x] **MT-0102 · P0 · DONE** — Defined the factual meaning of `payment_submitted`, legacy/manual `paid`, manually reviewed `verified`, staff-set `processing` and staff-marked `delivered`, explicitly distinguishing proof submission/review from independent settlement and delivery evidence. Evidence: section 30.
-- [ ] **MT-0103 · P0 · TODO** — Add explicit Cancelled, Failed, Refunded and Action required states where applicable.
-- [ ] **MT-0104 · P0 · TODO** — Prevent invalid status jumps, such as Pending directly to Delivered without payment verification.
+- [!] **MT-0103 · P0 · BLOCKED** — The live `public.order_status` enum already contains `cancelled`, `failed` and `refunded`, but it has no `action_required` value. Adding a persisted action-required state requires a schema migration, and the repository explicitly holds migrations until the Boxont-controlled Supabase cutover; no approved cutover target/window is available. The owner must also approve which customer actions (for example, missing player details or delivery-email correction) create/clear this state and what terminal-state/refund handling means. Do not invent the workflow or write directly to production. Existing terminal values remain for legacy compatibility; generic admin updates no longer expose cancellation/refund until dedicated workflows are approved. Evidence: sections 29–31.
+- [x] **MT-0104 · P0 · DONE** — Enforced the generic admin fulfilment path server-side: only `verified` → `processing` and `processing` → `delivered` are accepted; the update uses a compare-and-swap status predicate to reject concurrent/stale transitions. Admin list/detail selectors expose only valid next states. Payment decisions remain in `reviewPayment`; generic edits cannot set legacy `paid`, `verified`, `rejected`, `cancelled` or `refunded`. Evidence and limits: section 31.
 - [ ] **MT-0105 · P0 · TODO** — Verify guest order tracking requires the order number plus the matching email or phone.
 - [ ] **MT-0106 · P0 · TODO** — Ensure account order history and guest tracking show the same canonical status.
 - [ ] **MT-0107 · P1 · TODO** — Record a timestamp and actor for every status transition.
@@ -1242,4 +1242,41 @@ Legacy enum values `pending`, `paid`, `failed`, `fulfilled`, and `completed` rem
 - The existing working branch preview for `09f0e6fb42eb863ce2822f3c2076f19cd32d9e68` is READY with `target = null` (preview), not production. No new deployment was requested.
 - The branch update is documentation-only and remains separate from `main`; the held backend migration PR #1 remains untouched.
 
-**Next P0 task:** MT-0103 — add explicit Cancelled, Failed, Refunded and Action required states where applicable. First establish whether existing enum values and labels already cover the first three; any new `action_required` enum value requires the documented Supabase cutover/migration gate and must not be applied to the current production project.
+MT-0103 is BLOCKED by the missing action-required workflow definition and the held Supabase migration gate. **Next P0 task:** MT-0105 — verify guest order tracking requires both the order number and the matching email or phone, including negative tests for mismatched contact/order pairs. Preserve the current rate limit and avoid production test orders.
+
+
+## 31. Server-side order transition guard — 7 November 2026
+
+**Task:** MT-0104 · P0 · DONE for all exposed application order-status update paths. The database still has no transition trigger/constraint; this work does not claim privileged SQL/service-role writes are database-enforced.
+
+### Implementation
+
+- Added `src/lib/order-transitions.ts` as the single pure transition policy used by both the admin UI and server action.
+- The only generic admin fulfilment transitions are `verified` → `processing` and `processing` → `delivered`.
+- `updateOrderStatus` still requires authenticated admin authorization, now loads the current order status, rejects every transition outside the shared allowlist, and updates with both order ID and previously read status in the WHERE clause. If another action changes the status first, the conditional update returns no row and the request is rejected rather than overwriting the newer state.
+- The order-list and order-detail selectors now show only valid next actions. Orders with no generic transition remain visible with their current status and a disabled selector.
+- Generic updates can no longer set `paid`, `verified`, `rejected`, `cancelled` or `refunded`. Payment verification/rejection stays in the dedicated `reviewPayment` flow. Cancellation and refund remain unavailable through the generic editor until a dedicated workflow and evidence rules are approved.
+- The guard does not claim independent bank settlement: `verified` continues to mean an administrator accepted a submitted proof under the existing manual process. MT-0086 remains blocked pending an authorised settlement/reconciliation source or owner-approved manual evidence process.
+
+### Regression tests and local verification
+
+- Added `src/lib/order-transitions.test.ts` with five cases: the two allowed transitions; rejection of pending/payment-submitted/legacy paid states entering fulfilment; rejection of skipped steps; no generic next actions for terminal/legacy states; and rejection of unknown or unrelated transitions.
+- Executed the focused test logic under Node `v22.16.0` with TypeScript type stripping in a local scratch harness: **5 tests passed, 0 failed**. The helper was also checked with global TypeScript `tsc --noEmit --strict --target ES2022 --module ESNext --moduleResolution Bundler`: **passed**.
+- The repository's Bun runtime is not installed in this execution environment, and there is no local MTDGC checkout/dependency tree. Therefore `bun run lint`, the full `bun run test`, project `bun run typecheck` and `bun run build` were **not run**. The GitHub workflow-run lookup for the current `main` SHA returned no runs (the available wrapper only returns PR-triggered runs); no PR was opened because that could start an automatic preview deployment.
+- Final source was re-fetched from the working branch after edits. The old `ADMIN_ORDER_STATUSES` reference was searched and no remaining match was returned.
+
+### Production, CI and release evidence
+
+- `main` HEAD observed at start: `1d948a818f056ec1ae1f630688070da6e8449fde`. The working branch is `automation/mt-0104-order-transition-guard`, based on the prior documentation branch `automation/mt-0101-order-status-map`; no changes were pushed to `main`.
+- GitHub combined status for current `main` reports Vercel `failure` with the Hobby/free build-rate-limit target. This is not a passing application quality check. The workflow-run lookup returned no result for the exact SHA.
+- Latest production Vercel deployment observed is READY but sourced from intermediate commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`, not current `main`. Vercel reported no runtime errors in the preceding 24 hours. No deployment was requested.
+- Read-only Supabase inspection confirmed the production `order_status` enum still has 13 values, the `orders`, `payment_proofs` and `order_status_events` tables have RLS enabled, and there is no order-status transition trigger. The current aggregate snapshot remains 8 orders, all `pending_payment`. No production rows, policies, schema, storage, settings or credentials were changed.
+- Open PR #1 remains explicitly held pending the Boxont-controlled Supabase move; no open issues were returned. The local working-tree status is unavailable because this environment has no repository checkout.
+- No production deployment, migration, billing change, paid service or third-party contact occurred. The branch is not merged and no PR was opened.
+
+### Remaining boundaries
+
+- Application server actions and both admin UI entry points now share the same transition guard. Database-level enforcement remains a separate release-gated task because production has no transition trigger and schema changes are held until the Supabase cutover.
+- `cancelled`, `failed` and `refunded` remain enum values; a dedicated action-required workflow is not defined. MT-0103 is BLOCKED until the owner approves the exact action-required triggers/clearance and terminal/refund workflow, and the Boxont-controlled Supabase migration target is approved.
+
+**Next P0 task:** MT-0105 — verify guest order tracking requires both the order number and matching email or phone, with negative tests for mismatched pairs. Do not create production test orders or weaken rate limiting.
