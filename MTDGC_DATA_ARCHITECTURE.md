@@ -42,14 +42,14 @@ The live `public.order_status` enum contains these 13 values. The list includes 
 | `pending` | Legacy initial-payment state. Current checkout creates `pending_payment` instead. | No current writer found in the inspected order/admin server functions. |
 | `pending_payment` | Order created and waiting for customer payment/proof. It is also restored when a rejected proof is returned for resubmission. | `placeOrder`; `reviewPayment` when rejection requests a new proof. |
 | `payment_submitted` | Customer has uploaded a proof and reference; the order is awaiting manual review. This is **not independent confirmation that funds were received**. | `submitPaymentProof`, conditional on the order still being `pending_payment`. |
-| `paid` | Legacy/manual admin status. The customer-facing page labels it “Payment received”; the current proof-review function does not use it. | Exposed by the generic admin status selector and `updateOrderStatus`. |
-| `verified` | Admin accepted a submitted proof. Current implementation is manual; no gateway callback or bank-settlement reconciliation is performed. | `reviewPayment`; also exposed by the generic admin status selector. |
-| `rejected` | Submitted proof/order was rejected. | `reviewPayment`; also exposed by the generic admin status selector. |
-| `processing` | Admin marks fulfilment as in progress. No automated supplier fulfilment is implied. | Generic admin status selector and `updateOrderStatus`. |
-| `delivered` | Admin marks the order delivered. No separate delivery-evidence check is enforced by the status setter. | Generic admin status selector and `updateOrderStatus`. |
+| `paid` | Legacy/manual status. It is not written by the dedicated proof-review function and is no longer selectable through the generic admin status editor. | Retained in the enum for legacy compatibility; no current normal-flow writer. |
+| `verified` | Admin accepted a submitted proof. Current implementation is manual; no gateway callback or bank-settlement reconciliation is performed. | `reviewPayment` only; generic admin status updates cannot set it. |
+| `rejected` | Submitted proof/order was rejected. | `reviewPayment` only; generic admin status updates cannot set it. |
+| `processing` | Admin marks fulfilment as in progress after manual proof review has set the order to `verified`. No automated supplier fulfilment is implied. | `updateOrderStatus`, guarded to allow only `verified` → `processing`. |
+| `delivered` | Admin marks the order delivered after it has entered `processing`. No separate delivery-evidence check is enforced by the status setter. | `updateOrderStatus`, guarded to allow only `processing` → `delivered`. |
 | `failed` | Legacy payment/order failure label. | No current writer found in the inspected order/admin server functions. |
-| `cancelled` | Admin-selectable terminal label; no transition or refund automation is attached to the value. | Generic admin status selector and `updateOrderStatus`. |
-| `refunded` | Admin-selectable label; it does not itself execute or verify a refund. | Generic admin status selector and `updateOrderStatus`. |
+| `cancelled` | Existing terminal enum value; no dedicated cancellation workflow or refund automation is implemented. | Retained for compatibility; no longer selectable through the generic admin status editor. |
+| `refunded` | Existing terminal enum value; it does not itself execute or verify a refund. | Retained for compatibility; no longer selectable through the generic admin status editor. |
 | `fulfilled` | Legacy delivery alias; customer-facing order page displays it as “Delivered”. | No current writer found in the inspected order/admin server functions. |
 | `completed` | Legacy delivery alias; customer-facing order page displays it as “Delivered”. | No current writer found in the inspected order/admin server functions. |
 
@@ -63,7 +63,7 @@ These are the transitions implemented by the currently inspected application cod
    - `verified` when an admin chooses Verify;
    - `pending_payment` when an admin rejects the proof and requests a replacement;
    - `rejected` when an admin rejects without requesting another proof.
-4. **Generic admin override:** `updateOrderStatus` accepts `paid`, `verified`, `rejected`, `processing`, `delivered`, `cancelled` and `refunded` from the order list and detail panel. It does not check the previous status or require a verified payment proof. As currently implemented, it can therefore bypass the proof-review path and jump directly into fulfilment states.
+4. **Generic admin fulfilment transitions:** `updateOrderStatus` now permits only `verified` → `processing` and `processing` → `delivered`. It reads the current status, checks the transition with the shared `canAdminTransitionOrder` guard, then performs a conditional update matching the previously read status so a concurrent status change cannot be overwritten. The order list and detail panel show only the valid next action. Generic updates cannot set `paid`, `verified`, `rejected`, `cancelled` or `refunded`; payment decisions remain in `reviewPayment`, while cancellation/refund require a dedicated workflow that is not yet implemented.
 5. **Notes/history:** `addOrderNote` inserts an `order_status_events` row with caller-provided text; it does not change `orders.status`. The history table's `status` column is text, so a note/event label is not proof that a valid order transition occurred.
 
 ### Separate payment-proof record states
@@ -72,7 +72,7 @@ These are the transitions implemented by the currently inspected application cod
 
 ### Database enforcement and known gap
 
-The live order table has the enum type, primary key, unique order-number constraint and non-negative subtotal/discount/total checks. The read-only production inspection found **no order-status transition trigger or transition-specific constraint**. The enum limits the allowed labels, but it does not restrict which status may follow another. The generic admin status action therefore remains a payment/fulfilment bypass risk and is tracked separately under MT-0086/MT-0104.
+The live order table has the enum type, primary key, unique order-number constraint and non-negative subtotal/discount/total checks. The read-only production inspection found **no order-status transition trigger or transition-specific constraint**. The enum limits the allowed labels, but it does not restrict which status may follow another. The new server-side guard protects the exposed generic admin application path; privileged service-role/manual SQL writes are not constrained at database level. Database-level transition enforcement remains subject to the documented Supabase cutover/migration gate. The remaining settlement-evidence dependency is tracked under MT-0086.
 
 The current customer-facing label for `payment_submitted` is “Payment received, being checked”; operationally it means only that proof was submitted and awaits review. Do not interpret it as bank settlement confirmation.
  
