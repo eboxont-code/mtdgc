@@ -219,7 +219,7 @@ export const getOrderForViewer = createServerFn({ method: "POST" })
     const orderNumber = data.orderNumber.toUpperCase();
     const { data: order } = await supabaseAdmin
       .from("orders")
-      .select("id, user_id, status, created_at, total_minor, verification_hash, access_token_hash, guest_email, order_items(product_name, variant_name, quantity, line_total_minor)")
+      .select("id, user_id, status, created_at, total_minor, verification_hash, access_token_hash, guest_email, order_items(product_name, variant_name, quantity, unit_price_minor, line_total_minor, products(categories(slug)))")
       .eq("order_number", orderNumber)
       .maybeSingle();
     let allowed = false;
