@@ -158,7 +158,7 @@ export const lookupOrder = createServerFn({ method: "POST" })
       .select("id", { count: "exact", head: true })
       .eq("ip_hash", ipHash)
       .gte("created_at", new Date(now - 10 * 60 * 1000).toISOString());
-    if (countError) return { status: "unavailable" as const };
+    if (countError || count === null) return { status: "unavailable" as const };
     if ((count ?? 0) >= 10) {
       return { status: "rate_limited" as const, message: "Too many attempts. Please wait a few minutes and try again." };
     }
