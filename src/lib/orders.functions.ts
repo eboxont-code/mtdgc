@@ -333,7 +333,7 @@ export const submitPaymentProof = createServerFn({ method: "POST" })
     if (!ext || !sniffed || sniffed !== ext) return { ok: false as const, error: "Please upload a JPG, PNG or WebP image." };
 
     const rand = [...crypto.getRandomValues(new Uint8Array(16))].map((b) => b.toString(16).padStart(2, "0")).join("");
-    const association = buildPaymentProofAssociation(order, rand, ext);
+    const association = buildPaymentProofAssociation(order, rand, ext, data.transactionRef);
     const up = await supabaseAdmin.storage.from("payment-proofs").upload(association.storagePath, buffer, { contentType: file.type });
     if (up.error) return { ok: false as const, error: "Upload failed. Please try again." };
 
