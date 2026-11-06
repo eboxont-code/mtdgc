@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { ORDER_NOTICE, ORDER_STEPS, orderStepIndex, stepTime, formatNpr, SITE_URL, STATUS_LABEL, whatsappLink } from "@/lib/format";
 import { GIFT_CARD_PRICE_DISCLOSURE } from "@/lib/gift-card-pricing";
 import { lookupOrder } from "@/lib/orders.functions";
+import { isValidOrderLookupContact } from "@/lib/order-access";
 import { isSupportedOrderReference } from "@/lib/order-reference";
 
 const STATUS_TEXT: Record<string, string> = { ...STATUS_LABEL, pending: "Placed", paid: "Payment confirmed", processing: "Processing", fulfilled: "Fulfilled", completed: "Completed", cancelled: "Cancelled", failed: "Failed", refunded: "Refunded" };
@@ -88,9 +89,7 @@ function TrackOrderPage() {
       setError("That order number does not look right. New MTDGC references start with MT followed by 32 hexadecimal characters. Older references are still accepted.");
       return;
     }
-    const digits = who.replace(/\D/g, "");
-    const looksEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(who);
-    if (!looksEmail && (digits.length < 7 || digits.length > 15)) {
+    if (!isValidOrderLookupContact(who)) {
       setError("Please enter a valid email address or a phone number of 7 to 15 digits.");
       return;
     }
@@ -100,6 +99,7 @@ function TrackOrderPage() {
       const result = await lookup({ data: { orderNumber: order, contact: who } });
       if (result.status === "found") setFound(result.order);
       else if (result.status === "rate_limited") setError("Too many attempts. Please wait a few minutes and try again.");
+      else if (result.status === "unavailable") setError("We could not check your order right now. Please try again shortly or contact us through the support page.");
       else setError("We could not find an order with that number and contact. Please confirm both and try again, or contact us through the support page.");
     } catch {
       setError("We could not check your order right now. Please try again shortly or contact us through the support page.");
