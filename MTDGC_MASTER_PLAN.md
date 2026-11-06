@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.3 · 7 November 2026
+**Version:** 2.4 · 7 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -226,7 +226,7 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** The order state is consistent from checkout to delivery, with a complete audit trail and useful customer visibility.
 
 - [x] **MT-0101 · P0 · DONE** — Mapped all 13 values in the live `public.order_status` enum, the current order/proof writers, generic admin override paths, legacy display aliases and the absence of database transition enforcement. Updated `MTDGC_DATA_ARCHITECTURE.md` section 4 and recorded the verified transition map and bypass risk in section 29.
-- [ ] **MT-0102 · P0 · TODO** — Ensure Payment received, Verified, Processing and Delivered have precise operational definitions.
+- [x] **MT-0102 · P0 · DONE** — Defined the factual meaning of `payment_submitted`, legacy/manual `paid`, manually reviewed `verified`, staff-set `processing` and staff-marked `delivered`, explicitly distinguishing proof submission/review from independent settlement and delivery evidence. Evidence: section 30.
 - [ ] **MT-0103 · P0 · TODO** — Add explicit Cancelled, Failed, Refunded and Action required states where applicable.
 - [ ] **MT-0104 · P0 · TODO** — Prevent invalid status jumps, such as Pending directly to Delivered without payment verification.
 - [ ] **MT-0105 · P0 · TODO** — Verify guest order tracking requires the order number plus the matching email or phone.
@@ -1122,7 +1122,7 @@ A safe completion requires a maintained server-side image decoder/parser already
 - Vercel reported no runtime error clusters in the last 24 hours.
 - Open PR #1 remains explicitly held until the Boxont-controlled Supabase move; it was not changed.
 
-MT-0085 is DONE (section 28); MT-0086 and MT-0087 are BLOCKED by missing independent settlement evidence and the held schema-migration gate; MT-0101 is DONE (section 29). **Next P0 task to inspect:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered without implying external settlement confirmation that the current system does not perform.
+MT-0085 is DONE (section 28); MT-0086 and MT-0087 are BLOCKED by missing independent settlement evidence and the held schema-migration gate; MT-0101 is DONE (section 29). **Next P0 task to inspect:** MT-0103 — determine which existing terminal statuses are already usable and whether an `action_required` state needs a schema change. Do not bypass the held Supabase cutover gate.
 
 
 ## 28. Payment-proof access control verification — 7 November 2026
@@ -1202,3 +1202,44 @@ Legacy enum values `pending`, `paid`, `failed`, `fulfilled`, and `completed` rem
 - This documentation update is on branch `automation/mt-0101-order-status-map`, based on the prior documentation-only audit branch. It is not merged to `main`. No production data, schema, storage, environment variables, credentials, payment settings, billing or deployments were changed.
 
 **Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered. Use the observed status behaviour and do not imply that a submitted screenshot proves funds were received. If the definition requires an owner policy decision, mark it BLOCKED and continue to the next independently actionable task.
+
+
+## 30. Order-status operational definitions — 7 November 2026
+
+**Task:** MT-0102 · P0 · DONE — established evidence-based operational definitions for the customer-facing payment and fulfilment milestones. This task defines what the existing states mean; it does not add settlement verification, transition enforcement or delivery-evidence capture.
+
+### Canonical operational meaning
+
+| Customer-facing concept | Stored status | Operational definition | What it does not prove |
+|---|---|---|---|
+| Payment proof submitted (do not label as Payment received) | `payment_submitted` | The customer uploaded a screenshot and transaction reference; the order is waiting for manual review. | It does not prove that funds reached or cleared in the receiving account. |
+| Payment marked received (legacy/manual only) | `paid` | A staff member used the generic admin status control to mark payment as received. The current `reviewPayment` function does not write this status. | It is not a gateway callback, bank-statement match or independent settlement confirmation. Do not use it as a substitute for `verified` or settlement evidence. |
+| Payment proof reviewed | `verified` | An administrator accepted the submitted proof through the manual review flow. | It does not mean MTDGC automatically checked a bank or payment-provider settlement feed; none is configured in the observed flow. |
+| Fulfilment in progress | `processing` | Staff marked the order as being prepared/fulfilled. No automated supplier fulfilment is implied. | It is not proof that payment was independently verified or that delivery is complete. The generic admin updater currently allows status jumps; MT-0104 tracks that enforcement gap. |
+| Marked delivered | `delivered` | Staff marked the order as delivered. | The current production schema has no `order_deliveries` table and the status setter does not require an attached delivery-evidence record. It does not guarantee a particular delivery channel such as email or the order page. |
+
+### Legacy compatibility
+
+- `pending` remains a legacy initial state; current checkout writes `pending_payment`.
+- `fulfilled` and `completed` are legacy delivery aliases and should be displayed as `Marked delivered`, not as separate delivery outcomes.
+- `paid` remains in the enum and generic admin selector for compatibility, but it is not written by the dedicated proof-review function. Treat it as a manually recorded legacy state only.
+- `rejected`, `cancelled`, `failed` and `refunded` remain distinct stored values; their customer-facing handling is assessed separately under MT-0103.
+
+### Source and live-production evidence
+
+- Source inspected on working branch `automation/mt-0101-order-status-map`: `src/lib/format.ts`, `src/lib/orders.functions.ts`, `src/lib/admin.functions.ts`, `src/routes/track-order.tsx`, `src/routes/order.$orderNumber.tsx`, `src/routes/_authenticated/orders.tsx`, and `src/components/admin/order-detail-panel.tsx`.
+- `ORDER_STEPS` currently says the submitted screenshot will be checked against the account and describes `verified` as a matched payment; the order page separately labels `payment_submitted` as “Payment received, being checked” and `paid` as “Payment received”. These phrases overstate what the current flow proves and should be aligned to these definitions when customer-facing status display is consolidated under MT-0106.
+- `reviewPayment` changes `payment_submitted` to `verified` after an admin decision; it does not query a bank or payment provider. `updateOrderStatus` permits manual status changes without checking prior state or proof verification.
+- Read-only Supabase inspection on 7 November 2026 confirmed the live enum still has 13 values; 8 orders are `pending_payment`; `payment_proofs` has 0 rows; `public.order_deliveries` does not exist; and there are no triggers on `public.orders`.
+- No production records, schema, storage, payment settings, environment variables or credentials were changed.
+
+### Verification and release boundary
+
+- This was a documentation/definition task; no application code changed, so unit tests, lint, typecheck and build were not applicable. The source and live-schema facts above were inspected directly.
+- The local runtime has Node `v22.16.0`, but no Bun executable or MTDGC Git checkout; a full local project quality run was unavailable.
+- `main` remains at `1d948a818f056ec1ae1f630688070da6e8449fde`; its combined status currently reports Vercel failure with the Hobby/free build-rate-limit target, and the GitHub workflow-run lookup returned no quality runs for that SHA.
+- Latest production Vercel deployment observed remains READY at `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`, which is not the current `main` HEAD. Vercel reported no runtime error clusters in the last 24 hours. No production deployment was requested.
+- The existing working branch preview for `09f0e6fb42eb863ce2822f3c2076f19cd32d9e68` is READY with `target = null` (preview), not production. No new deployment was requested.
+- The branch update is documentation-only and remains separate from `main`; the held backend migration PR #1 remains untouched.
+
+**Next P0 task:** MT-0103 — add explicit Cancelled, Failed, Refunded and Action required states where applicable. First establish whether existing enum values and labels already cover the first three; any new `action_required` enum value requires the documented Supabase cutover/migration gate and must not be applied to the current production project.
