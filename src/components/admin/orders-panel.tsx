@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ADMIN_ORDER_STATUSES } from "@/components/admin/order-detail-panel";
+import { getAdminOrderStatusOptions } from "@/lib/order-transitions";
 import { formatNpr } from "@/lib/format";
 import type { OrderRow } from "./panel-types";
 type Props = {
@@ -28,26 +28,30 @@ export function OrdersPanel({ orders, orderQuery, setOrderQuery, onSelectOrder, 
               </label>
               {visibleOrders.length ? (
                 <ul className="mt-2 divide-y divide-border text-sm">
-                  {visibleOrders.map((o) => (
+                  {visibleOrders.map((o) => {
+                    const availableStatuses = getAdminOrderStatusOptions(o.status);
+                    return (
                     <li key={o.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
                       <Button variant="ghost" className="min-h-11 font-display" onClick={() => onSelectOrder(o.id)}>{o.order_number}</Button>
                       <label>
                         <span className="sr-only">Status for {o.order_number}</span>
                         <select
                           value={o.status}
+                          disabled={availableStatuses.length === 0}
                           onChange={(e) => onStatusChange(o.id, e.target.value)}
                           className="min-h-11 rounded-md border border-input bg-card px-2 text-base"
                         >
-                          {!ADMIN_ORDER_STATUSES.some((s) => s === o.status) && <option value={o.status} disabled>{o.status.replaceAll("_", " ")}</option>}
-                          {ADMIN_ORDER_STATUSES.map((s) => (
-                            <option key={s} value={s}>{s}</option>
+                          <option value={o.status} disabled>{o.status.replaceAll("_", " ")}</option>
+                          {availableStatuses.map((status) => (
+                            <option key={status} value={status}>{status.replaceAll("_", " ")}</option>
                           ))}
                         </select>
                       </label>
                       <span>{formatNpr(o.total_minor)}</span>
                       <span className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleDateString()}</span>
                     </li>
-                  ))}
+                    );
+                  })}
                 </ul>
               ) : (
                 <p className="mt-1 text-sm text-muted-foreground">
