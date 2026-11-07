@@ -56,8 +56,8 @@ describe("catalog availability and price consistency", () => {
     };
     assert.equal(lowestPurchasablePrice(product), 24900);
     assert.equal(lowestPurchasableVariant(product)?.sku, "EVENT");
-    assert.equal(isPurchasableVariant(product, product.variants[1]), true);
-    assert.equal(isPurchasableVariant(product, product.variants[2]), false);
+    assert.equal(isPurchasableVariant(product, product.variants[1]!), true);
+    assert.equal(isPurchasableVariant(product, product.variants[2]!), false);
     assert.equal(selectProductVariant(product)?.sku, "EVENT");
     assert.equal(selectProductVariant(product, "GOLD")?.sku, "GOLD");
     assert.equal(selectProductVariant(product, "EARLY")?.sku, "EVENT");
@@ -65,7 +65,7 @@ describe("catalog availability and price consistency", () => {
   test("product-level unavailability and unsupported currencies suppress purchasable prices", () => {
     const paused = { ...live, status: "temporarily_unavailable" };
     const unsupportedProduct = { ...live, currency: "USD" };
-    const unsupportedVariant = { ...live, variants: [{ ...live.variants[0], currency: "USD" }] };
+    const unsupportedVariant = { ...live, variants: [{ ...live.variants[0]!, currency: "USD" }] };
     assert.deepEqual(purchasableVariants(paused), []);
     assert.equal(lowestPurchasablePrice(paused), null);
     assert.equal(isPurchasable(unsupportedProduct), false);
