@@ -63,3 +63,21 @@ MTDGC (Matrix Digital Goods & Commerce) is a digital marketplace for Nepal. This
 - **Payment**: Integration with eSewa/Khalti SDKs/Webhooks.
 - **Fulfillment**: Automated delivery for products with pre-loaded digital codes.
 
+
+
+## 7. Current authentication and authorisation boundaries — 7 November 2026
+
+This section describes current GitHub main and the read-only production database inspection. It is not a claim that every current-main change is live in production.
+
+- The authenticated route calls Supabase getUser and redirects signed-out visitors. Data access remains protected by server-function authentication and database RLS; the route/UI gate alone is not an authorization boundary.
+- Global server-function middleware attaches the browser's Supabase access token. The server-side requireSupabaseAuth middleware validates the Bearer token with Supabase getClaims and places the subject ID and a user-scoped Supabase client in handler context.
+- Every inspected admin server function requires authenticated context and independently checks the admin role through has_role. Direct admin-page reads use the authenticated client and rely on RLS.
+- Customer profile, order, support-ticket and wishlist access is scoped by RLS to auth.uid(); support-ticket insertion must use the signed-in user's ID. Payment-proof rows and private payment-proof objects are readable only by the related order owner or an administrator. Payment QR objects are admin-only.
+- Guest order access is deliberately separate from account authentication: the server resolves the order and checks its hashed order-specific access token, a verified account-owner bearer token, or saved order/contact verification. Authenticated order history uses a user-scoped server function and explicit user_id filter.
+- The service-role key is isolated in the server-only client module and bypasses RLS; it must remain dynamically imported only inside trusted server handlers. Never import it into route components or browser code.
+- Current production storage buckets payment-proofs and payment-qr are private. The payment-proofs read policy permits the order owner and admins; payment-qr object operations are admin-only.
+- Supabase's current security advisor warns that public.has_role is SECURITY DEFINER and executable by anon and authenticated. It accepts an arbitrary user ID, so it can reveal whether a supplied UUID has a role. No role-write privilege is granted to client roles, and no privilege escalation was demonstrated. Any change must coordinate the function and policies that call it and must be applied only after the approved Supabase cutover/migration gate.
+- order_lookup_attempts has RLS enabled but no policies; only service_role has table privileges. This is an intentional server-only access pattern under the observed grants.
+- In current main, the order lookup/contact rate-limit paths do not fail closed if the attempt-count query or insert errors. This is a separate abuse-control follow-up and must be covered by focused tests before changing the flow.
+
+Production deployment currently lags current main. Recheck the deployed commit before treating current-main authorization code as active on mtdgc.com.
