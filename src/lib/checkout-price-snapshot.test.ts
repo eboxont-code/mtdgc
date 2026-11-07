@@ -25,8 +25,8 @@ describe("MT-0183 checkout price snapshots", () => {
   });
 
   test("detects product or variant renames even when the price is unchanged", () => {
-    assert.equal(hasCheckoutPriceSnapshotChanges(expected, [{ ...resolved[0], productName: "Free Fire" }]), true);
-    assert.equal(hasCheckoutPriceSnapshotChanges(expected, [{ ...resolved[0], variantName: "30 Diamonds" }]), true);
+    assert.equal(hasCheckoutPriceSnapshotChanges(expected, [{ ...resolved[0]!, productName: "Free Fire" }]), true);
+    assert.equal(hasCheckoutPriceSnapshotChanges(expected, [{ ...resolved[0]!, variantName: "30 Diamonds" }]), true);
   });
 
   test("accepts legacy clients that do not send a price snapshot", () => {
@@ -34,7 +34,7 @@ describe("MT-0183 checkout price snapshots", () => {
   });
 
   test("rejects a changed SKU, reordered lines or a changed line count", () => {
-    assert.equal(hasCheckoutPriceSnapshotChanges(expected, [{ ...resolved[0], sku: "FF-115" }]), true);
+    assert.equal(hasCheckoutPriceSnapshotChanges(expected, [{ ...resolved[0]!, sku: "FF-115" }]), true);
     assert.equal(hasCheckoutPriceSnapshotChanges([{ ...expected[0]!, sku: "FF-115" }], resolved), true);
     assert.equal(hasCheckoutPriceSnapshotChanges([...expected, { sku: "PUBG-60" }], resolved), true);
   });
