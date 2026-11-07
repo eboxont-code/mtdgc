@@ -63,3 +63,14 @@ MTDGC (Matrix Digital Goods & Commerce) is a digital marketplace for Nepal. This
 - **Payment**: Integration with eSewa/Khalti SDKs/Webhooks.
 - **Fulfillment**: Automated delivery for products with pre-loaded digital codes.
 
+
+
+## 7. Catalogue price and checkout snapshot integrity
+
+- The storefront formats selling prices as NPR. A product/variant is purchasable only when both product and variant statuses are `available` or `low_stock`, the variant price is a positive minor-unit integer, both currency fields are `NPR`, and the product is not hidden as a sample/coming-soon listing.
+- The catalog card's “From” price and the product page's initial option use the same lowest purchasable variant. A valid explicit SKU selection is preserved. Unavailable variants remain visible with an availability label, but cannot be selected and do not expose a purchasable price. Product structured offers include only purchasable variants.
+- The cart stores a display snapshot (product name, variant name and unit price). Current checkout submits that snapshot as an expectation only; it is never used as the order price. The server re-resolves each SKU and its current price from the catalogue. If the snapshot changed, it returns current line values before inserting an order; the client updates the cart and requires a fresh customer submission.
+- On success, the server returns the exact line snapshots used for order-item insertion. Checkout's success summary renders those server-resolved values, not the stale browser snapshot.
+- Legacy clients may omit the optional expectation fields for backwards compatibility. They still receive server-calculated order prices, but the explicit stale-snapshot refresh/review handshake is provided by the current checkout client.
+- The current implementation supports NPR only. Non-NPR product/variant rows fail closed in storefront purchasability and server order creation; no foreign-currency conversion or exchange-rate assumption is made.
+- No schema change or migration is required for this control.
