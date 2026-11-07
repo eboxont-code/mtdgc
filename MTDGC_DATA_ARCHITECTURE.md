@@ -33,18 +33,53 @@ MTDGC (Matrix Digital Goods & Commerce) is a digital marketplace for Nepal. This
 
 ## 4. Order & Payment State Model
 
-### Order Status Flow
-1. `PENDING`: Order created, awaiting payment.
-2. `PAID`: Payment verified.
-3. `PROCESSING`: Admin/System fulfilling the digital delivery.
-4. `COMPLETED`: Item delivered to customer.
-5. `CANCELLED`: Terminated before fulfillment.
-6. `REFUNDED`: Payment returned to customer.
+### 4.1 Live order-status enum
 
-### Payment Status Flow
-1. `PENDING`: Payment initiated.
-2. `SUCCESS`: Verified by provider/admin.
-3. `FAILED`: Declined or timed out.
+The live `public.order_status` enum contains 13 values. Legacy labels remain in the database for compatibility; an enum value existing does not mean the current application writes it in its normal flow.
+
+| Order status | Current writer / use | Notes |
+|---|---|---|
+| `pending` | Database default only; no current checkout writer. | Legacy initial state; current checkout explicitly writes `pending_payment`. |
+| `pending_payment` | `placeOrder`; proof rejection when resubmission is requested. | Current order-created/payment-pending state. |
+| `payment_submitted` | `submitPaymentProof`. | Screenshot/reference submitted for manual review; not independent settlement confirmation. |
+| `paid` | Generic administrator status update. | Legacy/manual label; not written by the dedicated proof-review action. |
+| `verified` | `reviewPayment` after an administrator decision; generic admin update also accepts it. | Manual proof-review result, not an automated bank/provider match. |
+| `rejected` | `reviewPayment` or generic admin update. | Proof/order rejection; may return to `pending_payment` when a new proof is requested. |
+| `processing` | Generic administrator status update. | Staff-marked fulfilment in progress. |
+| `delivered` | Generic administrator status update. | Staff-marked delivered; no delivery evidence is required by the status setter. |
+| `failed` | No current order/admin writer found. | Legacy enum value. |
+| `cancelled` | Generic administrator status update. | Status only; no cancellation/refund automation is implied. |
+| `refunded` | Generic administrator status update. | Status only; does not execute or verify a refund. |
+| `fulfilled` | No current order/admin writer found. | Legacy alias displayed with Delivered. |
+| `completed` | No current order/admin writer found. | Legacy alias displayed with Delivered. |
+
+### 4.2 Transitions currently written by the application
+
+These are observed code paths, not an approved business state machine.
+
+| Trigger | Starting state | Result | Guard / limitation |
+|---|---|---|---|
+| `placeOrder` | New order | `pending_payment` | Explicit initial state. |
+| `submitPaymentProof` | `pending_payment` | `payment_submitted` | Conditional update requires the current status to remain `pending_payment`. |
+| `reviewPayment` — verify | `payment_submitted` | `verified` | Conditional update requires `payment_submitted`; manual admin decision. |
+| `reviewPayment` — reject and request new proof | `payment_submitted` | `pending_payment` | Returns the order for proof resubmission. |
+| `reviewPayment` — reject | `payment_submitted` | `rejected` | Conditional update requires `payment_submitted`. |
+| `updateOrderStatus` | Any current state | `paid`, `verified`, `rejected`, `processing`, `delivered`, `cancelled`, `refunded` | Admin-only but has no previous-state, proof-review or payment prerequisite; can jump directly to fulfilment. |
+| `addOrderNote` | Any | No order-state change | Writes a free-text event label only. |
+
+### 4.3 Separate payment-proof state
+
+`payment_proofs.status` is a separate text field constrained to `submitted`, `verified` and `rejected`. The `resubmit_requested` boolean is not an order status. The proof amount is copied from the order total and is not independent evidence of funds received.
+
+### 4.4 Event-history semantics
+
+`order_status_events.status` is plain text. The history table can contain a label or note that does not correspond to an actual `orders.status` transition; in particular, `addOrderNote` accepts caller-provided event text without updating the order row.
+
+### 4.5 Enforcement boundary
+
+The enum restricts valid status labels only. The live database has no non-internal `public.orders` transition trigger or transition-specific constraint. The dedicated proof submission/review actions have conditional status checks, but the generic admin updater accepts its seven target values from any existing state. Do not treat this observed map as an approved allowed-transition policy; MT-0104 owns transition enforcement after the business rules and payment prerequisites are resolved.
+
+The customer progress helper groups `payment_submitted`/`paid`, `verified`, `processing`, and `delivered`/`fulfilled`/`completed` into four steps. The order page and tracking page retain individual labels for the legacy values. MT-0102/MT-0106 own the operational wording and display consistency work.
 
 ## 5. Guest Checkout Architecture
 - **No Account Required**: Orders are created with `user_id = NULL`.
