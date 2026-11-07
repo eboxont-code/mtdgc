@@ -21,6 +21,7 @@ type CartContextValue = {
   setQuantity: (sku: string, quantity: number) => void;
   remove: (sku: string) => void;
   updateFields: (sku: string, fields: Record<string, string>) => void;
+  updateSnapshot: (sku: string, snapshot: Pick<CartLine, "productName" | "variantName" | "priceMinor" | "image" | "categorySlug">) => void;
   clear: () => void;
   drawerOpen: boolean;
   setDrawerOpen: (open: boolean) => void;
@@ -115,13 +116,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setLines((current) => current.map((item) => (item.sku === sku ? { ...item, fields } : item)));
   }, []);
 
+  const updateSnapshot = useCallback((sku: string, snapshot: Pick<CartLine, "productName" | "variantName" | "priceMinor" | "image" | "categorySlug">) => {
+    setLines((current) => current.map((item) => item.sku === sku ? { ...item, ...snapshot } : item));
+  }, []);
+
   const clear = useCallback(() => setLines([]), []);
 
   const value = useMemo<CartContextValue>(() => {
     const count = lines.reduce((sum, line) => sum + line.quantity, 0);
     const subtotalMinor = lines.reduce((sum, line) => sum + line.priceMinor * line.quantity, 0);
-    return { lines, count, subtotalMinor, add, setQuantity, remove, updateFields, clear, drawerOpen, setDrawerOpen, hydrated };
-  }, [lines, add, setQuantity, remove, updateFields, clear, drawerOpen, hydrated]);
+    return { lines, count, subtotalMinor, add, setQuantity, remove, updateFields, updateSnapshot, clear, drawerOpen, setDrawerOpen, hydrated };
+  }, [lines, add, setQuantity, remove, updateFields, updateSnapshot, clear, drawerOpen, hydrated]);
 
   return (
     <CartContext.Provider value={value}>
