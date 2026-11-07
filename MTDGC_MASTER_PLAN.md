@@ -530,7 +530,7 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-No numbered task is currently marked **IN PROGRESS**. MT-0105 is DONE on this branch. Earlier payment/status tasks with external, migration or branch-promotion dependencies are marked BLOCKED below; the next independently actionable P0 task is MT-0122.
+No numbered task is currently marked **IN PROGRESS**. MT-0105 is DONE on this branch. Earlier payment/status tasks with external, migration or branch-promotion dependencies are marked BLOCKED below; the next independently actionable P0 task is MT-0162.
 
 | Order | Task | Status |
 |---:|---|---|
@@ -541,7 +541,7 @@ No numbered task is currently marked **IN PROGRESS**. MT-0105 is DONE on this br
 | 5 | MT-0086–MT-0087 — independent settlement and duplicate-reference protection | BLOCKED; no independent settlement source; unique transaction-reference migration is behind the Supabase cutover |
 | 6 | MT-0101–MT-0102 — order status map and operational definitions | BLOCKED; completed documentation remains on a diverged, unmerged branch |
 | 7 | MT-0103–MT-0104 — terminal states and transition enforcement | BLOCKED; action_required needs an owner decision/migration if required; safe override matrix is not owner-approved |
-| 8 | MT-0105 — guest tracking requires order number plus matching contact | DONE on automation/mt-0105-guest-order-tracking-20261107; four commits ahead of main |
+| 8 | MT-0105 — guest tracking requires order number plus matching contact | DONE on automation/mt-0105-guest-order-tracking-20261107; six commits ahead of main |
 | 9 | MT-0106 — consistent customer status display | BLOCKED; depends on canonical status-map/definition promotion |
 | 10 | MT-0121 — product-family manual fulfilment instructions | BLOCKED; supplier instructions and delivery evidence are missing |
 | 11 | MT-0122–MT-0126 — fulfilment checklist, confirmation, supplier reference, delivery evidence and credential guard | BLOCKED; implementations are on a broad 80-ahead/7-behind branch; MT-0125 also needs the Supabase storage cutover |
@@ -1130,7 +1130,7 @@ No product records, supplier assignments, prices, variants, order records, datab
 - Source baseline: current main commit 9c745dda3951bc8af616ea09061cb828e16f89d6.
 - Read-only Supabase inspection confirmed orders RLS is enabled with an authenticated-owner/admin SELECT policy; no anonymous SELECT policy exists. The production order status aggregate remains 8 pending_payment orders; no contact values or customer records were retrieved.
 - Focused order-access tests were run locally with Node 22.16 using the same TypeScript helper/test assertions; strict TypeScript checking of src/lib/order-access.ts passed. Full Bun project tests, full typecheck and production build were unavailable because Bun and the repository dependency checkout are not present in the execution environment.
-- Main GitHub Actions Quality run 42323805501 passed on main SHA 9c745dd; it does not validate this branch. No PR or preview deployment was created, to avoid initiating a Vercel deployment while the free deployment quota/release gate is unresolved.
+- Main GitHub Actions Quality run 42323805501 passed on main SHA 9c745dd; it does not validate this branch. No PR or manual deployment was created. Vercel automatically generated a branch preview from the Git push; it reached READY with target=null and is not production.
 - Production Vercel deployment remains READY on older commit 779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7. No production database, storage, authentication, environment, payment, deployment or billing change was made.
 
 **Next eligible P0 task:** MT-0162 — verify cross-customer order isolation by changing an ID or URL and add focused negative tests. MT-0122–MT-0126, MT-0141/0144/0145 and MT-0161 have existing implementation/audit work on unmerged branches; do not duplicate or promote those broad/diverged diffs without owner review.
@@ -1145,7 +1145,7 @@ Current canonical base is main SHA 9c745dda3951bc8af616ea09061cb828e16f89d6. The
 | automation/mt-0101-order-status-map | 6 commits ahead, 7 behind; no PR | MT-0101/0102 status inventory and definitions; MT-0085 documentation | Diverged; review/reconcile before canonical promotion |
 | automation/mt-0104-order-transition-guard | 80 commits ahead, 7 behind; no PR | MT-0122–MT-0126, MT-0141/0144/0145 and related order/checkout code | Broad unrelated diff; do not merge as-is or duplicate its completed work |
 | automation/mt-0161-authz-audit | 3 commits ahead, 0 behind; no PR | MT-0161 read-only security audit documentation | Review/promote separately; no production settings changed |
-| automation/mt-0105-guest-order-tracking-20261107 | 4 commits ahead, 0 behind; no PR | MT-0105 shared guest-contact authorization and tests | Current task branch; no PR opened to avoid initiating another preview deployment |
+| automation/mt-0105-guest-order-tracking-20261107 | 6 commits ahead, 0 behind; no PR | MT-0105 shared guest-contact authorization and tests | Current task branch; no PR opened to avoid initiating another preview deployment |
 
 ### Promotion and release boundary
 
