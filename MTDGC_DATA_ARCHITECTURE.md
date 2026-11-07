@@ -63,3 +63,28 @@ MTDGC (Matrix Digital Goods & Commerce) is a digital marketplace for Nepal. This
 - **Payment**: Integration with eSewa/Khalti SDKs/Webhooks.
 - **Fulfillment**: Automated delivery for products with pre-loaded digital codes.
 
+## 7. Guest Order Tracking Access
+
+### Public tracking route
+
+- The public /track-order form requires both the order number and the email address or phone number used when the order was placed. The browser checks both fields, and the lookupOrder server input schema independently requires an order number of 4–40 characters and contact of 3–120 characters.
+- The server normalises the order number to uppercase and resolves the order by that exact order_number. It then calls the shared hasOrderContactAccess helper before returning any order summary.
+- The helper normalises email to lowercase and phone numbers to digits, then checks the order-scoped SHA-256 value created by placeOrder from the order number plus the selected contact. It also accepts an exact case-insensitive match to the saved guest_email.
+- The contact check is bound to the resolved order number. A matching phone/email for a different order does not authorise access. Missing, blank or mismatched contact returns the same generic not_found result.
+- The server function uses the server-only Supabase client; anonymous browsers do not receive direct SELECT access to public.orders. The live orders RLS policy grants reads to authenticated owners/admins only.
+
+### Other order-view paths
+
+- getOrderForViewer separately tries the order-specific access-token hash, then the authenticated account owner, then the same contact helper after its rate-limit check.
+- submitPaymentProof uses the same order-scoped contact helper after its rate-limit check and still requires the resolved order to be pending_payment.
+- These paths share the same contact matching logic; the public tracker does not treat the order number by itself as an authentication credential.
+
+### Known rate-limit limitation
+
+- lookupOrder currently reads and inserts order_lookup_attempts but does not check the returned database errors. If the count query fails, the current (count ?? 0) fallback can fail open; insert/cleanup failures are also not surfaced.
+- This does not bypass the separate order-number/contact comparison, but it weakens abuse throttling. It is not claimed as fixed by MT-0105 and remains a separate security follow-up.
+
+### Verification boundary
+
+- The live public.orders table has RLS enabled. Its read policy is authenticated-owner/admin only; there is no anonymous SELECT policy.
+- No production order, contact, token, payment, schema, storage or authentication data was changed. The live order snapshot was queried only as an aggregate; no personal field values were retrieved.

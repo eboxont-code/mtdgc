@@ -66,3 +66,19 @@ describe("MT-0083 payment proof ownership and association", () => {
     assert.throws(() => buildPaymentProofAssociation({ id: "resolved-order-a", total_minor: 1299 }, "not-random", "png", "TXN-12345"));
   });
 });
+
+describe("MT-0105 guest order tracking", () => {
+  test("requires the same order number and a matching saved email or phone", async () => {
+    const order = {
+      verification_hash: await sha256Hex("MTA" + normaliseContact("+61 412 345 678")),
+      guest_email: "buyer-a@example.com",
+    };
+
+    assert.equal(await hasOrderContactAccess(order, "MTA", "+61 412 345 678"), true);
+    assert.equal(await hasOrderContactAccess(order, "MTA", "BUYER-A@example.com"), true);
+    assert.equal(await hasOrderContactAccess(order, "MTB", "+61 412 345 678"), false);
+    assert.equal(await hasOrderContactAccess(order, "MTA", "attacker@example.com"), false);
+    assert.equal(await hasOrderContactAccess(order, "MTA", undefined), false);
+    assert.equal(await hasOrderContactAccess(order, "MTA", "   "), false);
+  });
+});
