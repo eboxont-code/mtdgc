@@ -1,14 +1,14 @@
 import { describe, test } from "node:test";
 import { strict as assert } from "node:assert";
-import { hasCheckoutPriceSnapshotChanges } from "./checkout-price-snapshot";
+import { hasCheckoutPriceSnapshotChanges, type ExpectedCheckoutPriceLine, type ResolvedCheckoutPriceLine } from "./checkout-price-snapshot";
 
-const expected = [{
+const expected: ExpectedCheckoutPriceLine[] = [{
   sku: "FF-25",
   expectedProductName: "Free Fire Diamonds",
   expectedVariantName: "25 Diamonds",
   expectedPriceMinor: 3000,
 }];
-const resolved = [{
+const resolved: ResolvedCheckoutPriceLine[] = [{
   sku: "FF-25",
   productName: "Free Fire Diamonds",
   variantName: "25 Diamonds",
@@ -21,7 +21,7 @@ describe("MT-0183 checkout price snapshots", () => {
   });
 
   test("detects a changed server price before order creation", () => {
-    assert.equal(hasCheckoutPriceSnapshotChanges(expected, [{ ...resolved[0], priceMinor: 3500 }]), true);
+    assert.equal(hasCheckoutPriceSnapshotChanges(expected, [{ ...resolved[0]!, priceMinor: 3500 }]), true);
   });
 
   test("detects product or variant renames even when the price is unchanged", () => {
@@ -35,7 +35,7 @@ describe("MT-0183 checkout price snapshots", () => {
 
   test("rejects a changed SKU, reordered lines or a changed line count", () => {
     assert.equal(hasCheckoutPriceSnapshotChanges(expected, [{ ...resolved[0], sku: "FF-115" }]), true);
-    assert.equal(hasCheckoutPriceSnapshotChanges([{ ...expected[0], sku: "FF-115" }], resolved), true);
+    assert.equal(hasCheckoutPriceSnapshotChanges([{ ...expected[0]!, sku: "FF-115" }], resolved), true);
     assert.equal(hasCheckoutPriceSnapshotChanges([...expected, { sku: "PUBG-60" }], resolved), true);
   });
 });
