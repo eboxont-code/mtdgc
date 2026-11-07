@@ -8,7 +8,7 @@ import { bestDeal } from "@/lib/pricing";
 import { PRICE_COMING_SOON, pricesHidden } from "@/lib/price-visibility";
 import { isGiftCardCategory } from "@/lib/gift-card-pricing";
 
-/** Lowest real price, or null for sample and coming-soon items (their prices are never shown). */
+/** Lowest currently purchasable price, or null when the product has no eligible NPR variant. */
 export function lowestPrice(product: CatalogProduct): number | null {
   return lowestPurchasableVariant(product)?.price_minor ?? null;
 }
