@@ -73,3 +73,14 @@ export function availabilityLabel(product: AvailabilityProduct): string {
   if (isComingSoon(product)) return "Coming soon";
   return isOrderable(product.status) ? "Unavailable" : STATUS_LABEL[product.status] ?? "Unavailable";
 }
+
+/** Counts the supplied product set using the same purchasability rules as cards and pages. */
+export function availabilityCounts(products: readonly AvailabilityProduct[]) {
+  const available = products.filter(isPurchasable).length;
+  const comingSoon = products.filter(isComingSoon).length;
+  return {
+    available,
+    comingSoon,
+    unavailable: products.length - available - comingSoon,
+  };
+}
