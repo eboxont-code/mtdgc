@@ -250,8 +250,8 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Orders are delivered accurately and on time, while manual checks are gradually replaced only by safe, tested automation.
 
-- [ ] **MT-0121 · P0 · TODO** — Document the current manual fulfilment steps for each active product family.
-- [ ] **MT-0122 · P0 · TODO** — Create a pre-fulfilment checklist for player ID, zone, server, region, denomination and email.
+- [!] **MT-0121 · P0 · BLOCKED** — Document the current manual fulfilment steps for each active product family. The supplier register remains empty and no verified supplier/product/region scope, authorised delivery route, supplier-specific instructions, delivery window or escalation contact is recorded. The catalogue's required customer fields do not establish how an authorised supplier fulfils each SKU. Unblock with owner-provided or independently verifiable supplier/issuer evidence; do not invent steps or contact suppliers.
+- [x] **MT-0122 · P0 · DONE** — Snapshot each order item's product region and exact required customer-field labels from the server-resolved product when the order is created; retain the selected variant/denomination in `variant_name`; and show an admin pre-fulfilment checklist with captured/missing values. Browser input cannot forge the reserved snapshot key, and historical items without a valid snapshot are explicitly marked as not captured/unrecognised. Evidence: section 30 and Data Architecture section 4.2; six focused regression tests.
 - [ ] **MT-0123 · P0 · TODO** — Require a second confirmation for irreversible top-ups and code releases.
 - [ ] **MT-0124 · P0 · TODO** — Record the supplier transaction or redemption reference for each completed order.
 - [ ] **MT-0125 · P0 · TODO** — Capture delivery evidence and attach it to the correct order.
@@ -1093,3 +1093,38 @@ No product records, supplier assignments, prices, variants, order records, datab
 - **Release action:** wait until the Vercel free deployment API quota has reset (the returned retry window was 24 hours), confirm the latest documentation-only `main` HEAD has a passing quality run, then deploy that current `main` commit (which includes the tested application-code commit `26a69301856a715a2cbd293da2cf88227d694ca5`) to production and verify both aliases before treating MT-0083 as live. Do not upgrade the plan or change billing to bypass the limit.
 
 **Next P0 task:** MT-0084 — validate uploaded proof file type, size and content handling. The source-level MT-0083 implementation is committed and CI-verified; its production rollout remains subject to the Vercel deployment quota above.
+
+
+## 30. Pre-fulfilment checklist and order-time snapshot — 7 November 2026
+
+**Task:** MT-0122 · P0 · DONE — new orders now retain the product region and required customer-field labels that applied when the selected SKU was resolved, and the administrator order-detail view presents those facts as a per-item pre-fulfilment checklist.
+
+### Implementation and data boundary
+
+- Added `src/lib/pre-fulfilment.ts`. `buildOrderItemFieldsSnapshot` adds a versioned `__mtdgc_snapshot` object to the existing `order_items.fields` JSONB. It contains only the server-read product `region` and the exact `requirements` labels; customer-provided field values remain top-level strings.
+- `placeOrder` resolves the selected SKU and its product on the server, then snapshots the product's region and requirements alongside the existing order-item variant name and price. The browser cannot supply the snapshot metadata: the order-line validator rejects the reserved key before order creation.
+- The selected option/denomination is already retained in `order_items.variant_name`; no extra column or schema migration was needed.
+- The admin order-detail panel uses `getPreFulfilmentChecklist` to display the saved option, order-time region, each required customer field and whether its value was recorded. Additional captured fields remain visible.
+- The checklist never consults today's product row to reconstruct an older order. Legacy items without a valid versioned snapshot are clearly marked as not captured or unrecognised; missing historical requirements are not guessed.
+- The checklist is an internal review aid only. It does not assert supplier legitimacy, region compatibility, payment settlement, fulfilment readiness or delivery evidence. MT-0121 remains blocked until supplier-specific instructions are verified.
+- No new table, column, bucket, RLS policy, grant, production record or migration was introduced. Existing order-item access controls remain unchanged. The public guest order summary does not select or return the `fields` JSONB.
+
+### Regression coverage
+
+- Added `src/lib/pre-fulfilment.test.ts` with six cases:
+  1. Store server-sourced region and required labels while preserving customer values.
+  2. Reject browser-supplied reserved metadata and malformed product metadata.
+  3. Flag missing player ID, zone, server and email values from the order-time requirement snapshot.
+  4. Handle products that had no required customer fields.
+  5. Avoid inferring historical region or requirements for legacy orders.
+  6. Treat unknown snapshot versions as unrecognised rather than trusting them.
+- The focused test file is compatible with the repository's existing `node:test`/Bun test convention.
+
+### Verification and release boundary
+
+- Production schema inspection confirmed `order_items.fields` is existing JSONB and `products.region` / `products.requirements` are present. A read-only catalogue query found the current requirement labels for the available top-up and gift-card listings; no order-item/customer field values were queried.
+- The implementation was isolated from the older `automation/mt-0104-order-transition-guard` branch, which is 80 commits ahead and 7 behind main and contains several unrelated tasks. Only the MT-0122 helper, tests, order-creation snapshot and admin checklist are carried into this clean main-based branch.
+- The canonical plan version header is deliberately unchanged while open PRs #2–#5 contain overlapping plan-version and architecture edits. Reconcile the version once those documentation branches are reviewed; do not merge their overlapping sections blindly.
+- No production database, order, payment, storage, authentication, environment, DNS, hosting, deployment or billing changes were made. No supplier/customer was contacted and no additional spend occurred.
+
+**Next P0 task:** MT-0123 — require a second confirmation for applicable top-ups and emailed codes. Review the existing implementation on the broad unmerged branch and isolate only the task-specific change; do not infer supplier-side irreversibility or merge the broad branch.
