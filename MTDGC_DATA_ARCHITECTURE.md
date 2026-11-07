@@ -63,3 +63,13 @@ MTDGC (Matrix Digital Goods & Commerce) is a digital marketplace for Nepal. This
 - **Payment**: Integration with eSewa/Khalti SDKs/Webhooks.
 - **Fulfillment**: Automated delivery for products with pre-loaded digital codes.
 
+
+
+## 7. Payment-proof access boundaries (verified 7 November 2026)
+
+- Customer proof submission resolves the order from its order number on the server and authorises it with the order-scoped access token, authenticated account-owner match or rate-limited contact fallback. The storage path, `payment_proofs.order_id` and amount are derived from the resolved order.
+- Direct proof-row reads are restricted by RLS to the authenticated owner of the related order or an administrator. Authenticated table grants are SELECT-only; service-role operations remain server-side.
+- The `payment-proofs` storage bucket is private. Its SELECT policy is limited to the authenticated related-order owner (order ID in the first path segment) or an administrator. No anonymous proof-object policy exists.
+- Administrator proof retrieval is behind `requireSupabaseAuth` and an exact successful admin-role check. The signed URL lifetime is 300 seconds. Admin role RPC errors and ambiguous values fail closed.
+- Migration-contract tests cover the row policy, object policy, grants and private bucket. Live production policies and bucket metadata were inspected read-only; no policy or storage setting was changed.
+- The bucket still has no storage-level MIME allowlist and application upload validation checks only MIME/signature bytes, not full image decoding. Keep MT-0084 open until a maintained server-side decoder and malformed/truncated-image tests are available.
