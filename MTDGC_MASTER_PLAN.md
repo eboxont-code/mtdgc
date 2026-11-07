@@ -278,7 +278,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [!] **MT-0141 · P0 · BLOCKED** — Review Terms, Privacy, Delivery and Refund policies for consistency across Nepal and Australia. Blocker: owner-approved supported-market/entity scope and qualified legal/privacy review are required; no legal interpretation will be inferred.
 - [!] **MT-0142 · P0 · BLOCKED** — Resolve conflicts between advertised markets and markets covered by legal terms. Blocker: owner decision on supported markets/entity scope plus qualified legal review.
 - [!] **MT-0143 · P0 · BLOCKED** — Ensure refund rules distinguish undelivered, supplier-failed, incorrect-item and successfully redeemed digital goods. Blocker: approved remedy matrix, verified supplier reversal/redemption evidence and qualified legal review are unavailable.
-- [~] **MT-0144 · P0 · IN PROGRESS** — Make region-lock warnings prominent before payment for every region-restricted code. Implementation and regression coverage are on PR #9; completion awaits the final PR-head quality run.
+- [x] **MT-0144 · P0 · DONE** — Make region-lock warnings prominent before payment for every region-restricted code. Product, checkout and server checks are implemented and verified; see section 33 and PR #9.
 - [ ] **MT-0145 · P0 · TODO** — Make wrong-player-ID warnings visible before confirming an irreversible top-up.
 - [ ] **MT-0146 · P1 · TODO** — Publish support response hours only after they are operationally staffed.
 - [ ] **MT-0147 · P1 · TODO** — Create ticket categories for payment, delayed delivery, invalid code, wrong item, refund and account access.
@@ -1204,13 +1204,13 @@ No product records, supplier assignments, prices, variants, order records, datab
 - MT-0103 and MT-0104 require owner decisions on status semantics and an approved transition matrix.
 - MT-0121 and MT-0124 require verified supplier runbooks/reference semantics; MT-0125 requires an approved private delivery-evidence design and Supabase migration.
 - MT-0141–MT-0143 require owner market/entity decisions, qualified legal review and/or verified supplier refund/redemption evidence.
-- **MT-0144 is IN PROGRESS on PR #9** (branch automation/mt-0144-region-warning-20261108), stacked on PR #8. Do not mark it complete until the final PR-head quality checks pass.
+- **MT-0144 is DONE on PR #9** (branch automation/mt-0144-region-warning-20261108), stacked on PR #8. The full PR-head quality workflow passed and the matching Vercel preview reached READY; production remains unchanged.
 - **Next P0 task after MT-0144: MT-0145 — make wrong-player-ID warnings visible before confirming an irreversible top-up.** Use saved product requirements and current UI evidence; do not claim supplier-specific irreversibility without verified supplier records.
 
 
 ## 33. Region compatibility warnings before payment — 8 November 2026
 
-**Task:** MT-0144 · P0 · IN PROGRESS on draft PR #9. Completion is pending the final PR-head quality workflow.
+**Task:** MT-0144 · P0 · DONE on draft PR #9 (unmerged).
 
 ### Implementation scope
 
@@ -1231,8 +1231,10 @@ No product records, supplier assignments, prices, variants, order records, datab
 
 ### Verification and release boundary
 
-- Regression tests were added for current and legacy category detection, Global/specific/missing-region wording, server rejection of missing/stale region values, and required acknowledgement. Final test and CI results will be recorded after the PR-head workflow completes.
+- Added seven focused MT-0144 regression tests for current/legacy category detection, Global/specific/missing-region wording, server rejection of missing/stale region values, and required acknowledgement. GitHub Actions Quality run [42385994748](https://github.com/eboxont-code/mtdgc/actions/runs/42385994748) passed on application-source commit `5a1f1c05d65fee2eb0f1e4704aeebd944e57a22d`: Bun setup, frozen dependency installation, ESLint, full Bun unit tests, TypeScript typecheck and production build all passed.
+- Vercel preview deployment [dpl_43MKDgKHyiiT6pBr5DgbkHYFLHun](https://vercel.com/boxont/mtdgc/43MKDgKHyiiT6pBr5DgbkHYFLHun) reached READY for the same commit at [mtdgc-75srtdel6-boxont.vercel.app](https://mtdgc-75srtdel6-boxont.vercel.app). Its target is null (preview only) and aliasError is null; it is not a production deployment.
 - The change uses existing product region metadata and the current order request; no database migration or production configuration change is required.
-- No production write, migration, deployment, supplier/customer contact, purchase, billing change or additional spend occurred.
+- PR #9 remains open and draft, unmerged, and is intended to target PR #8's branch after this main-targeted quality run. The main-targeted PR comparison currently includes the MT-0122/0123/0126 stack; the final stacked diff will contain only MT-0144.
+- No production write, migration, production deployment, supplier/customer contact, purchase, billing change or additional spend occurred.
 
 **Next P0 task after MT-0144:** MT-0145 — make wrong-player-ID warnings visible before confirming an irreversible top-up. Keep supplier-specific irreversibility wording blocked until actual supplier evidence exists.
