@@ -37,6 +37,7 @@ const TEXT_EXTENSIONS = new Set([
   ".ts",
   ".tsx",
   ".txt",
+  ".vars",
   ".xml",
   ".yaml",
   ".yml",
@@ -60,7 +61,7 @@ function collectTextFiles(directory = ROOT): Array<{ path: string; content: stri
 
     if (!entry.isFile()) continue;
     const extension = extname(entry.name).toLowerCase();
-    if (!TEXT_EXTENSIONS.has(extension) && !entry.name.startsWith(".env")) continue;
+    if (!TEXT_EXTENSIONS.has(extension) && !entry.name.startsWith(".env") && ![".dev.vars", ".npmrc", ".netrc", ".yarnrc"].includes(entry.name)) continue;
 
     const bytes = readFileSync(absolutePath);
     if (bytes.length > 5 * 1024 * 1024 || bytes.includes(0)) continue;
@@ -86,6 +87,7 @@ function findCredentialLikeValues(files: Array<{ path: string; content: string }
     ["npm token", /\bnpm_[A-Za-z0-9]{36}\b/g],
     ["Anthropic API key", /\bsk-ant-[A-Za-z0-9_-]{20,}\b/g],
     ["Sentry auth token", /\bsntrys_[A-Za-z0-9_-]{20,}\b/g],
+    ["Browser-exposed private environment variable name", /\bVITE_[A-Z0-9_]*(?:SERVICE_ROLE|SECRET_KEY|PRIVATE_KEY|DB_PASSWORD|MIGRATION_URL)\b/g],
     ["PEM private key", /-----BEGIN (?:RSA |EC |OPENSSH |DSA |PGP )?PRIVATE KEY-----/g],
     ["Password-bearing PostgreSQL URL", /\bpostgres(?:ql)?:\/\/[^/\s:@]+:[^@\s/]+@/gi],
     [
