@@ -3,6 +3,7 @@ import { pricesHidden } from "./price-visibility";
 
 export type AvailabilityVariant = {
   sku: string;
+  name: string;
   status: string;
   price_minor: number;
   currency: string;
