@@ -94,6 +94,16 @@ The current customer-facing label for `payment_submitted` is “Payment received
 - The checklist UI is rendered only in the admin order detail view. Existing authenticated-owner/admin RLS on `order_items` remains unchanged and allows each order owner to read their own order-item JSONB, including this non-secret snapshot; the public guest order-summary function does not select `fields` or return the snapshot. No new access policy or grant was added.
 - This is an order-data snapshot and review aid, not a supplier runbook or proof of fulfilment readiness. Supplier-specific instructions remain blocked until independently verified evidence exists.
 
+### 4.3 Supplier transaction and redemption reference events
+
+- The existing `order_status_events` table is used for internal supplier-reference records without a schema migration. Its `status` text column uses the internal event label `supplier_reference`; its `note` stores the exact trimmed reference text, while `created_by` and `created_at` retain the administrator and timestamp.
+- The server action requires an authenticated administrator (`requireSupabaseAuth` plus the `has_role(..., 'admin')` check), loads the order's current status from the database, and accepts a reference only after fulfilment has started: `processing`, `delivered`, or the legacy delivered aliases `fulfilled` and `completed`. It does not trust a status supplied by the browser.
+- The admin order-detail panel displays previously recorded references and permits additional references while the order is processing or in a delivered state. Multiple references may be recorded at order level; this does not associate a reference with an individual line item or identify a supplier.
+- Customer-facing order lookup/history maps filter the internal `supplier_reference` event label, so the reference and its internal event do not appear as customer status progress.
+- Production `order_status_events` has RLS enabled with an authenticated-admin-only policy. The server action also performs its own administrator check. No RLS policy, grant, table, column, storage bucket or production data was changed.
+- The field is for an actual supplier transaction/redemption reference only. It must not contain a redeemable code, customer password, OTP, payment PIN or other credential. Staff are told to leave it blank when no supplier reference was issued; the application does not invent a value or claim a supplier always provides one.
+- This is an order-level audit record, not independent proof that funds settled or that a digital item was delivered/redeemed. The supplier register currently has no verified suppliers or reference-format evidence, and the read-only production snapshot had no completed orders. No historical or live reference values were populated. There is no database uniqueness constraint for reference values.
+
 ## 5. Guest Checkout and Order Tracking Architecture
 
 ### Order identity at creation
