@@ -279,7 +279,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [!] **MT-0142 · P0 · BLOCKED** — Resolve conflicts between advertised markets and markets covered by legal terms. Blocker: owner decision on supported markets/entity scope plus qualified legal review.
 - [!] **MT-0143 · P0 · BLOCKED** — Ensure refund rules distinguish undelivered, supplier-failed, incorrect-item and successfully redeemed digital goods. Blocker: approved remedy matrix, verified supplier reversal/redemption evidence and qualified legal review are unavailable.
 - [x] **MT-0144 · P0 · DONE** — Make region-lock warnings prominent before payment for every region-restricted code. Product, checkout and server checks are implemented and verified; see section 33 and PR #9.
-- [ ] **MT-0145 · P0 · TODO** — Make wrong-player-ID warnings visible before confirming an irreversible top-up.
+- [x] **MT-0145 · P0 · DONE** — Show explicit wrong-player/account-identifier warnings beside top-up details and again in the final checkout confirmation. The warning names saved Player/User ID, Player tag, Zone/Server ID, linked account email or in-game nickname fields. It does not claim categorical irreversibility; supplier-specific reversal evidence remains unavailable. Evidence: section 34 and PR #10.
 - [ ] **MT-0146 · P1 · TODO** — Publish support response hours only after they are operationally staffed.
 - [ ] **MT-0147 · P1 · TODO** — Create ticket categories for payment, delayed delivery, invalid code, wrong item, refund and account access.
 - [ ] **MT-0148 · P1 · TODO** — Require an order number for order-specific support while allowing pre-purchase questions.
@@ -300,7 +300,7 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Customer information, payment evidence, order records and staff tools are protected with least-privilege access.
 
-- [ ] **MT-0161 · P0 · TODO** — Audit authentication and authorisation for customer accounts, support requests and admin routes.
+- [~] **MT-0161 · P0 · IN PROGRESS** — A read-only authentication/authorisation audit is documented on existing branch automation/mt-0161-authz-audit (three commits ahead of main, zero behind, two documentation files). It has no PR; reconcile the evidence with the current stack and open a clean stacked PR before marking DONE.
 - [ ] **MT-0162 · P0 · TODO** — Verify one customer cannot access another customer's orders by changing an ID or URL.
 - [ ] **MT-0163 · P0 · TODO** — Verify payment uploads and delivered codes are stored privately, not in public buckets.
 - [ ] **MT-0164 · P0 · TODO** — Ensure admin-only actions are enforced server-side, not only hidden in the interface.
@@ -1238,4 +1238,40 @@ No product records, supplier assignments, prices, variants, order records, datab
 - PR #9 remains open, draft and unmerged, and now targets PR #8's branch. Its stacked comparison contains only MT-0144 across seven files; no merge or rebase was performed. The current branch tip is a documentation-only verification-record commit; no application source changed after the successful full quality run.
 - No production write, migration, production deployment, supplier/customer contact, purchase, billing change or additional spend occurred.
 
-**Next P0 task after MT-0144:** MT-0145 — make wrong-player-ID warnings visible before confirming an irreversible top-up. Keep supplier-specific irreversibility wording blocked until actual supplier evidence exists.
+**Next P0 task after MT-0144:** MT-0145 is DONE on draft PR #10. The next P0 task is MT-0161; an existing three-commit read-only audit branch is available for review and promotion. Supplier-specific reversibility remains unverified and must not be claimed.
+
+
+## 34. Wrong-player/account identifier warnings before top-up confirmation — 8 November 2026
+
+**Task:** MT-0145 · P0 · DONE on draft PR #10 (unmerged).
+
+### Implementation
+
+- Added isPlayerIdentifierRequirement and getPlayerIdentifierWarning in src/lib/order-confirmation.ts. The policy recognises saved top-up requirement labels for Player ID, User ID, Player tag, Zone/Server ID, Supercell ID email and in-game nickname after Unicode, case and separator normalisation.
+- The product page displays the warning beside saved delivery fields before the customer adds or buys the top-up.
+- Checkout repeats the warning while the customer edits delivery details and again inside the final product/delivery confirmation dialog before the explicit Confirm details & place order action.
+- For games that require both a user/player ID and zone/server ID, the warning tells the customer to verify the pair against the same intended in-game account. It lists the exact identifier labels saved on that product/order line.
+- The wording states that a typo can misdirect a top-up or delay fulfilment and that no supplier-specific reversal process has been verified. It tells customers not to assume an incorrect top-up can be reversed; it does not claim every top-up is categorically irreversible or invent a supplier remedy.
+- The existing server-resolved detailsConfirmed requirement for game-top-ups remains the final checkout review gate. This task adds visible accuracy warnings, not a new authentication control or a server-verifiable proof that a human read the warning. No schema migration is required.
+
+### Production catalogue evidence (read-only)
+
+- The 8 November 2026 production catalogue query found four currently orderable game-top-up products:
+  - Clash of Clans Passes — Supercell ID email, Player tag.
+  - Free Fire Diamonds — Free Fire player ID, In-game nickname for verification.
+  - Mobile Legends Diamonds — Mobile Legends user ID, Zone ID.
+  - PUBG Mobile UC — PUBG Mobile player ID, In-game nickname for verification.
+- The currently orderable product rows are published and have active variants. Coming-soon sample listings were not treated as orderable.
+- SUPPLIER_REGISTER.md still has no supplier identity or verified product-scope rows. Supplier-specific reversibility and reversal procedures therefore remain unverified; no supplier claim is made.
+- The query read product/category/variant metadata only. No customer, order, payment or support data was queried. No production data was changed.
+
+### Tests and verification
+
+- Added five focused MT-0145 tests covering the active identifier labels, exact saved labels in the warning, warning wording and supplier-reversal limitation, category scope, and legacy carts without a saved category.
+- Local Node 22.16 scratch run of the complete order-confirmation.test.ts source passed 17 tests, 0 failed (12 existing MT-0123/MT-0144 tests plus 5 MT-0145 tests). The scratch copy changed only the relative import to include .ts for Node ESM resolution; repository source retains its Bun-compatible import.
+- GitHub Actions Quality run 42390708202 (https://github.com/eboxont-code/mtdgc/actions/runs/42390708202) passed on application-source commit 94b8440a0580ea89762dc83dfb887050076807bc: Bun setup, frozen dependency installation, ESLint, full Bun unit-test suite, TypeScript typecheck and production build all passed.
+- The PR is stacked on PR #9 / automation/mt-0144-region-warning-20261108. Its final comparison contains only the MT-0145 helper, tests, product-detail warning and checkout warnings. No merge or rebase was performed.
+- Vercel preview status is recorded separately from production. A READY preview is not permission to deploy.
+- No production write, migration, deployment, supplier/customer contact, purchase, billing change or additional spend occurred.
+
+**Next P0 task:** MT-0161 — reconcile and promote the existing read-only authentication/authorisation audit on automation/mt-0161-authz-audit. That branch is three commits ahead of main, zero behind, changes only the master plan and data architecture, and has no PR yet. Do not mark MT-0161 complete on this stack until its evidence is reconciled and promoted. MT-0162 follows it in the P0 register.
