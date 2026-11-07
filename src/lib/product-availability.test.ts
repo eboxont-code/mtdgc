@@ -5,6 +5,7 @@ import {
   availabilityLabel,
   isComingSoon,
   isPurchasable,
+  isPurchasableVariant,
   isUnavailable,
   lowestPurchasablePrice,
   lowestPurchasableVariant,
@@ -20,7 +21,7 @@ const live = {
   variants: [{ sku: "SKU-1", name: "Default option", status: "available", price_minor: 10000, currency: "NPR", is_default: true, sort_order: 1 }],
 };
 
-describe("MT-0182 purchase availability", () => {
+describe("catalog availability and price consistency", () => {
   test("coming-soon records never contribute to the purchasable count", () => {
     const soon = { ...live, status: "coming_soon" };
     assert.equal(isPurchasable(soon), false);
@@ -55,6 +56,8 @@ describe("MT-0182 purchase availability", () => {
     };
     assert.equal(lowestPurchasablePrice(product), 24900);
     assert.equal(lowestPurchasableVariant(product)?.sku, "EVENT");
+    assert.equal(isPurchasableVariant(product, product.variants[1]), true);
+    assert.equal(isPurchasableVariant(product, product.variants[2]), false);
     assert.equal(selectProductVariant(product)?.sku, "EVENT");
     assert.equal(selectProductVariant(product, "GOLD")?.sku, "GOLD");
     assert.equal(selectProductVariant(product, "EARLY")?.sku, "EVENT");
