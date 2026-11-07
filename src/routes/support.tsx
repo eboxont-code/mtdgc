@@ -187,7 +187,7 @@ function SupportPage() {
             </label>
             <label htmlFor="support-description" className="block">
               <span className="font-display text-xs text-muted-foreground">What happened</span>
-              <p id="support-description-safety" role="note" className="mt-1 text-xs text-muted-foreground">{CUSTOMER_CREDENTIAL_WARNING}</p>
+              <span id="support-description-safety" role="note" className="mt-1 block text-xs text-muted-foreground">{CUSTOMER_CREDENTIAL_WARNING}</span>
               <textarea
                 id="support-description"
                 aria-invalid={status === "error"}
