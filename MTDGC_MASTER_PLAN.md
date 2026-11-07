@@ -278,7 +278,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [!] **MT-0141 · P0 · BLOCKED** — Review Terms, Privacy, Delivery and Refund policies for consistency across Nepal and Australia. Blocker: owner-approved supported-market/entity scope and qualified legal/privacy review are required; no legal interpretation will be inferred.
 - [!] **MT-0142 · P0 · BLOCKED** — Resolve conflicts between advertised markets and markets covered by legal terms. Blocker: owner decision on supported markets/entity scope plus qualified legal review.
 - [!] **MT-0143 · P0 · BLOCKED** — Ensure refund rules distinguish undelivered, supplier-failed, incorrect-item and successfully redeemed digital goods. Blocker: approved remedy matrix, verified supplier reversal/redemption evidence and qualified legal review are unavailable.
-- [ ] **MT-0144 · P0 · TODO** — Make region-lock warnings prominent before payment for every region-restricted code.
+- [x] **MT-0144 · P0 · DONE** — Make region-lock warnings prominent before payment for every region-restricted code. Product, checkout and server checks are implemented and verified; see section 33 and PR #9.
 - [ ] **MT-0145 · P0 · TODO** — Make wrong-player-ID warnings visible before confirming an irreversible top-up.
 - [ ] **MT-0146 · P1 · TODO** — Publish support response hours only after they are operationally staffed.
 - [ ] **MT-0147 · P1 · TODO** — Create ticket categories for payment, delayed delivery, invalid code, wrong item, refund and account access.
@@ -1204,5 +1204,38 @@ No product records, supplier assignments, prices, variants, order records, datab
 - MT-0103 and MT-0104 require owner decisions on status semantics and an approved transition matrix.
 - MT-0121 and MT-0124 require verified supplier runbooks/reference semantics; MT-0125 requires an approved private delivery-evidence design and Supabase migration.
 - MT-0141–MT-0143 require owner market/entity decisions, qualified legal review and/or verified supplier refund/redemption evidence.
-- **Next eligible P0 task: MT-0144 — make region-lock warnings prominent before payment for every region-restricted code.** It can be scoped to the existing server-sourced product region and conservative customer confirmation without claiming unverified supplier compatibility.
+- **MT-0144 is DONE on PR #9** (branch automation/mt-0144-region-warning-20261108), stacked on PR #8. The full PR-head quality workflow passed and the matching Vercel preview reached READY; production remains unchanged.
+- **Next P0 task after MT-0144: MT-0145 — make wrong-player-ID warnings visible before confirming an irreversible top-up.** Use saved product requirements and current UI evidence; do not claim supplier-specific irreversibility without verified supplier records.
 
+
+## 33. Region compatibility warnings before payment — 8 November 2026
+
+**Task:** MT-0144 · P0 · DONE on draft PR #9 (unmerged).
+
+### Implementation scope
+
+- The public product page treats both game-top-ups and gift-cards as region-sensitive categories. It displays the catalogue region warning in the desktop purchase summary, mobile sticky purchase bar and product-page region-check panel.
+- The previous unsupported wording that a code marked Global works only on a Global account has been removed. New wording explicitly says Global is a catalogue label, not a guarantee of redemption in every country or account region.
+- A specific label such as Australia is displayed as catalogue information only. Customers are told to check the issuer's current redemption rules for the intended account/store country and not pay if compatibility cannot be confirmed. No issuer compatibility or supplier authority is claimed.
+- Missing region metadata disables product ordering. The product page requires a region check before adding an orderable code/top-up to the cart.
+- Checkout repeats a per-item warning in the final review dialog and requires a separate issuer-rule acknowledgement before creating the order.
+- placeOrder resolves category and region from the selected SKU on the server, compares the current server region with the cart's saved region to reject stale carts, and requires the acknowledgement before any order row is created. Client region data is comparison-only and is never the source of truth.
+- The acknowledgement is a customer accuracy step, not proof that the issuer was contacted or that a code is compatible. A direct API caller can set the boolean; server-side region/category resolution and stale-cart comparison still apply.
+
+### Production catalogue evidence
+
+- Read-only production Supabase query on 8 November 2026 found four orderable game-top-up products (13 orderable variants) and one orderable gift-card product (2 orderable variants). All five current orderable products are labelled Global in the catalogue.
+- Published Australian gift-card sample listings are marked Australia but remain coming_soon with zero orderable variants. They are not presented as purchasable.
+- The Supplier Register remains empty. These catalogue labels are not independent issuer/supplier compatibility evidence; this task adds warnings and a confirmation gate, not region verification.
+- Production project mtdgc was ACTIVE_HEALTHY on PostgreSQL 17.11.0.003. No customer/order/payment data was queried.
+
+### Verification and release boundary
+
+- Added seven focused MT-0144 regression tests for current/legacy category detection, Global/specific/missing-region wording, server rejection of missing/stale region values, and required acknowledgement. GitHub Actions Quality run [42385994748](https://github.com/eboxont-code/mtdgc/actions/runs/42385994748) passed on application-source commit `5a1f1c05d65fee2eb0f1e4704aeebd944e57a22d`: Bun setup, frozen dependency installation, ESLint, full Bun unit tests, TypeScript typecheck and production build all passed.
+- The final code-and-plan head before this evidence-only documentation correction, `faadc1a820ad076337a7e50bbe17f15dfbd3c7de`, also passed the full GitHub Actions Quality workflow [42386106190](https://github.com/eboxont-code/mtdgc/actions/runs/42386106190): Bun setup, frozen dependency installation, ESLint, full Bun unit tests, TypeScript typecheck and production build all passed. No application source changed after that run.
+- Vercel preview deployment [dpl_43MKDgKHyiiT6pBr5DgbkHYFLHun](https://vercel.com/boxont/mtdgc/43MKDgKHyiiT6pBr5DgbkHYFLHun) reached READY for application-source commit `5a1f1c05` at [mtdgc-75srtdel6-boxont.vercel.app](https://mtdgc-75srtdel6-boxont.vercel.app). Its target is null (preview only) and aliasError is null; it is not a production deployment. The later documentation-only head `faadc1a8` received a Vercel failure status pointing to the free build-rate limit, so no separate preview of that docs-only commit is claimed; no paid retry was attempted.
+- The change uses existing product region metadata and the current order request; no database migration or production configuration change is required.
+- PR #9 remains open, draft and unmerged, and now targets PR #8's branch. Its stacked comparison contains only MT-0144 across seven files; no merge or rebase was performed. The current branch tip is a documentation-only verification-record commit; no application source changed after the successful full quality run.
+- No production write, migration, production deployment, supplier/customer contact, purchase, billing change or additional spend occurred.
+
+**Next P0 task after MT-0144:** MT-0145 — make wrong-player-ID warnings visible before confirming an irreversible top-up. Keep supplier-specific irreversibility wording blocked until actual supplier evidence exists.
