@@ -101,7 +101,11 @@ function findCredentialLikeValues(files: Array<{ path: string; content: string }
   for (const file of files) {
     for (const [kind, pattern] of patterns) {
       pattern.lastIndex = 0;
-      if (pattern.test(file.content)) findings.push({ path: file.path, kind });
+      const matches = [...file.content.matchAll(pattern)];
+      const hasNonPlaceholderMatch =
+        kind !== "Private environment credential assignment" ||
+        matches.some((match) => !/(?:placeholder|example|dummy|change[_-]?me|replace[_-]?me)/i.test(match[1] ?? ""));
+      if (matches.length > 0 && hasNonPlaceholderMatch) findings.push({ path: file.path, kind });
     }
 
     const jwtPattern = /\b(eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,})\b/g;
