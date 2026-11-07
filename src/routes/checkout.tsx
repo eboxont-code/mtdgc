@@ -397,7 +397,7 @@ function CheckoutPage() {
                   <label htmlFor="co-note" className="mt-4 block">
                     <span className="font-display text-xs text-muted-foreground">Anything else we should know (optional)</span>
                     <textarea id="co-note" aria-describedby="co-note-safety" value={note} rows={3} onChange={(e) => setNote(e.target.value)} className="mt-1 w-full rounded-lg border border-border bg-background/60 p-3 font-display text-[15px] outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
-                    <p id="co-note-safety" className="mt-1 text-xs text-muted-foreground">{CUSTOMER_CREDENTIAL_WARNING}</p>
+                    <span id="co-note-safety" className="mt-1 block text-xs text-muted-foreground">{CUSTOMER_CREDENTIAL_WARNING}</span>
                   </label>
                 </Panel>
               )}
