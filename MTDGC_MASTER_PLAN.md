@@ -1121,6 +1121,7 @@ No product records, supplier assignments, prices, variants, order records, datab
 - The focused test file is compatible with the repository's existing `node:test`/Bun test convention.
 
 ### Verification and release boundary
+- Implementation is isolated on `automation/mt-0122-pre-fulfilment-checklist-20261107`, 9 commits ahead and 0 behind current main. Draft [PR #6](https://github.com/eboxont-code/mtdgc/pull/6) contains only the MT-0122 helper, tests, order-creation snapshot, admin checklist and supporting documentation; final head commit: [ae370b4](https://github.com/eboxont-code/mtdgc/commit/ae370b4ed7c99a462c00a3c16ec580084c8c4752). PR remains open and unmerged for review.
 
 - Production schema inspection confirmed `order_items.fields` is existing JSONB and `products.region` / `products.requirements` are present. A read-only catalogue query found the current requirement labels for the available top-up and gift-card listings; no order-item/customer field values were queried.
 - GitHub Actions Quality run [42372233958](https://github.com/eboxont-code/mtdgc/actions/runs/42372233958) passed on application-code head `08ffa011cdc6f2ef66867c4b1a9054a42def3c61`, and final PR-head run [42372320583](https://github.com/eboxont-code/mtdgc/actions/runs/42372320583) passed on `fe99d856bef064d9404d51c77345719281813848`: Bun setup, frozen dependency install, ESLint, full Bun unit-test suite, TypeScript typecheck and production build all succeeded.
