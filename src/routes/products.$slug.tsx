@@ -183,9 +183,10 @@ function ProductPage() {
         ? availabilityLabel({ ...product, variants: [variant] })
         : availabilityLabel(product);
 
-  const [regionConfirmed, setRegionConfirmed] = useState(false);
+  const regionConfirmationKey = `undefined:${regionText}`;
+  const [regionConfirmedFor, setRegionConfirmedFor] = useState<string | null>(null);
+  const regionConfirmed = regionConfirmedFor === regionConfirmationKey;
   const regionRef = useRef<HTMLInputElement>(null);
-  useEffect(() => { setRegionConfirmed(false); }, [product.id]);
 
   const navigate = useNavigate();
   const addToCart = (buyNow = false) => {
@@ -455,7 +456,7 @@ function ProductPage() {
                       type="checkbox"
                       required
                       checked={regionConfirmed}
-                      onChange={(e) => { setRegionConfirmed(e.target.checked); if (e.target.checked) setError(null); }}
+                      onChange={(e) => { setRegionConfirmedFor(e.target.checked ? regionConfirmationKey : null); if (e.target.checked) setError(null); }}
                       className="size-5 shrink-0 accent-primary"
                     />
                     <span>I have checked the issuer's current redemption rules for the account that will receive this code. I will not pay if those rules do not confirm compatibility.</span>
