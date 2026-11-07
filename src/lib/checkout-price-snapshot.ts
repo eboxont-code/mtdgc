@@ -1,8 +1,8 @@
 export type ExpectedCheckoutPriceLine = {
   sku: string;
-  expectedProductName?: string;
-  expectedVariantName?: string;
-  expectedPriceMinor?: number;
+  expectedProductName?: string | undefined;
+  expectedVariantName?: string | undefined;
+  expectedPriceMinor?: number | undefined;
 };
 
 export type ResolvedCheckoutPriceLine = {
