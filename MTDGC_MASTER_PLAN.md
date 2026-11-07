@@ -325,8 +325,8 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Customers can discover the right digital item, understand restrictions and complete an order without confusion.
 
-- [ ] **MT-0181 · P0 · TODO** — Test the full purchase journey on common Android phones and narrow mobile screens.
-- [ ] **MT-0182 · P0 · REVIEW** — Availability labels, purchasable counts and disabled coming-soon actions were implemented and rule-tested in the 5 November pack; confirm the current production page before marking complete because the roadmap pack recorded the change as not yet published.
+- [!] **MT-0181 · P0 · BLOCKED** — Test the full purchase journey on common Android phones and narrow mobile screens. Blocked because this run has no physical Android-device access and the read-only production boundary does not permit placing a real test order or payment; unlock with an owner-provided device/test window and explicit authorisation for a non-production or otherwise approved end-to-end test order/payment.
+- [x] **MT-0182 · P0 · DONE** — Availability labels, purchasable counts and disabled coming-soon actions are rule-tested and verified on the current production storefront on 8 November 2026; see section 27 and `roadmap.md` for read-only live-page, Supabase catalogue and deployed-source evidence.
 - [ ] **MT-0183 · P0 · TODO** — Ensure the product card, product page and checkout show matching prices and variants.
 - [ ] **MT-0184 · P0 · REVIEW** — Product purchase summaries for region, platform, delivery method and required details were implemented in the 5 November pack; confirm the current production page before marking complete because the roadmap pack recorded the change as not yet published.
 - [ ] **MT-0185 · P1 · TODO** — Improve catalog search for brand, product, game, denomination and common abbreviations.
@@ -1093,3 +1093,37 @@ No product records, supplier assignments, prices, variants, order records, datab
 - **Release action:** wait until the Vercel free deployment API quota has reset (the returned retry window was 24 hours), confirm the latest documentation-only `main` HEAD has a passing quality run, then deploy that current `main` commit (which includes the tested application-code commit `26a69301856a715a2cbd293da2cf88227d694ca5`) to production and verify both aliases before treating MT-0083 as live. Do not upgrade the plan or change billing to bypass the limit.
 
 **Next P0 task:** MT-0084 — validate uploaded proof file type, size and content handling. The source-level MT-0083 implementation is committed and CI-verified; its production rollout remains subject to the Vercel deployment quota above.
+
+
+## 27. Production availability verification — 8 November 2026
+
+**Task:** MT-0182 · P0 · DONE.
+
+### Production page and deployment evidence
+
+- Read-only Vercel inspection identified the current production deployment as READY: `dpl_4nELrLJ21wEGvAAtVbs2g6UPsNhC`, with `mtdgc.com` and `www.mtdgc.com` aliases, sourced from main commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`.
+- A direct read-only fetch of `https://mtdgc.com/catalog` returned HTTP 200 and current server-rendered HTML showing **36 listed / 5 available now / 30 coming soon / 1 unavailable**. The category sidebar showed available-now counts of **Game Top-Ups 4, Gift Cards 1, Subscriptions 0 and Software 0**.
+- The live Steam Wallet Code product page returned HTTP 200 and its purchase action rendered as a disabled button with `aria-disabled="true"` and the label `Coming soon`.
+- The live Netflix Subscription page returned HTTP 200 and its purchase action rendered as a disabled button with `aria-disabled="true"` and the label `Temporarily unavailable`. Its catalogue card also displays the unavailable status rather than an available-now label.
+- The production deployment's exact source ref was inspected at commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`. That deployed ref contains `src/lib/product-availability.ts`, `src/routes/catalog.tsx`, `src/components/product-card.tsx` and `src/routes/products.$slug.tsx` with the shared availability rules, category counts, status labels and disabled purchase actions. The deployment is therefore verified for this specific task even though current main is 12 commits ahead of the production source commit; this is not a claim that all current-main changes are deployed.
+- A separate older search-index crawl showed a stale 26-product snapshot; it was not used. The direct current production fetch and database query below agree on the 36-product snapshot.
+
+### Read-only Supabase catalogue reconciliation
+
+- Queried only published product, category and variant metadata in production project `eaomkkswslqtfunkceuc`; no customer, order, payment or user records were queried or changed.
+- The database returned **36 published products** and **54 variants**. Applying the same rules as `pricesHidden`, `isOrderable` and `isPurchasable` produced **5 available, 30 coming soon and 1 unavailable**, matching the live catalog.
+- Published products by category and available-now counts: Game Top-Ups **6 / 4**, Gift Cards **12 / 1**, Subscriptions **7 / 0**, Software **11 / 0**. These sum to 36 published products and 5 purchasable products.
+- The 30 coming-soon listings are excluded from purchasable counts; the one temporarily unavailable subscription is counted as unavailable, not available. An available product must have an orderable product status and at least one orderable variant with a positive price, while sample/coming-soon price-hidden records remain non-purchasable.
+
+### Existing rule tests and CI
+
+- The existing `src/lib/product-availability.test.ts` covers: coming-soon exclusion from purchasable counts; the requirement for an orderable positive-price variant; hidden sample-price handling; and out-of-stock/temporarily-unavailable classification.
+- The current main HEAD is `9c745dda3951bc8af616ea09061cb828e16f89d6`. Its Quality workflow run [42323805501](https://github.com/eboxont-code/mtdgc/actions/runs/42323805501) completed successfully, including dependency install, ESLint, unit tests, TypeScript typecheck and production build.
+- The production source commit is 12 commits behind current main. This verification establishes only that the MT-0182 implementation is present and working on the currently assigned production deployment; it does not certify the unrelated changes on main as deployed.
+
+### Result and boundaries
+
+- MT-0182 acceptance criteria are met: product cards/pages show accurate availability states; catalog and category counts match current published database eligibility; coming-soon and temporarily unavailable purchase actions are disabled; and existing rule tests pass on main.
+- No code, catalogue records, variants, order/cart/payment records, database schema, storage, deployment, domain, environment variable or billing setting was changed. No order or payment was created. No supplier/customer was contacted. Additional spend: $0.
+
+**Next P0 task:** MT-0183 — verify that product cards, product pages and checkout display matching prices and variants. MT-0181 is separately marked BLOCKED until physical Android-device access and an explicitly authorised end-to-end test order/payment window are available.
