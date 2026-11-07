@@ -20,7 +20,7 @@ export type AvailabilityProduct = {
 };
 
 /** Variants that can actually be purchased and whose price uses the storefront's NPR currency. */
-export function purchasableVariants(product: AvailabilityProduct): AvailabilityVariant[] {
+export function purchasableVariants<T extends AvailabilityProduct>(product: T): T["variants"][number][] {
   if (pricesHidden(product) || !isOrderable(product.status) || product.currency !== "NPR") return [];
   return product.variants.filter((variant) =>
     isOrderable(variant.status) && variant.price_minor > 0 && variant.currency === "NPR"
@@ -32,7 +32,7 @@ export function isPurchasableVariant(product: AvailabilityProduct, variant: Avai
 }
 
 /** Lowest purchasable variant; used by both the catalog card and the product-page initial selection. */
-export function lowestPurchasableVariant(product: AvailabilityProduct): AvailabilityVariant | null {
+export function lowestPurchasableVariant<T extends AvailabilityProduct>(product: T): T["variants"][number] | null {
   return [...purchasableVariants(product)].sort((a, b) =>
     a.price_minor - b.price_minor || (a.sort_order ?? 0) - (b.sort_order ?? 0)
   )[0] ?? null;
@@ -43,7 +43,7 @@ export function lowestPurchasablePrice(product: AvailabilityProduct): number | n
 }
 
 /** Keep an explicitly requested orderable option; otherwise select the same lowest option shown on the card. */
-export function selectProductVariant(product: AvailabilityProduct, requestedSku?: string): AvailabilityVariant | null {
+export function selectProductVariant<T extends AvailabilityProduct>(product: T, requestedSku?: string): T["variants"][number] | null {
   const eligible = purchasableVariants(product);
   if (eligible.length) {
     return eligible.find((variant) => variant.sku === requestedSku) ?? lowestPurchasableVariant(product);
