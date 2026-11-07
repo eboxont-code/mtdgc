@@ -26,7 +26,12 @@ import {
 import { useCart } from "@/lib/cart";
 import {
   ORDER_DETAILS_CONFIRMATION_REQUIRED_MESSAGE,
+  REGION_CHANGED_MESSAGE,
+  REGION_COMPATIBILITY_CONFIRMATION_REQUIRED_MESSAGE,
+  REGION_NOT_LISTED_MESSAGE,
+  getRegionCompatibilityWarning,
   requiresOrderDetailsConfirmation,
+  requiresRegionCompatibilityConfirmation,
 } from "@/lib/order-confirmation";
 import { CUSTOMER_CREDENTIAL_WARNING } from "@/lib/supplier-safety";
 import { formatNpr, SITE_URL } from "@/lib/format";
@@ -73,6 +78,7 @@ function CheckoutPage() {
   const [sending, setSending] = useState(false);
   const [placeError, setPlaceError] = useState<string | null>(null);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [regionConfirmedFor, setRegionConfirmedFor] = useState<string | null>(null);
   const [placed, setPlaced] = useState<{ orderNumber: string; totalMinor: number; lines: typeof lines } | null>(null);
   const formRef = useRef<HTMLDivElement>(null);
   const restored = useRef(false);
@@ -152,7 +158,7 @@ function CheckoutPage() {
     formRef.current?.focus({ preventScroll: true });
   };
 
-  const submitOrder = async (detailsConfirmed = false) => {
+  const submitOrder = async (detailsConfirmed = false, regionConfirmed = false) => {
     if (sending) return;
     const e = { ...validateContact(), ...validateDelivery() };
     if (Object.keys(e).length) {
@@ -172,8 +178,9 @@ function CheckoutPage() {
           email: email.trim(),
           note: note.trim(),
           bearer: sess.session?.access_token,
-          lines: lines.map((l) => ({ sku: l.sku, quantity: l.quantity, fields: l.fields ?? {} })),
+          lines: lines.map((l) => ({ sku: l.sku, quantity: l.quantity, fields: l.fields ?? {}, region: l.region ?? "" })),
           detailsConfirmed,
+          regionConfirmed,
         },
       });
       const tokenKey = `mtdgc-order-${result.orderNumber.toUpperCase()}`;
@@ -185,8 +192,10 @@ function CheckoutPage() {
       window.scrollTo({ top: 0 });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      if (message.includes(ORDER_DETAILS_CONFIRMATION_REQUIRED_MESSAGE)) {
+      if (message.includes(ORDER_DETAILS_CONFIRMATION_REQUIRED_MESSAGE) || message.includes(REGION_COMPATIBILITY_CONFIRMATION_REQUIRED_MESSAGE)) {
         setConfirmationOpen(true);
+      } else if (message.includes(REGION_NOT_LISTED_MESSAGE) || message.includes(REGION_CHANGED_MESSAGE)) {
+        setPlaceError(message);
       } else {
         setPlaceError("We could not save your order. Please check your connection and try again.");
       }
@@ -205,7 +214,14 @@ function CheckoutPage() {
   });
 
   const shownLines = placed?.lines ?? lines;
-  const confirmationLines = lines.filter((line) => requiresOrderDetailsConfirmation([line]));
+  const regionConfirmationLines = lines.filter((line) => requiresRegionCompatibilityConfirmation([line]));
+  const regionConfirmationKey = JSON.stringify(
+    regionConfirmationLines.map((line) => [line.sku, line.variantName, line.quantity, line.region ?? ""]),
+  );
+  const regionConfirmed = regionConfirmationLines.length > 0 && regionConfirmedFor === regionConfirmationKey;
+  const confirmationLines = lines.filter(
+    (line) => requiresOrderDetailsConfirmation([line]) || requiresRegionCompatibilityConfirmation([line]),
+  );
   const detailsToConfirm = confirmationLines.length > 0 ? confirmationLines : lines;
   const itemCount = shownLines.reduce((sum, line) => sum + line.quantity, 0);
   const totalMinor = placed?.totalMinor ?? subtotalMinor;
@@ -272,11 +288,11 @@ function CheckoutPage() {
   );
 
   const requestPlaceOrder = () => {
-    if (requiresOrderDetailsConfirmation(lines)) {
+    if (requiresOrderDetailsConfirmation(lines) || regionConfirmationLines.length > 0) {
       setConfirmationOpen(true);
       return;
     }
-    void submitOrder(false);
+    void submitOrder(false, false);
   };
 
   const primaryAction =
@@ -516,8 +532,9 @@ function CheckoutPage() {
             <AlertDialogDescription>
               Review the exact product, selected option, listed region and delivery details below. A wrong player/account
               identifier or delivery email may direct a top-up or digital code to a different account or recipient.
-              Go back and edit anything uncertain before placing the order. This is an accuracy check; it does not
-              confirm payment settlement or supplier-specific reversibility.
+              A catalogue region is not independent issuer verification: check the issuer's current redemption rules
+              for the account that will receive each code before paying. Do not pay if you cannot confirm compatibility.
+              This review does not confirm payment settlement or supplier-specific reversibility.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="max-h-64 space-y-3 overflow-y-auto">
@@ -529,6 +546,11 @@ function CheckoutPage() {
                   {" · "}Qty {line.quantity} · Line total {formatNpr(line.priceMinor * line.quantity)}
                 </p>
                 {line.region?.trim() && <p className="mt-1 text-xs text-muted-foreground">Listed region: {line.region}</p>}
+                {requiresRegionCompatibilityConfirmation([line]) && (
+                  <p role="note" className="mt-2 rounded-lg border border-warn/40 bg-warn/5 p-2 text-xs leading-relaxed">
+                    {getRegionCompatibilityWarning(line.region)}
+                  </p>
+                )}
                 {Object.entries(line.fields ?? {}).length > 0 ? (
                   <dl className="mt-2 space-y-1">
                     {Object.entries(line.fields ?? {}).map(([label, value]) => (
@@ -544,9 +566,25 @@ function CheckoutPage() {
               </section>
             ))}
           </div>
+          {regionConfirmationLines.length > 0 && (
+            <div className="rounded-xl border border-warn/50 bg-warn/5 p-3">
+              <label className="flex min-h-11 cursor-pointer items-start gap-3 text-sm">
+                <input
+                  type="checkbox"
+                  checked={regionConfirmed}
+                  onChange={(event) => setRegionConfirmedFor(event.target.checked ? regionConfirmationKey : null)}
+                  className="mt-0.5 size-5 shrink-0 accent-primary"
+                />
+                <span>I have checked the issuer's current redemption rules for each intended account. I will not pay unless those rules confirm that every listed code can be redeemed there.</span>
+              </label>
+            </div>
+          )}
           <AlertDialogFooter>
             <AlertDialogCancel>Go back and edit</AlertDialogCancel>
-            <AlertDialogAction disabled={sending} onClick={() => { void submitOrder(true); }}>
+            <AlertDialogAction
+              disabled={sending || (regionConfirmationLines.length > 0 && !regionConfirmed)}
+              onClick={() => { void submitOrder(true, regionConfirmed); }}
+            >
               Confirm details &amp; place order
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -5,7 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { findUnsafeCustomerRequirement, isSafeCustomerRequirements, UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE } from "@/lib/supplier-safety";
 import { generateOrderReference } from "@/lib/order-reference";
 import { buildOrderItemFieldsSnapshot, hasReservedOrderItemField } from "@/lib/pre-fulfilment";
-import { assertOrderDetailsConfirmed } from "@/lib/order-confirmation";
+import { assertOrderDetailsConfirmed, assertRegionCompatibilityConfirmed } from "@/lib/order-confirmation";
 import {
   buildPaymentProofAssociation,
   hasOrderAccessToken,
@@ -21,6 +21,7 @@ const lineSchema = z.object({
   sku: z.string().min(1).max(80),
   quantity: z.number().int().min(1).max(10),
   fields: z.record(z.string().max(80), z.string().max(200)).default({}),
+  region: z.string().max(80).optional(),
 }).refine(
   (line) => !findUnsafeCustomerRequirement(Object.keys(line.fields)),
   { message: UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE },
@@ -47,6 +48,7 @@ const orderSchema = z
     note: z.string().trim().max(500).optional(),
     bearer: z.string().max(4000).optional(),
     detailsConfirmed: z.boolean().optional().default(false),
+    regionConfirmed: z.boolean().optional().default(false),
     lines: z.array(lineSchema).min(1).max(20),
   })
   .refine((d) => Boolean(d.phone) || Boolean(d.email), "Add a mobile number or an email");
@@ -89,11 +91,20 @@ export const placeOrder = createServerFn({ method: "POST" })
       .in("sku", skus);
     if (error) throw new Error("Could not load products");
 
-    const productCategorySlugs = data.lines.map((line) => {
+    const resolvedProducts = data.lines.map((line) => {
       const variant = variants?.find((candidate) => candidate.sku === line.sku);
-      const product = variant?.products as { categories?: { slug?: string } | null } | null | undefined;
-      return product?.categories?.slug;
+      const product = variant?.products as {
+        categories?: { slug?: string } | null;
+        region?: unknown;
+      } | null | undefined;
+      return {
+        categorySlug: product?.categories?.slug,
+        region: product?.region,
+        expectedRegion: line.region,
+      };
     });
+    assertRegionCompatibilityConfirmed(resolvedProducts, data.regionConfirmed);
+    const productCategorySlugs = resolvedProducts.map((product) => product.categorySlug);
     const items = data.lines.map((line) => {
       const v = variants?.find((x) => x.sku === line.sku);
       const p = v?.products as { id: string; name: string; is_published: boolean; status: string; region: string; requirements: unknown } | null | undefined;

@@ -278,7 +278,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [!] **MT-0141 · P0 · BLOCKED** — Review Terms, Privacy, Delivery and Refund policies for consistency across Nepal and Australia. Blocker: owner-approved supported-market/entity scope and qualified legal/privacy review are required; no legal interpretation will be inferred.
 - [!] **MT-0142 · P0 · BLOCKED** — Resolve conflicts between advertised markets and markets covered by legal terms. Blocker: owner decision on supported markets/entity scope plus qualified legal review.
 - [!] **MT-0143 · P0 · BLOCKED** — Ensure refund rules distinguish undelivered, supplier-failed, incorrect-item and successfully redeemed digital goods. Blocker: approved remedy matrix, verified supplier reversal/redemption evidence and qualified legal review are unavailable.
-- [ ] **MT-0144 · P0 · TODO** — Make region-lock warnings prominent before payment for every region-restricted code.
+- [~] **MT-0144 · P0 · IN PROGRESS** — Make region-lock warnings prominent before payment for every region-restricted code. Implementation and regression coverage are on PR #9; completion awaits the final PR-head quality run.
 - [ ] **MT-0145 · P0 · TODO** — Make wrong-player-ID warnings visible before confirming an irreversible top-up.
 - [ ] **MT-0146 · P1 · TODO** — Publish support response hours only after they are operationally staffed.
 - [ ] **MT-0147 · P1 · TODO** — Create ticket categories for payment, delayed delivery, invalid code, wrong item, refund and account access.
@@ -1204,5 +1204,35 @@ No product records, supplier assignments, prices, variants, order records, datab
 - MT-0103 and MT-0104 require owner decisions on status semantics and an approved transition matrix.
 - MT-0121 and MT-0124 require verified supplier runbooks/reference semantics; MT-0125 requires an approved private delivery-evidence design and Supabase migration.
 - MT-0141–MT-0143 require owner market/entity decisions, qualified legal review and/or verified supplier refund/redemption evidence.
-- **Next eligible P0 task: MT-0144 — make region-lock warnings prominent before payment for every region-restricted code.** It can be scoped to the existing server-sourced product region and conservative customer confirmation without claiming unverified supplier compatibility.
+- **MT-0144 is IN PROGRESS on PR #9** (branch automation/mt-0144-region-warning-20261108), stacked on PR #8. Do not mark it complete until the final PR-head quality checks pass.
+- **Next P0 task after MT-0144: MT-0145 — make wrong-player-ID warnings visible before confirming an irreversible top-up.** Use saved product requirements and current UI evidence; do not claim supplier-specific irreversibility without verified supplier records.
 
+
+## 33. Region compatibility warnings before payment — 8 November 2026
+
+**Task:** MT-0144 · P0 · IN PROGRESS on draft PR #9. Completion is pending the final PR-head quality workflow.
+
+### Implementation scope
+
+- The public product page treats both game-top-ups and gift-cards as region-sensitive categories. It displays the catalogue region warning in the desktop purchase summary, mobile sticky purchase bar and product-page region-check panel.
+- The previous unsupported wording that a code marked Global works only on a Global account has been removed. New wording explicitly says Global is a catalogue label, not a guarantee of redemption in every country or account region.
+- A specific label such as Australia is displayed as catalogue information only. Customers are told to check the issuer's current redemption rules for the intended account/store country and not pay if compatibility cannot be confirmed. No issuer compatibility or supplier authority is claimed.
+- Missing region metadata disables product ordering. The product page requires a region check before adding an orderable code/top-up to the cart.
+- Checkout repeats a per-item warning in the final review dialog and requires a separate issuer-rule acknowledgement before creating the order.
+- placeOrder resolves category and region from the selected SKU on the server, compares the current server region with the cart's saved region to reject stale carts, and requires the acknowledgement before any order row is created. Client region data is comparison-only and is never the source of truth.
+- The acknowledgement is a customer accuracy step, not proof that the issuer was contacted or that a code is compatible. A direct API caller can set the boolean; server-side region/category resolution and stale-cart comparison still apply.
+
+### Production catalogue evidence
+
+- Read-only production Supabase query on 8 November 2026 found four orderable game-top-up products (13 orderable variants) and one orderable gift-card product (2 orderable variants). All five current orderable products are labelled Global in the catalogue.
+- Published Australian gift-card sample listings are marked Australia but remain coming_soon with zero orderable variants. They are not presented as purchasable.
+- The Supplier Register remains empty. These catalogue labels are not independent issuer/supplier compatibility evidence; this task adds warnings and a confirmation gate, not region verification.
+- Production project mtdgc was ACTIVE_HEALTHY on PostgreSQL 17.11.0.003. No customer/order/payment data was queried.
+
+### Verification and release boundary
+
+- Regression tests were added for current and legacy category detection, Global/specific/missing-region wording, server rejection of missing/stale region values, and required acknowledgement. Final test and CI results will be recorded after the PR-head workflow completes.
+- The change uses existing product region metadata and the current order request; no database migration or production configuration change is required.
+- No production write, migration, deployment, supplier/customer contact, purchase, billing change or additional spend occurred.
+
+**Next P0 task after MT-0144:** MT-0145 — make wrong-player-ID warnings visible before confirming an irreversible top-up. Keep supplier-specific irreversibility wording blocked until actual supplier evidence exists.

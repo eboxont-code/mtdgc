@@ -75,6 +75,14 @@ MTDGC (Matrix Digital Goods & Commerce) is a digital marketplace for Nepal. This
 - A read-only production catalogue audit on 8 November 2026 found 36 published products and zero requirement labels matching the expanded credential policy. No customer/order values were queried. The Supplier Register contains no verified suppliers, so no supplier-side credential practice is claimed to have been screened.
 - No schema migration is required. This application safeguard does not replace supplier due diligence or a response process for accidentally submitted secrets.
 
+### 4.5 Region compatibility review before order creation
+
+- game-top-ups and gift-cards use the server-resolved product region as a catalogue label that must be reviewed before payment. The value is not independent issuer/supplier evidence. In particular, Global is not treated as proof that redemption works in every country or account region.
+- Product detail shows the warning alongside purchase actions and requires the customer to review the issuer's current redemption rules before adding an orderable code/top-up to the cart. Missing region metadata disables ordering.
+- Checkout repeats the warning for every applicable cart line and requires an explicit acknowledgement before placeOrder can create the order.
+- The server resolves category and region through the selected SKU. The cart's saved region is used only to detect a stale cart; it is compared with the current server value and never trusted as the product source of truth. Missing or changed region metadata is rejected before order creation.
+- The acknowledgement is an accuracy control, not proof of issuer verification or a guarantee of compatibility. No supplier-specific region claim is made while the Supplier Register is empty. No schema migration is required.
+
 ## 5. Guest Checkout Architecture
 - **No Account Required**: Orders are created with `user_id = NULL`.
 - **Identity**: `guest_email` and `guest_whatsapp` are captured.
