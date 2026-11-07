@@ -20,6 +20,7 @@ import { enabledProviders } from "@/lib/payments";
 import { compareAt } from "@/lib/pricing";
 import { GIFT_CARD_PRICE_DISCLOSURE, isGiftCardCategory } from "@/lib/gift-card-pricing";
 import {
+  getPlayerIdentifierWarning,
   getRegionCompatibilityWarning,
   isRegionSensitiveCategory,
   REGION_COMPATIBILITY_CONFIRMATION_REQUIRED_MESSAGE,
@@ -172,6 +173,7 @@ function ProductPage() {
   const needsRegionConfirm = isRegionSensitiveCategory(product.category?.slug);
   const regionWarning = needsRegionConfirm ? getRegionCompatibilityWarning(regionText) : null;
   const regionReady = !needsRegionConfirm || regionText.length > 0;
+  const playerIdentifierWarning = getPlayerIdentifierWarning(product.category?.slug, safeRequirements);
   const variant = product.variants.find((item) => item.sku === selectedSku) ?? defaultVariant;
   const hidePrices = pricesHidden(product);
   const orderable = !unsafeRequirement && regionReady && !hidePrices && isOrderable(product.status) && !!variant && isOrderable(variant.status) && variant.price_minor > 0;
@@ -369,6 +371,11 @@ function ProductPage() {
               <section className="mt-6 rounded-2xl border border-border bg-card p-4 md:p-5">
                 <StepTitle n={1}>Your details</StepTitle>
                 <p role="note" className="mt-3 text-xs text-muted-foreground">{CUSTOMER_CREDENTIAL_WARNING}</p>
+                {playerIdentifierWarning && (
+                  <p role="note" className="mt-3 rounded-xl border border-warn/50 bg-warn/5 p-3 text-xs leading-relaxed">
+                    {playerIdentifierWarning}
+                  </p>
+                )}
                 <div className="mt-4 space-y-3">
                   {safeRequirements.map((requirement) => {
                     const help = requirementHelp(requirement);

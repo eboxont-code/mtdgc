@@ -83,6 +83,16 @@ MTDGC (Matrix Digital Goods & Commerce) is a digital marketplace for Nepal. This
 - The server resolves category and region through the selected SKU. The cart's saved region is used only to detect a stale cart; it is compared with the current server value and never trusted as the product source of truth. Missing or changed region metadata is rejected before order creation.
 - The acknowledgement is an accuracy control, not proof of issuer verification or a guarantee of compatibility. No supplier-specific region claim is made while the Supplier Register is empty. No schema migration is required.
 
+
+### 4.6 Wrong-player/account identifier warning before top-up confirmation
+
+- isPlayerIdentifierRequirement normalises saved requirement labels and recognises Player ID, User ID, Player tag, Zone/Server ID, Supercell ID email and in-game nickname fields.
+- getPlayerIdentifierWarning returns a warning only for the game-top-ups category with one or more matching identifier labels. Legacy cart lines with no category are handled conservatively when their saved fields clearly identify a player/account/zone/server; gift cards and unrelated categories are not warned by this policy.
+- Product detail shows the warning beside saved delivery fields. Checkout shows it again while editing those fields and in the final order confirmation before the existing server-enforced detailsConfirmed gate.
+- The warning lists the exact saved labels, tells customers to verify any player/user ID and zone/server pair against the same intended game account, and explains that a typo can misdirect a top-up or delay fulfilment.
+- Supplier-specific reversal evidence is not available because the Supplier Register has no verified supplier/product-scope rows. The UI therefore says not to assume an incorrect top-up can be reversed; it does not assert that all top-ups are irreversible or promise a reversal.
+- This is a customer accuracy warning, not proof that a human read it, supplier verification, payment settlement or fulfilment evidence. No database migration is required.
+
 ## 5. Guest Checkout Architecture
 - **No Account Required**: Orders are created with `user_id = NULL`.
 - **Identity**: `guest_email` and `guest_whatsapp` are captured.

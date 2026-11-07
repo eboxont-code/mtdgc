@@ -10,6 +10,39 @@ export const REGION_NOT_LISTED_MESSAGE =
 export const REGION_CHANGED_MESSAGE =
   "The product region changed after this item was added to your cart. Remove and re-add the item before placing the order.";
 
+const PLAYER_IDENTIFIER_REQUIREMENT_PATTERNS = [
+  /\b(?:player|user|account|character|game)\b.{0,24}\b(?:id|identifier|tag|name|email)\b/,
+  /\b(?:zone|server)(?:\s+(?:id|identifier))?\b/,
+  /\bsupercell\s+id\b/,
+  /\bin\s+game\s+nickname\b/,
+] as const;
+
+/** Identify saved customer fields that route or verify a game top-up account. */
+export function isPlayerIdentifierRequirement(requirement: unknown): requirement is string {
+  if (typeof requirement !== "string") return false;
+  const normalised = requirement
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return PLAYER_IDENTIFIER_REQUIREMENT_PATTERNS.some((pattern) => pattern.test(normalised));
+}
+
+/**
+ * Show a wrong-account warning only for top-ups with saved account identifiers.
+ * Older cart lines without a category are handled conservatively when their
+ * saved field labels clearly identify a player/account/zone/server.
+ */
+export function getPlayerIdentifierWarning(categorySlug: unknown, requirements: readonly unknown[]): string | null {
+  const labels = [...new Set(requirements.filter(isPlayerIdentifierRequirement).map((label) => label.trim()))];
+  const slug = typeof categorySlug === "string" ? categorySlug.trim() : "";
+  const isTopUp = slug === "game-top-ups" || (!slug && labels.length > 0);
+  if (!isTopUp || labels.length === 0) return null;
+
+  return `Double-check these details against the exact in-game account before confirming this top-up: ${labels.join(", ")}. For games that use both a user/player ID and a zone/server ID, verify the pair together. A typo can misdirect a top-up or delay fulfilment. No supplier-specific reversal process has been verified, so do not assume an incorrect top-up can be reversed. If any detail is uncertain, go back and correct it or contact MTDGC before paying.`;
+}
+
 export type OrderConfirmationLine = {
   categorySlug?: string | null | undefined;
   region?: string | null | undefined;

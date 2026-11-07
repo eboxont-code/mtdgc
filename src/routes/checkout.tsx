@@ -29,6 +29,7 @@ import {
   REGION_CHANGED_MESSAGE,
   REGION_COMPATIBILITY_CONFIRMATION_REQUIRED_MESSAGE,
   REGION_NOT_LISTED_MESSAGE,
+  getPlayerIdentifierWarning,
   getRegionCompatibilityWarning,
   requiresOrderDetailsConfirmation,
   requiresRegionCompatibilityConfirmation,
@@ -214,6 +215,8 @@ function CheckoutPage() {
   });
 
   const shownLines = placed?.lines ?? lines;
+  const playerIdentifierWarningForLine = (line: (typeof lines)[number]) =>
+    getPlayerIdentifierWarning(line.categorySlug, Object.keys(line.fields ?? {}));
   const regionConfirmationLines = lines.filter((line) => requiresRegionCompatibilityConfirmation([line]));
   const regionConfirmationKey = JSON.stringify(
     regionConfirmationLines.map((line) => [line.sku, line.variantName, line.quantity, line.region ?? ""]),
@@ -391,9 +394,11 @@ function CheckoutPage() {
                       {lines.map((line) => {
                         const all = Object.entries(line.fields ?? {});
                         if (!all.length) return null;
+                        const playerWarning = playerIdentifierWarningForLine(line);
                         return (
                           <fieldset key={line.sku} className="rounded-xl border border-border p-3">
                             <legend className="px-1 font-mono text-[11px] uppercase tracking-[0.08em] text-primary">{line.productName}, {line.variantName}</legend>
+                            {playerWarning && <p role="note" className="mb-3 rounded-lg border border-warn/50 bg-warn/5 p-3 text-xs leading-relaxed">{playerWarning}</p>}
                             {all.map(([key, value]) => {
                               const id = fieldId(line.sku, key);
                               return (
@@ -549,6 +554,11 @@ function CheckoutPage() {
                 {requiresRegionCompatibilityConfirmation([line]) && (
                   <p role="note" className="mt-2 rounded-lg border border-warn/40 bg-warn/5 p-2 text-xs leading-relaxed">
                     {getRegionCompatibilityWarning(line.region)}
+                  </p>
+                )}
+                {playerIdentifierWarningForLine(line) && (
+                  <p role="note" className="mt-2 rounded-lg border border-warn/50 bg-warn/5 p-2 text-xs leading-relaxed">
+                    {playerIdentifierWarningForLine(line)}
                   </p>
                 )}
                 {Object.entries(line.fields ?? {}).length > 0 ? (
