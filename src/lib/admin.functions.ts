@@ -6,6 +6,7 @@ import type { Database } from "@/integrations/supabase/types";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { findUnsafeCustomerRequirement, UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE } from "@/lib/supplier-safety";
 import { canAdminTransitionOrder } from "@/lib/order-transitions";
+import { canRecordSupplierReference, MAX_SUPPLIER_REFERENCE_LENGTH, normaliseSupplierReference, SUPPLIER_REFERENCE_EVENT_STATUS } from "@/lib/supplier-reference";
 
 type Ctx = { supabase: SupabaseClient<Database>; userId: string };
 
@@ -52,6 +53,36 @@ export const addOrderNote = createServerFn({ method: "POST" })
     await assertAdmin(context as Ctx);
     const { error } = await context.supabase.from("order_status_events").insert({ order_id: data.id, status: data.status, note: data.note, created_by: context.userId });
     if (error) throw new Error("Could not save the note");
+    return { ok: true };
+  });
+
+export const addSupplierReference = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({
+    id: z.string().uuid(),
+    reference: z.string().trim().min(1).max(MAX_SUPPLIER_REFERENCE_LENGTH),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context as Ctx);
+    const { data: order, error: readError } = await context.supabase
+      .from("orders")
+      .select("status")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (readError) throw new Error("Could not load the order");
+    if (!order) throw new Error("Order not found");
+    if (!canRecordSupplierReference(order.status)) {
+      throw new Error("A supplier reference can be recorded once fulfilment is in progress.");
+    }
+    const reference = normaliseSupplierReference(data.reference);
+    if (!reference) throw new Error("Enter a valid supplier reference");
+    const { error } = await context.supabase.from("order_status_events").insert({
+      order_id: data.id,
+      status: SUPPLIER_REFERENCE_EVENT_STATUS,
+      note: reference,
+      created_by: context.userId,
+    });
+    if (error) throw new Error("Could not save the supplier reference");
     return { ok: true };
   });
 
