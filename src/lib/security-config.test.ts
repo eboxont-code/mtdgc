@@ -249,7 +249,7 @@ describe("MT-0165 secret and payment configuration safeguards", () => {
 
   test("the payment-settings schema contains no gateway or supplier credential columns", () => {
     const types = readProjectFile("src/integrations/supabase/types.ts");
-    const paymentSettings = sectionBetween(types, "payment_settings: {", "payment_proofs: {");
+    const paymentSettings = sectionBetween(types, "payment_settings: {", "product_variants: {");
 
     assert.doesNotMatch(paymentSettings, /secret|token|password|api[_-]?key|merchant[_-]?credential|supplier/i);
     assert.match(paymentSettings, /account_number/);
