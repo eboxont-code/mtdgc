@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { WishlistButton } from "@/components/wishlist-button";
 import { getProductBySlug } from "@/lib/catalog.functions";
 import { PRICE_COMING_SOON, pricesHidden } from "@/lib/price-visibility";
-import { availabilityLabel } from "@/lib/product-availability";
+import { availabilityLabel, getRegionCompatibilityWarning } from "@/lib/product-availability";
 import { useCart } from "@/lib/cart";
 import { categoryTypeFromSlug, formatNpr, isOrderable, SITE_URL, SUPPORT_MESSAGE, whatsappLink } from "@/lib/format";
 import { enabledProviders } from "@/lib/payments";
@@ -164,15 +164,18 @@ function ProductPage() {
     : availabilityLabel(product);
 
   const regionText = product.region?.trim() ?? "";
-  const needsRegionConfirm = categoryTypeFromSlug(product.category?.slug ?? "") === "gift_card" && regionText.length > 0;
-  const [regionConfirmed, setRegionConfirmed] = useState(false);
+  const regionWarning = getRegionCompatibilityWarning(regionText);
+  const needsRegionConfirm = Boolean(regionWarning);
+  const regionConfirmationKey = `${product.id}:${regionText}`;
+  const [confirmedRegionKey, setConfirmedRegionKey] = useState("");
+  const regionConfirmed = confirmedRegionKey === regionConfirmationKey;
   const regionRef = useRef<HTMLInputElement>(null);
 
   const navigate = useNavigate();
   const addToCart = (buyNow = false) => {
     if (!variant || !orderable) return;
     if (needsRegionConfirm && !regionConfirmed) {
-      setError(`Please confirm this code works in your ${regionText} account before continuing.`);
+      setError("Please confirm the listed region before continuing.");
       regionRef.current?.focus();
       return;
     }
@@ -325,6 +328,30 @@ function ProductPage() {
               {!isPlan && deliveryTime && <li className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-[11px]"><Clock className="size-3.5 text-primary" />{deliveryTime}</li>}
               {!isPlan && product.platform && <li className="rounded-full border border-border bg-card px-2.5 py-1 text-[11px]">{product.platform}</li>}
             </ul>
+            {regionWarning && (
+              <section role="note" aria-label="Regional compatibility warning" className="mt-4 rounded-2xl border border-warn/40 bg-warn/5 p-4">
+                <p className="flex gap-2 text-sm">
+                  <Globe className="mt-0.5 size-4 shrink-0 text-warn" />
+                  <span><strong className="font-semibold">Check regional compatibility before paying.</strong> {regionWarning.message}</span>
+                </p>
+                {orderable && (
+                  <label className="mt-3 flex min-h-11 cursor-pointer items-center gap-3 text-sm">
+                    <input
+                      ref={regionRef}
+                      type="checkbox"
+                      required
+                      checked={regionConfirmed}
+                      onChange={(event) => {
+                        setConfirmedRegionKey(event.target.checked ? regionConfirmationKey : "");
+                        if (event.target.checked) setError(null);
+                      }}
+                      className="size-5 shrink-0 accent-primary"
+                    />
+                    <span>{regionWarning.confirmationLabel}</span>
+                  </label>
+                )}
+              </section>
+            )}
             {isPlan && (deliveryMethod || deliveryTime) && (
               <dl className="mt-4 space-y-2 text-sm">
                 {deliveryMethod && <div className="grid grid-cols-1 gap-1 sm:grid-cols-2"><dt className="text-muted-foreground">You receive</dt><dd>{deliveryMethod}</dd></div>}
@@ -411,23 +438,6 @@ function ProductPage() {
                 <li className="flex gap-2"><span className="font-mono text-primary">3.</span><span>We check the payment by hand and deliver your order once it is verified.</span></li>
               </ol>
             </section>
-
-            {orderable && needsRegionConfirm && (
-              <section aria-label="Region confirmation" className="mt-4 rounded-2xl border border-primary/40 bg-primary/5 p-4">
-                <p className="flex gap-2 text-sm"><Globe className="mt-0.5 size-4 shrink-0 text-primary" /><span>This code is for <strong>{regionText}</strong> accounts only. A code for another region will not redeem on your account.</span></p>
-                <label className="mt-3 flex min-h-11 cursor-pointer items-center gap-3 text-sm">
-                  <input
-                    ref={regionRef}
-                    type="checkbox"
-                    required
-                    checked={regionConfirmed}
-                    onChange={(e) => { setRegionConfirmed(e.target.checked); if (e.target.checked) setError(null); }}
-                    className="size-5 shrink-0 accent-primary"
-                  />
-                  <span>I confirm my account region is {regionText}.</span>
-                </label>
-              </section>
-            )}
 
             {error && <p role="alert" className="mt-4 text-sm text-destructive">{error}</p>}
 
