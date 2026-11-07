@@ -255,7 +255,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [x] **MT-0123 · P0 · DONE** — Require a second confirmation for the currently orderable game top-up and emailed gift-card categories. Checkout shows the exact product, selected option, listed region and saved delivery fields; the customer must explicitly confirm before order creation. The server resolves category from the selected SKU and rejects missing acknowledgement. No supplier-specific reversibility claim is made because no supplier evidence or reversibility field exists. Evidence: section 31 and Data Architecture section 4.3.
 - [!] **MT-0124 · P0 · BLOCKED** — Record the supplier transaction or redemption reference for each completed order. Blocker: no verified supplier/reference source exists and the read-only production snapshot has no completed orders to evidence the workflow. Unlock with verified supplier reference semantics and a completed test/real order record approved for use.
 - [!] **MT-0125 · P0 · BLOCKED** — Capture delivery evidence and attach it to the correct order. Blocker: no dedicated delivery-evidence table/bucket or approved private-storage design exists; implementation requires the Boxont-controlled Supabase cutover and migration approval.
-- [x] **MT-0126 · P0 · DONE** — Prevent MTDGC-owned product, checkout and support surfaces from requesting customer passwords, passcodes/passkeys, OTP/2FA/MFA codes, PINs, recovery secrets, account-access tokens or payment-card credentials; unsafe saved catalogue requirements now fail closed at display and server order creation. Evidence: section 32 and Data Architecture section 4.4; six focused regression tests and PR #8.
+- [~] **MT-0126 · P0 · IN PROGRESS** — Credential safeguards are implemented on the MT-0126 branch; final completion awaits the full PR quality workflow. Evidence and acceptance checks: section 32 and Data Architecture section 4.4; six focused regression tests added in PR #8.
 - [ ] **MT-0127 · P1 · TODO** — Define realistic delivery-time ranges per product based on measured fulfilment history.
 - [ ] **MT-0128 · P1 · TODO** — Pause new orders when a supplier is unavailable or a product cannot be delivered.
 - [ ] **MT-0129 · P1 · TODO** — Create a queue sorted by paid status, promised delivery window and risk.
@@ -1171,7 +1171,7 @@ No product records, supplier assignments, prices, variants, order records, datab
 
 ## 32. Customer credential collection safeguards — 8 November 2026
 
-**Task:** MT-0126 · P0 · DONE on the MT-0126 branch/PR #8. This closes the remaining customer-facing collection gaps beyond the original MT-0044 admin/server requirement-label guard.
+**Task:** MT-0126 · P0 · IN PROGRESS pending full GitHub Actions verification on PR #8. This closes the remaining customer-facing collection gaps beyond the original MT-0044 admin/server requirement-label guard.
 
 ### Enforcement
 
@@ -1190,7 +1190,7 @@ No product records, supplier assignments, prices, variants, order records, datab
 
 ### Regression coverage and release boundary
 
-- Six focused tests cover explicit credentials, normalised less-obvious variants, safe player/zone/server/region/email identifiers, original-label reporting, fail-closed suppression of all fields, and rejection of malformed server requirement arrays.
+- Added six focused tests for explicit credentials, normalised less-obvious variants, safe player/zone/server/region/email identifiers, original-label reporting, fail-closed suppression of all fields, and rejection of malformed server requirement arrays. Their execution result will be recorded from the PR quality workflow.
 - The server order path checks the product requirements resolved from the SKU, not a browser-supplied category or requirement list. No production schema migration is needed.
 - Implementation branch: `automation/mt-0126-credential-safety-20261108`, based on the MT-0123 branch `automation/mt-0123-second-confirmation-20261107`. Draft PR #8 is opened against `main` for the required quality run and will be retargeted to the MT-0123 branch after CI, keeping the final diff stacked and task-scoped.
 - Production inspection was read-only. No product, customer, order, support, payment, schema, RLS, storage, authentication, environment, DNS, hosting, billing or deployment setting was changed. No supplier/customer was contacted and no additional spend occurred.
