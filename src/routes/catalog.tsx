@@ -3,13 +3,13 @@ import { SlidersHorizontal, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { CategoryRail } from "@/components/home/rails";
 import { ProductCard, lowestPrice } from "@/components/product-card";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { listCatalog } from "@/lib/catalog.functions";
+import { compareCatalogProducts, searchScore } from "@/lib/catalog-search";
 import { SITE_URL } from "@/lib/format";
 import { availabilityCounts, isComingSoon, isPurchasable, isUnavailable } from "@/lib/product-availability";
 import { breadcrumbLd, itemListLd } from "@/lib/seo";
@@ -52,10 +52,12 @@ export const Route = createFileRoute("/catalog")({
 });
 
 const SORTS = [
+  { id: "relevance", label: "Relevance" },
+  { id: "price-asc", label: "Price low-high" },
+  { id: "price-desc", label: "Price high-low" },
+  { id: "availability", label: "Availability" },
   { id: "popular", label: "Popular" },
   { id: "newest", label: "Newest" },
-  { id: "price-asc", label: "Price low to high" },
-  { id: "price-desc", label: "Price high to low" },
 ] as const;
 
 const PAGE_SIZE = 12;
@@ -66,52 +68,37 @@ function CatalogPage() {
   const navigate = Route.useNavigate();
   const [query, setQuery] = useState((search.q ?? "").slice(0, 100));
   const [category, setCategory] = useState(search.category ?? "all");
-  const [sort, setSort] = useState<(typeof SORTS)[number]["id"]>((SORTS.some((item) => item.id === search.sort) ? search.sort : "popular") as (typeof SORTS)[number]["id"]);
+  const sort = SORTS.find((item) => item.id === search.sort)?.id ?? "relevance";
   const [availability, setAvailability] = useState(search.availability ?? "all");
   const [price, setPrice] = useState(search.price ?? "all");
   const [shown, setShown] = useState(PAGE_SIZE);
   const [filtersOpen, setFiltersOpen] = useState(false);
   useEffect(() => { setQuery((search.q ?? "").slice(0, 100)); }, [search.q]);
   useEffect(() => { setCategory(search.category ?? "all"); }, [search.category]);
+  useEffect(() => { setAvailability(search.availability ?? "all"); setPrice(search.price ?? "all"); }, [search.availability, search.price]);
+  useEffect(() => { setShown(PAGE_SIZE); }, [query, category, sort, availability, price]);
 
   const visible = useMemo(() => {
-    const needle = query.trim().toLowerCase();
     const filtered = products.filter((product) => {
       const matchesCategory = category === "all" || product.category?.slug === category;
       const matchesAvailability = availability === "all" || (availability === "available" ? isPurchasable(product) : availability === "coming_soon" ? isComingSoon(product) : isUnavailable(product));
       const lowest = lowestPrice(product);
       const matchesPrice = price === "all" || (lowest !== null && (price === "under-1000" ? lowest < 100000 : price === "1000-3000" ? lowest >= 100000 && lowest <= 300000 : lowest > 300000));
-      const haystack = [
-        product.name,
-        product.brand,
-        product.summary,
-        product.region,
-        product.category?.name ?? "",
-        ...product.tags,
-        ...product.variants.map((variant) => variant.sku),
-      ]
-        .join(" ")
-        .toLowerCase();
-      return matchesCategory && matchesAvailability && matchesPrice && (!needle || haystack.includes(needle));
+      return matchesCategory && matchesAvailability && matchesPrice && searchScore(product, query) > 0;
     });
 
     const sorted = [...filtered];
-    sorted.sort((a, b) => {
-      if (sort === "newest") return b.created_at.localeCompare(a.created_at);
-      if (sort === "price-asc") return (lowestPrice(a) ?? Infinity) - (lowestPrice(b) ?? Infinity);
-      if (sort === "price-desc") return (lowestPrice(b) ?? -Infinity) - (lowestPrice(a) ?? -Infinity);
-      return (a.featured_rank ?? 999) - (b.featured_rank ?? 999);
-    });
+    sorted.sort((a, b) => compareCatalogProducts(a, b, sort, query, lowestPrice));
     return sorted;
   }, [products, query, category, availability, price, sort]);
 
   const syncUrl = (next: { q?: string; category?: string; sort?: string; availability?: string; price?: string }) => {
-    void navigate({ search: { q: next.q || undefined, category: next.category === "all" ? undefined : next.category, sort: next.sort === "popular" ? undefined : next.sort, availability: next.availability === "all" ? undefined : next.availability, price: next.price === "all" ? undefined : next.price }, replace: true });
+    void navigate({ search: (prev) => ({ ...prev, q: next.q || undefined, category: next.category === "all" ? undefined : next.category, sort: next.sort === "relevance" ? undefined : next.sort, availability: next.availability === "all" ? undefined : next.availability, price: next.price === "all" ? undefined : next.price }), replace: true });
   };
 
   const activeCategory = categories.find((item) => item.slug === category);
   const counts = availabilityCounts(visible);
-  const filterCount = Number(availability !== "all") + Number(price !== "all");
+  const filterCount = Number(category !== "all") + Number(availability !== "all") + Number(price !== "all");
   const setFilter = (next: { availability?: string; price?: string }) => {
     const a = next.availability ?? availability;
     const p = next.price ?? price;
@@ -122,12 +109,12 @@ function CatalogPage() {
   const clearAll = () => {
     setQuery("");
     setCategory("all");
-    setAvailability("all"); setPrice("all"); setSort("popular");
-    syncUrl({ q: "", category: "all", sort: "popular", availability: "all", price: "all" });
+    setAvailability("all"); setPrice("all");
+    syncUrl({ q: "", category: "all", sort: "relevance", availability: "all", price: "all" });
   };
 
   const chip = (active: boolean) =>
-    `rounded-full border px-3 py-1.5 text-[13px] transition-colors ${active ? "border-primary bg-primary/15 text-primary" : "border-border bg-card text-foreground/85 hover:border-primary/40"}`;
+    `min-h-11 rounded-full border px-3 py-1.5 text-[13px] transition-colors ${active ? "border-primary bg-primary/15 text-primary" : "border-border bg-card text-foreground/85 hover:border-primary/40"}`;
 
   const filterGroups = (
     <div className="space-y-6">
@@ -135,7 +122,7 @@ function CatalogPage() {
         <legend className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Availability</legend>
         <div className="mt-2 flex flex-wrap gap-2">
           {([["all", "All"], ["available", "Available now"], ["coming_soon", "Coming soon"], ["unavailable", "Unavailable"]] as const).map(([value, label]) => (
-            <button key={value} type="button" aria-pressed={availability === value} className={chip(availability === value)} onClick={() => setFilter({ availability: value })}>{label}</button>
+            <Button variant="outline" key={value} aria-pressed={availability === value} className={chip(availability === value)} onClick={() => setFilter({ availability: value })}>{label}</Button>
           ))}
         </div>
       </fieldset>
@@ -143,7 +130,7 @@ function CatalogPage() {
         <legend className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Price in NPR</legend>
         <div className="mt-2 flex flex-wrap gap-2">
           {([["all", "All prices"], ["under-1000", "Under Rs 1,000"], ["1000-3000", "Rs 1,000 to 3,000"], ["over-3000", "Over Rs 3,000"]] as const).map(([value, label]) => (
-            <button key={value} type="button" aria-pressed={price === value} className={chip(price === value)} onClick={() => setFilter({ price: value })}>{label}</button>
+            <Button variant="outline" key={value} aria-pressed={price === value} className={chip(price === value)} onClick={() => setFilter({ price: value })}>{label}</Button>
           ))}
         </div>
       </fieldset>
@@ -151,13 +138,13 @@ function CatalogPage() {
   );
 
   const sortSelect = (
-    <label className="relative inline-flex h-9 items-center rounded-full border border-border bg-card pl-3 pr-2 text-[13px]">
+    <label className="relative inline-flex h-11 min-w-0 items-center rounded-full border border-border bg-card pl-3 pr-2 text-[13px]">
       <span className="mr-1 text-muted-foreground">Sort:</span>
       <select
         id="sort"
         value={sort}
-        onChange={(event) => { const value = event.target.value as (typeof SORTS)[number]["id"]; setSort(value); syncUrl({ q: query, category, sort: value, availability, price }); }}
-        className="h-full appearance-none bg-transparent pr-1 text-foreground outline-none"
+        onChange={(event) => { syncUrl({ q: query, category, sort: event.target.value, availability, price }); }}
+        className="h-full min-w-0 appearance-none bg-transparent pr-1 text-foreground outline-none"
       >
         {SORTS.map((option) => (
           <option key={option.id} value={option.id} className="bg-card">{option.label}</option>
@@ -208,11 +195,7 @@ function CatalogPage() {
               </span>
             </div>
 
-            <div className="mt-3 md:hidden">
-              <CategoryRail categories={categories} active={category} />
-            </div>
-
-            <nav aria-label="Product types" className="mt-3 flex flex-wrap gap-2">
+            <nav aria-label="Product types" className="mt-3 hidden flex-wrap gap-2 md:flex">
               {([
                 ["all", "All"],
                 ["software", "Software"],
@@ -228,14 +211,14 @@ function CatalogPage() {
             </nav>
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <button type="button" onClick={() => setFiltersOpen(true)} className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border bg-card px-3 text-[13px] md:hidden">
+              <Button variant="outline" onClick={() => setFiltersOpen(true)} className="h-11 gap-1.5 rounded-full border-border bg-card px-3 text-[13px] md:hidden">
                 <SlidersHorizontal className="size-4 text-primary" /> Filters{filterCount ? ` (${filterCount})` : ""}
-              </button>
+              </Button>
               {sortSelect}
               {query && (
-                <button type="button" onClick={() => { setQuery(""); syncUrl({ q: "", category, sort, availability, price }); }} className="inline-flex h-9 items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-3 text-[13px] text-primary">
-                  &ldquo;{query}&rdquo; <X className="size-3.5" aria-label="Clear search" />
-                </button>
+                <Button variant="outline" aria-label="Clear search" onClick={() => { setQuery(""); syncUrl({ q: "", category, sort, availability, price }); }} className="h-11 max-w-full gap-1 rounded-full border-primary/40 bg-primary/10 px-3 text-[13px] text-primary">
+                  <span className="truncate">{query}</span><X className="size-3.5 shrink-0" aria-hidden="true" />
+                </Button>
               )}
             </div>
 
@@ -276,12 +259,20 @@ function CatalogPage() {
       </main>
 
       <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
-        <SheetContent side="bottom" className="rounded-t-3xl border-border bg-background px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-5">
+        <SheetContent side="bottom" aria-describedby={undefined} className="max-h-[85dvh] overflow-y-auto rounded-t-lg border-border bg-background px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-5 [&>button]:flex [&>button]:size-11 [&>button]:items-center [&>button]:justify-center motion-reduce:transition-none motion-reduce:animate-none">
           <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-foreground/20" aria-hidden="true" />
           <SheetTitle className="font-display text-lg font-semibold">Filters</SheetTitle>
+          <fieldset className="mt-4">
+            <legend className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Categories</legend>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {[{ slug: "all", name: "All products" }, ...categories].map((item) => (
+                <Button key={item.slug} variant="outline" aria-pressed={category === item.slug} className={chip(category === item.slug)} onClick={() => { setCategory(item.slug); syncUrl({ q: query, category: item.slug, sort, availability, price }); }}>{item.name}</Button>
+              ))}
+            </div>
+          </fieldset>
           <div className="mt-4">{filterGroups}</div>
           <div className="mt-6 flex gap-2">
-            <Button variant="outline" className="flex-1" onClick={() => setFilter({ availability: "all", price: "all" })}>Reset</Button>
+            <Button variant="outline" className="flex-1" onClick={() => { setCategory("all"); setAvailability("all"); setPrice("all"); syncUrl({ q: query, category: "all", sort, availability: "all", price: "all" }); }}>Reset</Button>
             <Button className="flex-1" onClick={() => setFiltersOpen(false)}>Show {visible.length} {visible.length === 1 ? "product" : "products"}</Button>
           </div>
         </SheetContent>

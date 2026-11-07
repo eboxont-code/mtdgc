@@ -23,3 +23,4 @@
 - Account empty states use the shared EmptyState presentation with existing Matrix surface tokens and a caller-supplied action, leaving reads and eligibility in each route.
 - Public availability labels, filters and purchasable counts share the browser-safe product-availability helper, mirroring product/option eligibility without modifying catalog data or cart rules.
 - Product purchase summaries reuse existing listing fields above desktop and mobile actions, omitting empty values without changing purchase eligibility or listing data.
+- Catalog search and sorting use browser-safe pure helpers with query-only aliases and the existing display-price callback; URL state and mobile filter sheets never mutate listing records or hidden-price rules.
