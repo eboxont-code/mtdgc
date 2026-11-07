@@ -9,7 +9,7 @@ const product = (name: string, brand = name) => ({
 });
 
 describe("MT-0185 catalog matching", () => {
-  for (const [query, name] of [["FF", "Free Fire"], ["PUBG", "PUBG Mobile"], ["ML", "Mobile Legends"], ["MLBB", "Mobile Legends"], ["NFX", "Netflix"]]) {
+  for (const [query, name] of [["FF", "Free Fire"], ["PUBG", "PUBG Mobile"], ["ML", "Mobile Legends"], ["MLBB", "Mobile Legends"], ["NFX", "Netflix"]] as const) {
     test(`${query} matches ${name}`, () => {
       assert.ok(searchScore(product(name), query) > 0);
       assert.equal(searchScore(product("Unrelated"), query), 0);
@@ -27,7 +27,7 @@ describe("MT-0185 catalog matching", () => {
 
 describe("MT-0186 catalog sorting", () => {
   const cheap = product("Free Fire");
-  const expensive = { ...product("PUBG"), variants: [{ ...cheap.variants[0], price_minor: 20000 }] };
+  const expensive = { ...product("PUBG"), variants: [{ name: "200 UC", sku: "PUBG-200", status: "available", price_minor: 20000 }] };
   const hidden = { ...product("Gift card"), slug: "sample-gift", status: "coming_soon" };
   const price = (p: typeof cheap) => p.slug.startsWith("sample-") ? null : p.variants[0]?.price_minor ?? null;
   test("price low-high orders visible prices and leaves hidden prices last", () => {
