@@ -303,7 +303,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [x] **MT-0161 · P0 · DONE** — Completed the read-only authentication/authorisation audit of current main source and production RLS, grants, private storage policies and Supabase security-advisor findings. Evidence and owner-gated follow-ups are recorded in section 27; no production changes were made.
 - [x] **MT-0162 · P0 · DONE** — Verified account-owned and guest-order isolation. Contact fallback is guest-only; account-owned orders require the matching authenticated account or order-specific bearer token. Synthetic negative tests and production RLS metadata are recorded in section 28.
 - [!] **MT-0163 · P0 · BLOCKED** — The production payment-proof and payment-QR buckets are private, but no dedicated delivery-code table or delivery bucket was found. The actual delivered-code storage path is not evidenced by the current schema/bucket inventory, so it cannot be verified until an approved private delivery-storage design and the Supabase cutover are available; see section 28.
-- [ ] **MT-0164 · P0 · TODO** — Ensure admin-only actions are enforced server-side, not only hidden in the interface.
+- [x] **MT-0164 · P0 · DONE** — Added an AST-based regression contract for all 14 exported admin server functions. Each must use `requireSupabaseAuth` middleware and await `assertAdmin(context)` as the first handler statement; the shared guard must check `has_role` for the current user with role `admin` and deny RPC errors/falsy results. GitHub Actions Quality run [42410620615](https://github.com/eboxont-code/mtdgc/actions/runs/42410620615) passed on commit `e8699c9010458ba5c9178aca5d5ea2418759dc63`; see section 29 and [PR #14](https://github.com/eboxont-code/mtdgc/pull/14).
 - [ ] **MT-0165 · P0 · TODO** — Review secrets, supplier credentials and payment configuration for accidental exposure.
 - [ ] **MT-0166 · P1 · TODO** — Enable strong admin authentication and remove unused staff accounts.
 - [ ] **MT-0167 · P1 · TODO** — Apply least-privilege roles for payment review, fulfilment, support and catalogue editing.
@@ -1202,3 +1202,57 @@ Supabase project `eaomkkswslqtfunkceuc` is ACTIVE_HEALTHY on PostgreSQL 17.11.0.
 
 No production deployment, migration, record write, storage/auth/RLS change, secret/environment/DNS/hosting/billing change, supplier/customer contact or purchase occurred. Additional spend: $0.
 
+
+
+## 29. Server-side administrator authorization contract — 8 November 2026
+
+**Task:** MT-0164 · P0 · DONE on draft PR #14 (stacked on MT-0162 PR #13).
+
+### Source audit
+
+The current admin server module `src/lib/admin.functions.ts` exposes 14 server functions:
+
+- `updateOrderStatus`
+- `addOrderNote`
+- `approveReview`
+- `saveProduct`
+- `archiveProduct`
+- `saveVariant`
+- `archiveVariant`
+- `saveCategory`
+- `getAdminPaymentSettings`
+- `savePaymentSettings`
+- `uploadPaymentQr`
+- `listPaymentsToVerify`
+- `getPaymentProofUrl`
+- `reviewPayment`
+
+Every exported endpoint includes `.middleware([requireSupabaseAuth])`. Every handler awaits `assertAdmin(context as Ctx)` as its first statement, before any read, mutation, signed-URL creation or storage operation. The shared guard calls `context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" })` and throws when the RPC errors or the role result is falsy.
+
+The admin page's browser-side role check remains presentation/navigation only. The server middleware and handler guard are the enforcement boundary; database RLS remains an independent defence for direct authenticated-client access.
+
+### Regression contract
+
+Added `src/lib/admin-authorization.test.ts`, using the TypeScript AST rather than formatting-sensitive text matching. Three tests:
+
+1. Pin the exact 14 exported admin server-function names and require every export in the module to be covered.
+2. Require each endpoint to include `requireSupabaseAuth` middleware and call `assertAdmin(context)` as the first handler statement.
+3. Verify the shared guard checks the current context user for the `admin` role and throws on RPC errors or missing/false role results.
+
+Adding, removing or restructuring an exported admin endpoint now fails the contract until its authorization path is explicitly reviewed and the inventory is updated.
+
+### Verification
+
+- GitHub Actions Quality run [42410620615](https://github.com/eboxont-code/mtdgc/actions/runs/42410620615) passed on test commit [`e8699c9010458ba5c9178aca5d5ea2418759dc63`](https://github.com/eboxont-code/mtdgc/commit/e8699c9010458ba5c9178aca5d5ea2418759dc63): locked dependency install, ESLint, full Bun unit-test suite, TypeScript typecheck and production build.
+- The preceding MT-0162 branch Quality run [42405438971](https://github.com/eboxont-code/mtdgc/actions/runs/42405438971) also passed all six stages.
+- Read-only production Supabase inspection on 8 November 2026 confirmed RLS policies on `orders`, `order_items`, `order_status_events`, `payment_proofs` and `payment_settings`. Administrator policies call `has_role(auth.uid(), 'admin')`; order-owner policies remain separate.
+- Production project `eaomkkswslqtfunkceuc` is `ACTIVE_HEALTHY` on PostgreSQL 17.11.0.003. No customer, order, payment, auth-user or storage-object records were queried.
+- The MT-0162 preview deployment [`dpl_4eYrggCR5bRp2gCr8TZ3RUciSxRe`](https://vercel.com/boxont/mtdgc/4eYrggCR5bRp2gCr8TZ3RUciSxRe) is `READY` for branch `automation/mt-0162-order-isolation-20261108`, commit `d7a2bd593bb89304ded7773e6728079ed80cb260`. Production remains `READY` on older main commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`; no deployment was requested for MT-0164.
+
+### Separate security finding retained
+
+The production function `public.has_role(uuid, app_role)` remains `SECURITY DEFINER` and has EXECUTE grants to `anon` and `authenticated`. Supabase's security advisor reports this as a role-membership disclosure warning. It does not replace or negate the per-request admin checks documented above, but it should be remediated through a coordinated function/policy migration only after the approved Boxont-controlled Supabase cutover. No function, policy, grant or schema change was made.
+
+### Next eligible P0 task
+
+**MT-0165 — Review secrets, supplier credentials and payment configuration for accidental exposure.** This is a read-only repository/history/configuration audit. Do not print or decrypt deployment secret values, and do not rotate credentials or change environment settings without owner approval. MT-0163 remains BLOCKED pending an approved private delivery-code storage design and Supabase cutover.
