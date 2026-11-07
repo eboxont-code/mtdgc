@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 3.2 · 7 November 2026
+**Version:** 3.3 · 7 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -278,7 +278,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [x] **MT-0141 · P0 · DONE** — Completed a factual consistency audit of the Terms, Privacy, Delivery and Refund pages against the live Nepal-first storefront, current `main` source, checkout/payment capabilities and read-only production schema/catalogue. Findings and exact follow-up dependencies are recorded in section 38. No legal interpretation or policy-copy change was made.
 - [!] **MT-0142 · P0 · BLOCKED** — The live storefront and live Terms currently describe Nepal-only sales/NPR, while current `main` About/Terms/footer and SEO metadata also claim Nepal and Australia; AUD catalogue records are all `coming_soon`, all live variants and orders are NPR, and manual QR/bank transfer is the only enabled payment route. Resolving the public-market/legal-terms conflict requires the owner's explicit operating-market and seller-entity decision plus qualified review for the relevant jurisdiction(s). Do not rewrite legal copy or enable Australia based on catalogue placeholders. Evidence: section 38.
 - [!] **MT-0143 · P0 · BLOCKED** — The current refund text contains an unresolved overlap between the broad full-refund-or-redelivery remedy for an MTDGC-side failure/wrong item and the later no-reversal wording after code reveal or credited top-up. The policy does not define the handling for every supplier-failure, incorrect-code, partial-delivery or already-redeemed case. A safe matrix requires owner-approved operational remedies, actual supplier reversal/replacement terms and qualified legal review; do not invent refund commitments. Evidence: section 38.
-- [ ] **MT-0144 · P0 · TODO** — Make region-lock warnings prominent before payment for every region-restricted code.
+- [x] **MT-0144 · P0 · DONE** — Show cautious region-compatibility warnings on product detail and checkout for every specifically listed non-Global region; require acknowledgement before adding an orderable region-specific product. Evidence: section 39.
 - [ ] **MT-0145 · P0 · TODO** — Make wrong-player-ID warnings visible before confirming an irreversible top-up.
 - [ ] **MT-0146 · P1 · TODO** — Publish support response hours only after they are operationally staffed.
 - [ ] **MT-0147 · P1 · TODO** — Create ticket categories for payment, delayed delivery, invalid code, wrong item, refund and account access.
@@ -549,6 +549,8 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 13 | MT-0126 — prohibit customer credential/PIN/OTP requests | DONE; supplier policy, admin form, server-side product save and server-side order-field validation are enforced; current published product copy scan found no credential requests |
 | 14 | MT-0141 — audit Terms, Privacy, Delivery and Refund policy consistency | DONE; findings in section 38. MT-0142/0143 remain blocked on owner decisions and qualified review |
 | 15 | MT-0303/MT-0304 — Supabase cutover and held backend PR reconciliation | BLOCKED; target project, backup/restore, auth/storage/RLS/secrets and migration-history plan are not verified; PR #1 explicitly remains on HOLD |
+| 16 | MT-0144 — region-compatibility warnings before payment | DONE; shared helper, product-detail acknowledgement, checkout banner and final-review warning; no current orderable non-Global product exists for live checkout verification |
+| 17 | MT-0145 — wrong-player-ID warning before top-up confirmation | NEXT ACTIONABLE P0; audit current product requirements and checkout review wording, use only existing player-ID/zone/server fields, and do not claim supplier reversibility without evidence |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -1544,7 +1546,7 @@ Verified the current working-branch implementation and current production produc
 - Open GitHub issues: 0. Open PR #1 remains explicitly held until the Supabase cutover. The connector has no local checkout/working-tree view, so local `git status` is unavailable.
 - No supplier/customer contact, purchase, payment, production write, migration, storage-policy change, deployment, billing change or additional spend occurred.
 
-**Next P0 task:** MT-0144 — verify region-lock warnings are prominent on product detail and checkout before payment. Use recorded per-product region data; do not invent issuer restrictions where product-region evidence is absent.
+**Next P0 task:** MT-0145 — make wrong-player-ID warnings visible before confirming a top-up. Use only the actual player/zone/server fields saved for each product; do not invent supplier reversibility or recovery claims.
 
 
 
@@ -1610,3 +1612,37 @@ Verified the current working-branch implementation and current production produc
 - Current `main` combined status reports Vercel `failure` with the Hobby/free build-rate-limit target. The new documentation commit's combined status is `pending`; Vercel deployment `dpl_93AvbxQBYkRi1SgRX7EGFvDNdqUU` is `BUILDING` for commit `4ed04a85048d57167fb9ec01855185bbdfd2b17d` at the time of inspection. The latest READY working-branch preview remains intermediate commit `7a3be8fc4d2864f6576aa55c8593b09816c83cf8`, not the current branch head. Vercel production deployment is READY but older commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`. Runtime-error aggregation for the preceding 24 hours returned no runtime errors.
 - Open GitHub issues: 0. Open PR #1 remains explicitly held until the Supabase cutover; no PR was opened or changed.
 - GitHub connector provides remote file operations but no local checkout/working-tree status, so `git status` is unavailable. No application code or customer-facing policy text was changed; no production data, schema, RLS, storage, payment settings, environment variable, secret, billing setting or authentication setting was changed. No production deployment was requested or changed. Git sync automatically started the preview build for this documentation commit; it remains `BUILDING`. No supplier/customer/third-party contact and no additional spend occurred.
+
+
+## 39. Region compatibility warnings before payment — 7 November 2026
+
+**Task:** MT-0144 · P0 · DONE — added consistent, cautious region-compatibility warnings to product detail and checkout. This is a presentation/acknowledgement safeguard, not issuer verification.
+
+### Production catalogue evidence (read-only)
+
+- `public.products.region` is a text field with default `Global`; the schema has no separate issuer-verified region-lock flag.
+- Read-only aggregate of 36 published products found the five currently orderable products (four game top-ups and one gift card) are all labelled `Global`.
+- Ten Australia gift-card listings are `coming_soon`; the Netflix listing is `temporarily_unavailable` and labelled Nepal. No currently orderable non-Global product was present for an end-to-end checkout test.
+- The supplier register remains empty. No issuer-specific compatibility, exclusion or redemption rule was inferred.
+
+### Implementation
+
+- Added `getRegionCompatibilityWarning` to `src/lib/product-availability.ts`. A non-empty region other than exact case-insensitive `Global` produces a caution containing the recorded region, a direction to check the issuer's current compatibility information, and a confirmation label. Missing region and `Global` do not create an invented lock.
+- Product detail now displays the warning near the product heading, before customer fields, variant selection and payment information. An orderable product with a specific region requires the customer to acknowledge the compatibility check before adding it to the cart. The acknowledgement is keyed to product ID and region so it cannot carry across a product/region change.
+- Checkout shows a prominent regional-compatibility banner above the form and order summary on mobile and desktop, includes each item's recorded region in the summary, and repeats the warning in the final order-details confirmation.
+- The warning copy describes the listing's recorded region and asks the customer to verify the issuer's current compatibility information. It does not claim a particular supplier, account, platform or country is compatible and does not promise or deny redemption.
+- No database schema change, product-record edit, payment change or supplier contact was needed.
+
+### Tests and limitations
+
+- Five focused cases were added to `src/lib/product-availability.test.ts`: specific region, whitespace normalization, Global label, missing region, and arbitrary non-Global region labels. A Node 22.16 scratch execution of the same helper and five assertions passed **5/5**. Strict TypeScript helper check passed with `--strict --exactOptionalPropertyTypes --noUncheckedIndexedAccess`.
+- Full `bun run test`, `bun run lint`, `bun run typecheck` and `bun run build` were not run: Bun is not installed in the remote execution environment and there is no local dependency checkout. The repository test file itself was not executed by Bun.
+- Checkout warnings use the region value captured in `CartLine` when the product is added. A region change after the item enters the cart can leave that display snapshot stale; order creation's server-side order-item snapshot remains authoritative. Revisit the product page if catalogue data changes. No live order was created to test a region-specific checkout because none is currently orderable.
+- `Global` remains visible as a catalogue label but is not treated as a specific region lock and is not a guarantee of universal issuer compatibility. Empty region data does not cause a fabricated restriction.
+
+### Repository and release evidence
+
+- Work is on `automation/mt-0104-order-transition-guard`; current main at inspection was `9c745dda3951bc8af616ea09061cb828e16f89d6`. The working branch was 68 commits ahead and 7 behind before this task. Main's seven later commits were inspected; no rebase, merge, force-push or PR was performed. Repository `AGENTS.md` prohibits rewriting Lovable-synced history.
+- The current main combined status reports Vercel failure with the Hobby/free build-rate-limit target. The working-branch head `18505ff8bc93bd3ee6037cab7f8b8f4398883bb9` had a successful Vercel status and a READY preview at inspection. The main Quality workflow's latest recorded success is run [42323805501](https://github.com/eboxont-code/mtdgc/actions/runs/42323805501) on main SHA `9c745dda3951bc8af616ea09061cb828e16f89d6`; the connector returned no working-branch Actions run. The workflow runs for pushes to main and PRs targeting main.
+- Supabase project `mtdgc` (`eaomkkswslqtfunkceuc`) is `ACTIVE_HEALTHY` on PostgreSQL 17.11.0.003. Production inspection was read-only; no customer/order/payment field values were selected for this task.
+- GitHub connector has no local checkout/working-tree view; local `git status` is unavailable. No production database/storage/policy/configuration change, migration, deployment request, billing change, supplier/customer contact or additional spend occurred. The connected Git integration may create an automatic preview for branch commits; this is not a production deployment.
