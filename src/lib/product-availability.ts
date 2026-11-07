@@ -39,3 +39,25 @@ export function availabilityCounts(products: readonly AvailabilityProduct[]) {
     unavailable: products.length - available - comingSoon,
   };
 }
+
+
+export type RegionCompatibilityWarning = {
+  region: string;
+  message: string;
+  confirmationLabel: string;
+};
+
+/**
+ * Return a cautious warning for a specifically listed region.
+ * "Global" is catalogue metadata, not evidence of a region lock or universal compatibility.
+ */
+export function getRegionCompatibilityWarning(region: string | null | undefined): RegionCompatibilityWarning | null {
+  const value = region?.trim();
+  if (!value || value.toLowerCase() === "global") return null;
+
+  return {
+    region: value,
+    message: `This listing is marked for ${value}. Before paying, check the issuer's current compatibility information and verify that the account, game, platform or store you intend to use is supported for this region. A mismatch may prevent activation or redemption.`,
+    confirmationLabel: `I have checked the issuer's compatibility information and confirmed that the account, game, platform or store I intend to use is supported for ${value}.`,
+  };
+}
