@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.9 · 7 November 2026
+**Version:** 3.0 · 7 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -253,7 +253,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [!] **MT-0121 · P0 · BLOCKED** — The supplier register has no verified supplier/product-scope records, no approved delivery route and no supplier-specific fulfilment instructions for the currently listed product families. The repository records product requirements but does not establish how an authorised supplier actually fulfils each SKU. The owner must provide verified supplier/source, region-scope and delivery-step evidence before a product-family runbook can be accurate. Do not invent steps or contact suppliers. Revisit when that evidence is supplied.
 - [x] **MT-0122 · P0 · DONE** — Snapshot each order item's product region and required customer-field labels at order creation in the existing `order_items.fields` JSONB, retain the selected variant/denomination in `variant_name`, and show an admin pre-fulfilment checklist that flags missing captured values. Historical items without the snapshot explicitly show region/requirements as not captured; no current catalog values or supplier instructions are inferred. Evidence: section 34.
 - [x] **MT-0123 · P0 · DONE** — Add a final customer review for the current `game-top-ups` and `gift-cards` categories. Checkout displays the exact selected product/option, region when present and saved delivery fields; the customer must explicitly confirm before order creation. The server resolves category from the selected SKU and rejects requests missing the acknowledgement. No supplier-side irreversibility claim is made because no supplier-specific evidence exists. Evidence: section 35.
-- [ ] **MT-0124 · P0 · TODO** — Record the supplier transaction or redemption reference for each completed order.
+- [x] **MT-0124 · P0 · DONE** — Added authenticated-admin capture of actual supplier transaction/redemption references as internal `order_status_events` entries once fulfilment is `processing` or delivered (including legacy aliases). References are excluded from customer timelines; no schema migration or production write was needed. This is a capture capability, not proof that a supplier issued a reference: the supplier register is still empty and the read-only production snapshot had no completed orders, so no real reference values were populated and no reference is fabricated or forced when none is issued. Evidence: section 36.
 - [ ] **MT-0125 · P0 · TODO** — Capture delivery evidence and attach it to the correct order.
 - [ ] **MT-0126 · P0 · TODO** — Never request a customer's game password, subscription password, OTP or payment PIN.
 - [ ] **MT-0127 · P1 · TODO** — Define realistic delivery-time ranges per product based on measured fulfilment history.
@@ -543,8 +543,10 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 7 | MT-0103 — action-required/cancellation/refund workflow | BLOCKED; exact customer triggers and terminal/refund handling require owner approval, and adding a persisted state requires the held migration gate |
 | 8 | MT-0121 — supplier-specific manual fulfilment runbooks | BLOCKED; verified supplier/product/region scope and actual delivery-step evidence are missing |
 | 9 | MT-0122 — pre-fulfilment checklist | DONE; order-time region and required fields are snapshotted; selected option is retained; historical items are explicitly marked as lacking a snapshot |
-| 10 | MT-0123 — second confirmation for irreversible top-ups and code releases | NEXT ACTIONABLE P0; inspect the current product/category and checkout action paths; do not infer supplier-side irreversibility |
-| 11 | MT-0303/MT-0304 — Supabase cutover and held backend PR reconciliation | BLOCKED; target project, backup/restore, auth/storage/RLS/secrets and migration-history plan are not verified; PR #1 explicitly remains on HOLD |
+| 10 | MT-0123 — second confirmation for top-ups and emailed codes | DONE; checkout review and server-resolved category acknowledgement are implemented; no supplier irreversibility claim is made |
+| 11 | MT-0124 — supplier transaction/redemption reference capture | DONE; admin-only reference events use the existing audited event table; no production values were fabricated or backfilled |
+| 12 | MT-0125 — delivery evidence attached to the correct order | NEXT ACTIONABLE P0; inspect current private storage and order evidence paths; do not invent evidence or add a production bucket/migration before the Supabase cutover |
+| 13 | MT-0303/MT-0304 — Supabase cutover and held backend PR reconciliation | BLOCKED; target project, backup/restore, auth/storage/RLS/secrets and migration-history plan are not verified; PR #1 explicitly remains on HOLD |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -1397,7 +1399,7 @@ MT-0106 is completed in section 33. MT-0121 was reviewed and marked BLOCKED beca
 - The latest observed production deployment remains READY on older commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`, not this working branch. Vercel reported no runtime errors in the preceding 24 hours. The final branch commit's Vercel check is blocked by the free build-rate limit; no paid upgrade or retry was attempted.
 - Existing `order_items` RLS already permits an authenticated order owner or admin to read the corresponding order item JSONB; this change adds no policy or grant. The guest order-summary function does not select `fields`, so it does not return the snapshot. No production order, customer record, payment record, database schema, storage policy, environment variable, billing setting or production deployment was changed. Vercel created an automatic preview for the earlier working-branch commit only; no production aliases were changed. No supplier or third party was contacted; no spend occurred.
 
-**Next P0 task:** MT-0124 — record the supplier transaction or redemption reference for each completed order. Inspect existing order/status-event fields and admin fulfilment actions first; do not invent supplier reference formats or add a production schema migration before the Supabase cutover.
+**Next P0 task:** MT-0125 — capture delivery evidence and attach it to the correct order. Inspect the current private storage buckets, order-detail actions and evidence access controls first. Do not store redeemable codes or credentials as evidence, create a public bucket, or add a production storage policy/migration before the Supabase cutover.
 
 
 ## 35. Checkout second confirmation for top-ups and emailed codes — 7 November 2026
@@ -1445,4 +1447,50 @@ MT-0106 is completed in section 33. MT-0121 was reviewed and marked BLOCKED beca
 - Supabase project `mtdgc` reported `ACTIVE_HEALTHY`. Product/category/variant data and schema were queried read-only. No production order, payment, customer or product records were changed; no schema, RLS, storage, environment, billing or authentication setting was changed.
 - The GitHub connector provides remote repository file operations but no local working tree; local `git status` is unavailable. No supplier or third party was contacted and no money was spent.
 
-**Next P0 task:** MT-0124 — record the supplier transaction or redemption reference for each completed order. Inspect existing order/status-event fields and admin fulfilment actions first; do not invent supplier reference formats or add a production schema migration before the Supabase cutover.
+**Next P0 task:** MT-0125 — capture delivery evidence and attach it to the correct order. Inspect the current private storage buckets, order-detail actions and evidence access controls first. Do not store redeemable codes or credentials as evidence, create a public bucket, or add a production storage policy/migration before the Supabase cutover.
+
+
+## 36. Supplier transaction and redemption reference capture — 7 November 2026
+
+**Task:** MT-0124 · P0 · DONE — added a restricted, auditable place for an administrator to record an actual supplier transaction or redemption reference against an order, using the existing schema. This completes the capture capability; it does not assert that any supplier has been verified or that a reference exists for every fulfilment route.
+
+### Existing schema and production evidence
+
+- Read-only `information_schema.columns` inspection confirmed `public.order_status_events` already has `order_id` (UUID), `status` (TEXT), `note` (TEXT), `created_by` (UUID) and `created_at` (timestamp with time zone). No supplier-reference column or supplier foreign key exists on `orders` or `order_status_events`.
+- Read-only `pg_policies` and `pg_class` queries confirmed RLS is enabled on `order_status_events` and its only policy is authenticated-admin-only (`has_role(auth.uid(), 'admin')`) for all operations. The server action additionally requires `requireSupabaseAuth` and calls the existing `assertAdmin` check.
+- The production orders snapshot contained 8 orders, all `pending_payment`; there were no completed orders from which to populate or verify real supplier references. The event-count query returned 8 existing events, but no note contents or customer details were read.
+- The supplier register remains empty. No supplier name, reference format, redemption policy, or sample reference was inferred.
+
+### Implementation
+
+- Added `src/lib/supplier-reference.ts` with a dedicated internal event label (`supplier_reference`), a 500-character bound, status eligibility for `processing`, `delivered` and legacy delivered aliases, and safe extraction helpers that preserve reference case and internal characters.
+- Added `src/lib/supplier-reference.test.ts` with five focused tests for eligible statuses, trimming/preservation, blank/overlong values, event classification and extraction.
+- Added `addSupplierReference` to `src/lib/admin.functions.ts`. It requires an authenticated administrator, reads the order's current status from the database (never accepts status from the browser), rejects orders that have not entered fulfilment, and appends the reference with the authenticated actor and database timestamp to `order_status_events`.
+- Updated `src/components/admin/order-detail-panel.tsx` to display existing references and provide an admin-only entry form while an order is processing or delivered. The UI explicitly says to enter only a supplier-issued reference, never a redeemable code, password, OTP or payment PIN, and to leave the field blank if no reference was issued.
+- Updated `src/lib/orders.functions.ts` to filter the internal event label from guest and account customer status timelines. The reference value is not selected or returned by those customer-facing functions.
+- Updated `MTDGC_DATA_ARCHITECTURE.md` section 4.3 with the event model, authorization boundary and limitations.
+- No new table, column, index, RLS policy, grant, storage bucket or production data change was made. No supplier reference value was entered.
+
+### Scope and limitations
+
+- References are order-level events. Multiple references can be appended to one order, but this implementation does not associate a reference with a particular order item or supplier identity; the current schema and empty supplier register do not support a substantiated mapping.
+- Capture is available once fulfilment is `processing` or the order is delivered (including legacy `fulfilled`/`completed`). It is not a requirement that blocks delivery, because no verified supplier evidence establishes that every supplier or fulfilment route issues a transaction/redemption reference. Do not invent a value to satisfy the form.
+- The event is an internal audit record, not independent proof of payment settlement, delivery, or successful redemption. Delivery evidence remains MT-0125; settlement evidence remains MT-0086.
+- The internal event label is filtered from customer-facing timelines so it does not create a duplicate `processing`/`delivered` progress timestamp.
+
+### Verification
+
+- Focused test suite: **5 passed, 0 failed** using Node 22.16 with native TypeScript stripping in a scratch workspace. The scratch copy used an explicit `.ts` import extension for Node resolution; the repository test retains the extensionless import used by Bun.
+- Strict TypeScript check of `src/lib/supplier-reference.ts`: PASS with `--strict --exactOptionalPropertyTypes --noUncheckedIndexedAccess`.
+- Read-only production schema/RLS/status checks: PASS; no completed orders were present to exercise an actual reference write. No production test order or reference was created.
+- Full `bun run lint`, `bun run test`, `bun run typecheck` and `bun run build`: NOT RUN because this environment has no Bun installation or local MTDGC checkout/dependency tree. The final route/server integration has not received the full project quality workflow.
+
+### Repository, CI and release boundary
+
+- Working branch: `automation/mt-0104-order-transition-guard`. The repository is private and connected to Lovable; repository instructions prohibit rewriting pushed history. Changes were appended with normal commits; no rebase, amend, force-push, merge or PR was performed.
+- Task commits: helper `3852fefc3ca4c01d7ae986b5121bd903d32c1026`; tests `d8aac041e1883ef874d13571ac1f71b132476918`; admin action `7a3be8fc4d2864f6576aa55c8593b09816c83cf8`; customer timeline filtering `6a8c5447a88d12953ce48fa9d3b5d43da9de93aa`; admin panel `b36adef4a3411fe18702438af1b2727f2cddb00c`; architecture `5dea8ed4ccc782418354c20a30b3fe5701b3b6d7`.
+- Main remains at `1d948a818f056ec1ae1f630688070da6e8449fde`; its plan is still v2.1. The working branch carries the updated v3.0 plan. The GitHub connector has no local checkout/working-tree view, so local `git status` is unavailable.
+- Current-main combined status reports Vercel failure with the Hobby/free build-rate-limit target. The commit-workflow-run lookup returned no runs for the exact main SHA because that connector wrapper only returns pull-request-triggered runs; the latest previously recorded main Quality run `42251736215` is not treated as branch verification.
+- No deployment was requested. The latest production deployment/runtime status is recorded in this section after the current read-only Vercel check. No paid upgrade, billing change, migration, production write, supplier contact or third-party contact occurred.
+
+**Next P0 task:** MT-0125 — capture delivery evidence and attach it to the correct order. Inspect existing private storage, order-detail actions and evidence access controls. Do not store redeemable codes or credentials as evidence, create a public bucket, or add a production storage policy/migration before the Supabase cutover.
