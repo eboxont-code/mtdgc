@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 3.1 · 7 November 2026
+**Version:** 3.2 · 7 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -275,9 +275,9 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Policies match real operations, customers can resolve problems quickly, and trust claims are supported by evidence.
 
-- [ ] **MT-0141 · P0 · TODO** — Review the current Terms, Privacy, Delivery and Refund policies for consistency across Nepal and Australia.
-- [ ] **MT-0142 · P0 · TODO** — Resolve any conflict between the advertised markets and the markets covered by legal terms.
-- [ ] **MT-0143 · P0 · TODO** — Ensure refund rules distinguish undelivered, supplier-failed, incorrect-item and successfully redeemed digital goods.
+- [x] **MT-0141 · P0 · DONE** — Completed a factual consistency audit of the Terms, Privacy, Delivery and Refund pages against the live Nepal-first storefront, current `main` source, checkout/payment capabilities and read-only production schema/catalogue. Findings and exact follow-up dependencies are recorded in section 38. No legal interpretation or policy-copy change was made.
+- [!] **MT-0142 · P0 · BLOCKED** — The live storefront and live Terms currently describe Nepal-only sales/NPR, while current `main` About/Terms/footer and SEO metadata also claim Nepal and Australia; AUD catalogue records are all `coming_soon`, all live variants and orders are NPR, and manual QR/bank transfer is the only enabled payment route. Resolving the public-market/legal-terms conflict requires the owner's explicit operating-market and seller-entity decision plus qualified review for the relevant jurisdiction(s). Do not rewrite legal copy or enable Australia based on catalogue placeholders. Evidence: section 38.
+- [!] **MT-0143 · P0 · BLOCKED** — The current refund text contains an unresolved overlap between the broad full-refund-or-redelivery remedy for an MTDGC-side failure/wrong item and the later no-reversal wording after code reveal or credited top-up. The policy does not define the handling for every supplier-failure, incorrect-code, partial-delivery or already-redeemed case. A safe matrix requires owner-approved operational remedies, actual supplier reversal/replacement terms and qualified legal review; do not invent refund commitments. Evidence: section 38.
 - [ ] **MT-0144 · P0 · TODO** — Make region-lock warnings prominent before payment for every region-restricted code.
 - [ ] **MT-0145 · P0 · TODO** — Make wrong-player-ID warnings visible before confirming an irreversible top-up.
 - [ ] **MT-0146 · P1 · TODO** — Publish support response hours only after they are operationally staffed.
@@ -1545,3 +1545,68 @@ Verified the current working-branch implementation and current production produc
 - No supplier/customer contact, purchase, payment, production write, migration, storage-policy change, deployment, billing change or additional spend occurred.
 
 **Next P0 task:** MT-0141 — perform a read-only consistency audit of the current Terms, Privacy, Delivery and Refund pages against the actual Nepal-first operating flow and advertised Australia references. Record discrepancies without rewriting legal terms or making legal interpretations; any market decision or legal-copy change remains subject to owner approval and qualified review.
+
+
+
+## 38. Terms, privacy, delivery and refund consistency audit — 7 November 2026
+
+**Task:** MT-0141 · P0 · DONE — completed a factual source/live/operations consistency review only. This is not legal advice, a compliance assessment, or approval to serve either market. No customer-facing policy text was changed.
+
+### Repository and release context
+
+- Current GitHub `main` HEAD: `9c745dda3951bc8af616ea09061cb828e16f89d6`. Current working branch: `automation/mt-0104-order-transition-guard` at `b66d1d17bae03a227d94e1571deca0ae38e841c7`.
+- The working branch and `main` are diverged: 66 commits ahead and 7 behind. The working branch carries this current v3.2 plan; `main` still contains the older v2.1 plan. Do not merge, rebase or force-push as part of this audit. Repository `AGENTS.md` warns against rewriting Lovable-synced history.
+- The four policy route files are byte-identical between `main` and the working branch at inspection: `terms.tsx` (`84d586d`), `privacy.tsx` (`370a0fb`), `delivery.tsx` (`6df2c78`) and `refunds.tsx` (`1894cd9`).
+- The latest production deployment is READY but runs older commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`; it is not current `main`. Live public policy pages were read directly and compared with source files. The source and production content differ in several places, so neither should be assumed to represent the other.
+
+### Market and payment consistency
+
+- Live public About and Terms pages describe MTDGC as serving customers in Nepal; the live site displays NPR pricing. Live Terms says the sale is formed after availability confirmation and payment completion.
+- Current `main` source `src/routes/about.tsx`, `src/routes/policies/terms.tsx` and `src/components/site-footer.tsx` still say Nepal and Australia in customer-facing body/footer or structured metadata. The current Terms source says it sells to customers in Nepal and Australia while the same paragraph set says prices are in NPR. The homepage title/description says Nepal, but its organization description and the shared footer/SEO alt text still include Australia. This is an internal source inconsistency as well as a source/live deployment mismatch.
+- Read-only production catalogue aggregate: 36 published product rows comprise 5 NPR `available`, 20 NPR `coming_soon`, 1 NPR `temporarily_unavailable`, and 10 AUD `coming_soon`. All 54 product variants are NPR (18 `available`, 36 `coming_soon`). All 8 production orders are NPR and currently `pending_payment`. No AUD variant or AUD order was found.
+- `src/lib/payments.ts` enables only `manual_qr`; Khalti and eSewa are disabled placeholders. The live How-it-works page says there is no card checkout and payment is arranged after order confirmation via QR/bank transfer.
+- Factual conclusion: the inspected production flow is Nepal/NPR-first. The AUD catalogue rows are explicitly coming soon and do not demonstrate an active Australian purchase journey. No market decision is made here.
+
+### Terms of service
+
+- Live Terms page says sales are to customers in Nepal and prices are in NPR. Current `main` source says Nepal and Australia, despite still describing prices in NPR.
+- The page records the trading style `Matrix Digital Goods and Commerce`, customer responsibility for player/zone/server/email accuracy, platform issuer terms, and links to refund/delivery policies.
+- The inspected Terms page does not identify a full contracting legal entity/registration number, registered or service address, governing-law/jurisdiction clause, or a market-specific seller/payment-receiving entity. This is an observation about the page content, not a conclusion about what law requires.
+- Required follow-up: owner must confirm the actual seller entity and approved supported market(s); qualified review must approve any jurisdiction-specific terms before copy is changed or Australia is advertised as active.
+
+### Privacy policy and actual application data categories
+
+- The live Privacy page says MTDGC collects name, contact number/email and product-required account details; stores profile, order, wishlist and support history for account users; does not ask for passwords/OTPs/payment PINs; may share required delivery details with a supplier; and accepts deletion requests through support while retaining accounting records.
+- Read-only production schema inspection confirms the application stores profile display name/phone/delivery email/preferences; order user ID, guest email/phone, customer-details JSON, order/access/verification hashes and totals; order-item customer-field JSON; payment-proof storage path, transaction reference, amount and review fields; support-ticket order number, issue type, description and optional screenshot path; and order-lookup IP hash/timestamp. No customer field values were selected for this audit.
+- The public Privacy copy does not specifically describe payment-proof screenshots/transaction references, support-ticket descriptions/screenshots, or the IP-derived lookup hash. It does not name the hosting/database/storage processors or describe their data locations, cross-border access, specific retention periods, or an operational deletion schedule. The support form itself requires sign-in; no dedicated account/data deletion workflow was identified in the inspected route. These are disclosure/process gaps to resolve with the owner and qualified privacy reviewer, not legal conclusions.
+- The supplier register remains empty. The statement that customer details may be shared with a supplier describes a possible purpose but no actual supplier, destination country or product-specific data-sharing route can be verified from available evidence.
+
+### Delivery policy and actual fulfilment
+
+- The live Delivery page says products are digital, nothing is shipped, fulfilment is manual, instant delivery is not promised, correct customer identifiers matter, and gift-card/wallet-code regions must match the customer's store account.
+- Current `main` source has a later page date (27 October 2026) than the live page (4 October 2026). Source copy says software keys/account details, subscription details and gift-card codes appear on the order page and by email.
+- Read-only catalogue aggregate shows every one of the 5 published NPR `available` products has `delivery_time = 'Confirmed after order review'`, not a measured duration/range. The 20 NPR coming-soon and 1 temporarily unavailable rows use the same generic value; 10 AUD coming-soon rows say `Shown at launch`. Thus the statement that each listing shows its usual/expected delivery time is not supported by a concrete time range for the currently available rows.
+- Repository package/dependency and server-action inspection found no outbound email provider dependency or email-send action (`sendEmail`, Resend, Nodemailer and Mailgun code searches returned no matches). Manual staff email remains possible, but an automated delivery-email channel was not evidenced. Do not promise automated email delivery unless the actual workflow is confirmed.
+- No supplier delivery-time, cut-off, outage or escalation evidence exists in `SUPPLIER_REGISTER.md`; manual handling and lack of instant-delivery claims remain the only substantiated general statements.
+
+### Refund policy
+
+- The live Refund page says cancellation before fulfilment starts results in cancellation/refund; after a gift-card code is sent/revealed or in-game currency is credited, the order cannot be reversed; MTDGC-side failure, inability to source, or wrong-item delivery results in full refund or redelivery at the customer's choice; a top-up sent to a customer-supplied wrong player ID cannot be recovered.
+- Category copy separately says software keys are refundable until reveal and then follow listing replacement periods; subscription issues follow listing replacement periods; gift cards cannot be refunded after reveal; and top-ups cannot be reversed after credit.
+- The broad wrong-item full-refund/redelivery statement and later no-reversal language may overlap where a wrong code/item has already been revealed or credited. The policy does not set out a complete distinct procedure for supplier failure after payment, incorrect/invalid code, partial delivery, a code already redeemed by someone else, or an ambiguous top-up outcome. This audit records textual ambiguity only and does not decide customer rights or a legal remedy.
+- No blanket statement about statutory/non-excludable consumer rights was found on the inspected Refund page. Whether and how such a statement is required must be determined by qualified review for the actual seller and market; no copy was added.
+
+### Exact follow-up dependencies and task status
+
+- **MT-0142 — BLOCKED:** owner confirmation of the contracting seller entity and whether Australia is an intended supported market now; qualified legal review of the relevant market terms. The live production pages currently say Nepal-only; current source code also contains Australia claims; the production catalogue/payment journey is not Australia-ready.
+- **MT-0143 — BLOCKED:** owner-approved operational remedy matrix for undelivered, supplier-failed, wrong/incorrect item, partial delivery and redeemed/revealed digital goods; actual supplier reversal/replacement evidence; qualified legal review. No supplier-specific facts or legal conclusions were invented.
+- **Next eligible P0 to inspect:** MT-0144 — verify that region-lock warnings are prominent on product detail and checkout before payment. Use current per-product region data and source paths; do not invent issuer restrictions where a product has no verified region evidence.
+
+### Verification, CI and production impact
+
+- Public live pages reviewed: [Terms](https://mtdgc.com/policies/terms), [Privacy](https://mtdgc.com/policies/privacy), [Delivery](https://mtdgc.com/policies/delivery), [Refund](https://mtdgc.com/policies/refunds), [About](https://mtdgc.com/about), [How it works](https://mtdgc.com/how-it-works), [Support](https://mtdgc.com/support).
+- Read-only Supabase project inspection: project `mtdgc` (`eaomkkswslqtfunkceuc`) is `ACTIVE_HEALTHY` on PostgreSQL 17.11.0.003. Schema and aggregate catalogue/order queries only; no customer/order/payment field values were read for this policy audit.
+- Latest main GitHub Actions Quality run [`42323805501`](https://github.com/eboxont-code/mtdgc/actions/runs/42323805501) is SUCCESS on exact main HEAD `9c745dda3951bc8af616ea09061cb828e16f89d6`: locked install, ESLint, unit tests, TypeScript typecheck and production build all succeeded. No Quality run was returned for the working branch; workflow triggers are pushes to `main` and PRs targeting `main`.
+- Combined GitHub status for both current `main` and working-branch HEAD reports Vercel `failure` with the Hobby/free build-rate-limit target. Vercel production deployment is READY but older commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`. The latest READY working-branch preview found is intermediate commit `7a3be8fc4d2864f6576aa55c8593b09816c83cf8`, not the current branch head. Vercel runtime-error aggregation for the preceding 24 hours returned no runtime errors.
+- Open GitHub issues: 0. Open PR #1 remains explicitly held until the Supabase cutover; no PR was opened or changed.
+- GitHub connector provides remote file operations but no local checkout/working-tree status, so `git status` is unavailable. No code, policy text, production data, schema, RLS, storage, payment settings, deployment, environment variable, secret, billing setting or authentication setting was changed. No supplier/customer/third-party contact and no additional spend occurred.
