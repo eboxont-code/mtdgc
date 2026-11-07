@@ -304,7 +304,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0162 · P0 · TODO** — Verify one customer cannot access another customer's orders by changing an ID or URL.
 - [ ] **MT-0163 · P0 · TODO** — Verify payment uploads and delivered codes are stored privately, not in public buckets.
 - [ ] **MT-0164 · P0 · TODO** — Ensure admin-only actions are enforced server-side, not only hidden in the interface.
-- [ ] **MT-0165 · P0 · TODO** — Review secrets, supplier credentials and payment configuration for accidental exposure.
+- [x] **MT-0165 · P0 · DONE** — Audit repository secrets, supplier credentials, Vercel environment-variable metadata and payment configuration; add CI regression checks for environment-file hygiene, server/client key separation, recognised credential patterns and payment-field allowlists. Evidence: section 27. Audit completion does not mean the Preview service-role isolation finding is remediated; the owner-only blocker is recorded in section 27.
 - [ ] **MT-0166 · P1 · TODO** — Enable strong admin authentication and remove unused staff accounts.
 - [ ] **MT-0167 · P1 · TODO** — Apply least-privilege roles for payment review, fulfilment, support and catalogue editing.
 - [ ] **MT-0168 · P1 · TODO** — Log sensitive admin actions such as refunds, code reveal, payment verification and status overrides.
@@ -1092,4 +1092,52 @@ No product records, supplier assignments, prices, variants, order records, datab
 - Vercel's last-hour runtime-error query found no runtime-error clusters, and the last-30-minute production error/fatal log query returned no entries. These monitoring results do not prove a payment submission succeeded; there were no orders created after the intermediate deployment in the read-only snapshot.
 - **Release action:** wait until the Vercel free deployment API quota has reset (the returned retry window was 24 hours), confirm the latest documentation-only `main` HEAD has a passing quality run, then deploy that current `main` commit (which includes the tested application-code commit `26a69301856a715a2cbd293da2cf88227d694ca5`) to production and verify both aliases before treating MT-0083 as live. Do not upgrade the plan or change billing to bypass the limit.
 
-**Next P0 task:** MT-0084 — validate uploaded proof file type, size and content handling. The source-level MT-0083 implementation is committed and CI-verified; its production rollout remains subject to the Vercel deployment quota above.
+**Historical next P0 at the time this section was written:** MT-0084 — validate uploaded proof file type, size and content handling. Subsequent task entries and section 27 record later implementation evidence and the current eligible queue.
+
+
+## 27. Secrets, supplier credentials and payment configuration audit — 8 November 2026
+
+**Task:** MT-0165 · P0 · DONE — repository/configuration audit and regression guardrails. This status records completion of the review; it does not claim that the separate Vercel Preview credential-isolation finding has been remediated.
+
+### Repository environment and Git history
+
+- Inspected the current private repository main tree at 9c745dda3951bc8af616ea09061cb828e16f89d6. A root .env file is absent from main (GitHub contents API returned NOT_FOUND).
+- .gitignore ignores both .env and .env.*, while explicitly allowing .env.example.
+- The tracked .env.example contains seven documented variable names and every value is blank. It includes the browser-safe Supabase URL/publishable key, server-side Supabase URL/publishable/service-role names, optional public Sentry DSN and developer-only migration URL. No actual environment value was copied into it.
+- Independently re-read the historical .env at the tips of backend-code-route and redesign-matrix. Both tips point to the same blob 122c165e8c74b43be3765b9cb4e35a1a44a5e459. Its six entries are project identifiers, Supabase URLs and publishable keys only; no service-role/secret key, database password or migration URL was present. Values were not reproduced in this plan.
+- Those branches remain unsafe to reactivate without a fresh review: backend-code-route is 7 commits ahead / 232 behind main and contains held migrations 0010–0017; redesign-matrix is 0 ahead / 196 behind. Neither branch was changed.
+- The private repository reports is_code_search_indexed=false; GitHub code search returned no indexed matches even for known variable names, so those zero-result searches are not treated as evidence of a clean repository. The new CI regression test scans the checked-out repository text files for a bounded set of high-confidence credential formats and reports only file paths/categories, never matched values. It does not scan all historical Git objects or external secret stores.
+
+### Application and CI key boundaries
+
+- src/integrations/supabase/client.ts reads only VITE_SUPABASE_URL / VITE_SUPABASE_PUBLISHABLE_KEY for browser configuration, with the non-Vite publishable values as the SSR fallback. It does not reference the service-role key or the migration URL.
+- src/integrations/supabase/client.server.ts reads SUPABASE_SERVICE_ROLE_KEY from process.env only. The file is explicitly server-only and documents that it bypasses RLS and must never be exposed to client code.
+- Server functions dynamically import the server-only client inside their handlers. The GitHub Actions quality workflow supplies a non-secret placeholder for the service-role variable; it does not connect to production Supabase.
+- The supplier register contains no verified supplier identities or supplier credentials. Its policy explicitly prohibits recording payment account numbers, card details, API tokens, passwords or other secrets. No supplier was contacted.
+
+### Vercel environment metadata — owner action required
+
+- Read Vercel project environment-variable metadata with decryption disabled. The returned names include Supabase URLs, project IDs, publishable keys, public VITE_SENTRY_DSN, and SUPABASE_SERVICE_ROLE_KEY. No supplier API, eSewa, Khalti, Stripe, PayPal or other payment-gateway credential variable name was present in the returned metadata.
+- SUPABASE_SERVICE_ROLE_KEY is configured with Vercel type sensitive for both production and preview targets. No value was decrypted or retrieved, so this audit cannot determine whether the two target values are identical or separately scoped.
+- **Owner-only blocker:** until the owner confirms separate non-production Supabase credentials/project for Preview, treat Preview code as potentially able to access the production Supabase project with service-role privileges. Resolve by providing an isolated Preview project/key or removing the production service-role variable from Preview until isolation is verified. Do not edit Vercel variables, rotate credentials or change deployment settings without explicit approval. This is a configuration-risk finding, not evidence that a credential value was committed or exposed publicly.
+
+### Payment configuration and storage
+
+- Read-only production schema inspection shows public.payment_settings has RLS enabled and currently contains 0 rows. Its columns are limited to the QR path, bank name, account name/number, customer instructions, Fonepay enabled flag and audit timestamps/user; there are no gateway API keys, merchant secrets, passwords or supplier credential columns.
+- The table has an authenticated SELECT grant and an administrator-only SELECT RLS policy. Payment QR object insert/read/update/delete policies are administrator-only. Both payment-qr and payment-proofs buckets are private; the configured size limits are 2 MiB and 5 MiB respectively.
+- Public getPaymentSettings intentionally returns only an explicit customer-facing allowlist (QR path, bank name, account name/number, instructions and Fonepay flag); the QR is returned through a 3,600-second signed URL. These are payment instructions, not merchant API credentials. No payment-setting row values, bank account values, QR objects, customer records, orders or payment proofs were read.
+- getAdminPaymentSettings, savePaymentSettings and uploadPaymentQr require authenticated middleware and call assertAdmin before database/storage access. The save schema accepts only the customer-facing bank/instruction fields and Fonepay flag.
+- The current admin payment panel collects bank details, instructions and a Fonepay toggle only. No eSewa/Khalti/Stripe/PayPal merchant API integration or credentials were observed in the inspected source/configuration.
+
+### Regression checks and limitations
+
+- Added src/lib/security-config.test.ts: blank-only environment example and ignore rules; browser/server Supabase key separation; CI placeholder verification; repository text-file scan for high-confidence credential formats (including service-role JWTs); public payment response allowlist; admin guards on payment-setting operations; and no secret-like payment-settings schema columns. The scanner ignores explicit example/placeholder values and reports paths/categories only. Final application/test-head GitHub Actions Quality run 42415687328 passed on ff61dc4dfc5a1bd4bc453c7b1e03e9552cb0e9e3: frozen install, ESLint (0 errors; 14 existing warnings), 46 tests across 11 files, TypeScript typecheck and production build. The final PR-head documentation commit 9837dfb947086efb43dba5ea0783093369918b82 also passed the complete Quality workflow in run 42415771615 with the same six stages.
+- The scanner skips binary files, files over 5 MiB and generated/dependency directories. It is a focused regression guard, not a substitute for GitHub secret scanning, a full historical-object scan, or a dedicated secret-management service. GitHub secret-scanning alert access was not available through the connected integration.
+- A READY preview exists for earlier audit documentation commit d192da9468822bb060eff243a7e9f7bc846b7cb3; no READY preview was observed for final application/test commit ff61dc4dfc5a1bd4bc453c7b1e03e9552cb0e9e3. Vercel reports the free deployment-rate limit, so no paid workaround or manual deployment was attempted.
+- Vercel production deployment remains READY on older commit 779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7. The current main combined status still reports the free deployment-rate limit. This PR is tests/documentation only; no deployment was requested.
+- No environment values were decrypted, printed, copied or changed. No production database, storage, RLS, authentication, Vercel environment, secrets, DNS, hosting, billing or customer/payment records were modified. No credentials were rotated because the inspected historical .env contained only public configuration; the Preview service-role isolation issue remains owner-only.
+
+
+- P0 tasks already implemented/audited on draft PRs #2–#14 remain unmerged and require owner review/promotion; do not duplicate those changes or treat them as canonical on main. The other earlier P0 blockers in the task register still require supplier/issuer evidence, independent settlement data, owner-approved commercial/legal decisions or the approved Supabase cutover.
+- MT-0181 requires a physical Android device and an authorised end-to-end test order/payment; neither device access nor permission to create a real test purchase was available in this run.
+**Next eligible P0:** MT-0182 — verify the existing availability labels, purchasable counts and disabled coming-soon actions against the current production page. MT-0181 remains ahead in the register but requires physical Android-device/full-purchase-journey verification and authorised test-order/payment access; do not simulate a real purchase or infer device results.

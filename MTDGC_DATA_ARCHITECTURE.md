@@ -63,3 +63,14 @@ MTDGC (Matrix Digital Goods & Commerce) is a digital marketplace for Nepal. This
 - **Payment**: Integration with eSewa/Khalti SDKs/Webhooks.
 - **Fulfillment**: Automated delivery for products with pre-loaded digital codes.
 
+
+
+## 7. Secret and payment configuration boundaries
+
+- Keep .env and all .env.* files ignored; .env.example is the only tracked environment template and must contain blank values only.
+- Browser code may use Supabase URLs and publishable keys only. The service-role key and migration connection string are server/developer-only; they must never receive a VITE_ prefix or enter a browser bundle.
+- src/integrations/supabase/client.server.ts is the server-only service-role client. Import it dynamically inside trusted server handlers and authorize each operation before using its RLS-bypassing client.
+- Customer-visible payment instructions are not gateway credentials. The public payment-settings response must keep an explicit allowlist of bank/QR/instruction fields; never add merchant API secrets, passwords, tokens or supplier credentials to payment_settings or its public response.
+- Payment-setting mutations and QR storage operations require authenticated administrator authorization. The production payment-qr and payment-proofs buckets are private; QR writes are admin-only and proof reads are owner/admin-controlled.
+- Vercel environment metadata currently shows a sensitive SUPABASE_SERVICE_ROLE_KEY for both Production and Preview. Until separate Preview credentials/project are owner-verified, treat Preview as potentially privileged against production data. This is a release/configuration blocker; do not change environment values without owner approval.
+- The MT-0165 regression test checks environment-template hygiene, server/client key separation, known high-confidence credential patterns in current text files, public payment field allowlists and administrator guards. It does not replace full Git-history scanning or secret-manager controls.
