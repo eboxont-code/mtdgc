@@ -112,3 +112,11 @@ Synthetic tests cover order-scoped tokens, account owner versus another user, or
 
 Known separate limitations: the guest lookup rate limiter's database errors are not consistently fail-closed; the `has_role` SECURITY DEFINER warning remains gated on the approved Supabase cutover. No dedicated delivery-code table or bucket was found; the current schema/bucket inventory does not evidence the delivered-code storage path. MT-0163 remains blocked pending an approved private storage design and cutover.
 
+## 9. Administrator server-function authorization contract
+
+- The current `src/lib/admin.functions.ts` module exposes 14 admin server functions. Every exported endpoint uses `requireSupabaseAuth` middleware and awaits `assertAdmin(context)` as the first handler statement, before any data read or mutation.
+- The shared handler guard calls `has_role` for the validated `context.userId` and role `admin`; an RPC error or falsy role result throws `Admin access required`. It is not a browser-only check.
+- `src/lib/admin-authorization.test.ts` parses the module with the TypeScript AST and pins the 14-function inventory. It fails if an exported binding is not a covered server function, if authentication middleware is missing, if the admin guard is not the first handler statement, or if the shared guard no longer checks the current user's admin role and denies errors/missing results.
+- The admin route's client-side role check remains a UI/navigation gate only. Direct server-function calls are protected by the server middleware and handler guard; direct authenticated-client reads/writes remain subject to database RLS.
+- Separate residual finding: production `public.has_role(uuid, app_role)` is still SECURITY DEFINER and executable by `anon` and `authenticated`. It can disclose role membership for a supplied UUID. Remediation must coordinate the function and all dependent RLS policies and remains gated on the approved Supabase cutover. No production role, function, policy or grant was changed.
+- Evidence: MT-0164 draft PR #14 and GitHub Actions Quality run [42410620615](https://github.com/eboxont-code/mtdgc/actions/runs/42410620615). No production records or secrets were accessed.
