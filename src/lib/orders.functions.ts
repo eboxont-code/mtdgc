@@ -140,7 +140,11 @@ export const placeOrder = createServerFn({ method: "POST" })
 
 export const lookupOrder = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) =>
-    z.object({ orderNumber: z.string().trim().min(4).max(40), contact: z.string().trim().min(3).max(120) }).parse(data),
+    z.object({
+      orderNumber: z.string().trim().min(4).max(40),
+      contact: z.string().trim().min(3).max(120),
+      bearer: z.string().max(4000).optional(),
+    }).parse(data),
   )
   .handler(async ({ data }) => {
     const { getRequestHeader } = await import("@tanstack/react-start/server");
@@ -162,14 +166,18 @@ export const lookupOrder = createServerFn({ method: "POST" })
     const orderNumber = data.orderNumber.toUpperCase();
     const { data: order } = await supabaseAdmin
       .from("orders")
-      .select("id, status, created_at, total_minor, verification_hash, guest_email, order_items(product_name, variant_name, quantity, unit_price_minor, line_total_minor, products(categories(slug))), order_status_events(status, created_at)")
+      .select("id, user_id, status, created_at, total_minor, verification_hash, guest_email, order_items(product_name, variant_name, quantity, unit_price_minor, line_total_minor, products(categories(slug))), order_status_events(status, created_at)")
       .eq("order_number", orderNumber)
       .maybeSingle();
     if (!order) return { status: "not_found" as const };
-    const contact = normaliseContact(data.contact);
-    const hashMatch = (await sha256(orderNumber + contact)) === order.verification_hash;
-    const emailMatch = contact.includes("@") && order.guest_email?.toLowerCase() === contact;
-    if (!hashMatch && !emailMatch) return { status: "not_found" as const };
+    let allowed = false;
+    if (order.user_id && data.bearer) {
+      const { data: user } = await supabaseAdmin.auth.getUser(data.bearer);
+      allowed = isAuthenticatedOrderOwner(order, user.user?.id);
+    } else if (!order.user_id) {
+      allowed = await hasOrderContactAccess(order, orderNumber, data.contact);
+    }
+    if (!allowed) return { status: "not_found" as const };
     return {
       status: "found" as const,
       order: {
