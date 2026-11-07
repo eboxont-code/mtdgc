@@ -66,6 +66,15 @@ MTDGC (Matrix Digital Goods & Commerce) is a digital marketplace for Nepal. This
 - The acknowledgement is an accuracy safeguard, not authentication or cryptographic proof of human review; a deliberate direct API caller can set the boolean. It does not verify payment settlement, supplier authority, fulfilment or delivery.
 - No supplier-specific reversibility claim is made: the product schema has no supplier irreversibility field and the Supplier Register has no verified product-scope records. No schema migration or production write is needed for this UI/server-input check.
 
+### 4.4 Customer credential collection boundary
+
+- Product requirement labels are normalised before validation and rejected when they request passwords, passcodes/passkeys, OTP/2FA/MFA or authenticator codes, PINs, recovery/backup/seed secrets, account login/access credentials, session/access/refresh tokens, API/private/client secrets, security answers, remote access or payment-card credentials.
+- The administrator product form and `saveProduct` server validator use the same policy. The product page suppresses every customer field and disables ordering if a saved requirement is unsafe; it does not display or autofill the unsafe label.
+- `placeOrder` re-reads the selected product requirements from the server-resolved SKU and rejects malformed or unsafe requirement lists before creating an order. It also rejects unsafe client-supplied field keys, including stale carts.
+- Product detail, checkout order-note and support free-text areas display a clear warning. Free-text descriptions are not automatically scanned or rejected, to avoid blocking legitimate troubleshooting; customers may still voluntarily type sensitive information despite the warning.
+- A read-only production catalogue audit on 8 November 2026 found 36 published products and zero requirement labels matching the expanded credential policy. No customer/order values were queried. The Supplier Register contains no verified suppliers, so no supplier-side credential practice is claimed to have been screened.
+- No schema migration is required. This application safeguard does not replace supplier due diligence or a response process for accidentally submitted secrets.
+
 ## 5. Guest Checkout Architecture
 - **No Account Required**: Orders are created with `user_id = NULL`.
 - **Identity**: `guest_email` and `guest_whatsapp` are captured.
