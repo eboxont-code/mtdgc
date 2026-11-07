@@ -34,8 +34,22 @@ describe("MT-0183 checkout price snapshots", () => {
   });
 
   test("rejects a changed SKU, reordered lines or a changed line count", () => {
+    const secondExpected: ExpectedCheckoutPriceLine = {
+      sku: "PUBG-60",
+      expectedProductName: "PUBG Mobile UC",
+      expectedVariantName: "60 UC",
+      expectedPriceMinor: 2000,
+    };
+    const secondResolved: ResolvedCheckoutPriceLine = {
+      sku: "PUBG-60",
+      productName: "PUBG Mobile UC",
+      variantName: "60 UC",
+      priceMinor: 2000,
+    };
     assert.equal(hasCheckoutPriceSnapshotChanges(expected, [{ ...resolved[0]!, sku: "FF-115" }]), true);
     assert.equal(hasCheckoutPriceSnapshotChanges([{ ...expected[0]!, sku: "FF-115" }], resolved), true);
-    assert.equal(hasCheckoutPriceSnapshotChanges([...expected, { sku: "PUBG-60" }], resolved), true);
+    assert.equal(hasCheckoutPriceSnapshotChanges([...expected, secondExpected], [secondResolved, resolved[0]!]), true);
+    assert.equal(hasCheckoutPriceSnapshotChanges([...expected, secondExpected], [...resolved, secondResolved]), false);
+    assert.equal(hasCheckoutPriceSnapshotChanges([...expected, secondExpected], resolved), true);
   });
 });
