@@ -79,16 +79,49 @@ export function categoryTypeFromSlug(slug: string): keyof typeof PRODUCT_TYPE_LA
 
 export const SITE_URL = "https://mtdgc.com";
 
+export const ORDER_STATUS_LABEL: Record<string, string> = {
+  pending: "Waiting for payment",
+  pending_payment: "Waiting for payment",
+  payment_submitted: "Payment proof received",
+  paid: "Legacy payment status",
+  verified: "Marked verified by staff",
+  processing: "Processing",
+  delivered: "Delivered",
+  fulfilled: "Delivered",
+  completed: "Delivered",
+  rejected: "Rejected",
+  failed: "Failed",
+  cancelled: "Cancelled",
+  refunded: "Refunded",
+};
+
 export const ORDER_STEPS: Array<{ title: string; body: string; statuses: string[] }> = [
-  { title: "Payment received", body: "We have your payment screenshot and will check it against our account.", statuses: ["payment_submitted", "paid"] },
-  { title: "Verified", body: "Your payment matched and the order is confirmed.", statuses: ["verified"] },
-  { title: "Processing", body: "We are preparing your key, account details or code.", statuses: ["processing"] },
-  { title: "Delivered", body: "Your order has been delivered to your order page and email.", statuses: ["delivered", "fulfilled", "completed"] },
+  {
+    title: "Payment proof received",
+    body: "We have received a payment-proof submission for review. Uploading a screenshot or reference does not confirm that funds reached our account.",
+    statuses: ["payment_submitted"],
+  },
+  {
+    title: "Verified by staff",
+    body: "An MTDGC administrator has marked this order as verified. This is a manual status; the app does not receive independent bank or payment-provider settlement confirmation.",
+    statuses: ["verified"],
+  },
+  {
+    title: "Processing",
+    body: "Our team has marked this order as processing. This is a manual staff update, not a live supplier/API signal or proof of delivery.",
+    statuses: ["processing"],
+  },
+  {
+    title: "Delivered",
+    body: "Our team has marked this order as delivered. Check your order page for delivery details; contact support if you cannot find them.",
+    statuses: ["delivered", "fulfilled", "completed"],
+  },
 ];
 
 export const ORDER_NOTICE: Record<string, string> = {
   pending: "Waiting for payment.",
   pending_payment: "Waiting for payment.",
+  paid: "This legacy/manual status is not independent confirmation that funds reached MTDGC.",
   rejected: "We could not match the payment. See the note and upload a new proof if asked.",
   cancelled: "This order was cancelled.",
   refunded: "This order was refunded.",
