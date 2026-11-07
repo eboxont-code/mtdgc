@@ -22,16 +22,16 @@ describe("MT-0183 checkout price snapshots", () => {
   });
 
   test("detects a changed server price before order creation", () => {
-    assert.equal(hasCheckoutPriceSnapshotChanges(expected, [{ ...resolved[0]!, priceMinor: 3500 }]), true);
+    assert.equal(hasCheckoutPriceSnapshotChanges(expected, [{ ...resolved[0]!, priceMinor: 2345 }]), true);
   });
 
   test("detects product or variant renames even when the price is unchanged", () => {
-    assert.equal(hasCheckoutPriceSnapshotChanges(expected, [{ ...resolved[0]!, productName: "Free Fire" }]), true);
-    assert.equal(hasCheckoutPriceSnapshotChanges(expected, [{ ...resolved[0]!, variantName: "30 Diamonds" }]), true);
+    assert.equal(hasCheckoutPriceSnapshotChanges(expected, [{ ...resolved[0]!, productName: "Fixture Product Changed" }]), true);
+    assert.equal(hasCheckoutPriceSnapshotChanges(expected, [{ ...resolved[0]!, variantName: "Fixture Option Changed" }]), true);
   });
 
   test("accepts legacy clients that do not send a price snapshot", () => {
-    assert.equal(hasCheckoutPriceSnapshotChanges([{ sku: "FF-25" }], resolved), false);
+    assert.equal(hasCheckoutPriceSnapshotChanges([{ sku: "TEST-A" }], resolved), false);
   });
 
   test("rejects a changed SKU, reordered lines or a changed line count", () => {
@@ -48,7 +48,7 @@ describe("MT-0183 checkout price snapshots", () => {
       priceMinor: 5678,
     };
     assert.equal(hasCheckoutPriceSnapshotChanges(expected, [{ ...resolved[0]!, sku: "TEST-A-CHANGED" }]), true);
-    assert.equal(hasCheckoutPriceSnapshotChanges([{ ...expected[0]!, sku: "FF-115" }], resolved), true);
+    assert.equal(hasCheckoutPriceSnapshotChanges([{ ...expected[0]!, sku: "TEST-A-CHANGED" }], resolved), true);
     assert.equal(hasCheckoutPriceSnapshotChanges([...expected, secondExpected], [secondResolved, resolved[0]!]), true);
     assert.equal(hasCheckoutPriceSnapshotChanges([...expected, secondExpected], [...resolved, secondResolved]), false);
     assert.equal(hasCheckoutPriceSnapshotChanges([...expected, secondExpected], resolved), true);
