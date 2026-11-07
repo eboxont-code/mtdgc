@@ -1125,6 +1125,15 @@ No product records, supplier assignments, prices, variants, order records, datab
 - The global `storage.objects` table grants include anon/authenticated privileges, but the private bucket and RLS policy above restrict payment-proof object access. No storage or database policy was changed.
 - Supabase's security advisor still warns that `public.has_role(uuid, app_role)` is a SECURITY DEFINER function executable by both anon and authenticated roles. Read-only inspection confirms it returns a role-existence boolean for the supplied UUID; this can disclose role membership but does not itself grant proof-row access because the proof policies are `TO authenticated` and evaluate `auth.uid()`. Do not revoke execution independently: existing RLS policies call it. A coordinated function/policy migration remains cutover-gated. The advisor's INFO finding for `order_lookup_attempts` (RLS enabled with no client policy) matches its service-role-only access pattern.
 
+### Implementation commits
+
+- Shared status labels: [403d77e](https://github.com/eboxont-code/mtdgc/commit/403d77e768c023c8b4f9139fa5b6e2e83b47de23).
+- Focused regression tests: [8c56e8d](https://github.com/eboxont-code/mtdgc/commit/8c56e8d17edbc8b281d49f43ba13080f6da17017).
+- Guest tracking labels: [b047b93](https://github.com/eboxont-code/mtdgc/commit/b047b9395810a3eb8645597cc6bd188d21016342).
+- Order detail and account history: [fa67955](https://github.com/eboxont-code/mtdgc/commit/fa67955dcece3bcadaadb160b051cd1e73c8fc09) and [4cd30af](https://github.com/eboxont-code/mtdgc/commit/4cd30af53845d375f037500797af1f0378d8b725).
+- Data architecture: [09d9c28](https://github.com/eboxont-code/mtdgc/commit/09d9c28326bc4ecfd3a99a6d0c08a71b2feae595).
+- Master plan and final verification: [c811350](https://github.com/eboxont-code/mtdgc/commit/c81135088712ac6c1f55fd35499fc70a618fed10) and [e10150b](https://github.com/eboxont-code/mtdgc/commit/e10150bec7c33d51db48262ad0b792d92924607e).
+
 ### Regression tests and verification
 
 - Existing `src/lib/order-access.test.ts` — 4 tests: order-scoped bearer token, authenticated owner match, contact fallback bound to order number/contact, and server-resolved proof association.
@@ -1222,7 +1231,7 @@ There is **no complete application-enforced allowed-transition graph** today. Th
 
 ## 29. Order milestone definitions and customer status copy — 7 November 2026
 
-**Task:** MT-0102 · P0 · DONE on draft PR #4, stacked on MT-0101 PR #3 and payment-proof PR #2. This task defines and displays the current operational meaning; it does not enforce a transition policy or claim independent payment settlement.
+**Task:** MT-0102 · P0 · DONE on draft [PR #4](https://github.com/eboxont-code/mtdgc/pull/4), stacked on MT-0101 [PR #3](https://github.com/eboxont-code/mtdgc/pull/3) and payment-proof [PR #2](https://github.com/eboxont-code/mtdgc/pull/2). PR #4 was OPEN/DRAFT and mergeable at the last check. This task defines and displays the current operational meaning; it does not enforce a transition policy or claim independent payment settlement.
 
 ### Source and production evidence
 
