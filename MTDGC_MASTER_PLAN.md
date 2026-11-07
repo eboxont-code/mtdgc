@@ -1118,6 +1118,7 @@ No product records, supplier assignments, prices, variants, order records, datab
 - The `payment-proofs` bucket is private (`public=false`) with a 5 MiB cap. `allowed_mime_types` is NULL; MIME/content hardening remains MT-0084 and is not claimed complete here.
 - Authenticated clients have SELECT only on `payment_proofs`; the cutover grant script revokes broad public/authenticated table grants before regranting the intended SELECT permission. Anonymous clients have no proof-row policy. The bucket is private and has no anonymous proof-object policy.
 - The global `storage.objects` table grants include anon/authenticated privileges, but the private bucket and RLS policy above restrict payment-proof object access. No storage or database policy was changed.
+- Supabase's security advisor still warns that `public.has_role(uuid, app_role)` is a SECURITY DEFINER function executable by both anon and authenticated roles. Read-only inspection confirms it returns a role-existence boolean for the supplied UUID; this can disclose role membership but does not itself grant proof-row access because the proof policies are `TO authenticated` and evaluate `auth.uid()`. Do not revoke execution independently: existing RLS policies call it. A coordinated function/policy migration remains cutover-gated. The advisor's INFO finding for `order_lookup_attempts` (RLS enabled with no client policy) matches its service-role-only access pattern.
 
 ### Regression tests and verification
 
