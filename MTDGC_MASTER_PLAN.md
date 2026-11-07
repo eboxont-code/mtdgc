@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.1 · 7 November 2026
+**Version:** 2.2 · 7 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -203,10 +203,10 @@ Do not set numerical targets until a reliable baseline exists.
 - [x] **MT-0081 · P0 · DONE** — Audit completed against the current application code, production schema/data snapshot, storage configuration and access policies. Findings and follow-up gaps are recorded in section 24; this completes the audit task, not a claim that all payment controls are secure.
 - [x] **MT-0082 · P0 · DONE** — Generate new order references with 128 bits of cryptographic randomness, retain the database UNIQUE constraint as the collision guard, and keep legacy tracking formats working. Evidence: section 25; CI run `42241329123` passed lint, tests, typecheck and production build; Vercel deployment for code commit `d81e1fc51ed2e1203defb63ec6a71dbcd21e889b` reached READY.
 - [x] **MT-0083 · P0 · DONE** — Bind payment-proof authorization and storage/database association to the server-resolved order. Shared order-access helpers now cover access-token, authenticated-owner and rate-limited contact checks; proof storage path, order ID, transaction reference and amount are derived from the resolved order, not client-supplied identifiers. Four focused tests and the full quality workflow passed. Evidence and the separate production deployment blocker are recorded in section 26.
-- [ ] **MT-0084 · P0 · TODO** — Validate uploaded proof file type, size and content handling.
-- [ ] **MT-0085 · P0 · TODO** — Restrict payment-proof access to the customer who owns the order and authorised staff.
-- [ ] **MT-0086 · P0 · TODO** — Prevent fulfilment until payment is independently matched to the correct amount and order.
-- [ ] **MT-0087 · P0 · TODO** — Prevent the same transaction reference or screenshot from being accepted for multiple orders.
+- [!] **MT-0084 · P0 · BLOCKED** — Validate uploaded proof file type, size and content handling. Blocker: `package.json`/`bun.lock` contain no maintained server-side image decoder, and Bun is unavailable in the execution environment to add a pinned decoder, regenerate the lockfile and run the required malformed/truncated-image tests safely. Do not substitute a host binary that is not guaranteed in the Vercel runtime.
+- [x] **MT-0085 · P0 · DONE** — Verified owner/admin-only proof-row and private-object policies against live Supabase metadata; added migration-contract tests and an explicit fail-closed admin-role helper. Existing order-token, authenticated-owner, contact-fallback and server-resolved proof-association tests remain in place. Evidence: section 27.
+- [!] **MT-0086 · P0 · BLOCKED** — Prevent fulfilment until payment is independently matched to the correct amount and order. No bank-statement feed, provider callback or other independent settlement evidence exists in the application; uploaded screenshots and customer-entered references do not independently prove funds received, and `amount_minor` is copied from the order total. Unlock with an approved settlement evidence source or owner-approved manual reconciliation evidence.
+- [!] **MT-0087 · P0 · BLOCKED** — Prevent the same transaction reference or screenshot from being accepted for multiple orders. Production has no unique index on `payment_proofs.transaction_ref`; concurrency-safe enforcement needs a schema migration, which remains behind the documented Boxont-controlled Supabase cutover and held PR #1. Unlock after approved cutover/migration gate.
 - [ ] **MT-0088 · P1 · TODO** — Show exact payment amount, account details, expiry window and reference instructions on the order page.
 - [ ] **MT-0089 · P1 · TODO** — Add a clear payment-pending state and explain what action the customer must take.
 - [ ] **MT-0090 · P1 · TODO** — Record who verified payment, when it was verified and the transaction reference.
@@ -539,8 +539,8 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 3 | MT-0061–MT-0063 — build landed cost and order-level gross margin from source costs | BLOCKED; supplier costs, dated FX, payment/settlement fees, refunds and variable fulfilment/support costs are absent |
 | 4 | MT-0064 — approve minimum contribution-margin floor | BLOCKED; business-owner decision required |
 | 5 | MT-0065 — enforce a current-price/margin gate at checkout | BLOCKED; depends on the approved floor and trusted cost/price-expiry data; schema changes remain behind the Supabase cutover |
-| 6 | MT-0081 — audit the current QR and bank-transfer payment flow | TODO; next independent P0 task after the supplier and pricing blockers |
-| 7 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
+| 6 | MT-0081 — audit the current QR and bank-transfer payment flow | DONE; audit-only evidence in section 24; remaining controls are tracked separately below |
+| 7 | MT-0084 — validate uploaded proof file type, size and content handling | BLOCKED; no maintained server-side decoder is pinned in the project and Bun is unavailable to add/lock and test one safely |\n| 8 | MT-0085 — restrict payment-proof access to the order owner and authorised staff | DONE; 11 focused tests plus read-only production RLS/storage evidence in section 27 |\n| 9 | MT-0086 — require independent payment settlement matching before fulfilment | BLOCKED; no independent bank/provider settlement evidence is available |\n| 10 | MT-0087 — prevent duplicate transaction references/screenshots across orders | BLOCKED; concurrency-safe uniqueness requires the approved Supabase migration gate |\n| 11 | MT-0101 — map current order statuses and allowed transitions | NEXT P0; can be mapped from the current source and existing status data without production writes |\n| 12 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 8 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
@@ -1092,4 +1092,42 @@ No product records, supplier assignments, prices, variants, order records, datab
 - Vercel's last-hour runtime-error query found no runtime-error clusters, and the last-30-minute production error/fatal log query returned no entries. These monitoring results do not prove a payment submission succeeded; there were no orders created after the intermediate deployment in the read-only snapshot.
 - **Release action:** wait until the Vercel free deployment API quota has reset (the returned retry window was 24 hours), confirm the latest documentation-only `main` HEAD has a passing quality run, then deploy that current `main` commit (which includes the tested application-code commit `26a69301856a715a2cbd293da2cf88227d694ca5`) to production and verify both aliases before treating MT-0083 as live. Do not upgrade the plan or change billing to bypass the limit.
 
-**Next P0 task:** MT-0084 — validate uploaded proof file type, size and content handling. The source-level MT-0083 implementation is committed and CI-verified; its production rollout remains subject to the Vercel deployment quota above.
+**Next P0 task:** MT-0101 — map every current order status and its allowed transitions. MT-0084 is blocked pending a maintained server-side image decoder and Bun-based lockfile/test verification; MT-0085 is complete with source tests and live read-only policy evidence; MT-0086 and MT-0087 are blocked by missing independent settlement evidence and the approved schema-migration gate respectively.
+
+
+## 27. Payment-proof access-control verification — 7 November 2026
+
+**Task:** MT-0085 · P0 · DONE. This completion verifies the current application access paths, migration policy contract and read-only production policy snapshot; it does not claim that a live end-user penetration test was performed.
+
+### Application controls
+
+- `src/lib/orders.functions.ts` resolves the order server-side and uses the existing order-scoped access-token, authenticated account-owner and rate-limited contact checks before accepting a proof. The customer request does not supply the storage folder or proof order ID.
+- `src/lib/admin.functions.ts` protects `listPaymentsToVerify` and `getPaymentProofUrl` with `requireSupabaseAuth` and an administrator-role RPC check. Proof URLs expire after 300 seconds.
+- Added `src/lib/admin-access.ts` so only an error-free exact boolean `true` from the role RPC grants administrator access. Ambiguous values and RPC errors fail closed.
+- Order-view responses do not include proof storage paths or signed proof URLs. Guest order access does not expose the administrator proof-retrieval action.
+
+### Read-only production policy snapshot — 7 November 2026
+
+- `public.payment_proofs`: RLS is enabled. The only SELECT policy is for `authenticated` and permits a row only when the related order belongs to `auth.uid()` or `has_role(auth.uid(), 'admin')` succeeds.
+- `storage.objects`: RLS is enabled. The payment-proof object policy is SELECT-only, scoped to bucket `payment-proofs`, and permits the related order owner (folder segment equals the order ID) or an administrator.
+- The `payment-proofs` bucket is private (`public=false`) with a 5 MiB cap. `allowed_mime_types` is NULL; MIME/content hardening remains MT-0084 and is not claimed complete here.
+- Authenticated clients have SELECT only on `payment_proofs`; the cutover grant script revokes broad public/authenticated table grants before regranting the intended SELECT permission. Anonymous clients have no proof-row policy. The bucket is private and has no anonymous proof-object policy.
+- The global `storage.objects` table grants include anon/authenticated privileges, but the private bucket and RLS policy above restrict payment-proof object access. No storage or database policy was changed.
+
+### Regression tests and verification
+
+- Existing `src/lib/order-access.test.ts` — 4 tests: order-scoped bearer token, authenticated owner match, contact fallback bound to order number/contact, and server-resolved proof association.
+- Added `src/lib/admin-access.test.ts` — 3 tests: exact successful admin result only; RPC errors and ambiguous values deny access.
+- Added `src/lib/payment-proof-policy.test.ts` — 4 static migration-contract tests for owner/admin proof-row policy, owner/admin private object policy, read-only table grants and private bucket cap.
+- **11 focused tests passed, 0 failed** using Node 22.16's TypeScript stripping in a scratch verification workspace. Relative imports were adjusted only in the scratch copy for Node's ESM resolution; repository test imports remain Bun-compatible.
+- Strict TypeScript check of `admin-access.ts` passed with TypeScript 5.8.3. Full `bun test`, ESLint, full project typecheck and production build were not run locally because Bun and the project dependency checkout are unavailable. A PR quality run is required for full repository verification.
+
+### Remaining payment-security blockers
+
+- MT-0084: no maintained server-side image decoder is pinned in the project; Bun is unavailable to add a locked dependency and verify malformed/truncated image rejection. Do not rely on ImageMagick/FFmpeg/Pillow or other host binaries absent from the deployed runtime.
+- MT-0086: no independent bank settlement feed/provider callback or equivalent evidence exists; a screenshot and typed transaction reference are not independent confirmation of receipt.
+- MT-0087: no unique index exists for `payment_proofs.transaction_ref`; a concurrency-safe uniqueness migration remains blocked by the Boxont-controlled Supabase cutover and held PR #1.
+
+### Production boundary
+
+All production checks were read-only. No customer/order/payment rows, storage objects, RLS policies, grants, schema, authentication settings, secrets, environment variables, billing or deployments were changed. No supplier/customer was contacted and no payment or purchase was made.
