@@ -1092,7 +1092,7 @@ No product records, supplier assignments, prices, variants, order records, datab
 - Vercel's last-hour runtime-error query found no runtime-error clusters, and the last-30-minute production error/fatal log query returned no entries. These monitoring results do not prove a payment submission succeeded; there were no orders created after the intermediate deployment in the read-only snapshot.
 - **Release action:** wait until the Vercel free deployment API quota has reset (the returned retry window was 24 hours), confirm the latest documentation-only `main` HEAD has a passing quality run, then deploy that current `main` commit (which includes the tested application-code commit `26a69301856a715a2cbd293da2cf88227d694ca5`) to production and verify both aliases before treating MT-0083 as live. Do not upgrade the plan or change billing to bypass the limit.
 
-**Next P0 task:** MT-0084 — validate uploaded proof file type, size and content handling. The source-level MT-0083 implementation is committed and CI-verified; its production rollout remains subject to the Vercel deployment quota above.
+**Historical next P0 at the time this section was written:** MT-0084 — validate uploaded proof file type, size and content handling. Subsequent task entries and section 27 record later implementation evidence and the current eligible queue.
 
 
 ## 27. Secrets, supplier credentials and payment configuration audit — 8 November 2026
@@ -1136,4 +1136,7 @@ No product records, supplier assignments, prices, variants, order records, datab
 - Vercel production deployment remains READY on older commit 779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7. The current main combined status still reports the free deployment-rate limit. This PR is tests/documentation only; no deployment was requested.
 - No environment values were decrypted, printed, copied or changed. No production database, storage, RLS, authentication, Vercel environment, secrets, DNS, hosting, billing or customer/payment records were modified. No credentials were rotated because the inspected historical .env contained only public configuration; the Preview service-role isolation issue remains owner-only.
 
+
+- P0 tasks already implemented/audited on draft PRs #2–#14 remain unmerged and require owner review/promotion; do not duplicate those changes or treat them as canonical on main. The other earlier P0 blockers in the task register still require supplier/issuer evidence, independent settlement data, owner-approved commercial/legal decisions or the approved Supabase cutover.
+- MT-0181 requires a physical Android device and an authorised end-to-end test order/payment; neither device access nor permission to create a real test purchase was available in this run.
 **Next eligible P0:** MT-0182 — verify the existing availability labels, purchasable counts and disabled coming-soon actions against the current production page. MT-0181 remains ahead in the register but requires physical Android-device/full-purchase-journey verification and authorised test-order/payment access; do not simulate a real purchase or infer device results.
