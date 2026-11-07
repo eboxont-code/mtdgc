@@ -57,6 +57,15 @@ MTDGC (Matrix Digital Goods & Commerce) is a digital marketplace for Nepal. This
 - The checklist is shown only in the administrator order-detail view. Existing order-item RLS remains unchanged; the snapshot contains product metadata and requirement labels, not new credentials or payment secrets. The public guest order-summary function does not select or return the `fields` JSONB.
 - This is a data snapshot and review aid, not a supplier runbook or proof of fulfilment readiness. Supplier-specific instructions remain blocked until independently verified evidence exists.
 
+### 4.3 Final checkout confirmation for current top-up and emailed-code categories
+
+- The current production catalogue identifies `game-top-ups` and `gift-cards` as the only currently orderable categories requiring this additional review. The current read-only snapshot found four orderable game top-up products and one orderable Roblox gift card; software/subscription listings were not treated as active code-release products.
+- `src/lib/order-confirmation.ts` centralises the category policy. Older cart lines with delivery fields but no saved category are conservatively prompted for confirmation.
+- Before order creation, checkout shows the exact cart product, selected option/face value, quantity, listed region and saved delivery-field values in an explicit confirmation dialog. Desktop and mobile order actions share the same path.
+- The server resolves each selected SKU's product category from the database relation and requires the `detailsConfirmed` acknowledgement for `game-top-ups` and `gift-cards`. The client-supplied category label is not trusted for the server decision.
+- The acknowledgement is an accuracy safeguard, not authentication or cryptographic proof of human review; a deliberate direct API caller can set the boolean. It does not verify payment settlement, supplier authority, fulfilment or delivery.
+- No supplier-specific reversibility claim is made: the product schema has no supplier irreversibility field and the Supplier Register has no verified product-scope records. No schema migration or production write is needed for this UI/server-input check.
+
 ## 5. Guest Checkout Architecture
 - **No Account Required**: Orders are created with `user_id = NULL`.
 - **Identity**: `guest_email` and `guest_whatsapp` are captured.
