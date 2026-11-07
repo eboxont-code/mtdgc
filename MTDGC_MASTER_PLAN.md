@@ -541,7 +541,7 @@ No numbered task is currently marked **IN PROGRESS**. MT-0105 is DONE on this br
 | 5 | MT-0086–MT-0087 — independent settlement and duplicate-reference protection | BLOCKED; no independent settlement source; unique transaction-reference migration is behind the Supabase cutover |
 | 6 | MT-0101–MT-0102 — order status map and operational definitions | BLOCKED; completed documentation remains on a diverged, unmerged branch |
 | 7 | MT-0103–MT-0104 — terminal states and transition enforcement | BLOCKED; action_required needs an owner decision/migration if required; safe override matrix is not owner-approved |
-| 8 | MT-0105 — guest tracking requires order number plus matching contact | DONE on automation/mt-0105-guest-order-tracking-20261107; six commits ahead of main |
+| 8 | MT-0105 — guest tracking requires order number plus matching contact | DONE on automation/mt-0105-guest-order-tracking-20261107; ahead of main with no behind commits |
 | 9 | MT-0106 — consistent customer status display | BLOCKED; depends on canonical status-map/definition promotion |
 | 10 | MT-0121 — product-family manual fulfilment instructions | BLOCKED; supplier instructions and delivery evidence are missing |
 | 11 | MT-0122–MT-0126 — fulfilment checklist, confirmation, supplier reference, delivery evidence and credential guard | BLOCKED; implementations are on a broad 80-ahead/7-behind branch; MT-0125 also needs the Supabase storage cutover |
@@ -1145,7 +1145,7 @@ Current canonical base is main SHA 9c745dda3951bc8af616ea09061cb828e16f89d6. The
 | automation/mt-0101-order-status-map | 6 commits ahead, 7 behind; no PR | MT-0101/0102 status inventory and definitions; MT-0085 documentation | Diverged; review/reconcile before canonical promotion |
 | automation/mt-0104-order-transition-guard | 80 commits ahead, 7 behind; no PR | MT-0122–MT-0126, MT-0141/0144/0145 and related order/checkout code | Broad unrelated diff; do not merge as-is or duplicate its completed work |
 | automation/mt-0161-authz-audit | 3 commits ahead, 0 behind; no PR | MT-0161 read-only security audit documentation | Review/promote separately; no production settings changed |
-| automation/mt-0105-guest-order-tracking-20261107 | 6 commits ahead, 0 behind; no PR | MT-0105 shared guest-contact authorization and tests | Current task branch; no PR opened to avoid initiating another preview deployment |
+| automation/mt-0105-guest-order-tracking-20261107 | Ahead of main, 0 behind; no PR | MT-0105 shared guest-contact authorization and tests | Current task branch; no PR opened to avoid initiating another preview deployment |
 
 ### Promotion and release boundary
 
