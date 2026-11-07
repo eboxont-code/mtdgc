@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { findUnsafeCustomerRequirement, UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE } from "@/lib/supplier-safety";
+import { findUnsafeCustomerRequirement, isSafeCustomerRequirements, UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE } from "@/lib/supplier-safety";
 import { generateOrderReference } from "@/lib/order-reference";
 import { buildOrderItemFieldsSnapshot, hasReservedOrderItemField } from "@/lib/pre-fulfilment";
 import { assertOrderDetailsConfirmed } from "@/lib/order-confirmation";
@@ -99,6 +99,8 @@ export const placeOrder = createServerFn({ method: "POST" })
       const p = v?.products as { id: string; name: string; is_published: boolean; status: string; region: string; requirements: unknown } | null | undefined;
       const ok = v && p?.is_published && ["available", "low_stock"].includes(v.status) && ["available", "low_stock"].includes(p.status);
       if (!ok || !v || !p) throw new Error(`An item in your cart is no longer available (${line.sku}).`);
+      const requirements = p.requirements ?? [];
+      if (!isSafeCustomerRequirements(requirements)) throw new Error(UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE);
       return {
         product_id: p.id,
         variant_id: v.id,
@@ -108,7 +110,7 @@ export const placeOrder = createServerFn({ method: "POST" })
         quantity: line.quantity,
         unit_price_minor: v.price_minor,
         line_total_minor: v.price_minor * line.quantity,
-        fields: buildOrderItemFieldsSnapshot(line.fields, p.region, p.requirements),
+        fields: buildOrderItemFieldsSnapshot(line.fields, p.region, requirements),
       };
     });
     assertOrderDetailsConfirmed(productCategorySlugs, data.detailsConfirmed);
