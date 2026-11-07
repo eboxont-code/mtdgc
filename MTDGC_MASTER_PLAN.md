@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.1 · 7 November 2026
+**Version:** 2.2 · 7 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -300,7 +300,7 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Customer information, payment evidence, order records and staff tools are protected with least-privilege access.
 
-- [ ] **MT-0161 · P0 · TODO** — Audit authentication and authorisation for customer accounts, support requests and admin routes.
+- [x] **MT-0161 · P0 · DONE** — Completed the read-only authentication/authorisation audit of current main source and production RLS, grants, private storage policies and Supabase security-advisor findings. Evidence and owner-gated follow-ups are recorded in section 27; no production changes were made.
 - [ ] **MT-0162 · P0 · TODO** — Verify one customer cannot access another customer's orders by changing an ID or URL.
 - [ ] **MT-0163 · P0 · TODO** — Verify payment uploads and delivered codes are stored privately, not in public buckets.
 - [ ] **MT-0164 · P0 · TODO** — Ensure admin-only actions are enforced server-side, not only hidden in the interface.
@@ -539,9 +539,11 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 3 | MT-0061–MT-0063 — build landed cost and order-level gross margin from source costs | BLOCKED; supplier costs, dated FX, payment/settlement fees, refunds and variable fulfilment/support costs are absent |
 | 4 | MT-0064 — approve minimum contribution-margin floor | BLOCKED; business-owner decision required |
 | 5 | MT-0065 — enforce a current-price/margin gate at checkout | BLOCKED; depends on the approved floor and trusted cost/price-expiry data; schema changes remain behind the Supabase cutover |
-| 6 | MT-0081 — audit the current QR and bank-transfer payment flow | TODO; next independent P0 task after the supplier and pricing blockers |
+| 6 | MT-0081 — audit the current QR and bank-transfer payment flow | DONE; audit and control gaps are documented in section 24 |
 | 7 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 8 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
+| 9 | MT-0161 — authentication and authorisation audit | DONE; read-only source, RLS, grants, storage and advisor findings documented in section 27 |
+| 10 | MT-0162 — verify one customer cannot access another customer's orders by changing an ID or URL | NEXT ACTIONABLE P0; extend negative coverage across guest tracking, authenticated ownership and payment-proof paths without production test orders |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -1093,3 +1095,52 @@ No product records, supplier assignments, prices, variants, order records, datab
 - **Release action:** wait until the Vercel free deployment API quota has reset (the returned retry window was 24 hours), confirm the latest documentation-only `main` HEAD has a passing quality run, then deploy that current `main` commit (which includes the tested application-code commit `26a69301856a715a2cbd293da2cf88227d694ca5`) to production and verify both aliases before treating MT-0083 as live. Do not upgrade the plan or change billing to bypass the limit.
 
 **Next P0 task:** MT-0084 — validate uploaded proof file type, size and content handling. The source-level MT-0083 implementation is committed and CI-verified; its production rollout remains subject to the Vercel deployment quota above.
+
+
+## 27. Authentication and authorisation audit — 7 November 2026
+
+**Task:** MT-0161 · P0 · DONE. This was a read-only audit of current GitHub main source, production database policy/grant metadata, private storage configuration and Supabase security-advisor findings. No application code or production settings were changed.
+
+### Source and route controls inspected
+
+- Audited current main commit 9c745dda3951bc8af616ea09061cb828e16f89d6. The existing automation branch automation/mt-0104-order-transition-guard is divergent (80 commits ahead and 7 behind main); it was not rebased or modified. This audit is recorded on a fresh branch based on current main because the authentication-related files are not identical across the two branches.
+- src/routes/_authenticated/route.tsx calls Supabase auth.getUser() and redirects unauthenticated visitors to /auth. The route is client-only (ssr:false); this is a navigation gate, not the security boundary for data.
+- src/start.ts registers global attachSupabaseAuth function middleware and CSRF middleware filtered to server-function requests. The client middleware attaches the current access token as a Bearer header.
+- src/integrations/supabase/auth-middleware.ts requires a Bearer token, validates it with Supabase auth.getClaims(token), requires a subject, and places the validated user ID/claims plus a user-authenticated Supabase client into server-function context.
+- The admin route checks has_role before rendering/loading admin data. That browser check is only a UI gate. All 14 exported functions in src/lib/admin.functions.ts independently use requireSupabaseAuth and call assertAdmin: updateOrderStatus, addOrderNote, approveReview, saveProduct, archiveProduct, saveVariant, archiveVariant, saveCategory, getAdminPaymentSettings, savePaymentSettings, uploadPaymentQr, listPaymentsToVerify, getPaymentProofUrl and reviewPayment.
+- Account/profile, order-history and wishlist reads use the browser Supabase client beneath the authenticated route and rely on RLS. Profile reads/writes are scoped to the signed-in user's ID. Account order and support-ticket reads do not add client-side owner filters in every call; database policies are essential.
+- The support form calls auth.getUser() before inserting a ticket with that user's ID. Production RLS independently restricts ticket insertion and reading to the owner, with a separate admin policy.
+- listMyOrders uses requireSupabaseAuth and explicitly filters user_id = context.userId. Guest-compatible order functions intentionally do not require an account session: getOrderForViewer and submitPaymentProof resolve the order server-side and check an order-scoped access-token hash, a verified bearer-token account owner, or saved order/contact verification. lookupOrder requires order number plus matching contact. getPaymentSettings is intentionally public checkout information (bank instructions and a time-limited signed QR URL), not customer order data.
+- The service-role client is defined in src/integrations/supabase/client.server.ts and is documented as server-only/RLS-bypassing. The inspected admin/order server functions load it dynamically inside handlers. No service-role value was read.
+
+### Production RLS, grants and storage evidence (read-only)
+
+Supabase project eaomkkswslqtfunkceuc (mtdgc) reported ACTIVE_HEALTHY; PostgreSQL was 17.11.0.003. All 14 application tables in the public schema have RLS enabled.
+
+- profiles: authenticated users can insert/read/update only rows where id = auth.uid().
+- orders: owners can read rows where user_id = auth.uid(); administrators have the all-operations policy. Although authenticated has table-level UPDATE privilege, the only UPDATE-capable policy is the admin policy, so the owner-read policy does not grant customers update access.
+- order_items: authenticated SELECT is limited to an order owned by the user or an administrator. No customer INSERT/UPDATE/DELETE grant was observed.
+- support_tickets: authenticated INSERT requires user_id = auth.uid(); SELECT is owner-or-admin; the separate admin policy permits staff operations.
+- user_roles: authenticated users have SELECT only on their own role rows. INSERT/UPDATE/DELETE grants are limited to service_role.
+- payment_proofs: authenticated SELECT is owner-or-admin; customer writes are not granted. Server-side service-role code performs proof uploads/association.
+- order_status_events: the policy permits all operations only when has_role(auth.uid(), 'admin') is true. Authenticated table grants include INSERT/SELECT, but RLS prevents non-admin customer writes.
+- wishlist_items: all authenticated operations are scoped to user_id = auth.uid(). Reviews allow public reads of approved records, owner submission of unapproved records, and admin moderation.
+- order_lookup_attempts: RLS is enabled with no policies, and the table has grants only for service_role; no anon/authenticated table grants were present. This is currently service-role-only rather than client-accessible.
+- Storage buckets payment-proofs and payment-qr are both private. The payment-proofs object SELECT policy allows the order owner or an administrator; no customer object-write policy was present. The payment-qr object policies restrict SELECT/INSERT/UPDATE/DELETE to administrators.
+
+### Findings and follow-up
+
+1. **Supabase security warning — public.has_role(uuid, app_role):** the function is SQL SECURITY DEFINER, sets search_path = public, and queries public.user_roles. Supabase's security advisor reports EXECUTE is granted to both anon and authenticated. The function accepts an arbitrary _user_id, so callers can ask whether a supplied UUID has a given role. The table itself remains RLS-protected and clients have no role-write grants; no privilege escalation was demonstrated, but this is an avoidable role-existence oracle and a security-advisor WARN. A safe fix needs a coordinated function/policy review (public approved-review policies also call has_role) and a migration on the approved Boxont-controlled Supabase target. Do not revoke grants or alter the live function/policies on the current project.
+2. **Supabase informational warning — order_lookup_attempts:** the advisor reports RLS enabled with no policies. The grant audit confirms only service_role has table privileges, so no client policy is currently required for the observed server-only access model. Recheck if the access model changes.
+3. **Fail-open lookup rate-limit handling in current main:** lookupOrder, the contact fallback in getOrderForViewer, and the contact fallback in submitPaymentProof do not check errors from the attempt-count query or attempt insert. A failed count can be treated as zero and allow the request to continue. This does not bypass the order-specific token/contact checks, but weakens enumeration/abuse protection when the rate-limit store is unavailable. Track this in the order-lookup/rate-limit follow-up; it was not changed as part of this audit.
+4. **Production release gap:** current main is newer than the latest observed production deployment. Vercel's latest production deployment is READY on commit 779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7, not current main 9c745dda3951bc8af616ea09061cb828e16f89d6. The current main combined Vercel status reports the free build-rate-limit failure. The current main GitHub Actions Quality run passed, and the production runtime-error query returned no errors in the preceding 24 hours. Source-level controls in newer main commits must not be described as live until a permitted production release.
+
+### Verification and boundaries
+
+- GitHub Actions Quality run [42323805501](https://github.com/eboxont-code/mtdgc/actions/runs/42323805501) completed successfully for current main SHA 9c745dda3951bc8af616ea09061cb828e16f89d6; the repository workflow covers locked dependency installation, ESLint, unit tests, TypeScript typecheck and production build.
+- Supabase security advisor returned WARN findings for the public SECURITY DEFINER has_role function and an INFO finding for the service-role-only order_lookup_attempts table. Health advisor returned no findings.
+- Vercel production deployment dpl_4nELrLJ21wEGvAAtVbs2g6UPsNhC is READY on the older 779d2da commit. Vercel's 24-hour runtime-error query returned no runtime errors. The latest branch previews are not production.
+- No local checkout or local working-tree status is exposed by the available GitHub connector; branch refs and the main-to-automation compare were inspected instead. No local Bun test run was possible or necessary for this read-only audit.
+- No customer records, order values, payment proof contents, auth-user records or secrets were queried. No production SQL writes, migrations, role/policy changes, auth-setting changes, deployments, customer/supplier contacts or purchases were performed.
+
+**Next P0 task:** MT-0162 — verify that one customer cannot access another customer's order by changing an ID or URL. Preserve guest access-token, authenticated-owner and contact fallback behaviour; use isolated tests/fixtures and do not create or modify production orders.
