@@ -1248,6 +1248,7 @@ Adding, removing or restructuring an exported admin endpoint now fails the contr
 - Read-only production Supabase inspection on 8 November 2026 confirmed RLS policies on `orders`, `order_items`, `order_status_events`, `payment_proofs` and `payment_settings`. Administrator policies call `has_role(auth.uid(), 'admin')`; order-owner policies remain separate.
 - Production project `eaomkkswslqtfunkceuc` is `ACTIVE_HEALTHY` on PostgreSQL 17.11.0.003. No customer, order, payment, auth-user or storage-object records were queried.
 - The MT-0162 preview deployment [`dpl_4eYrggCR5bRp2gCr8TZ3RUciSxRe`](https://vercel.com/boxont/mtdgc/4eYrggCR5bRp2gCr8TZ3RUciSxRe) is `READY` for branch `automation/mt-0162-order-isolation-20261108`, commit `d7a2bd593bb89304ded7773e6728079ed80cb260`. Production remains `READY` on older main commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`; no deployment was requested for MT-0164.
+- The MT-0164 preview deployment [`dpl_BbBgB8fMWytXmPoLSh5wLVaJhDoy`](https://vercel.com/boxont/mtdgc/BbBgB8fMWytXmPoLSh5wLVaJhDoy) is `READY` for application/test commit `e8699c9010458ba5c9178aca5d5ea2418759dc63`. Documentation-only commits `308b0ffbe6e2b7792d7fd59de47d689b14831cc3` and `576d2ec4290481fc762c563e24dcfc2feef64f8f` were `BUILDING` and `QUEUED` respectively at the latest read; neither is treated as a READY deployment. All are previews (`target: null`); no production deployment was requested.
 
 ### Separate security finding retained
 
