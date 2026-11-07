@@ -301,8 +301,8 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** Customer information, payment evidence, order records and staff tools are protected with least-privilege access.
 
 - [x] **MT-0161 · P0 · DONE** — Completed the read-only authentication/authorisation audit of current main source and production RLS, grants, private storage policies and Supabase security-advisor findings. Evidence and owner-gated follow-ups are recorded in section 27; no production changes were made.
-- [ ] **MT-0162 · P0 · TODO** — Verify one customer cannot access another customer's orders by changing an ID or URL.
-- [ ] **MT-0163 · P0 · TODO** — Verify payment uploads and delivered codes are stored privately, not in public buckets.
+- [x] **MT-0162 · P0 · DONE** — Verified account-owned and guest-order isolation. Contact fallback is guest-only; account-owned orders require the matching authenticated account or order-specific bearer token. Synthetic negative tests and production RLS metadata are recorded in section 28.
+- [!] **MT-0163 · P0 · BLOCKED** — The production payment-proof and payment-QR buckets are private, but no delivery-code table or delivery bucket exists. The delivered-code portion cannot be verified until an approved private delivery-storage design and the Supabase cutover are available; see section 28.
 - [ ] **MT-0164 · P0 · TODO** — Ensure admin-only actions are enforced server-side, not only hidden in the interface.
 - [ ] **MT-0165 · P0 · TODO** — Review secrets, supplier credentials and payment configuration for accidental exposure.
 - [ ] **MT-0166 · P1 · TODO** — Enable strong admin authentication and remove unused staff accounts.
@@ -544,7 +544,9 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 8 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 | 9 | MT-0161 — authentication and authorisation audit | DONE; read-only source, RLS, grants, storage and advisor findings documented in section 27 |
 | 10 | MT-0084 / MT-0085 — payment-proof image validation and access boundaries | IMPLEMENTED on open draft PRs #11 and #2 respectively; both remain unmerged and are not part of main. Do not duplicate; owner review/merge is the promotion dependency |
-| 11 | MT-0162 — verify cross-customer order isolation | NEXT NEW INDEPENDENT P0; use synthetic fixtures and read-only policy review; do not access customer records or write to production |
+| 11 | MT-0162 — verify cross-customer order isolation | DONE on PR #13; guest contact fallback and account bearer/owner checks are covered by synthetic tests; production RLS inspected read-only |
+| 12 | MT-0163 — verify private payment uploads and delivered-code storage | BLOCKED; payment-proof and payment-QR buckets are private, but no delivery-code table or bucket exists. Requires approved private storage design and Supabase cutover |
+| 13 | MT-0164 — verify admin-only actions are enforced server-side | NEXT P0; audit every exported admin server function and add regression coverage for non-admin denial |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -1159,3 +1161,44 @@ Supabase project eaomkkswslqtfunkceuc (mtdgc) reported ACTIVE_HEALTHY; PostgreSQ
 - MT-0161 promotion: draft PR [#12](https://github.com/eboxont-code/mtdgc/pull/12) was opened from `automation/mt-0161-authz-audit`; the preceding documentation head `7a74dfdf2cf62e0fe888603c403d61aca704b762` passed the full Quality workflow in run [42400942748](https://github.com/eboxont-code/mtdgc/actions/runs/42400942748). PR #12 remains OPEN/DRAFT and unmerged; no review has been submitted. This follow-up records promotion evidence only and changes no application source.
 
 **Next new independent P0 task:** MT-0162 — verify one customer cannot access another customer's orders by changing an ID or URL. MT-0084 and MT-0085 already have separate open draft PRs [#11](https://github.com/eboxont-code/mtdgc/pull/11) and [#2](https://github.com/eboxont-code/mtdgc/pull/2); both remain unmerged and are not part of main, so do not duplicate their implementation. MT-0086 remains blocked pending independent settlement evidence; MT-0087 remains blocked pending the approved Supabase cutover/uniqueness migration. The existing status/checkout tasks are represented by open draft PRs #3–#10 and remain subject to owner review/merge order.
+
+## 28. Cross-customer order isolation — 8 November 2026
+
+**Task:** MT-0162 · P0 · DONE on `automation/mt-0162-order-isolation-20261108`; draft PR [#13](https://github.com/eboxont-code/mtdgc/pull/13) is stacked on MT-0161 PR #12.
+
+### Application access boundaries
+
+- `listMyOrders` requires `requireSupabaseAuth`, uses the user-scoped Supabase client and filters `orders.user_id = context.userId`. Production RLS independently limits order SELECT to the authenticated owner or an administrator.
+- The order-detail URL contains an order number, not a trusted database ID. `getOrderForViewer` resolves the unique order number server-side before authorising access; its input accepts only the order number, optional order-scoped token, contact and bearer.
+- `hasOrderAccessToken` compares the supplied bearer secret's SHA-256 hash with the hash stored on that exact order. `isAuthenticatedOrderOwner` requires an exact match between the validated Supabase user ID and the order's `user_id`.
+- **Contact fallback is now guest-only.** `hasOrderContactAccess` returns false whenever `orders.user_id` is non-null, even if the submitted phone/email matches the account order's saved contact and verification hash. This shared helper is used by `getOrderForViewer` and `submitPaymentProof`, so an account-owned order cannot be opened or have proof submitted using contact details alone.
+- Public `lookupOrder` now resolves `user_id`. Guest orders require the matching order-scoped contact verification; account-owned orders require a bearer token validated by Supabase Auth and an exact owner-ID match. The tracking page passes its current session token so the legitimate account owner retains the tracking route.
+- Payment-proof association continues to derive the order ID, amount and storage path from the server-resolved order; the customer request does not supply a database order ID or storage path.
+- Nested order items/status events are returned only after the server-side order check. Direct customer table access is independently constrained by RLS.
+
+### Synthetic regression tests and CI
+
+- Existing tests cover order-token scoping, authenticated owner versus another user, guest contact plus order-number matching, and server-derived proof association.
+- Added tests prove that matching phone/email cannot use the contact fallback on an account-owned order and that an account order's bearer token cannot be reused against another order.
+- The order-access suite now has six tests. Full GitHub Actions Quality run [42405248193](https://github.com/eboxont-code/mtdgc/actions/runs/42405248193) passed on application commit `4ac01f06f18504270a4508bd59301a078b29009a`: Bun setup, frozen install, ESLint, full Bun unit tests, TypeScript typecheck and production build.
+
+### Production RLS and schema evidence — read-only
+
+Supabase project `eaomkkswslqtfunkceuc` is ACTIVE_HEALTHY on PostgreSQL 17.11.0.003.
+
+- `orders`, `order_items` and `order_status_events` all have RLS enabled.
+- `orders`: the owner SELECT policy is `auth.uid() = user_id`; the separate administrator policy grants administrator operations. Authenticated table-level UPDATE privilege is constrained by RLS; the owner policy itself is read-only.
+- `order_items`: authenticated SELECT requires a related `orders` row with `orders.user_id = auth.uid()`, or administrator access.
+- `order_status_events`: the only observed policy is administrator-only. Authenticated INSERT/SELECT grants do not bypass that RLS policy.
+- No customer, order, payment, auth-user or storage-object records were read. Only schema, policy, grant and bucket metadata was inspected.
+
+### Remaining boundaries and next tasks
+
+- The server-side Supabase service-role client bypasses RLS by design. Every order handler using it must retain explicit order-scoped token, authenticated-owner or guest-contact checks.
+- The existing order lookup rate-limit count/delete/insert error handling can still fail open; that is a separate abuse-control follow-up and is not claimed as fixed by MT-0162.
+- The `public.has_role` SECURITY DEFINER advisor warning remains cutover-gated under MT-0161; no production function, policy, grant or schema change was made.
+- MT-0163 is BLOCKED: production has only the private `payment-proofs` (5 MiB) and `payment-qr` (2 MiB) buckets. No public-schema delivery/code table or delivery bucket exists. The delivered-code portion needs an approved private storage design and the Boxont-controlled Supabase cutover.
+- MT-0164 is the next eligible P0 task: verify every admin-only action is enforced server-side and add focused negative tests.
+
+No production deployment, migration, record write, storage/auth/RLS change, secret/environment/DNS/hosting/billing change, supplier/customer contact or purchase occurred. Additional spend: $0.
+
