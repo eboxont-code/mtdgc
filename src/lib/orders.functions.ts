@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { hasCheckoutPriceSnapshotChanges } from "@/lib/checkout-price-snapshot";
 import { findUnsafeCustomerRequirement, UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE } from "@/lib/supplier-safety";
 import { generateOrderReference } from "@/lib/order-reference";
 import {
@@ -19,10 +20,17 @@ const lineSchema = z.object({
   sku: z.string().min(1).max(80),
   quantity: z.number().int().min(1).max(10),
   fields: z.record(z.string().max(80), z.string().max(200)).default({}),
+  expectedProductName: z.string().trim().min(1).max(120).optional(),
+  expectedVariantName: z.string().trim().min(1).max(120).optional(),
+  expectedPriceMinor: z.number().int().positive().optional(),
 }).refine(
   (line) => !findUnsafeCustomerRequirement(Object.keys(line.fields)),
   { message: UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE },
-);
+).refine((line) => {
+  const snapshotValues = [line.expectedProductName, line.expectedVariantName, line.expectedPriceMinor];
+  const supplied = snapshotValues.filter((value) => value !== undefined).length;
+  return supplied === 0 || supplied === snapshotValues.length;
+}, { message: "Checkout price snapshot must be complete." });
 
 const orderSchema = z
   .object({
@@ -79,28 +87,54 @@ export const placeOrder = createServerFn({ method: "POST" })
     const skus = data.lines.map((l) => l.sku);
     const { data: variants, error } = await supabaseAdmin
       .from("product_variants")
-      .select("id, sku, name, price_minor, status, product_id, products(id, name, is_published, status)")
+      .select("id, sku, name, price_minor, currency, status, product_id, products(id, name, image_url, currency, is_published, status, categories(slug))")
       .in("sku", skus);
     if (error) throw new Error("Could not load products");
 
-    const items = data.lines.map((line) => {
+    const resolvedLines = data.lines.map((line) => {
       const v = variants?.find((x) => x.sku === line.sku);
-      const p = v?.products as { id: string; name: string; is_published: boolean; status: string } | null | undefined;
+      const p = v?.products as {
+        id: string;
+        name: string;
+        image_url: string | null;
+        currency: string;
+        is_published: boolean;
+        status: string;
+        categories: { slug: string } | null;
+      } | null | undefined;
       const ok = v && p?.is_published && ["available", "low_stock"].includes(v.status) && ["available", "low_stock"].includes(p.status);
       if (!ok || !v || !p) throw new Error(`An item in your cart is no longer available (${line.sku}).`);
+      if (v.currency !== "NPR" || p.currency !== "NPR") throw new Error("This item's price currency is not supported by checkout.");
       return {
-        product_id: p.id,
-        variant_id: v.id,
-        sku: v.sku,
-        product_name: p.name,
-        variant_name: v.name,
-        quantity: line.quantity,
-        unit_price_minor: v.price_minor,
-        line_total_minor: v.price_minor * line.quantity,
-        fields: line.fields,
+        orderItem: {
+          product_id: p.id,
+          variant_id: v.id,
+          sku: v.sku,
+          product_name: p.name,
+          variant_name: v.name,
+          quantity: line.quantity,
+          unit_price_minor: v.price_minor,
+          line_total_minor: v.price_minor * line.quantity,
+          fields: line.fields,
+        },
+        checkoutLine: {
+          sku: v.sku,
+          productName: p.name,
+          variantName: v.name,
+          priceMinor: v.price_minor,
+          quantity: line.quantity,
+          image: p.image_url,
+          categorySlug: p.categories?.slug,
+        },
       };
     });
+    const items = resolvedLines.map((line) => line.orderItem);
+    const checkoutLines = resolvedLines.map((line) => line.checkoutLine);
     const subtotal = items.reduce((s, i) => s + i.line_total_minor, 0);
+
+    if (hasCheckoutPriceSnapshotChanges(data.lines, checkoutLines)) {
+      return { status: "cart_changed" as const, totalMinor: subtotal, lines: checkoutLines };
+    }
     const email = data.email || null;
     const contactKey = normaliseContact(data.phone || data.email || "");
     const tokenBytes = crypto.getRandomValues(new Uint8Array(32));
@@ -135,7 +169,7 @@ export const placeOrder = createServerFn({ method: "POST" })
       .from("order_items")
       .insert(items.map((i) => ({ ...i, order_id: order.id })));
     if (itemsError) throw new Error("Could not save order lines");
-    return { orderNumber, accessToken, totalMinor: subtotal };
+    return { status: "created" as const, orderNumber, accessToken, totalMinor: subtotal, lines: checkoutLines };
   });
 
 export const lookupOrder = createServerFn({ method: "POST" })
