@@ -554,7 +554,7 @@ function CheckoutPage() {
               go back and edit before placing the order.
             </section>
           )}
-          <div className="max-h-64 space-y-3 overflow-y-auto>
+          <div className="max-h-64 space-y-3 overflow-y-auto">
             {detailsToConfirm.map((line) => (
               <section key={line.sku} className="rounded-xl border border-border bg-background/50 p-3 text-sm">
                 <p className="font-display font-semibold">{line.productName}</p>
