@@ -251,11 +251,11 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** Orders are delivered accurately and on time, while manual checks are gradually replaced only by safe, tested automation.
 
 - [!] **MT-0121 · P0 · BLOCKED** — Product-specific supplier fulfilment instructions, delivery windows, escalation contacts and source evidence are not recorded; the supplier register is empty. Unblock with verified supplier/issuer instructions for each active product family.
-- [ ] **MT-0122 · P0 · TODO** — Create a pre-fulfilment checklist for player ID, zone, server, region, denomination and email.
-- [ ] **MT-0123 · P0 · TODO** — Require a second confirmation for irreversible top-ups and code releases.
-- [ ] **MT-0124 · P0 · TODO** — Record the supplier transaction or redemption reference for each completed order.
+- [!] **MT-0122 · P0 · BLOCKED** — A complete implementation and six-test set exist on automation/mt-0104-order-transition-guard, but that branch is 80 commits ahead and 7 behind main, has no PR, and contains many unrelated order/checkout changes. Reconcile and review the branch before promotion; do not duplicate or merge its broad diff without owner review.
+- [!] **MT-0123 · P0 · BLOCKED** — The second-confirmation implementation and tests exist on the same 80-ahead/7-behind unmerged branch. Reconcile/review the broad branch before promotion; do not treat its preview as production or claim supplier-side irreversibility.
+- [!] **MT-0124 · P0 · BLOCKED** — Supplier-reference capture code/tests exist on the same unmerged branch, but the branch has no PR and is 80 commits ahead/7 behind main. Reconcile/review before promotion; no actual supplier references or verified suppliers are recorded.
 - [ ] **MT-0125 · P0 · TODO** — Capture delivery evidence and attach it to the correct order.
-- [ ] **MT-0126 · P0 · TODO** — Never request a customer's game password, subscription password, OTP or payment PIN.
+- [!] **MT-0126 · P0 · BLOCKED** — Credential-field protections and tests exist on the same unmerged 80-ahead/7-behind branch. Review and reconcile the broad branch before promoting; no supplier practices are independently verified.
 - [ ] **MT-0127 · P1 · TODO** — Define realistic delivery-time ranges per product based on measured fulfilment history.
 - [ ] **MT-0128 · P1 · TODO** — Pause new orders when a supplier is unavailable or a product cannot be delivered.
 - [ ] **MT-0129 · P1 · TODO** — Create a queue sorted by paid status, promised delivery window and risk.
@@ -275,11 +275,11 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Policies match real operations, customers can resolve problems quickly, and trust claims are supported by evidence.
 
-- [ ] **MT-0141 · P0 · TODO** — Review the current Terms, Privacy, Delivery and Refund policies for consistency across Nepal and Australia.
+- [!] **MT-0141 · P0 · BLOCKED** — The factual policy audit is documented on the unmerged automation/mt-0104-order-transition-guard branch. It is not part of canonical main; reconcile/review the branch before treating the audit as canonical. Legal/market decisions remain separately blocked under MT-0142/0143.
 - [ ] **MT-0142 · P0 · TODO** — Resolve any conflict between the advertised markets and the markets covered by legal terms.
 - [ ] **MT-0143 · P0 · TODO** — Ensure refund rules distinguish undelivered, supplier-failed, incorrect-item and successfully redeemed digital goods.
-- [ ] **MT-0144 · P0 · TODO** — Make region-lock warnings prominent before payment for every region-restricted code.
-- [ ] **MT-0145 · P0 · TODO** — Make wrong-player-ID warnings visible before confirming an irreversible top-up.
+- [!] **MT-0144 · P0 · BLOCKED** — Region-warning implementation/tests exist on the same unmerged 80-ahead/7-behind branch. Reconcile and review the broad branch before promotion; do not assume the preview is production.
+- [!] **MT-0145 · P0 · BLOCKED** — Player-identifier warning implementation/tests exist on the same unmerged 80-ahead/7-behind branch. Reconcile and review the broad branch before promotion; do not assume the preview is production.
 - [ ] **MT-0146 · P1 · TODO** — Publish support response hours only after they are operationally staffed.
 - [ ] **MT-0147 · P1 · TODO** — Create ticket categories for payment, delayed delivery, invalid code, wrong item, refund and account access.
 - [ ] **MT-0148 · P1 · TODO** — Require an order number for order-specific support while allowing pre-purchase questions.
@@ -300,7 +300,7 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Customer information, payment evidence, order records and staff tools are protected with least-privilege access.
 
-- [ ] **MT-0161 · P0 · TODO** — Audit authentication and authorisation for customer accounts, support requests and admin routes.
+- [!] **MT-0161 · P0 · BLOCKED** — The read-only audit is documented on automation/mt-0161-authz-audit, 3 commits ahead of main with no PR. Review/promote the audit branch before treating it as canonical; the Supabase has_role SECURITY DEFINER warning remains unresolved behind the migration gate.
 - [ ] **MT-0162 · P0 · TODO** — Verify one customer cannot access another customer's orders by changing an ID or URL.
 - [ ] **MT-0163 · P0 · TODO** — Verify payment uploads and delivered codes are stored privately, not in public buckets.
 - [ ] **MT-0164 · P0 · TODO** — Ensure admin-only actions are enforced server-side, not only hidden in the interface.
@@ -541,12 +541,15 @@ No numbered task is currently marked **IN PROGRESS**. MT-0105 is DONE on this br
 | 5 | MT-0086–MT-0087 — independent settlement and duplicate-reference protection | BLOCKED; no independent settlement source; unique transaction-reference migration is behind the Supabase cutover |
 | 6 | MT-0101–MT-0102 — order status map and operational definitions | BLOCKED; completed documentation remains on a diverged, unmerged branch |
 | 7 | MT-0103–MT-0104 — terminal states and transition enforcement | BLOCKED; action_required needs an owner decision/migration if required; safe override matrix is not owner-approved |
-| 8 | MT-0105 — guest tracking requires order number plus matching contact | DONE; shared order-scoped helper and negative tests are committed on this branch |
+| 8 | MT-0105 — guest tracking requires order number plus matching contact | DONE on automation/mt-0105-guest-order-tracking-20261107; four commits ahead of main |
 | 9 | MT-0106 — consistent customer status display | BLOCKED; depends on canonical status-map/definition promotion |
 | 10 | MT-0121 — product-family manual fulfilment instructions | BLOCKED; supplier instructions and delivery evidence are missing |
-| 11 | MT-0122 — pre-fulfilment checklist | NEXT P0; can use saved order-item fields and existing product requirements without a production schema change |
-| 12 | Boxont-controlled Supabase cutover and held PR #1 | BLOCKED; target project, backup/restore and migration reconciliation gates remain unverified |
-| 13 | MT-0282 — Netflix listing | BLOCKED; requires written supplier/issuer evidence and a successful authorised test order |
+| 11 | MT-0122–MT-0126 — fulfilment checklist, confirmation, supplier reference, delivery evidence and credential guard | BLOCKED; implementations are on a broad 80-ahead/7-behind branch; MT-0125 also needs the Supabase storage cutover |
+| 12 | MT-0141, MT-0144–MT-0145 — policy audit and checkout warnings | BLOCKED; implementation/audit evidence is on the same unmerged broad branch; MT-0142/0143 require owner/legal review |
+| 13 | MT-0161 — authentication and authorisation audit | BLOCKED; audit is on a separate unmerged 3-commit branch |
+| 14 | MT-0162 — cross-customer order isolation by ID/URL | NEXT P0; inspect current route/server/RLS paths and add negative tests without production writes |
+| 15 | Boxont-controlled Supabase cutover and held PR #1 | BLOCKED; target project, backup/restore and migration reconciliation gates remain unverified |
+| 16 | MT-0282 — Netflix listing | BLOCKED; requires written supplier/issuer evidence and a successful authorised test order |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -1130,4 +1133,23 @@ No product records, supplier assignments, prices, variants, order records, datab
 - Main GitHub Actions Quality run 42323805501 passed on main SHA 9c745dd; it does not validate this branch. No PR or preview deployment was created, to avoid initiating a Vercel deployment while the free deployment quota/release gate is unresolved.
 - Production Vercel deployment remains READY on older commit 779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7. No production database, storage, authentication, environment, payment, deployment or billing change was made.
 
-**Next eligible P0 task:** MT-0122 — create the pre-fulfilment checklist from the saved order-item fields and existing product requirements. MT-0106 and MT-0121 remain blocked by canonical status-definition promotion and missing supplier instructions respectively.
+**Next eligible P0 task:** MT-0162 — verify cross-customer order isolation by changing an ID or URL and add focused negative tests. MT-0122–MT-0126, MT-0141/0144/0145 and MT-0161 have existing implementation/audit work on unmerged branches; do not duplicate or promote those broad/diverged diffs without owner review.
+
+## 28. Unmerged work-branch reconciliation snapshot — 7 November 2026
+
+Current canonical base is main SHA 9c745dda3951bc8af616ea09061cb828e16f89d6. The GitHub connector exposes remote refs but no local checkout/working tree.
+
+| Branch | Compare with main | Work represented | Current disposition |
+|---|---|---|---|
+| automation/mt-0085-proof-access-tests | PR #2, 14 commits ahead, 0 behind | MT-0085 helper/tests/docs | Draft PR; owner review/merge required; no production release |
+| automation/mt-0101-order-status-map | 6 commits ahead, 7 behind; no PR | MT-0101/0102 status inventory and definitions; MT-0085 documentation | Diverged; review/reconcile before canonical promotion |
+| automation/mt-0104-order-transition-guard | 80 commits ahead, 7 behind; no PR | MT-0122–MT-0126, MT-0141/0144/0145 and related order/checkout code | Broad unrelated diff; do not merge as-is or duplicate its completed work |
+| automation/mt-0161-authz-audit | 3 commits ahead, 0 behind; no PR | MT-0161 read-only security audit documentation | Review/promote separately; no production settings changed |
+| automation/mt-0105-guest-order-tracking-20261107 | 4 commits ahead, 0 behind; no PR | MT-0105 shared guest-contact authorization and tests | Current task branch; no PR opened to avoid initiating another preview deployment |
+
+### Promotion and release boundary
+
+- No existing branch was rebased, force-pushed, merged or rewritten. The older order-transition branch includes 80 commits across several unrelated tasks and is 7 commits behind current main; it needs owner review and careful reconciliation rather than an automatic merge.
+- PR #2 remains DRAFT and PR #1 remains explicitly held until the Boxont-controlled Supabase cutover. No PR was merged in this run.
+- The current branch preview was automatically created by Vercel from commit 24f02c7b7a31aa468c932dfdc34c5e98d3947d63 and was BUILDING at final inspection with target=null. It is not production. The production alias remains on READY deployment 779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7.
+- No production database, storage, authentication, payment, environment, billing or deployment setting was changed.
