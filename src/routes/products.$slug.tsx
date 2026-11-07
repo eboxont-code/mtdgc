@@ -19,6 +19,7 @@ import { enabledProviders } from "@/lib/payments";
 import { compareAt } from "@/lib/pricing";
 import { GIFT_CARD_PRICE_DISCLOSURE, isGiftCardCategory } from "@/lib/gift-card-pricing";
 import { productFaqs, requirementHelp } from "@/lib/product-help";
+import { getTopUpIdentifierGuidance, shouldPrefillDeliveryEmail } from "@/lib/top-up-identifiers";
 import { AccordionList } from "@/components/sections/accordion-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -147,7 +148,7 @@ function ProductPage() {
       if (!mail) return;
       setFields((c) => {
         const n = { ...c };
-        for (const r of product.requirements) if (/email/i.test(r) && !n[r]) n[r] = mail;
+        for (const r of product.requirements) if (shouldPrefillDeliveryEmail(r) && !n[r]) n[r] = mail;
         return n;
       });
     })();
@@ -204,6 +205,7 @@ function ProductPage() {
   };
 
   const hasDetails = product.requirements.length > 0;
+  const isGameTopUp = product.category?.slug === "game-top-ups";
   const packStep = hasDetails ? 2 : 1;
   const payStep = packStep + 1;
   const wa = whatsappLink(`${SUPPORT_MESSAGE} with ${product.name}`);
@@ -352,6 +354,18 @@ function ProductPage() {
                 )}
               </section>
             )}
+            {isGameTopUp && hasDetails && (
+              <section role="note" aria-label="Game account identifier warning" className="mt-4 rounded-2xl border border-warn/40 bg-warn/5 p-4">
+                <p className="text-sm leading-relaxed">
+                  <strong className="font-semibold">Check game account details before continuing.</strong>{" "}
+                  Copy each requested Player ID, User ID or Player tag directly from the game's own profile.
+                  If a Zone ID or Server is also requested, verify it separately. A typo may identify a different
+                  account. A nickname requested for verification is only a cross-check; it does not replace the
+                  required identifier.
+                </p>
+              </section>
+            )}
+
             {isPlan && (deliveryMethod || deliveryTime) && (
               <dl className="mt-4 space-y-2 text-sm">
                 {deliveryMethod && <div className="grid grid-cols-1 gap-1 sm:grid-cols-2"><dt className="text-muted-foreground">You receive</dt><dd>{deliveryMethod}</dd></div>}
@@ -365,6 +379,7 @@ function ProductPage() {
                 <div className="mt-4 space-y-3">
                   {product.requirements.map((requirement) => {
                     const help = requirementHelp(requirement);
+                    const identifierGuidance = isGameTopUp ? getTopUpIdentifierGuidance(requirement) : null;
                     const id = `req-${requirement.replace(/\W+/g, "-").toLowerCase()}`;
                     return (
                       <div key={requirement}>
@@ -373,12 +388,21 @@ function ProductPage() {
                           ref={(node) => { fieldRefs.current[requirement] = node; }}
                           id={id}
                           aria-invalid={invalidFields.includes(requirement)}
-                          aria-describedby={`${id}-help${invalidFields.includes(requirement) ? ` ${id}-error` : ""}`}
+                          aria-describedby={[
+                            help ? `${id}-help` : "",
+                            identifierGuidance ? `${id}-guidance` : "",
+                            invalidFields.includes(requirement) ? `${id}-error` : "",
+                          ].filter(Boolean).join(" ") || undefined}
                           value={fields[requirement] ?? ""}
                           onChange={(event) => { const v = event.target.value; setFields((current) => ({ ...current, [requirement]: v })); try { const all = JSON.parse(localStorage.getItem("mtdgc-fields-v1") ?? "{}"); all[requirement] = v; localStorage.setItem("mtdgc-fields-v1", JSON.stringify(all)); } catch { /* ignore */ } }}
                           className="mt-1 h-11 w-full rounded-xl border border-border bg-secondary px-3 font-mono text-sm outline-none focus:border-primary aria-[invalid=true]:border-destructive"
                         />
                         {help && <p id={`${id}-help`} className="mt-1 text-xs text-muted-foreground">{help}</p>}
+                        {identifierGuidance && (
+                          <p id={`${id}-guidance`} role="note" className="mt-2 rounded-lg border border-warn/30 bg-warn/5 p-2 text-xs leading-relaxed">
+                            <strong>{identifierGuidance.title}:</strong> {identifierGuidance.message}
+                          </p>
+                        )}
                         {invalidFields.includes(requirement) && <p id={`${id}-error`} className="mt-1 text-xs text-destructive">This detail is required.</p>}
                       </div>
                     );

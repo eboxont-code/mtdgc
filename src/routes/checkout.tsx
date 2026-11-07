@@ -26,6 +26,7 @@ import {
 import { useCart } from "@/lib/cart";
 import { formatNpr, SITE_URL } from "@/lib/format";
 import { getRegionCompatibilityWarning } from "@/lib/product-availability";
+import { getTopUpIdentifierGuidance } from "@/lib/top-up-identifiers";
 import { enabledProviders } from "@/lib/payments";
 import {
   ORDER_DETAILS_CONFIRMATION_REQUIRED_MESSAGE,
@@ -211,6 +212,10 @@ function CheckoutPage() {
   });
   const confirmationLines = lines.filter((line) => requiresOrderDetailsConfirmation([line]));
   const detailsToConfirm = confirmationLines.length > 0 ? confirmationLines : lines;
+  const needsTopUpIdentifierWarning = detailsToConfirm.some((line) =>
+    line.categorySlug === "game-top-ups" ||
+    Object.keys(line.fields ?? {}).some((label) => getTopUpIdentifierGuidance(label) !== null),
+  );
   const itemCount = shownLines.reduce((sum, line) => sum + line.quantity, 0);
   const totalMinor = placed?.totalMinor ?? subtotalMinor;
   const provider = enabledProviders()[0];
@@ -540,7 +545,16 @@ function CheckoutPage() {
               values shown below. If anything is wrong, go back and edit your details before placing the order.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="max-h-64 space-y-3 overflow-y-auto">
+          {needsTopUpIdentifierWarning && (
+            <section role="note" aria-label="Game account identifier warning" className="rounded-xl border border-warn/40 bg-warn/5 p-3 text-sm leading-relaxed">
+              <strong>Check game account identifiers carefully.</strong>{" "}
+              Compare each Player/User ID or Player tag with the game's own profile.
+              If a Zone ID or Server is requested, verify it separately. A typo may identify a different account.
+              Nicknames are cross-checks only; they do not replace the required identifier. If anything is uncertain,
+              go back and edit before placing the order.
+            </section>
+          )}
+          <div className="max-h-64 space-y-3 overflow-y-auto>
             {detailsToConfirm.map((line) => (
               <section key={line.sku} className="rounded-xl border border-border bg-background/50 p-3 text-sm">
                 <p className="font-display font-semibold">{line.productName}</p>
