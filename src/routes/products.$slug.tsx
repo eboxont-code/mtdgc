@@ -265,7 +265,7 @@ function ProductPage() {
         <ShoppingBag className="size-4" /> {addLabel}
       </Button>
       <Button size="lg" className="flex-1" disabled={!orderable} onClick={() => addToCart(true)}>
-        {orderable ? "Buy now" : "Not open yet"}
+        {orderable ? "Buy now" : unsafeRequirement ? "Temporarily unavailable" : "Not open yet"}
       </Button>
     </div>
   );
@@ -525,7 +525,7 @@ function ProductPage() {
             <ShoppingBag className="size-4" />
           </Button>
           <Button className="h-11 shrink-0 px-5" disabled={!orderable} onClick={() => addToCart(true)}>
-            {orderable ? "Buy now" : "Not open yet"}
+            {orderable ? "Buy now" : unsafeRequirement ? "Temporarily unavailable" : "Not open yet"}
           </Button>
           </>)}
         </div>
