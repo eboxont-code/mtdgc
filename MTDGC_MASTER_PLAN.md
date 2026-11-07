@@ -302,7 +302,7 @@ Do not set numerical targets until a reliable baseline exists.
 
 - [x] **MT-0161 · P0 · DONE** — Completed the read-only authentication/authorisation audit of current main source and production RLS, grants, private storage policies and Supabase security-advisor findings. Evidence and owner-gated follow-ups are recorded in section 27; no production changes were made.
 - [x] **MT-0162 · P0 · DONE** — Verified account-owned and guest-order isolation. Contact fallback is guest-only; account-owned orders require the matching authenticated account or order-specific bearer token. Synthetic negative tests and production RLS metadata are recorded in section 28.
-- [!] **MT-0163 · P0 · BLOCKED** — The production payment-proof and payment-QR buckets are private, but no delivery-code table or delivery bucket exists. The delivered-code portion cannot be verified until an approved private delivery-storage design and the Supabase cutover are available; see section 28.
+- [!] **MT-0163 · P0 · BLOCKED** — The production payment-proof and payment-QR buckets are private, but no dedicated delivery-code table or delivery bucket was found. The actual delivered-code storage path is not evidenced by the current schema/bucket inventory, so it cannot be verified until an approved private delivery-storage design and the Supabase cutover are available; see section 28.
 - [ ] **MT-0164 · P0 · TODO** — Ensure admin-only actions are enforced server-side, not only hidden in the interface.
 - [ ] **MT-0165 · P0 · TODO** — Review secrets, supplier credentials and payment configuration for accidental exposure.
 - [ ] **MT-0166 · P1 · TODO** — Enable strong admin authentication and remove unused staff accounts.
@@ -1197,7 +1197,7 @@ Supabase project `eaomkkswslqtfunkceuc` is ACTIVE_HEALTHY on PostgreSQL 17.11.0.
 - The server-side Supabase service-role client bypasses RLS by design. Every order handler using it must retain explicit order-scoped token, authenticated-owner or guest-contact checks.
 - The existing order lookup rate-limit count/delete/insert error handling can still fail open; that is a separate abuse-control follow-up and is not claimed as fixed by MT-0162.
 - The `public.has_role` SECURITY DEFINER advisor warning remains cutover-gated under MT-0161; no production function, policy, grant or schema change was made.
-- MT-0163 is BLOCKED: production has only the private `payment-proofs` (5 MiB) and `payment-qr` (2 MiB) buckets. No public-schema delivery/code table or delivery bucket exists. The delivered-code portion needs an approved private storage design and the Boxont-controlled Supabase cutover.
+- MT-0163 is BLOCKED: production has only the private `payment-proofs` (5 MiB) and `payment-qr` (2 MiB) buckets. No dedicated delivery/code table or delivery bucket was found; the current schema/bucket inventory does not evidence where delivered codes are stored, if they are stored in the application. The delivered-code portion needs an approved private storage design and the Boxont-controlled Supabase cutover.
 - MT-0164 is the next eligible P0 task: verify every admin-only action is enforced server-side and add focused negative tests.
 
 No production deployment, migration, record write, storage/auth/RLS change, secret/environment/DNS/hosting/billing change, supplier/customer contact or purchase occurred. Additional spend: $0.
