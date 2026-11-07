@@ -40,7 +40,6 @@ export const Route = createFileRoute("/products/$slug")({
     const url = `${SITE_URL}/products/${product.slug}`;
     const title = product.seo_title?.trim() || `${product.name} price in Nepal | MTDGC`;
     const image = product.image_url ? (product.image_url.startsWith("http") ? product.image_url : `${SITE_URL}${product.image_url}`) : undefined;
-    const hidePrices = pricesHidden(product);
     const orderableVariants = purchasableVariants(product);
     const lowestPrice = lowestPurchasableVariant(product)?.price_minor ?? 0;
     return {
