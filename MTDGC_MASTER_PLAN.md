@@ -543,7 +543,7 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 7 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 8 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 | 9 | MT-0161 — authentication and authorisation audit | DONE; read-only source, RLS, grants, storage and advisor findings documented in section 27 |
-| 10 | MT-0162 — verify one customer cannot access another customer's orders by changing an ID or URL | NEXT ACTIONABLE P0; extend negative coverage across guest tracking, authenticated ownership and payment-proof paths without production test orders |
+| 10 | MT-0084 — validate uploaded proof file type, size and content handling | NEXT ACTIONABLE P0 from the canonical task register; inspect the locked dependency/test environment first, mark blocked if no safe decoder is available, then continue to MT-0085 rather than stalling |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -1143,4 +1143,4 @@ Supabase project eaomkkswslqtfunkceuc (mtdgc) reported ACTIVE_HEALTHY; PostgreSQ
 - No local checkout or local working-tree status is exposed by the available GitHub connector; branch refs and the main-to-automation compare were inspected instead. No local Bun test run was possible or necessary for this read-only audit.
 - No customer records, order values, payment proof contents, auth-user records or secrets were queried. No production SQL writes, migrations, role/policy changes, auth-setting changes, deployments, customer/supplier contacts or purchases were performed.
 
-**Next P0 task:** MT-0162 — verify that one customer cannot access another customer's order by changing an ID or URL. Preserve guest access-token, authenticated-owner and contact fallback behaviour; use isolated tests/fixtures and do not create or modify production orders.
+**Next P0 task:** MT-0084 — validate uploaded proof file type, size and content handling. Inspect the committed lockfile for an available decoder and the test environment; if the required safe decoder is absent, record the exact dependency as BLOCKED and continue to MT-0085.
