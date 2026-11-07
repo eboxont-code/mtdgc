@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 3.3 · 7 November 2026
+**Version:** 3.4 · 7 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -279,7 +279,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [!] **MT-0142 · P0 · BLOCKED** — The live storefront and live Terms currently describe Nepal-only sales/NPR, while current `main` About/Terms/footer and SEO metadata also claim Nepal and Australia; AUD catalogue records are all `coming_soon`, all live variants and orders are NPR, and manual QR/bank transfer is the only enabled payment route. Resolving the public-market/legal-terms conflict requires the owner's explicit operating-market and seller-entity decision plus qualified review for the relevant jurisdiction(s). Do not rewrite legal copy or enable Australia based on catalogue placeholders. Evidence: section 38.
 - [!] **MT-0143 · P0 · BLOCKED** — The current refund text contains an unresolved overlap between the broad full-refund-or-redelivery remedy for an MTDGC-side failure/wrong item and the later no-reversal wording after code reveal or credited top-up. The policy does not define the handling for every supplier-failure, incorrect-code, partial-delivery or already-redeemed case. A safe matrix requires owner-approved operational remedies, actual supplier reversal/replacement terms and qualified legal review; do not invent refund commitments. Evidence: section 38.
 - [x] **MT-0144 · P0 · DONE** — Show cautious region-compatibility warnings on product detail and checkout for every specifically listed non-Global region; require acknowledgement before adding an orderable region-specific product. Evidence: section 39.
-- [ ] **MT-0145 · P0 · TODO** — Make wrong-player-ID warnings visible before confirming an irreversible top-up.
+- [x] **MT-0145 · P0 · DONE** — Show explicit Player/User ID, Player tag, Zone ID/Server and nickname cross-check guidance on game top-up product details and in the final checkout confirmation. Keep account-specific Supercell ID email separate from generic delivery-email autofill. This is a caution and accuracy safeguard, not a claim that a supplier can or cannot reverse a top-up. Evidence: section 40.
 - [ ] **MT-0146 · P1 · TODO** — Publish support response hours only after they are operationally staffed.
 - [ ] **MT-0147 · P1 · TODO** — Create ticket categories for payment, delayed delivery, invalid code, wrong item, refund and account access.
 - [ ] **MT-0148 · P1 · TODO** — Require an order number for order-specific support while allowing pre-purchase questions.
@@ -550,7 +550,8 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 14 | MT-0141 — audit Terms, Privacy, Delivery and Refund policy consistency | DONE; findings in section 38. MT-0142/0143 remain blocked on owner decisions and qualified review |
 | 15 | MT-0303/MT-0304 — Supabase cutover and held backend PR reconciliation | BLOCKED; target project, backup/restore, auth/storage/RLS/secrets and migration-history plan are not verified; PR #1 explicitly remains on HOLD |
 | 16 | MT-0144 — region-compatibility warnings before payment | DONE; shared helper, product-detail acknowledgement, checkout banner and final-review warning; no current orderable non-Global product exists for live checkout verification |
-| 17 | MT-0145 — wrong-player-ID warning before top-up confirmation | NEXT ACTIONABLE P0; audit current product requirements and checkout review wording, use only existing player-ID/zone/server fields, and do not claim supplier reversibility without evidence |
+| 17 | MT-0145 — wrong-player-ID warning before top-up confirmation | DONE; product fields and final checkout confirmation now show exact identifier guidance, nickname is explicitly secondary, and Supercell ID email is not prefilled from delivery email |
+| 18 | MT-0161 — authentication and authorisation audit | NEXT ACTIONABLE P0; inspect customer, support and admin route/server checks plus existing RLS read-only; do not change roles, policies or credentials |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -1546,7 +1547,7 @@ Verified the current working-branch implementation and current production produc
 - Open GitHub issues: 0. Open PR #1 remains explicitly held until the Supabase cutover. The connector has no local checkout/working-tree view, so local `git status` is unavailable.
 - No supplier/customer contact, purchase, payment, production write, migration, storage-policy change, deployment, billing change or additional spend occurred.
 
-**Next P0 task:** MT-0145 — make wrong-player-ID warnings visible before confirming a top-up. Use only the actual player/zone/server fields saved for each product; do not invent supplier reversibility or recovery claims.
+**Next P0 task:** MT-0161 — audit authentication and authorisation for customer accounts, support requests and admin routes. Begin with read-only server-function, route-guard and RLS inspection; do not alter roles, policies or credentials.
 
 
 
@@ -1602,7 +1603,7 @@ Verified the current working-branch implementation and current production produc
 
 - **MT-0142 — BLOCKED:** owner confirmation of the contracting seller entity and whether Australia is an intended supported market now; qualified legal review of the relevant market terms. The live production pages currently say Nepal-only; current source code also contains Australia claims; the production catalogue/payment journey is not Australia-ready.
 - **MT-0143 — BLOCKED:** owner-approved operational remedy matrix for undelivered, supplier-failed, wrong/incorrect item, partial delivery and redeemed/revealed digital goods; actual supplier reversal/replacement evidence; qualified legal review. No supplier-specific facts or legal conclusions were invented.
-- **Next eligible P0 to inspect:** MT-0145 — make wrong-player-ID warnings visible before confirming a top-up. Use only the actual player/zone/server fields saved for each product; do not claim supplier reversibility or recovery without evidence.
+- **Next eligible P0 to inspect:** MT-0161 — audit authentication and authorisation for customer accounts, support requests and admin routes. Inspect existing route/server checks and RLS read-only; record exact gaps before proposing any changes.
 
 ### Verification, CI and production impact
 
@@ -1658,3 +1659,50 @@ Verified the current working-branch implementation and current production produc
 - The latest production Vercel deployment remains **READY** on older main commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`. The current main combined status also reports the free build-rate-limit failure. Vercel runtime-error aggregation for the preceding 24 hours returned no runtime errors.
 - Supabase remains `ACTIVE_HEALTHY`; no schema, product, order, payment, storage, policy, auth, environment, secret or billing changes were made. Open issues remain 0; PR #1 remains held for the Supabase cutover. The GitHub connector has no local checkout view, so local `git status` is unavailable.
 - GitHub branch commits can trigger automatic preview builds through the existing integration. No production deployment was requested, no PR was opened or merged, and no additional spend occurred.
+
+
+## 40. Game top-up identifier warnings before order confirmation — 7 November 2026
+
+**Task:** MT-0145 · P0 · DONE — customers now receive explicit guidance for the exact game-account identifiers present in the current top-up catalogue, both on product detail and again in the final checkout confirmation. This is an accuracy safeguard; it does not assert supplier reversibility or recovery.
+
+### Production catalogue evidence (read-only)
+
+- A read-only query of published game-top-ups products returned four currently available product listings with these exact requirement labels:
+  - Clash of Clans Passes: Supercell ID email, Player tag.
+  - Free Fire Diamonds: Free Fire player ID, In-game nickname for verification.
+  - Mobile Legends Diamonds: Mobile Legends user ID, Zone ID.
+  - PUBG Mobile UC: PUBG Mobile player ID, In-game nickname for verification.
+- Published Genshin Impact and Valorant sample listings remain coming_soon and have no required fields in the inspected production rows; no live checkout behaviour or supplier instructions were inferred for them.
+- The supplier register remains empty. There is no supplier-specific evidence about whether a submitted top-up can be cancelled, redirected, recovered or reversed.
+
+### Implementation
+
+- Added src/lib/top-up-identifiers.ts with pure, label-based guidance for Player/User IDs, Player tags, Zone IDs/Servers, verification-only nicknames and Supercell ID email.
+- Game top-up product pages show a prominent warning before the customer continues, plus field-specific guidance beneath the exact required field. A nickname is clearly described as a cross-check, not a substitute for the account identifier.
+- The Supercell ID email field now has account-specific help. It is not automatically populated from the profile's generic delivery_email, because the delivery address may differ from the email associated with the intended Supercell ID. Generic delivery-email requirements retain the existing profile prefill.
+- The final checkout confirmation repeats the account-identifier warning for game top-up cart lines. Older carts without a category slug also receive the warning when their saved field labels identify a Player/User ID, Player tag, Zone ID/Server, nickname or Supercell ID email.
+- The existing second-confirmation flow and server-side detailsConfirmed enforcement remain unchanged. The warning does not claim that a top-up is irreversible, that MTDGC can verify account ownership, or that a supplier can recover a misdirected order.
+- No database schema, catalogue record, order, payment, supplier setting or production configuration was changed.
+
+### Regression tests and verification
+
+- Added src/lib/top-up-identifiers.test.ts with six focused cases covering Player/User IDs, Player tags, Zone ID/Server, nickname-only verification, Supercell ID email versus delivery-email prefill, and generic delivery-email compatibility.
+- The Supercell ID email helper in src/lib/product-help.ts now takes precedence over generic email help, so it no longer describes an account identifier as an MTDGC delivery/updates address.
+- Focused Node 22.16 scratch execution: **6 passed, 0 failed**. Strict TypeScript helper check with TypeScript 5.8.3: **PASS**.
+- The first automatic preview for code commit 9434a55 failed because the checkout confirmation JSX had a missing closing quote at checkout.tsx:559:95. The exact syntax issue was corrected in commit ea3e746. The corrected code+architecture preview reached **READY** on commit ea3e746 at https://mtdgc-n7zz15yro-boxont.vercel.app.
+- Full Bun test suite, ESLint, full project typecheck and local production build: **NOT RUN** in this remote execution environment; no local MTDGC checkout or Bun installation is available. The successful Vercel preview build validates the corrected application build, not the full test/lint/typecheck suite.
+
+### Repository, CI and deployment evidence
+
+- Main HEAD at inspection: 9c745dda3951bc8af616ea09061cb828e16f89d6. Task branch before this work: 291b52d28269a942ae003f64eb895e223690c6bb. Compare at start: 75 commits ahead and 7 behind, merge base 1d948a818f056ec1ae1f630688070da6e8449fde.
+- The seven-commit main delta was reviewed. Relevant changes to AGENTS.md, roadmap.md, catalogue search/sort, requiredProductFields and the product route were inspected. No rebase, merge, cherry-pick, force-push or PR was performed; the existing Lovable-synced branch history was preserved. The main-branch product-page changes remain separate from this task branch and must be reconciled deliberately before any future merge.
+- Latest main Quality workflow run 42323805501 completed **SUCCESS** on exact main HEAD 9c745dda3951bc8af616ea09061cb828e16f89d6; locked install, ESLint, unit tests, TypeScript typecheck and production build all passed. This validates main, not this task branch. No branch Quality run was returned; the workflow triggers on main pushes and pull requests.
+- Main combined Vercel status still reports the Hobby/free build-rate-limit failure. The corrected task-branch preview itself reached READY; it is a preview only, has no production target, and does not authorise publication.
+- Latest production deployment dpl_4nELrLJ21wEGvAAtVbs2g6UPsNhC is READY on older main commit 779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7. No production deployment was requested or performed.
+- Supabase project mtdgc (eaomkkswslqtfunkceuc) is ACTIVE_HEALTHY on PostgreSQL 17.11.0.003. Only product names, category, region, availability and required-field labels were queried; no customer/order/payment values were selected. No production write or migration occurred.
+- Open issues: 0. PR #1 remains open/draft and explicitly held until the Boxont-controlled Supabase cutover; it was not changed. GitHub remote refs/files were inspected, but a local checkout/working-tree status is unavailable in this environment.
+- No production deployment, migration, storage/RLS, payment, secret, environment, billing or authentication change occurred. No supplier/customer/third-party contact and no additional spend occurred.
+
+### Next eligible P0 task
+
+- **MT-0161 — audit authentication and authorisation for customer accounts, support requests and admin routes.** Start with read-only route/server-function and RLS inspection; do not alter roles, policies or credentials as part of the audit.
