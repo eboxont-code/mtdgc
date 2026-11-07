@@ -13,6 +13,7 @@ import { WishlistButton } from "@/components/wishlist-button";
 import { getProductBySlug } from "@/lib/catalog.functions";
 import { PRICE_COMING_SOON, pricesHidden } from "@/lib/price-visibility";
 import { availabilityLabel } from "@/lib/product-availability";
+import { requiredProductFields } from "@/lib/product-fields";
 import { useCart } from "@/lib/cart";
 import { categoryTypeFromSlug, formatNpr, isOrderable, SITE_URL, SUPPORT_MESSAGE, whatsappLink } from "@/lib/format";
 import { enabledProviders } from "@/lib/payments";
@@ -134,23 +135,25 @@ function ProductPage() {
   const selectedSku = product.variants.some((item) => item.sku === plan) ? plan : defaultVariant?.sku ?? "";
   const [fields, setFields] = useState<Record<string, string>>({});
   useEffect(() => {
+    let active = true;
     let saved: Record<string, string> = {};
     try { saved = JSON.parse(localStorage.getItem("mtdgc-fields-v1") ?? "{}"); } catch { /* ignore */ }
     const initial: Record<string, string> = {};
     for (const r of product.requirements) if (saved[r]) initial[r] = saved[r];
-    setFields((c) => ({ ...initial, ...c }));
+    setFields(requiredProductFields(product.requirements, initial));
     void (async () => {
       const { data } = await supabase.auth.getUser();
       if (!data.user) return;
       const { data: p } = await supabase.from("profiles").select("delivery_email").eq("id", data.user.id).maybeSingle();
       const mail = p?.delivery_email || data.user.email;
-      if (!mail) return;
+      if (!mail || !active) return;
       setFields((c) => {
         const n = { ...c };
         for (const r of product.requirements) if (/email/i.test(r) && !n[r]) n[r] = mail;
         return n;
       });
     })();
+    return () => { active = false; };
   }, [product.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const [error, setError] = useState<string | null>(null);
   const fieldRefs = useRef<Record<string, HTMLInputElement | null>>({});
@@ -194,7 +197,7 @@ function ProductPage() {
       image: product.image_url,
       region: product.region,
       categorySlug: product.category?.slug,
-      fields,
+      fields: requiredProductFields(product.requirements, fields),
     });
     if (buyNow) void navigate({ to: "/checkout" });
     else setDrawerOpen(true);

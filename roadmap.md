@@ -5,6 +5,8 @@
 > This file is preserved as a dated implementation and verification history. Checkboxes below record the status claimed by each historical pack when it was written; they are not a second live TODO register. When an old pack conflicts with the Master Plan, use the Master Plan and refresh the implementation evidence before changing task status.
 
 ## 5 Nov ordered pack
+- [ ] MT-0188: existing plan URL remains the selection source; back-navigation and reload verification pending; not published.
+- [ ] MT-0189: product forms already render listing requirements only; restored and submitted fields now exclude unrelated keys; protected checkout contact fields and legacy cart-line cleanup skipped; verification pending; not published.
 - [x] MT-0185: client-side brand/name/game/denomination search and FF/PUBG/ML/MLBB/NFX aliases; URL state retained; rule tests and real FF search passed; not published.
 - [x] MT-0186: Relevance, Price low-high, Price high-low and Availability sorting using existing display prices and purchasability; rule tests, URL reload and automatic build passed; not published.
 - [x] MT-0187: compact mobile filter row with categories/availability/prices in a bottom sheet; Matrix product tiles unchanged; 390px and desktop checks passed without overflow, first product starts at 344px; not published.
