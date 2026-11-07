@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { WishlistButton } from "@/components/wishlist-button";
 import { getProductBySlug } from "@/lib/catalog.functions";
 import { PRICE_COMING_SOON, pricesHidden } from "@/lib/price-visibility";
-import { availabilityLabel } from "@/lib/product-availability";
+import { availabilityLabel, isPurchasableVariant, lowestPurchasableVariant, purchasableVariants, selectProductVariant } from "@/lib/product-availability";
 import { requiredProductFields } from "@/lib/product-fields";
 import { useCart } from "@/lib/cart";
 import { categoryTypeFromSlug, formatNpr, isOrderable, SITE_URL, SUPPORT_MESSAGE, whatsappLink } from "@/lib/format";
@@ -41,8 +41,8 @@ export const Route = createFileRoute("/products/$slug")({
     const title = product.seo_title?.trim() || `${product.name} price in Nepal | MTDGC`;
     const image = product.image_url ? (product.image_url.startsWith("http") ? product.image_url : `${SITE_URL}${product.image_url}`) : undefined;
     const hidePrices = pricesHidden(product);
-    const prices = hidePrices ? [] : product.variants.filter((variant) => variant.price_minor > 0 && variant.status !== "archived").map((variant) => variant.price_minor);
-    const lowestPrice = prices.length ? Math.min(...prices) : 0;
+    const orderableVariants = purchasableVariants(product);
+    const lowestPrice = lowestPurchasableVariant(product)?.price_minor ?? 0;
     return {
       meta: [
         { title },
@@ -81,10 +81,7 @@ export const Route = createFileRoute("/products/$slug")({
             sku: product.variants[0]?.sku ?? product.slug,
             brand: { "@type": "Brand", name: product.brand },
             category: product.category?.name,
-            ...(hidePrices ? {} : { offers: [
-              ...product.variants
-              .filter((variant) => variant.price_minor > 0 && variant.status !== "archived")
-              .map((variant) => ({
+            ...(orderableVariants.length ? { offers: orderableVariants.map((variant) => ({
                 "@type": "Offer",
                 sku: variant.sku,
                 name: variant.name,
@@ -98,8 +95,7 @@ export const Route = createFileRoute("/products/$slug")({
                     ? "https://schema.org/PreOrder"
                     : "https://schema.org/OutOfStock",
                 url,
-              })),
-            ] }),
+              })) } : {}),
             seller: { "@type": "Organization", name: "MTDGC", url: `${SITE_URL}/` },
             itemCondition: "https://schema.org/NewCondition",
             hasMerchantReturnPolicy: {
@@ -130,9 +126,9 @@ export const Route = createFileRoute("/products/$slug")({
 function ProductPage() {
   const { product, related, explore } = Route.useLoaderData();
   const { add, setDrawerOpen } = useCart();
-  const defaultVariant = product.variants.find((variant) => variant.is_default) ?? product.variants[0];
   const { plan } = Route.useSearch();
-  const selectedSku = product.variants.some((item) => item.sku === plan) ? plan : defaultVariant?.sku ?? "";
+  const selectedVariant = selectProductVariant(product, plan);
+  const selectedSku = selectedVariant?.sku ?? "";
   const [fields, setFields] = useState<Record<string, string>>({});
   useEffect(() => {
     let active = true;
@@ -159,9 +155,9 @@ function ProductPage() {
   const fieldRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const [invalidFields, setInvalidFields] = useState<string[]>([]);
 
-  const variant = product.variants.find((item) => item.sku === selectedSku) ?? defaultVariant;
+  const variant = selectedVariant;
   const hidePrices = pricesHidden(product);
-  const orderable = !hidePrices && isOrderable(product.status) && !!variant && isOrderable(variant.status) && variant.price_minor > 0;
+  const orderable = !!variant && isPurchasableVariant(product, variant);
   const selectedAvailability = variant
     ? availabilityLabel({ ...product, variants: [variant] })
     : availabilityLabel(product);
@@ -208,7 +204,7 @@ function ProductPage() {
   const payStep = packStep + 1;
   const wa = whatsappLink(`${SUPPORT_MESSAGE} with ${product.name}`);
   const providers = enabledProviders();
-  const variantWas = variant ? compareAt(variant) : null;
+  const variantWas = orderable && variant ? compareAt(variant) : null;
   const productType = categoryTypeFromSlug(product.category?.slug ?? "");
   const isPlan = productType === "software" || productType === "subscription";
   const isGiftCard = isGiftCardCategory(product.category?.slug);
@@ -299,10 +295,10 @@ function ProductPage() {
                   <p className="mt-1 font-display text-sm">{variant?.name ?? "Choose an option"}</p>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">{isGiftCard ? "MTDGC selling price" : "Price"}</p>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">{orderable ? (isGiftCard ? "MTDGC selling price" : "Price") : "Availability"}</p>
                   <p className="font-mono text-xl font-bold text-price">
-                    {hidePrices ? PRICE_COMING_SOON : variant ? formatNpr(variant.price_minor) : ""}
-                    {!hidePrices && variantWas && <span className="ml-2 text-sm font-normal text-muted-foreground line-through">{formatNpr(variantWas)}</span>}
+                    {hidePrices ? PRICE_COMING_SOON : orderable && variant ? formatNpr(variant.price_minor) : selectedAvailability}
+                    {orderable && variantWas && <span className="ml-2 text-sm font-normal text-muted-foreground line-through">{formatNpr(variantWas)}</span>}
                   </p>
                 </div>
               </div>
@@ -370,20 +366,21 @@ function ProductPage() {
                   <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
                     {product.variants.map((item) => {
                       const selected = selectedSku === item.sku;
-                      const was = compareAt(item);
+                      const itemOrderable = isPurchasableVariant(product, item);
+                      const was = itemOrderable ? compareAt(item) : null;
                       const itemAvailability = availabilityLabel({ ...product, variants: [item] });
                       return (
                         <label
                           key={item.sku}
-                          className={`relative flex cursor-pointer flex-col gap-1 rounded-xl border p-3 transition-colors ${selected ? "border-primary bg-primary/10" : "border-border bg-secondary/60 hover:border-primary/40"}`}
+                          className={`relative flex ${itemOrderable ? "cursor-pointer" : "cursor-not-allowed opacity-60"} flex-col gap-1 rounded-xl border p-3 transition-colors ${selected ? "border-primary bg-primary/10" : "border-border bg-secondary/60 hover:border-primary/40"}`}
                         >
-                          <input type="radio" name="variant" value={item.sku} checked={selected} onChange={() => void navigate({ to: "/products/$slug", params: { slug: product.slug }, search: (previous) => ({ ...previous, plan: item.sku }), replace: true })} className="sr-only" />
+                          <input type="radio" name="variant" value={item.sku} checked={selected} disabled={!itemOrderable} onChange={() => void navigate({ to: "/products/$slug", params: { slug: product.slug }, search: (previous) => ({ ...previous, plan: item.sku }), replace: true })} className="sr-only" />
                           {selected && <Check className="absolute right-2 top-2 size-4 text-primary" aria-hidden="true" />}
                           <span className="pr-5 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">{isGiftCard ? "Face value" : "Option"}</span>
                           <span className="pr-5 font-mono text-[13px] font-medium leading-tight">{item.name}</span>
-                          <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">{isGiftCard ? "MTDGC selling price" : "Price"}</span>
-                          <span className="font-mono text-sm font-bold text-price">{hidePrices ? PRICE_COMING_SOON : formatNpr(item.price_minor)}</span>
-                          {!hidePrices && was && <span className="font-mono text-[11px] text-muted-foreground line-through">{formatNpr(was)}</span>}
+                          <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">{itemOrderable ? (isGiftCard ? "MTDGC selling price" : "Price") : "Availability"}</span>
+                          <span className="font-mono text-sm font-bold text-price">{hidePrices ? PRICE_COMING_SOON : itemOrderable ? formatNpr(item.price_minor) : itemAvailability}</span>
+                          {itemOrderable && was && <span className="font-mono text-[11px] text-muted-foreground line-through">{formatNpr(was)}</span>}
                           {item.status === "low_stock" && <span className="font-mono text-[10px] uppercase text-warn">Limited</span>}
                           <span className="font-mono text-[10px] text-muted-foreground">{itemAvailability}</span>
                         </label>
@@ -497,7 +494,7 @@ function ProductPage() {
         <div className="flex items-center gap-2.5">
           <div className="min-w-0 flex-1">
             <p className="truncate text-[10px] text-muted-foreground">{isGiftCard ? "Face value: " + (variant?.name ?? "Choose a denomination") : variant?.name ?? "Choose an option"}</p>
-            <p className={`font-mono font-bold leading-tight text-price ${hidePrices ? "text-[13px]" : "text-[15px]"}`}>{hidePrices ? PRICE_COMING_SOON : variant ? (isGiftCard ? "MTDGC price " : "") + formatNpr(variant.price_minor) : ""}</p>
+            <p className={`font-mono font-bold leading-tight text-price ${hidePrices ? "text-[13px]" : "text-[15px]"}`}>{hidePrices ? PRICE_COMING_SOON : orderable && variant ? (isGiftCard ? "MTDGC price " : "") + formatNpr(variant.price_minor) : selectedAvailability}</p>
           </div>
           {wa && (
             <a href={wa} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp support (opens in a new tab)" className="grid size-11 shrink-0 place-items-center rounded-xl border border-border text-primary">
