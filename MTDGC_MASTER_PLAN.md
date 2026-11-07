@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 3.0 · 7 November 2026
+**Version:** 3.1 · 7 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -254,8 +254,8 @@ Do not set numerical targets until a reliable baseline exists.
 - [x] **MT-0122 · P0 · DONE** — Snapshot each order item's product region and required customer-field labels at order creation in the existing `order_items.fields` JSONB, retain the selected variant/denomination in `variant_name`, and show an admin pre-fulfilment checklist that flags missing captured values. Historical items without the snapshot explicitly show region/requirements as not captured; no current catalog values or supplier instructions are inferred. Evidence: section 34.
 - [x] **MT-0123 · P0 · DONE** — Add a final customer review for the current `game-top-ups` and `gift-cards` categories. Checkout displays the exact selected product/option, region when present and saved delivery fields; the customer must explicitly confirm before order creation. The server resolves category from the selected SKU and rejects requests missing the acknowledgement. No supplier-side irreversibility claim is made because no supplier-specific evidence exists. Evidence: section 35.
 - [x] **MT-0124 · P0 · DONE** — Added authenticated-admin capture of actual supplier transaction/redemption references as internal `order_status_events` entries once fulfilment is `processing` or delivered (including legacy aliases). References are excluded from customer timelines; no schema migration or production write was needed. This is a capture capability, not proof that a supplier issued a reference: the supplier register is still empty and the read-only production snapshot had no completed orders, so no real reference values were populated and no reference is fabricated or forced when none is issued. Evidence: section 36.
-- [ ] **MT-0125 · P0 · TODO** — Capture delivery evidence and attach it to the correct order.
-- [ ] **MT-0126 · P0 · TODO** — Never request a customer's game password, subscription password, OTP or payment PIN.
+- [!] **MT-0125 · P0 · BLOCKED** — Capture delivery evidence and attach it to the correct order. The production project has no `order_deliveries` table or delivery-evidence storage policy. The existing `payment-proofs` bucket is private but its SELECT policy allows the authenticated order owner as well as admins; reusing it would expose internal delivery evidence to customers. `payment-qr` is private/admin-only but is reserved for payment QR assets and is not an order-evidence store. `order_status_events.note` is text-only and cannot attach files. A dedicated private bucket/table and admin-only access boundary require the held Supabase cutover/migration gate. Do not create a bucket, policy or migration on the current project. Evidence: section 37.
+- [x] **MT-0126 · P0 · DONE** — The supplier register prohibits password/passcode, OTP/2FA, PIN, recovery/backup/seed-code, session/access-token, private-key and remote-account-access requirements; the admin product form and server-side `saveProduct` validator reject unsafe requirement labels; the server-side `placeOrder` line schema rejects unsafe customer field keys. A read-only scan of all published product summaries, descriptions, delivery methods and requirement labels found no credential/payment requests. Evidence: sections 23 and 37.
 - [ ] **MT-0127 · P1 · TODO** — Define realistic delivery-time ranges per product based on measured fulfilment history.
 - [ ] **MT-0128 · P1 · TODO** — Pause new orders when a supplier is unavailable or a product cannot be delivered.
 - [ ] **MT-0129 · P1 · TODO** — Create a queue sorted by paid status, promised delivery window and risk.
@@ -545,8 +545,10 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 9 | MT-0122 — pre-fulfilment checklist | DONE; order-time region and required fields are snapshotted; selected option is retained; historical items are explicitly marked as lacking a snapshot |
 | 10 | MT-0123 — second confirmation for top-ups and emailed codes | DONE; checkout review and server-resolved category acknowledgement are implemented; no supplier irreversibility claim is made |
 | 11 | MT-0124 — supplier transaction/redemption reference capture | DONE; admin-only reference events use the existing audited event table; no production values were fabricated or backfilled |
-| 12 | MT-0125 — delivery evidence attached to the correct order | NEXT ACTIONABLE P0; inspect current private storage and order evidence paths; do not invent evidence or add a production bucket/migration before the Supabase cutover |
-| 13 | MT-0303/MT-0304 — Supabase cutover and held backend PR reconciliation | BLOCKED; target project, backup/restore, auth/storage/RLS/secrets and migration-history plan are not verified; PR #1 explicitly remains on HOLD |
+| 12 | MT-0125 — delivery evidence attached to the correct order | BLOCKED; no suitable order-evidence table/bucket exists. Reusing `payment-proofs` would grant the order owner read access; a dedicated private bucket/table and admin-only policy require the held Supabase cutover/migration gate |
+| 13 | MT-0126 — prohibit customer credential/PIN/OTP requests | DONE; supplier policy, admin form, server-side product save and server-side order-field validation are enforced; current published product copy scan found no credential requests |
+| 14 | MT-0141 — audit Terms, Privacy, Delivery and Refund policy consistency | NEXT ACTIONABLE P0; perform a text-only consistency audit; do not make legal interpretations or change market/legal commitments without owner approval and qualified review |
+| 15 | MT-0303/MT-0304 — Supabase cutover and held backend PR reconciliation | BLOCKED; target project, backup/restore, auth/storage/RLS/secrets and migration-history plan are not verified; PR #1 explicitly remains on HOLD |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -1494,3 +1496,52 @@ MT-0106 is completed in section 33. MT-0121 was reviewed and marked BLOCKED beca
 - Read-only Vercel history shows the latest production deployment READY on older commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`; it is not this working branch. The latest preview for this task is READY for intermediate server-action commit `7a3be8fc4d2864f6576aa55c8593b09816c83cf8` at `https://mtdgc-dt7sqce2y-boxont.vercel.app`; it does not include the later customer-timeline filtering, admin panel and documentation commits. The final branch commit status remains FAILURE with the Hobby/free build-rate-limit target. Vercel reported no runtime-error clusters in the preceding 24 hours. No deployment was requested. Supabase project `mtdgc` remains `ACTIVE_HEALTHY` on PostgreSQL `17.11.0.003`. No paid upgrade, billing change, migration, production write, supplier contact or third-party contact occurred.
 
 **Next P0 task:** MT-0125 — capture delivery evidence and attach it to the correct order. Inspect existing private storage, order-detail actions and evidence access controls. Do not store redeemable codes or credentials as evidence, create a public bucket, or add a production storage policy/migration before the Supabase cutover.
+
+
+## 37. Delivery-evidence storage boundary and customer-credential prohibition verification — 7 November 2026
+
+### MT-0125 — BLOCKED: no safe existing attachment destination
+
+Read-only inspection of the live MTDGC Supabase project `eaomkkswslqtfunkceuc` found:
+
+- The only storage buckets are `payment-proofs` (private, 5 MiB limit) and `payment-qr` (private, 2 MiB limit). Neither has a storage-level MIME allowlist.
+- `storage.objects` has RLS enabled. The `payment-proofs` SELECT policy allows authenticated admins and the authenticated owner of the associated order to read objects. That is appropriate for customer payment screenshots but is not an admin-only boundary for internal delivery evidence.
+- `payment-qr` has admin-only storage policies, but it is the payment-instruction QR asset bucket, not an order-scoped evidence store. Reusing it would conflate unrelated data and still would not provide an order-evidence record.
+- `public.order_status_events` has only `id`, `order_id`, `status`, `note`, `created_by` and `created_at`; `note` is text-only. The table has RLS enabled and an authenticated-admin-only policy, but it cannot attach a file or enforce an evidence-object relationship.
+- `public.order_deliveries` does not exist in the current production schema. The held backend PR #1 contains migration 0015 for `order_deliveries`, but the PR explicitly says not to apply migrations or merge/deploy that branch before the move to Boxont-controlled Supabase.
+
+**Exact dependency:** complete and verify the Boxont-controlled Supabase cutover, then approve/review a dedicated private delivery-evidence storage destination and order-linked metadata/access policy. Until then, there is no existing storage destination that both attaches evidence to an order and preserves an internal-only read boundary. Do not reuse `payment-proofs`, repurpose `payment-qr`, create a public bucket, or apply a migration to the current project.
+
+No production object, row, schema, bucket, policy, secret, billing setting or deployment was changed. No test evidence or supplier reference was invented.
+
+### MT-0126 — DONE: prohibit customer credential and payment-secret requests
+
+Verified the current working-branch implementation and current production product copy:
+
+- `SUPPLIER_REGISTER.md` section 1.1 explicitly rejects supplier workflows that require customer account/game/subscription passwords, passcodes, passphrases, OTPs, authenticator/2FA codes, payment/bank/card PINs, recovery/backup/seed phrases, session cookies, access tokens, private keys, CVV/CVC, card details or remote account/device access.
+- `src/lib/supplier-safety.ts` centralises the unsafe customer-requirement patterns and the customer-safe rejection message.
+- `src/components/admin/product-form.tsx` checks requirement labels before save and displays the rejection guidance.
+- `src/lib/admin.functions.ts` repeats the requirement-label check in the authenticated-admin `saveProduct` server action; the UI is not the only control.
+- `src/lib/orders.functions.ts` validates every submitted order line server-side and rejects unsafe customer field keys before order creation, so a stale/manipulated cart cannot bypass the product-form rule.
+- The existing `src/lib/supplier-safety.test.ts` covers password, passcode, OTP, verification code, 2FA, PIN, recovery/backup, login credentials, session/access tokens, remote access, CVV and card-number labels, while allowing product identifiers and necessary delivery contact labels.
+- A read-only production query scanned all 36 published product records across `summary`, `description`, `delivery_method` and `requirements`; it returned zero records containing the credential/payment-secret terms checked. No customer/order data was selected.
+
+### MT-0126 focused verification
+
+- Re-ran the three existing supplier-safety test cases in a scratch Node 22.16 workspace using the same helper and assertions, with an explicit `.ts` import for Node resolution: **3 passed, 0 failed**. The repository test retains its extensionless import for the Bun runner.
+- Strict TypeScript helper check passed with `--strict --exactOptionalPropertyTypes --noUncheckedIndexedAccess`.
+- Source inspection confirmed the unsafe-field check is present in both admin product save and server-side order creation.
+- Full Bun suite, full ESLint, project typecheck and production build were not rerun because this run changed no application source and the environment has no local Bun checkout/dependency tree.
+
+**Scope limitation:** the supplier register remains empty. This verifies MTDGC's product-requirement controls and the current published product copy; it does not certify any external supplier workflow. Any supplier that requests credentials or unsafe account access must still be rejected under the register policy.
+
+### Repository, CI and release evidence
+
+- The authoritative `main` branch remains at `1d948a818f056ec1ae1f630688070da6e8449fde`; its checked-in master plan remains v2.1 and still lists the older P0 queue. The active working branch `automation/mt-0104-order-transition-guard` is 64 commits ahead and 0 behind, and carries the current v3.0 plan before this update. This run updates only that working-branch plan; `main` and the production deployment are unchanged.
+- GitHub Actions Quality run [`42251736215`](https://github.com/eboxont-code/mtdgc/actions/runs/42251736215) passed on the exact current `main` SHA `1d948a818f056ec1ae1f630688070da6e8449fde` (install, ESLint, unit tests, typecheck and production build). No Actions run was returned for the working branch; the workflow is configured for pushes to `main` and pull requests, and no PR was opened.
+- The latest production Vercel deployment is READY but sourced from older commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`. The latest working-branch preview in the read-only deployment history is READY for intermediate commit `7a3be8fc4d2864f6576aa55c8593b09816c83cf8`; it does not include the final branch head `8b1e467a69b763d647a5296089dc456bfc3a521f`. The current main and working-branch combined statuses both report Vercel failure with the Hobby/free build-rate-limit target. No deployment was requested.
+- Vercel's last-24-hour runtime-error aggregation returned no runtime errors. Supabase project `mtdgc` is `ACTIVE_HEALTHY` on PostgreSQL 17.11.0.003.
+- Open GitHub issues: 0. Open PR #1 remains explicitly held until the Supabase cutover. The connector has no local checkout/working-tree view, so local `git status` is unavailable.
+- No supplier/customer contact, purchase, payment, production write, migration, storage-policy change, deployment, billing change or additional spend occurred.
+
+**Next P0 task:** MT-0141 — perform a read-only consistency audit of the current Terms, Privacy, Delivery and Refund pages against the actual Nepal-first operating flow and advertised Australia references. Record discrepancies without rewriting legal terms or making legal interpretations; any market decision or legal-copy change remains subject to owner approval and qualified review.
