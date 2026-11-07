@@ -63,3 +63,20 @@ MTDGC (Matrix Digital Goods & Commerce) is a digital marketplace for Nepal. This
 - **Payment**: Integration with eSewa/Khalti SDKs/Webhooks.
 - **Fulfillment**: Automated delivery for products with pre-loaded digital codes.
 
+
+
+## 7. Payment-proof access boundary — verified 7 November 2026
+
+Production verification for MT-0085 confirmed the following read paths:
+
+| Resource | Authenticated order owner | Administrator | Guest order holder | Anonymous |
+|---|---|---|---|---|
+| public.payment_proofs rows | SELECT only for proofs linked to the user's own orders | SELECT | No direct row read | No table grant/policy |
+| payment-proofs storage objects | SELECT only when the first storage folder segment identifies an order owned by the user | SELECT | No direct object read | No matching policy |
+| Signed proof URL | Not exposed by customer routes | Admin-only server action; 300-second expiry | Not exposed | Not exposed |
+
+The payment-proofs bucket is private and limited to 5 MiB. RLS is enabled on both public.payment_proofs and storage.objects. The payment-proof storage bucket has a single SELECT policy scoped to authenticated owners or administrators; no payment-proof INSERT, UPDATE or DELETE policy exists for client roles. The server uses the service role for the application-controlled upload path.
+
+Guest order access-token/contact checks authorize guest order viewing and proof submission, but do not grant direct proof-row or proof-object reads. Keep that distinction explicit. Do not create guest signed URLs without a separate order-token/contact validation design and short-lived URL issuance.
+
+The Supabase security advisor separately warns that public.has_role is SECURITY DEFINER and executable by anon/authenticated. Existing RLS policies depend on it, so any correction must coordinate the function and dependent policies in an approved migration after the Supabase cutover. The storage-level allowed_mime_types setting is currently NULL; complete image-content validation remains MT-0084 and is not implied by this access-control verification.
