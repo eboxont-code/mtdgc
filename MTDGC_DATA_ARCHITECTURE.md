@@ -111,7 +111,7 @@ The current customer-facing label for `payment_submitted` is “Payment received
 - The Supercell ID email is account-specific and is not prefilled from the profile's generic delivery email. Generic delivery-email fields retain their existing prefill behaviour.
 - The final checkout confirmation repeats the account-identifier warning for game top-ups and recognisable legacy cart fields. Existing server-side second-confirmation enforcement is unchanged.
 - The warning says a typo may identify a different account; it does not claim supplier irreversibility, guaranteed recovery, or that MTDGC can independently verify account ownership. No supplier evidence is currently recorded.
-- Code implementation and regression tests: commit 9434a55ad623ab9cdd4a8ee08d66dcf27149f547.
+- Code implementation and regression tests: commit 9434a55ad623ab9cdd4a8ee08d66dcf27149f547; the first preview caught a missing closing quote in the checkout JSX, corrected in commit ea3e74652e50006bc341ae0ff87d134bb6a78a81. The corrected branch preview reached READY at https://mtdgc-n7zz15yro-boxont.vercel.app.
 - This is a presentation/input-guidance change only. It does not change order fields, product records, supplier configuration, payment handling, schema, RLS or production data.
 
 ## 5. Guest Checkout and Order Tracking Architecture
