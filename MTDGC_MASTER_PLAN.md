@@ -203,10 +203,10 @@ Do not set numerical targets until a reliable baseline exists.
 - [x] **MT-0081 · P0 · DONE** — Audit completed against the current application code, production schema/data snapshot, storage configuration and access policies. Findings and follow-up gaps are recorded in section 24; this completes the audit task, not a claim that all payment controls are secure.
 - [x] **MT-0082 · P0 · DONE** — Generate new order references with 128 bits of cryptographic randomness, retain the database UNIQUE constraint as the collision guard, and keep legacy tracking formats working. Evidence: section 25; CI run `42241329123` passed lint, tests, typecheck and production build; Vercel deployment for code commit `d81e1fc51ed2e1203defb63ec6a71dbcd21e889b` reached READY.
 - [x] **MT-0083 · P0 · DONE** — Bind payment-proof authorization and storage/database association to the server-resolved order. Shared order-access helpers now cover access-token, authenticated-owner and rate-limited contact checks; proof storage path, order ID, transaction reference and amount are derived from the resolved order, not client-supplied identifiers. Four focused tests and the full quality workflow passed. Evidence and the separate production deployment blocker are recorded in section 26.
-- [ ] **MT-0084 · P0 · TODO** — Validate uploaded proof file type, size and content handling.
-- [ ] **MT-0085 · P0 · TODO** — Restrict payment-proof access to the customer who owns the order and authorised staff.
-- [ ] **MT-0086 · P0 · TODO** — Prevent fulfilment until payment is independently matched to the correct amount and order.
-- [ ] **MT-0087 · P0 · TODO** — Prevent the same transaction reference or screenshot from being accepted for multiple orders.
+- [!] **MT-0084 · P0 · BLOCKED** — Validate uploaded proof file type, size and content handling. Blocker: no maintained server-side image decoder is pinned in `package.json`/`bun.lock`, and Bun is unavailable in the local execution environment to regenerate and verify the lockfile. Unlock with a compatible decoder selection and a reproducible Bun lockfile/test run; do not rely on host-only binaries.
+- [!] **MT-0085 · P0 · BLOCKED** — Restrict payment-proof access to the customer who owns the order and authorised staff. The implementation and 11 focused tests are in draft PR #2; canonical promotion is blocked pending owner review/merge of that PR.
+- [!] **MT-0086 · P0 · BLOCKED** — Prevent fulfilment until payment is independently matched to the correct amount and order. Blocker: no bank settlement feed, payment-provider callback or equivalent independent settlement evidence exists; a screenshot/reference is not proof of funds received. Unlock with an approved independent reconciliation source.
+- [!] **MT-0087 · P0 · BLOCKED** — Prevent the same transaction reference or screenshot from being accepted for multiple orders. Blocker: concurrency-safe transaction-reference uniqueness requires the approved Supabase cutover/migration gate; PR #1 remains held. Unlock with owner-approved cutover and migration approval.
 - [ ] **MT-0088 · P1 · TODO** — Show exact payment amount, account details, expiry window and reference instructions on the order page.
 - [ ] **MT-0089 · P1 · TODO** — Add a clear payment-pending state and explain what action the customer must take.
 - [ ] **MT-0090 · P1 · TODO** — Record who verified payment, when it was verified and the transaction reference.
@@ -225,12 +225,12 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** The order state is consistent from checkout to delivery, with a complete audit trail and useful customer visibility.
 
-- [ ] **MT-0101 · P0 · TODO** — Map every current order status and the allowed transitions between them.
-- [ ] **MT-0102 · P0 · TODO** — Ensure Payment received, Verified, Processing and Delivered have precise operational definitions.
-- [ ] **MT-0103 · P0 · TODO** — Add explicit Cancelled, Failed, Refunded and Action required states where applicable.
-- [ ] **MT-0104 · P0 · TODO** — Prevent invalid status jumps, such as Pending directly to Delivered without payment verification.
-- [ ] **MT-0105 · P0 · TODO** — Verify guest order tracking requires the order number plus the matching email or phone.
-- [ ] **MT-0106 · P0 · TODO** — Ensure account order history and guest tracking show the same canonical status.
+- [!] **MT-0101 · P0 · BLOCKED** — Map every current order status and the allowed transitions between them. The status map is documented in draft PR #3, stacked on unmerged PR #2; canonical promotion awaits owner review/merge of the stack.
+- [!] **MT-0102 · P0 · BLOCKED** — Ensure Payment received, Verified, Processing and Delivered have precise operational definitions. The definitions and shared labels are documented in draft PR #4, stacked on PRs #2/#3; canonical promotion awaits owner review/merge of the stack.
+- [!] **MT-0103 · P0 · BLOCKED** — Decide whether a distinct `action_required` order state is needed. Blocker: this is an owner/product decision and adding an enum value requires the approved Supabase migration gate.
+- [!] **MT-0104 · P0 · BLOCKED** — Enforce allowed order-status transitions. Blocker: an owner-approved transition matrix and explicit payment/fulfilment prerequisites are missing; do not infer them from the current generic admin updater.
+- [!] **MT-0105 · P0 · BLOCKED** — Require the order number and matching saved email/phone for guest tracking. The implementation and regression tests are in open draft PR #5; canonical promotion awaits owner review/merge.
+- [!] **MT-0106 · P0 · BLOCKED** — Verify account order history, guest tracking and order detail use the same canonical status labels end-to-end. Blocker: MT-0102's shared status map remains in unmerged PR #4; complete the cross-surface acceptance check after that stack is reviewed and merged.
 - [ ] **MT-0107 · P1 · TODO** — Record a timestamp and actor for every status transition.
 - [ ] **MT-0108 · P1 · TODO** — Show customers what happens next at each stage and whether they need to act.
 - [ ] **MT-0109 · P1 · TODO** — Allow staff to add internal notes without exposing them to customers.
@@ -250,12 +250,12 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Orders are delivered accurately and on time, while manual checks are gradually replaced only by safe, tested automation.
 
-- [!] **MT-0121 · P0 · BLOCKED** — Document the current manual fulfilment steps for each active product family. The supplier register remains empty and no verified supplier/product/region scope, authorised delivery route, supplier-specific instructions, delivery window or escalation contact is recorded. The catalogue's required customer fields do not establish how an authorised supplier fulfils each SKU. Unblock with owner-provided or independently verifiable supplier/issuer evidence; do not invent steps or contact suppliers.
+- [!] **MT-0121 · P0 · BLOCKED** — Document current manual fulfilment steps for each active product family. Blocker: the Supplier Register has no verified supplier/product/region scope, delivery instructions, delivery windows or escalation contacts. Unlock with independently verified supplier runbooks.
 - [x] **MT-0122 · P0 · DONE** — Snapshot each order item's product region and exact required customer-field labels from the server-resolved product when the order is created; retain the selected variant/denomination in `variant_name`; and show an admin pre-fulfilment checklist with captured/missing values. Browser input cannot forge the reserved snapshot key, and historical items without a valid snapshot are explicitly marked as not captured/unrecognised. Evidence: section 30 and Data Architecture section 4.2; six focused regression tests.
 - [x] **MT-0123 · P0 · DONE** — Require a second confirmation for the currently orderable game top-up and emailed gift-card categories. Checkout shows the exact product, selected option, listed region and saved delivery fields; the customer must explicitly confirm before order creation. The server resolves category from the selected SKU and rejects missing acknowledgement. No supplier-specific reversibility claim is made because no supplier evidence or reversibility field exists. Evidence: section 31 and Data Architecture section 4.3.
-- [!] **MT-0124 · P0 · BLOCKED** — Record the supplier transaction or redemption reference for each completed order. `SUPPLIER_REGISTER.md` has no verified supplier/product-scope record or supplier-issued reference source, and the live orders table currently contains 8 orders, all `pending_payment`, with no completed order or actual reference to record. Unblock when a supplier/product scope is verified and a real transaction/redemption reference is supplied; never invent a value.
-- [!] **MT-0125 · P0 · BLOCKED** — Capture delivery evidence and attach it to the correct order. Production has no delivery-evidence/order-delivery table and only the existing private `payment-proofs` and `payment-qr` buckets. A dedicated private evidence-storage design and approved Boxont-controlled Supabase cutover/migration are required; do not create a production bucket/table before approval.
-- [ ] **MT-0126 · P0 · TODO** — Never request a customer's game password, subscription password, OTP or payment PIN.
+- [!] **MT-0124 · P0 · BLOCKED** — Record the supplier transaction or redemption reference for each completed order. Blocker: no verified supplier/reference source exists and the read-only production snapshot has no completed orders to evidence the workflow. Unlock with verified supplier reference semantics and a completed test/real order record approved for use.
+- [!] **MT-0125 · P0 · BLOCKED** — Capture delivery evidence and attach it to the correct order. Blocker: no dedicated delivery-evidence table/bucket or approved private-storage design exists; implementation requires the Boxont-controlled Supabase cutover and migration approval.
+- [x] **MT-0126 · P0 · DONE** — Prevent MTDGC-owned product, checkout and support surfaces from requesting customer passwords, passcodes/passkeys, OTP/2FA/MFA codes, PINs, recovery secrets, account-access tokens or payment-card credentials; unsafe saved catalogue requirements now fail closed at display and server order creation. Evidence: section 32 and Data Architecture section 4.4; six focused regression tests and PR #8.
 - [ ] **MT-0127 · P1 · TODO** — Define realistic delivery-time ranges per product based on measured fulfilment history.
 - [ ] **MT-0128 · P1 · TODO** — Pause new orders when a supplier is unavailable or a product cannot be delivered.
 - [ ] **MT-0129 · P1 · TODO** — Create a queue sorted by paid status, promised delivery window and risk.
@@ -275,9 +275,9 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Policies match real operations, customers can resolve problems quickly, and trust claims are supported by evidence.
 
-- [ ] **MT-0141 · P0 · TODO** — Review the current Terms, Privacy, Delivery and Refund policies for consistency across Nepal and Australia.
-- [ ] **MT-0142 · P0 · TODO** — Resolve any conflict between the advertised markets and the markets covered by legal terms.
-- [ ] **MT-0143 · P0 · TODO** — Ensure refund rules distinguish undelivered, supplier-failed, incorrect-item and successfully redeemed digital goods.
+- [!] **MT-0141 · P0 · BLOCKED** — Review Terms, Privacy, Delivery and Refund policies for consistency across Nepal and Australia. Blocker: owner-approved supported-market/entity scope and qualified legal/privacy review are required; no legal interpretation will be inferred.
+- [!] **MT-0142 · P0 · BLOCKED** — Resolve conflicts between advertised markets and markets covered by legal terms. Blocker: owner decision on supported markets/entity scope plus qualified legal review.
+- [!] **MT-0143 · P0 · BLOCKED** — Ensure refund rules distinguish undelivered, supplier-failed, incorrect-item and successfully redeemed digital goods. Blocker: approved remedy matrix, verified supplier reversal/redemption evidence and qualified legal review are unavailable.
 - [ ] **MT-0144 · P0 · TODO** — Make region-lock warnings prominent before payment for every region-restricted code.
 - [ ] **MT-0145 · P0 · TODO** — Make wrong-player-ID warnings visible before confirming an irreversible top-up.
 - [ ] **MT-0146 · P1 · TODO** — Publish support response hours only after they are operationally staffed.
@@ -1168,3 +1168,40 @@ No product records, supplier assignments, prices, variants, order records, datab
 - Implementation is isolated on `automation/mt-0123-second-confirmation-20261107`, stacked on the independently tested MT-0122 branch `automation/mt-0122-pre-fulfilment-checklist-20261107`. Draft [PR #7](https://github.com/eboxont-code/mtdgc/pull/7) is open, unmerged and now targets the MT-0122 branch; its final diff contains six files and seven commits for MT-0123 only. It was temporarily targeted at `main` to run the repository's main-targeted quality workflow, then retargeted after that run passed. Implementation commits: [helper](https://github.com/eboxont-code/mtdgc/commit/1343a74498250ed2477c96c94416b19b70878195), [tests](https://github.com/eboxont-code/mtdgc/commit/a6928694d7e84a80bc8cacf059e6b913368187d5), [server gate](https://github.com/eboxont-code/mtdgc/commit/f0ec09b08a3daaa88834da200e42983dcb413373), [checkout dialog](https://github.com/eboxont-code/mtdgc/commit/78dc5c2e008d7d1ddc3fd81800dd26f5b02441c6), and [final verification record](https://github.com/eboxont-code/mtdgc/commit/fb75f72a8dec238415530e5d71202fa8e1c9f8c2).
 - GitHub Actions Quality run [42376713964](https://github.com/eboxont-code/mtdgc/actions/runs/42376713964) completed successfully on 7 November 2026 for combined PR #6 + MT-0123 head `3f8f52be5d87a5b68d2ce551480c3c9303f6da60`: Bun setup, frozen dependency install, ESLint, full Bun unit tests, TypeScript typecheck and production build all passed. The focused confirmation test file also passed 5/5 under Node 22.16.0 in the available scratch environment, and strict TypeScript checking of the pure helper passed with TypeScript 5.8.3.
 - Vercel's read-only deployment list returned no deployment for this branch at final inspection, so no branch preview is claimed. The production deployment remains READY on older main commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7` with the production aliases assigned; no deployment was requested. No production database, order, payment, storage, authentication, environment, DNS, hosting, deployment or billing changes were made. No supplier/customer was contacted and no additional spend occurred.
+
+## 32. Customer credential collection safeguards — 8 November 2026
+
+**Task:** MT-0126 · P0 · DONE on the MT-0126 branch/PR #8. This closes the remaining customer-facing collection gaps beyond the original MT-0044 admin/server requirement-label guard.
+
+### Enforcement
+
+- Expanded `src/lib/supplier-safety.ts` to normalise Unicode, case and separators before checking requirement labels. It now rejects passwords, passcodes/passphrases/passkeys, OTP/2FA/MFA and authenticator codes, PINs, recovery/backup/seed codes/phrases/keys, security-question answers, account login/access requests, session/access/bearer/refresh/OAuth tokens, API/private/client secrets, remote access, device/screen unlock codes and payment-card security credentials.
+- The admin product form and existing `saveProduct` server schema use the same guard. Product requirement labels remain server-validated.
+- The public product detail page now fails closed for an unsafe saved catalogue requirement: it suppresses all customer fields, does not read/autofill those field values, displays a safe unavailability warning and disables purchase actions.
+- `placeOrder` revalidates the server-resolved product's current requirement array before constructing order items. Malformed or unsafe requirements are rejected before an order row is created. Existing client-supplied unsafe field-key validation remains in place, covering stale carts and direct API calls.
+- Product detail, checkout reassurance/order notes and the support description form display a consistent warning not to share passwords, OTP/2FA/MFA codes, PINs, recovery secrets, card security codes or account-access credentials.
+- Free-text order notes and support descriptions are intentionally not keyword-blocked: legitimate troubleshooting can mention passwords or reset flows. The interface warns customers, but cannot guarantee that a customer will never voluntarily type a secret into free text.
+
+### Production catalogue evidence
+
+- Read-only Supabase query on 8 November 2026: project `mtdgc` (`eaomkkswslqtfunkceuc`) ACTIVE_HEALTHY on PostgreSQL 17.11.0.003; 36 published product rows; zero current requirement labels matched the expanded credential policy.
+- The query selected only product names, publication/status and requirement labels. No customer, order, support-ticket, payment or secret values were read.
+- The Supplier Register still has no verified supplier entries. This task verifies MTDGC-owned collection surfaces; it does not claim any supplier has been independently screened or that external supplier portals follow the same rule.
+
+### Regression coverage and release boundary
+
+- Six focused tests cover explicit credentials, normalised less-obvious variants, safe player/zone/server/region/email identifiers, original-label reporting, fail-closed suppression of all fields, and rejection of malformed server requirement arrays.
+- The server order path checks the product requirements resolved from the SKU, not a browser-supplied category or requirement list. No production schema migration is needed.
+- Implementation branch: `automation/mt-0126-credential-safety-20261108`, based on the MT-0123 branch `automation/mt-0123-second-confirmation-20261107`. Draft PR #8 is opened against `main` for the required quality run and will be retargeted to the MT-0123 branch after CI, keeping the final diff stacked and task-scoped.
+- Production inspection was read-only. No product, customer, order, support, payment, schema, RLS, storage, authentication, environment, DNS, hosting, billing or deployment setting was changed. No supplier/customer was contacted and no additional spend occurred.
+
+### Current blockers and next eligible P0 task
+
+- MT-0084 remains blocked: no maintained server-side image decoder is pinned; Bun is unavailable locally for lockfile generation/verification.
+- MT-0085, MT-0101, MT-0102 and MT-0105 have tested implementations in open draft PRs #2–#5 but require owner review/merge before canonical main promotion. MT-0106 depends on the MT-0102 stack.
+- MT-0086 remains blocked by missing independent bank/provider settlement evidence; MT-0087 by the approved Supabase cutover/uniqueness migration gate.
+- MT-0103 and MT-0104 require owner decisions on status semantics and an approved transition matrix.
+- MT-0121 and MT-0124 require verified supplier runbooks/reference semantics; MT-0125 requires an approved private delivery-evidence design and Supabase migration.
+- MT-0141–MT-0143 require owner market/entity decisions, qualified legal review and/or verified supplier refund/redemption evidence.
+- **Next eligible P0 task: MT-0144 — make region-lock warnings prominent before payment for every region-restricted code.** It can be scoped to the existing server-sourced product region and conservative customer confirmation without claiming unverified supplier compatibility.
+
