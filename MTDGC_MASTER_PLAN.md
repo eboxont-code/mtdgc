@@ -252,7 +252,7 @@ Do not set numerical targets until a reliable baseline exists.
 
 - [!] **MT-0121 · P0 · BLOCKED** — Document the current manual fulfilment steps for each active product family. The supplier register remains empty and no verified supplier/product/region scope, authorised delivery route, supplier-specific instructions, delivery window or escalation contact is recorded. The catalogue's required customer fields do not establish how an authorised supplier fulfils each SKU. Unblock with owner-provided or independently verifiable supplier/issuer evidence; do not invent steps or contact suppliers.
 - [x] **MT-0122 · P0 · DONE** — Snapshot each order item's product region and exact required customer-field labels from the server-resolved product when the order is created; retain the selected variant/denomination in `variant_name`; and show an admin pre-fulfilment checklist with captured/missing values. Browser input cannot forge the reserved snapshot key, and historical items without a valid snapshot are explicitly marked as not captured/unrecognised. Evidence: section 30 and Data Architecture section 4.2; six focused regression tests.
-- [ ] **MT-0123 · P0 · TODO** — Require a second confirmation for irreversible top-ups and code releases.
+- [x] **MT-0123 · P0 · DONE** — Require a second confirmation for the currently orderable game top-up and emailed gift-card categories. Checkout shows the exact product, selected option, listed region and saved delivery fields; the customer must explicitly confirm before order creation. The server resolves category from the selected SKU and rejects missing acknowledgement. No supplier-specific reversibility claim is made because no supplier evidence or reversibility field exists. Evidence: section 31 and Data Architecture section 4.3.
 - [ ] **MT-0124 · P0 · TODO** — Record the supplier transaction or redemption reference for each completed order.
 - [ ] **MT-0125 · P0 · TODO** — Capture delivery evidence and attach it to the correct order.
 - [ ] **MT-0126 · P0 · TODO** — Never request a customer's game password, subscription password, OTP or payment PIN.
@@ -1130,4 +1130,41 @@ No product records, supplier assignments, prices, variants, order records, datab
 - The canonical plan version header is deliberately unchanged while open PRs #2–#5 contain overlapping plan-version and architecture edits. Reconcile the version once those documentation branches are reviewed; do not merge their overlapping sections blindly.
 - No production database, order, payment, storage, authentication, environment, DNS, hosting, deployment or billing changes were made. No supplier/customer was contacted and no additional spend occurred.
 
-**Next P0 task:** MT-0123 — require a second confirmation for applicable top-ups and emailed codes. Review the existing implementation on the broad unmerged branch and isolate only the task-specific change; do not infer supplier-side irreversibility or merge the broad branch.
+**Next P0 task:** MT-0124 — record actual supplier transaction or redemption references as internal order evidence. Keep reference capture optional until a verified supplier actually issues a reference; do not fabricate values or require a reference that the supplier does not provide.
+
+
+
+## 31. Final checkout confirmation for current top-up and emailed-code categories — 7 November 2026
+
+**Task:** MT-0123 · P0 · DONE — added a final customer review for the current orderable game top-up and emailed gift-card categories. The review is an accuracy safeguard; it does not assert that a specific supplier action is irreversible.
+
+### Production catalogue scope and evidence
+
+- A read-only query against Supabase project `mtdgc` (`eaomkkswslqtfunkceuc`) on 7 November 2026 found four currently orderable `game-top-ups` products — Clash of Clans Passes, Free Fire Diamonds, Mobile Legends Diamonds and PUBG Mobile UC — with 13 orderable variants in total.
+- The same query found one currently orderable `gift-cards` product, Roblox Gift Card, with two orderable variants. Its product record identifies delivery by digital code to the delivery email.
+- Other gift-card listings were not orderable; software and subscription products were not treated as code-release actions because their current records do not establish an active code-delivery route.
+- The production product schema has no explicit supplier-side `irreversible` flag, and the Supplier Register contains no verified supplier/product-scope records. No supplier-specific reversal, redemption or irreversibility rule was inferred.
+
+### Implementation
+
+- Added `src/lib/order-confirmation.ts` with one shared policy for the `game-top-ups` and `gift-cards` category slugs. Older persisted cart lines that have delivery fields but no saved category are conservatively prompted for confirmation.
+- Checkout opens a final `AlertDialog` before order creation. It shows each applicable product, selected option/face value, quantity, listed region and exact saved delivery-field values. The customer can return to edit or choose **Confirm details & place order**.
+- Both the desktop review action and the mobile sticky checkout action use the same confirmation path.
+- `placeOrder` resolves the selected SKU and its product category from Supabase, then rejects a top-up/gift-card order when `detailsConfirmed` is absent or false. The server does not trust the category label saved in the browser cart.
+- The acknowledgement is a checkout mistake-prevention safeguard, not an authorization boundary or cryptographic proof that a human read the dialog. A deliberate direct API caller can submit the flag; payment settlement, supplier verification and fulfilment controls remain separate.
+- The copy asks customers to verify the exact details and does not promise that an order can or cannot be reversed. No schema migration, production record update, supplier contact or payment action was required.
+
+### Regression coverage
+
+- Added `src/lib/order-confirmation.test.ts` with five tests covering:
+  1. Exact supported category detection and unrelated-category exclusion.
+  2. Confirmation requirement for game top-ups and gift cards.
+  3. Conservative confirmation for legacy cart lines with delivery fields but no category.
+  4. Server rejection of unconfirmed top-up and gift-card orders.
+  5. Server acceptance of confirmed sensitive categories and non-gating of unrelated categories.
+
+### Verification and release boundary
+
+- Implementation is isolated on `automation/mt-0123-second-confirmation-20261107`, stacked on the independently tested MT-0122 branch `automation/mt-0122-pre-fulfilment-checklist-20261107`. The PR is initially targeted at `main` only to run the repository's main-targeted quality workflow, then will be retargeted to the MT-0122 branch so the final PR contains only MT-0123.
+- Full GitHub Actions quality verification and the final preview status are recorded in the follow-up verification commit once available.
+- No production database, order, payment, storage, authentication, environment, DNS, hosting, deployment or billing changes were made. No supplier/customer was contacted and no additional spend occurred.
