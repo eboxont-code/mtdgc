@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
-import { addOrderNote, getPaymentProofUrl, updateOrderStatus } from "@/lib/admin.functions";
+import { addOrderNote, addSupplierReference, getPaymentProofUrl, updateOrderStatus } from "@/lib/admin.functions";
 import { formatNpr } from "@/lib/format";
 import { getAdminOrderStatusOptions } from "@/lib/order-transitions";
 import { getPreFulfilmentChecklist } from "@/lib/pre-fulfilment";
+import { canRecordSupplierReference, getSupplierReferenceFromEvent, isSupplierReferenceEvent, MAX_SUPPLIER_REFERENCE_LENGTH } from "@/lib/supplier-reference";
 
 type Detail = {
   id: string; order_number: string; status: string; total_minor: number;
@@ -24,9 +25,11 @@ export function OrderDetailPanel({ orderId, onClose, onUpdated }: { orderId: str
   const [error, setError] = useState("");
   const [proofUrl, setProofUrl] = useState("");
   const [note, setNote] = useState("");
+  const [supplierReference, setSupplierReference] = useState("");
   const [busy, setBusy] = useState(false);
   const saveStatus = useServerFn(updateOrderStatus);
   const saveNote = useServerFn(addOrderNote);
+  const saveSupplierReference = useServerFn(addSupplierReference);
   const getProof = useServerFn(getPaymentProofUrl);
   const load = useCallback(async () => {
     if (!orderId) return;
@@ -41,8 +44,15 @@ export function OrderDetailPanel({ orderId, onClose, onUpdated }: { orderId: str
     } catch { setError("Could not load this order. Please try again."); }
     finally { setLoading(false); }
   }, [orderId, getProof]);
-  useEffect(() => { setNote(""); void load(); }, [load]);
+  useEffect(() => { setNote(""); setSupplierReference(""); void load(); }, [load]);
   const availableStatuses = order ? getAdminOrderStatusOptions(order.status) : [];
+  const supplierReferences = order
+    ? order.order_status_events.flatMap((event) => {
+        const reference = getSupplierReferenceFromEvent(event);
+        return reference ? [{ id: event.id, reference, createdAt: event.created_at }] : [];
+      })
+    : [];
+  const historyEvents = order?.order_status_events.filter((event) => !isSupplierReferenceEvent(event)) ?? [];
 
   return <Sheet open={Boolean(orderId)} onOpenChange={(open) => { if (!open) onClose(); }}>
     <SheetContent className="w-full overflow-y-auto pb-28 font-body sm:w-full sm:max-w-xl [&>button]:min-h-11 [&>button]:min-w-11">
@@ -165,7 +175,59 @@ export function OrderDetailPanel({ orderId, onClose, onUpdated }: { orderId: str
           try { await saveStatus({ data: { id: order.id, status } }); onUpdated(order.id, status); await load(); }
           catch { setError("Could not save the status. Please try again."); } finally { setBusy(false); }
         }}><option value={order.status} disabled>{order.status.replaceAll("_", " ")}</option>{availableStatuses.map((status) => <option key={status} value={status}>{status.replaceAll("_", " ")}</option>)}</select></section>
-        <section><h2 className="font-display font-medium">History and notes</h2>{order.order_status_events.length ? <ol className="mt-2 space-y-3">{[...order.order_status_events].sort((a, b) => a.created_at.localeCompare(b.created_at)).map((event) => <li key={event.id}><p className="capitalize">{event.status.replaceAll("_", " ")}</p><time className="text-muted-foreground" dateTime={event.created_at}>{new Date(event.created_at).toLocaleString()}</time>{event.note && <p className="mt-1 break-words">{event.note}</p>}</li>)}</ol> : <p className="mt-2 text-muted-foreground">No history is recorded.</p>}
+        {(order && (canRecordSupplierReference(order.status) || supplierReferences.length > 0)) && (
+          <section>
+            <h2 className="font-display font-medium">Supplier transaction / redemption references</h2>
+            {supplierReferences.length ? (
+              <ol className="mt-2 space-y-3">
+                {supplierReferences.map((item) => (
+                  <li key={item.id} className="rounded-md border border-border p-3">
+                    <code className="block break-all whitespace-pre-wrap">{item.reference}</code>
+                    <time className="mt-1 block text-xs text-muted-foreground" dateTime={item.createdAt}>
+                      Recorded {new Date(item.createdAt).toLocaleString()}
+                    </time>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="mt-2 text-sm text-muted-foreground">No supplier reference has been recorded for this order.</p>
+            )}
+            {canRecordSupplierReference(order.status) && (
+              <form className="mt-4" onSubmit={async (event) => {
+                event.preventDefault();
+                if (!supplierReference.trim() || busy) return;
+                setBusy(true); setError("");
+                try {
+                  await saveSupplierReference({ data: { id: order.id, reference: supplierReference } });
+                  setSupplierReference("");
+                  await load();
+                } catch {
+                  setError("Could not save the supplier reference. Please check the order and try again.");
+                } finally {
+                  setBusy(false);
+                }
+              }}>
+                <label htmlFor="admin-supplier-reference">Supplier transaction / redemption reference</label>
+                <input
+                  id="admin-supplier-reference"
+                  type="text"
+                  autoComplete="off"
+                  maxLength={MAX_SUPPLIER_REFERENCE_LENGTH}
+                  value={supplierReference}
+                  onChange={(event) => setSupplierReference(event.target.value)}
+                  className="mt-2 min-h-11 w-full rounded-md border border-input bg-card px-3 text-base"
+                />
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Enter only the actual reference issued by the supplier or redemption service. Do not enter a redeemable code, password, OTP or payment PIN. Leave blank if no reference was issued.
+                </p>
+                <Button type="submit" disabled={busy || !supplierReference.trim()} className="mt-2 min-h-11">
+                  {busy ? "Saving" : "Record supplier reference"}
+                </Button>
+              </form>
+            )}
+          </section>
+        )}
+        <section><h2 className="font-display font-medium">History and notes</h2>{historyEvents.length ? <ol className="mt-2 space-y-3">{[...historyEvents].sort((a, b) => a.created_at.localeCompare(b.created_at)).map((event) => <li key={event.id}><p className="capitalize">{event.status.replaceAll("_", " ")}</p><time className="text-muted-foreground" dateTime={event.created_at}>{new Date(event.created_at).toLocaleString()}</time>{event.note && <p className="mt-1 break-words">{event.note}</p>}</li>)}</ol> : <p className="mt-2 text-muted-foreground">No history is recorded.</p>}
           <form className="mt-4" onSubmit={async (event) => { event.preventDefault(); if (!note.trim() || busy) return; setBusy(true); try { await saveNote({ data: { id: order.id, status: order.status, note: note.trim() } }); setNote(""); await load(); } catch { setError("Could not save the note. Please try again."); } finally { setBusy(false); } }}><label htmlFor="admin-order-note">Add a note</label><textarea id="admin-order-note" maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} className="mt-2 min-h-24 w-full rounded-md border border-input bg-card p-3 text-base" /><Button type="submit" disabled={busy || !note.trim()} className="mt-2 min-h-11">{busy ? "Saving" : "Save note"}</Button></form>
         </section>
       </div>}
