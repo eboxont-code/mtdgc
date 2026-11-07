@@ -252,9 +252,9 @@ Do not set numerical targets until a reliable baseline exists.
 
 - [!] **MT-0121 · P0 · BLOCKED** — Document the current manual fulfilment steps for each active product family. The supplier register remains empty and no verified supplier/product/region scope, authorised delivery route, supplier-specific instructions, delivery window or escalation contact is recorded. The catalogue's required customer fields do not establish how an authorised supplier fulfils each SKU. Unblock with owner-provided or independently verifiable supplier/issuer evidence; do not invent steps or contact suppliers.
 - [x] **MT-0122 · P0 · DONE** — Snapshot each order item's product region and exact required customer-field labels from the server-resolved product when the order is created; retain the selected variant/denomination in `variant_name`; and show an admin pre-fulfilment checklist with captured/missing values. Browser input cannot forge the reserved snapshot key, and historical items without a valid snapshot are explicitly marked as not captured/unrecognised. Evidence: section 30 and Data Architecture section 4.2; six focused regression tests.
-- [ ] **MT-0123 · P0 · TODO** — Require a second confirmation for irreversible top-ups and code releases.
-- [ ] **MT-0124 · P0 · TODO** — Record the supplier transaction or redemption reference for each completed order.
-- [ ] **MT-0125 · P0 · TODO** — Capture delivery evidence and attach it to the correct order.
+- [x] **MT-0123 · P0 · DONE** — Require a second confirmation for the currently orderable game top-up and emailed gift-card categories. Checkout shows the exact product, selected option, listed region and saved delivery fields; the customer must explicitly confirm before order creation. The server resolves category from the selected SKU and rejects missing acknowledgement. No supplier-specific reversibility claim is made because no supplier evidence or reversibility field exists. Evidence: section 31 and Data Architecture section 4.3.
+- [!] **MT-0124 · P0 · BLOCKED** — Record the supplier transaction or redemption reference for each completed order. `SUPPLIER_REGISTER.md` has no verified supplier/product-scope record or supplier-issued reference source, and the live orders table currently contains 8 orders, all `pending_payment`, with no completed order or actual reference to record. Unblock when a supplier/product scope is verified and a real transaction/redemption reference is supplied; never invent a value.
+- [!] **MT-0125 · P0 · BLOCKED** — Capture delivery evidence and attach it to the correct order. Production has no delivery-evidence/order-delivery table and only the existing private `payment-proofs` and `payment-qr` buckets. A dedicated private evidence-storage design and approved Boxont-controlled Supabase cutover/migration are required; do not create a production bucket/table before approval.
 - [ ] **MT-0126 · P0 · TODO** — Never request a customer's game password, subscription password, OTP or payment PIN.
 - [ ] **MT-0127 · P1 · TODO** — Define realistic delivery-time ranges per product based on measured fulfilment history.
 - [ ] **MT-0128 · P1 · TODO** — Pause new orders when a supplier is unavailable or a product cannot be delivered.
@@ -1130,4 +1130,41 @@ No product records, supplier assignments, prices, variants, order records, datab
 - The canonical plan version header is deliberately unchanged while open PRs #2–#5 contain overlapping plan-version and architecture edits. Reconcile the version once those documentation branches are reviewed; do not merge their overlapping sections blindly.
 - No production database, order, payment, storage, authentication, environment, DNS, hosting, deployment or billing changes were made. No supplier/customer was contacted and no additional spend occurred.
 
-**Next P0 task:** MT-0123 — require a second confirmation for applicable top-ups and emailed codes. Review the existing implementation on the broad unmerged branch and isolate only the task-specific change; do not infer supplier-side irreversibility or merge the broad branch.
+**Next P0 task:** MT-0126 — verify that no customer game/subscription password, OTP/2FA code, recovery code or payment PIN is requested anywhere in product requirements, checkout, support and administrator flows. Reuse the existing unsafe-requirement guard and add focused regression coverage; do not invent new product requirements.
+
+
+
+## 31. Final checkout confirmation for current top-up and emailed-code categories — 7 November 2026
+
+**Task:** MT-0123 · P0 · DONE — added a final customer review for the current orderable game top-up and emailed gift-card categories. The review is an accuracy safeguard; it does not assert that a specific supplier action is irreversible.
+
+### Production catalogue scope and evidence
+
+- A read-only query against Supabase project `mtdgc` (`eaomkkswslqtfunkceuc`) on 7 November 2026 found four currently orderable `game-top-ups` products — Clash of Clans Passes, Free Fire Diamonds, Mobile Legends Diamonds and PUBG Mobile UC — with 13 orderable variants in total.
+- The same query found one currently orderable `gift-cards` product, Roblox Gift Card, with two orderable variants. Its product record identifies delivery by digital code to the delivery email.
+- Other gift-card listings were not orderable; software and subscription products were not treated as code-release actions because their current records do not establish an active code-delivery route.
+- The production product schema has no explicit supplier-side `irreversible` flag, and the Supplier Register contains no verified supplier/product-scope records. No supplier-specific reversal, redemption or irreversibility rule was inferred.
+
+### Implementation
+
+- Added `src/lib/order-confirmation.ts` with one shared policy for the `game-top-ups` and `gift-cards` category slugs. Older persisted cart lines that have delivery fields but no saved category are conservatively prompted for confirmation.
+- Checkout opens a final `AlertDialog` before order creation. It shows each applicable product, selected option/face value, quantity, listed region and exact saved delivery-field values. The customer can return to edit or choose **Confirm details & place order**.
+- Both the desktop review action and the mobile sticky checkout action use the same confirmation path.
+- `placeOrder` resolves the selected SKU and its product category from Supabase, then rejects a top-up/gift-card order when `detailsConfirmed` is absent or false. The server does not trust the category label saved in the browser cart.
+- The acknowledgement is a checkout mistake-prevention safeguard, not an authorization boundary or cryptographic proof that a human read the dialog. A deliberate direct API caller can submit the flag; payment settlement, supplier verification and fulfilment controls remain separate.
+- The copy asks customers to verify the exact details and does not promise that an order can or cannot be reversed. No schema migration, production record update, supplier contact or payment action was required.
+
+### Regression coverage
+
+- Added `src/lib/order-confirmation.test.ts` with five tests covering:
+  1. Exact supported category detection and unrelated-category exclusion.
+  2. Confirmation requirement for game top-ups and gift cards.
+  3. Conservative confirmation for legacy cart lines with delivery fields but no category.
+  4. Server rejection of unconfirmed top-up and gift-card orders.
+  5. Server acceptance of confirmed sensitive categories and non-gating of unrelated categories.
+
+### Verification and release boundary
+
+- Implementation is isolated on `automation/mt-0123-second-confirmation-20261107`, stacked on the independently tested MT-0122 branch `automation/mt-0122-pre-fulfilment-checklist-20261107`. Draft [PR #7](https://github.com/eboxont-code/mtdgc/pull/7) is open, unmerged and now targets the MT-0122 branch; its final diff contains six files and seven commits for MT-0123 only. It was temporarily targeted at `main` to run the repository's main-targeted quality workflow, then retargeted after that run passed. Implementation commits: [helper](https://github.com/eboxont-code/mtdgc/commit/1343a74498250ed2477c96c94416b19b70878195), [tests](https://github.com/eboxont-code/mtdgc/commit/a6928694d7e84a80bc8cacf059e6b913368187d5), [server gate](https://github.com/eboxont-code/mtdgc/commit/f0ec09b08a3daaa88834da200e42983dcb413373), [checkout dialog](https://github.com/eboxont-code/mtdgc/commit/78dc5c2e008d7d1ddc3fd81800dd26f5b02441c6), and [final verification record](https://github.com/eboxont-code/mtdgc/commit/fb75f72a8dec238415530e5d71202fa8e1c9f8c2).
+- GitHub Actions Quality run [42376713964](https://github.com/eboxont-code/mtdgc/actions/runs/42376713964) completed successfully on 7 November 2026 for combined PR #6 + MT-0123 head `3f8f52be5d87a5b68d2ce551480c3c9303f6da60`: Bun setup, frozen dependency install, ESLint, full Bun unit tests, TypeScript typecheck and production build all passed. The focused confirmation test file also passed 5/5 under Node 22.16.0 in the available scratch environment, and strict TypeScript checking of the pure helper passed with TypeScript 5.8.3.
+- Vercel's read-only deployment list returned no deployment for this branch at final inspection, so no branch preview is claimed. The production deployment remains READY on older main commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7` with the production aliases assigned; no deployment was requested. No production database, order, payment, storage, authentication, environment, DNS, hosting, deployment or billing changes were made. No supplier/customer was contacted and no additional spend occurred.
