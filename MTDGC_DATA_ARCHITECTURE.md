@@ -110,5 +110,5 @@ Production metadata rechecked read-only: RLS is enabled on `orders`, `order_item
 
 Synthetic tests cover order-scoped tokens, account owner versus another user, order-number/contact matching, denial of contact fallback for account-owned orders, and server-derived payment-proof association. GitHub Actions Quality run [42405248193](https://github.com/eboxont-code/mtdgc/actions/runs/42405248193) passed lint, full Bun tests, TypeScript and production build on the application commit.
 
-Known separate limitations: the guest lookup rate limiter's database errors are not consistently fail-closed; the `has_role` SECURITY DEFINER warning remains gated on the approved Supabase cutover. No delivered-code storage exists yet; MT-0163 remains blocked pending an approved private storage design and cutover.
+Known separate limitations: the guest lookup rate limiter's database errors are not consistently fail-closed; the `has_role` SECURITY DEFINER warning remains gated on the approved Supabase cutover. No dedicated delivery-code table or bucket was found; the current schema/bucket inventory does not evidence the delivered-code storage path. MT-0163 remains blocked pending an approved private storage design and cutover.
 
