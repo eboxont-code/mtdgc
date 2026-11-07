@@ -102,7 +102,7 @@ export function getPreFulfilmentChecklist(fields: unknown, variantName: unknown)
 
   const capturedFields = Object.entries(record)
     .filter(([key, value]) => key !== ORDER_ITEM_SNAPSHOT_KEY && typeof value === "string")
-    .map(([key, value]) => [key, value as string]);
+    .map(([key, value]) => [key, value as string] as [string, string]);
 
   const requiredFields = snapshot
     ? snapshot.requiredFields.map((label) => {
