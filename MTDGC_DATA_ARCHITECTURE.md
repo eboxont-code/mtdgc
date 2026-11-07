@@ -46,6 +46,17 @@ MTDGC (Matrix Digital Goods & Commerce) is a digital marketplace for Nepal. This
 2. `SUCCESS`: Verified by provider/admin.
 3. `FAILED`: Declined or timed out.
 
+
+### 4.2 Order-time pre-fulfilment snapshot
+
+- New order items store a versioned `__mtdgc_snapshot` object inside the existing `order_items.fields` JSONB. The snapshot contains the product's server-read `region` and exact `requirements` labels at order creation.
+- Customer-provided values remain top-level string fields. The server resolves the selected SKU's product and reads region/requirements from that product row; the browser cannot supply or overwrite the reserved snapshot key.
+- `order_items.variant_name` already records the selected option/denomination, so no additional denomination column or migration is required.
+- The admin order detail panel builds a per-item checklist from the saved snapshot: selected option, order-time product region, each required field and recorded/missing state. Other saved customer fields remain visible.
+- The checklist never joins the current product record to reconstruct historical requirements or region. Items without a valid snapshot are explicitly marked as not captured/unrecognised; missing historical requirements are not guessed.
+- The checklist is shown only in the administrator order-detail view. Existing order-item RLS remains unchanged; the snapshot contains product metadata and requirement labels, not new credentials or payment secrets. The public guest order-summary function does not select or return the `fields` JSONB.
+- This is a data snapshot and review aid, not a supplier runbook or proof of fulfilment readiness. Supplier-specific instructions remain blocked until independently verified evidence exists.
+
 ## 5. Guest Checkout Architecture
 - **No Account Required**: Orders are created with `user_id = NULL`.
 - **Identity**: `guest_email` and `guest_whatsapp` are captured.
