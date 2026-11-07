@@ -65,4 +65,25 @@ describe("MT-0083 payment proof ownership and association", () => {
     });
     assert.throws(() => buildPaymentProofAssociation({ id: "resolved-order-a", total_minor: 1299 }, "not-random", "png", "TXN-12345"));
   });
+
+  test("contact fallback cannot expose an account-owned order even with matching saved contact", async () => {
+    const phone = "+61 412 345 678";
+    const accountOrder = {
+      user_id: "customer-a",
+      verification_hash: await sha256Hex("MTA" + normaliseContact(phone)),
+      guest_email: "buyer-a@example.com",
+    };
+
+    assert.equal(await hasOrderContactAccess(accountOrder, "MTA", phone), false);
+    assert.equal(await hasOrderContactAccess(accountOrder, "MTA", "buyer-a@example.com"), false);
+  });
+
+  test("an account order's bearer token remains scoped to that order", async () => {
+    const tokenA = "a".repeat(64);
+    const orderA = { user_id: "customer-a", access_token_hash: await sha256Hex(tokenA) };
+    const orderB = { user_id: "customer-b", access_token_hash: await sha256Hex("b".repeat(64)) };
+
+    assert.equal(await hasOrderAccessToken(orderA, tokenA), true);
+    assert.equal(await hasOrderAccessToken(orderB, tokenA), false);
+  });
 });
