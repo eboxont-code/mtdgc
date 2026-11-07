@@ -79,7 +79,22 @@ These are observed code paths, not an approved business state machine.
 
 The enum restricts valid status labels only. The live database has no non-internal `public.orders` transition trigger or transition-specific constraint. The dedicated proof submission/review actions have conditional status checks, but the generic admin updater accepts its seven target values from any existing state. Do not treat this observed map as an approved allowed-transition policy; MT-0104 owns transition enforcement after the business rules and payment prerequisites are resolved.
 
-The customer progress helper groups `payment_submitted`/`paid`, `verified`, `processing`, and `delivered`/`fulfilled`/`completed` into four steps. The order page and tracking page retain individual labels for the legacy values. MT-0102/MT-0106 own the operational wording and display consistency work.
+The customer progress helper now groups `payment_submitted`, `verified`, `processing`, and `delivered`/`fulfilled`/`completed` into four steps. Legacy `paid` is displayed separately and is not treated as proof submission or verification. The operational definitions and current limitations are recorded in section 4.6.
+
+
+### 4.6 Customer-facing operational definitions (MT-0102)
+
+These definitions describe what the current application records and displays. They do not create or imply an enforced state machine; MT-0104 remains responsible for approved transition rules and server-side gates.
+
+| Customer label | Stored status | Operational meaning in the current implementation | Does not prove |
+|---|---|---|---|
+| Payment proof received | `payment_submitted` | The customer proof handler accepts a screenshot/reference submission, uploads the image, and conditionally changes the order from `pending_payment` to `payment_submitted`. The proof-row and event writes occur separately and their errors are not all checked. | That funds reached MTDGC, or that the proof metadata/event was persisted successfully. |
+| Verified by staff | `verified` | An administrator has marked the order verified. The dedicated `reviewPayment` path can do this after loading a submitted proof, but the generic `updateOrderStatus` action can also set `verified` directly; proof metadata is updated separately. | Independent bank/provider settlement, or that the dedicated proof-review path and proof-row update definitely completed. |
+| Processing | `processing` | An administrator has manually marked the order as processing. | A live supplier/API state, that a supplier accepted the order, or that the payment prerequisite was enforced. The generic updater currently permits this status from any existing state. |
+| Delivered | `delivered` (legacy aliases: `fulfilled`, `completed`) | An administrator has manually marked the order delivered. The customer progress UI groups the legacy aliases with `delivered`. | A delivery-evidence record, customer receipt confirmation, or email dispatch. The live schema has no `order_deliveries` table, and no outbound email-sending integration was found in the repository source/dependencies. |
+| Legacy payment status | `paid` | A legacy/manual target of the generic administrator status updater. It is excluded from the four-step progress sequence and displayed as “Legacy payment status”. | Proof submission, dedicated proof review, or independent settlement confirmation. |
+
+The customer UI uses “Payment proof received” rather than “Payment received” because a screenshot/reference submission is not evidence that funds reached the receiving account. “Verified by staff” is deliberately a staff-marked status, not a bank/provider-confirmed settlement claim. “Processing” and “Delivered” describe manual staff status changes; neither is an automated supplier or delivery-evidence signal.
 
 ## 5. Guest Checkout Architecture
 - **No Account Required**: Orders are created with `user_id = NULL`.
