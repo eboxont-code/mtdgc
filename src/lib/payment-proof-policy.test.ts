@@ -12,12 +12,12 @@ describe("MT-0085 payment-proof access policy contract", () => {
     assert.notEqual(start, -1, "owner/admin proof-row policy must exist");
     const policy = proofMigration.slice(start);
 
-    assert.match(policy, /ON public\\.payment_proofs FOR SELECT TO authenticated/);
-    assert.match(policy, /o\\.id = payment_proofs\\.order_id/);
-    assert.match(policy, /o\\.user_id = auth\\.uid\\(\\)/);
-    assert.match(policy, /has_role\\(auth\\.uid\\(\\), 'admin'::public\\.app_role\\)/);
+    assert.match(policy, /ON public\.payment_proofs FOR SELECT TO authenticated/);
+    assert.match(policy, /o\.id = payment_proofs\.order_id/);
+    assert.match(policy, /o\.user_id = auth\.uid\(\)/);
+    assert.match(policy, /has_role\(auth\.uid\(\), 'admin'::public\.app_role\)/);
     assert.doesNotMatch(policy, /TO anon/);
-    assert.doesNotMatch(proofMigration, /CREATE POLICY [^\\n]+ ON public\\.payment_proofs FOR (?:INSERT|UPDATE|DELETE)/i);
+    assert.doesNotMatch(proofMigration, /CREATE POLICY [^\n]+ ON public\.payment_proofs FOR (?:INSERT|UPDATE|DELETE)/i);
   });
 
   test("proof objects are private to the payment-proofs bucket and scoped to the order owner or admin", () => {
@@ -25,23 +25,23 @@ describe("MT-0085 payment-proof access policy contract", () => {
     assert.notEqual(start, -1, "owner/admin proof-object policy must exist");
     const policy = proofMigration.slice(start);
 
-    assert.match(policy, /ON storage\\.objects FOR SELECT TO authenticated/);
+    assert.match(policy, /ON storage\.objects FOR SELECT TO authenticated/);
     assert.match(policy, /bucket_id = 'payment-proofs'/);
-    assert.match(policy, /o\\.id::text = \\(storage\\.foldername\\(name\\)\\)\\[1\\]/);
-    assert.match(policy, /o\\.user_id = auth\\.uid\\(\\)/);
-    assert.match(policy, /has_role\\(auth\\.uid\\(\\), 'admin'::public\\.app_role\\)/);
+    assert.match(policy, /o\.id::text = \(storage\.foldername\(name\)\)\[1\]/);
+    assert.match(policy, /o\.user_id = auth\.uid\(\)/);
+    assert.match(policy, /has_role\(auth\.uid\(\), 'admin'::public\.app_role\)/);
     assert.doesNotMatch(policy, /TO anon/);
     assert.doesNotMatch(policy, /FOR (?:INSERT|UPDATE|DELETE)/i);
   });
 
   test("authenticated clients receive read-only table grants for payment proofs", () => {
     assert.match(grantMigration, /REVOKE ALL ON ALL TABLES IN SCHEMA public FROM anon, authenticated/);
-    assert.match(grantMigration, /GRANT SELECT ON public\\.payment_proofs TO authenticated/);
-    assert.doesNotMatch(grantMigration, /GRANT (?:INSERT|UPDATE|DELETE|ALL) ON public\\.payment_proofs TO authenticated/i);
+    assert.match(grantMigration, /GRANT SELECT ON public\.payment_proofs TO authenticated/);
+    assert.doesNotMatch(grantMigration, /GRANT (?:INSERT|UPDATE|DELETE|ALL) ON public\.payment_proofs TO authenticated/i);
   });
 
   test("the payment-proofs bucket is private and retains its five-MiB storage cap", () => {
-    assert.match(bucketMigration, /'payment-proofs'\\s*,\\s*'payment-proofs'\\s*,\\s*false\\s*,\\s*5242880/);
-    assert.match(bucketMigration, /ON CONFLICT \\(id\\) DO UPDATE SET public=false, file_size_limit=EXCLUDED\\.file_size_limit/);
+    assert.match(bucketMigration, /'payment-proofs'\s*,\s*'payment-proofs'\s*,\s*false\s*,\s*5242880/);
+    assert.match(bucketMigration, /ON CONFLICT \(id\) DO UPDATE SET public=false, file_size_limit=EXCLUDED\.file_size_limit/);
   });
 });
