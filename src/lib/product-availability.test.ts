@@ -17,7 +17,7 @@ const live = {
   status: "available",
   currency: "NPR",
   tags: [],
-  variants: [{ sku: "SKU-1", status: "available", price_minor: 10000, currency: "NPR", is_default: true, sort_order: 1 }],
+  variants: [{ sku: "SKU-1", name: "Default option", status: "available", price_minor: 10000, currency: "NPR", is_default: true, sort_order: 1 }],
 };
 
 describe("MT-0182 purchase availability", () => {
@@ -27,8 +27,8 @@ describe("MT-0182 purchase availability", () => {
     assert.deepEqual(availabilityCounts([live, soon]), { available: 1, comingSoon: 1, unavailable: 0 });
   });
   test("requires an orderable positive-price option, not just an available product status", () => {
-    assert.equal(isPurchasable({ ...live, variants: [{ sku: "SOON", status: "coming_soon", price_minor: 10000, currency: "NPR" }] }), false);
-    assert.equal(isPurchasable({ ...live, variants: [{ sku: "ZERO", status: "available", price_minor: 0, currency: "NPR" }] }), false);
+    assert.equal(isPurchasable({ ...live, variants: [{ sku: "SOON", name: "Soon", status: "coming_soon", price_minor: 10000, currency: "NPR" }] }), false);
+    assert.equal(isPurchasable({ ...live, variants: [{ sku: "ZERO", name: "Zero", status: "available", price_minor: 0, currency: "NPR" }] }), false);
     assert.equal(isPurchasable({ ...live, variants: [] }), false);
     assert.equal(isPurchasable({ ...live, status: "low_stock" }), true);
   });
@@ -48,9 +48,9 @@ describe("MT-0182 purchase availability", () => {
     const product = {
       ...live,
       variants: [
-        { sku: "GOLD", status: "available", price_minor: 39900, currency: "NPR", is_default: true, sort_order: 1 },
-        { sku: "EVENT", status: "available", price_minor: 24900, currency: "NPR", is_default: false, sort_order: 2 },
-        { sku: "EARLY", status: "coming_soon", price_minor: 10000, currency: "NPR", is_default: false, sort_order: 3 },
+        { sku: "GOLD", name: "Gold Pass", status: "available", price_minor: 39900, currency: "NPR", is_default: true, sort_order: 1 },
+        { sku: "EVENT", name: "Event Pass", status: "available", price_minor: 24900, currency: "NPR", is_default: false, sort_order: 2 },
+        { sku: "EARLY", name: "Early Pass", status: "coming_soon", price_minor: 10000, currency: "NPR", is_default: false, sort_order: 3 },
       ],
     };
     assert.equal(lowestPurchasablePrice(product), 24900);
