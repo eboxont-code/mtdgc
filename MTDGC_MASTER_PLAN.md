@@ -1121,7 +1121,7 @@ No product records, supplier assignments, prices, variants, order records, datab
 - Extended product-availability tests for the shared lowest purchasable variant, explicit SKU selection, unavailable options, and unsupported currencies.
 - Added checkout snapshot tests for unchanged snapshots, changed price, changed product/variant name, legacy clients, SKU/order changes and line-count changes.
 - Updated catalog-search and wishlist type/data projections to carry the product and variant currency required by the shared availability contract.
-- Final GitHub Actions Quality run [42424730368](https://github.com/eboxont-code/mtdgc/actions/runs/42424730368) passed on source commit `42b7ee27fde172c05d78fcfd1b4e472a9e074008`: frozen dependency installation PASS; ESLint PASS (0 errors, 14 existing warnings); full unit suite PASS (46 tests across 11 files); TypeScript typecheck PASS; production build PASS.
+- Final application/test-head GitHub Actions Quality run [42425013914](https://github.com/eboxont-code/mtdgc/actions/runs/42425013914) passed on commit `1a20041f71d67e11b6d98ef6af1bc8338a47292d`: frozen dependency installation PASS; ESLint PASS (0 errors, 14 warnings); full unit suite PASS (46 tests across 11 files); TypeScript typecheck PASS; production build PASS. Earlier source-head run [42424730368](https://github.com/eboxont-code/mtdgc/actions/runs/42424730368) also passed before the final synthetic-fixture-only test cleanup.
 - Earlier CI attempts exposed test-fixture/type-contract issues and were corrected before the final successful run. They are not counted as successful verification.
 
 ### Deployment and production boundary
