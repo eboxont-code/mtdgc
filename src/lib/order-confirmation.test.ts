@@ -8,7 +8,9 @@ import {
   REGION_NOT_LISTED_MESSAGE,
   assertOrderDetailsConfirmed,
   assertRegionCompatibilityConfirmed,
+  getPlayerIdentifierWarning,
   getRegionCompatibilityWarning,
+  isPlayerIdentifierRequirement,
   isOrderDetailsConfirmationCategory,
   isRegionSensitiveCategory,
   requiresOrderDetailsConfirmation,
@@ -118,5 +120,53 @@ describe("MT-0144 region compatibility warnings before payment", () => {
     assert.doesNotThrow(() =>
       assertRegionCompatibilityConfirmed([{ categorySlug: "software", region: "Australia", expectedRegion: "Australia" }], false),
     );
+  });
+});
+
+
+describe("MT-0145 wrong-player/account identifier warnings", () => {
+  test("recognises the active top-up identifier labels without matching ordinary delivery email", () => {
+    for (const label of [
+      "Free Fire player ID",
+      "Mobile Legends user ID",
+      "Zone ID",
+      "PUBG Mobile player ID",
+      "Player tag",
+      "Supercell ID email",
+      "In-game nickname for verification",
+    ]) {
+      assert.equal(isPlayerIdentifierRequirement(label), true, label);
+    }
+    assert.equal(isPlayerIdentifierRequirement("Delivery email address"), false);
+  });
+
+  test("shows the exact saved player/account identifiers before top-up confirmation", () => {
+    const warning = getPlayerIdentifierWarning("game-top-ups", [
+      "Free Fire player ID",
+      "In-game nickname for verification",
+    ]);
+    assert.ok(warning);
+    assert.match(warning, /Free Fire player ID, In-game nickname for verification/);
+    assert.match(warning, /verify the pair together/);
+    assert.match(warning, /before confirming this top-up/);
+  });
+
+  test("does not imply a reversal is available or claim every top-up is irreversible", () => {
+    const warning = getPlayerIdentifierWarning("game-top-ups", ["Mobile Legends user ID", "Zone ID"]);
+    assert.ok(warning);
+    assert.match(warning, /No supplier-specific reversal process has been verified/);
+    assert.match(warning, /do not assume an incorrect top-up can be reversed/);
+  });
+
+  test("limits the warning to top-ups with player/account identifiers", () => {
+    assert.equal(getPlayerIdentifierWarning("gift-cards", ["Player ID"]), null);
+    assert.equal(getPlayerIdentifierWarning("game-top-ups", ["Delivery email address"]), null);
+    assert.equal(getPlayerIdentifierWarning("software", ["Player ID"]), null);
+  });
+
+  test("conservatively warns for legacy cart lines without a category when player fields remain", () => {
+    const warning = getPlayerIdentifierWarning(undefined, ["Player ID"]);
+    assert.ok(warning);
+    assert.match(warning, /Player ID/);
   });
 });
