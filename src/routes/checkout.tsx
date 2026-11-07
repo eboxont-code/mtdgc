@@ -25,12 +25,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useCart } from "@/lib/cart";
 import { formatNpr, SITE_URL } from "@/lib/format";
+import { getRegionCompatibilityWarning } from "@/lib/product-availability";
 import { enabledProviders } from "@/lib/payments";
 import {
   ORDER_DETAILS_CONFIRMATION_REQUIRED_MESSAGE,
   requiresOrderDetailsConfirmation,
 } from "@/lib/order-confirmation";
-import { Check, ChevronDown, Lock, QrCode, ShieldCheck } from "lucide-react";
+import { Check, ChevronDown, Globe, Lock, QrCode, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -204,6 +205,10 @@ function CheckoutPage() {
   });
 
   const shownLines = placed?.lines ?? lines;
+  const regionWarnings = lines.flatMap((line) => {
+    const warning = getRegionCompatibilityWarning(line.region);
+    return warning ? [{ sku: line.sku, productName: line.productName, ...warning }] : [];
+  });
   const confirmationLines = lines.filter((line) => requiresOrderDetailsConfirmation([line]));
   const detailsToConfirm = confirmationLines.length > 0 ? confirmationLines : lines;
   const itemCount = shownLines.reduce((sum, line) => sum + line.quantity, 0);
@@ -244,6 +249,7 @@ function CheckoutPage() {
           <span className="min-w-0 flex-1 text-sm">
             <span className="block truncate font-display font-medium">{line.productName}</span>
             <span className="block text-xs text-muted-foreground">{isGiftCardCategory(line.categorySlug) ? "Face value: " + line.variantName : line.variantName} · Qty {line.quantity}</span>
+            {line.region?.trim() && <span className="block text-xs text-muted-foreground">Listed region: {line.region.trim()}</span>}
             {isGiftCardCategory(line.categorySlug) && <span className="block text-xs text-muted-foreground">MTDGC selling price: {formatNpr(line.priceMinor)} each</span>}
           </span>
           <span className="shrink-0 text-right font-mono text-sm font-bold text-price">{formatNpr(line.priceMinor * line.quantity)}{isGiftCardCategory(line.categorySlug) && <span className="block text-[10px] font-normal text-muted-foreground">Line total</span>}</span>
@@ -313,6 +319,23 @@ function CheckoutPage() {
               </li>
             ))}
           </ol>
+        )}
+
+        {!placed && regionWarnings.length > 0 && (
+          <section role="note" aria-label="Regional compatibility warnings" className="mt-4 rounded-2xl border border-warn/40 bg-warn/5 p-4">
+            <h2 className="flex items-center gap-2 font-display text-sm font-semibold">
+              <Globe className="size-4 shrink-0 text-warn" />
+              Check regional compatibility before paying
+            </h2>
+            <ul className="mt-3 space-y-3">
+              {regionWarnings.map((warning) => (
+                <li key={warning.sku} className="text-sm">
+                  <p className="font-semibold">{warning.productName} · {warning.region}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-foreground/85">{warning.message}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
 
         {!placed && !hydrated ? (
@@ -512,9 +535,9 @@ function CheckoutPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm your delivery details</AlertDialogTitle>
             <AlertDialogDescription>
-              Double-check game/player identifiers for top-ups and the delivery email and region for gift cards.
-              Your order will be submitted with the exact values shown below. If anything is wrong, go back and edit
-              your details before placing the order.
+              Double-check game/player identifiers, delivery details and any listed region. For a region-specific item,
+              check the issuer's current compatibility information before paying. Your order will be submitted with the exact
+              values shown below. If anything is wrong, go back and edit your details before placing the order.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="max-h-64 space-y-3 overflow-y-auto">
@@ -524,7 +547,8 @@ function CheckoutPage() {
                 <p className="mt-1 text-xs text-muted-foreground">
                   {isGiftCardCategory(line.categorySlug) ? "Face value / denomination" : "Selected option"}: {line.variantName} · Qty {line.quantity}
                 </p>
-                {line.region && <p className="mt-1 text-xs text-muted-foreground">Region: {line.region}</p>}
+                {line.region && <p className="mt-1 text-xs text-muted-foreground">Listed region: {line.region}</p>}
+                {getRegionCompatibilityWarning(line.region) && <p className="mt-2 rounded-lg border border-warn/40 bg-warn/5 p-2 text-xs leading-relaxed">{getRegionCompatibilityWarning(line.region)?.message}</p>}
                 {Object.entries(line.fields ?? {}).length > 0 ? (
                   <dl className="mt-2 space-y-1">
                     {Object.entries(line.fields ?? {}).map(([label, value]) => (
