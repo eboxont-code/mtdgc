@@ -81,3 +81,17 @@ This section describes current GitHub main and the read-only production database
 - In current main, the order lookup/contact rate-limit paths do not fail closed if the attempt-count query or insert errors. This is a separate abuse-control follow-up and must be covered by focused tests before changing the flow.
 
 Production deployment currently lags current main. Recheck the deployed commit before treating current-main authorization code as active on mtdgc.com.
+
+
+
+### 7.1 Read-only verification recheck — 8 November 2026
+
+The 8 November 2026 metadata recheck confirmed the access boundaries above against production project `eaomkkswslqtfunkceuc` (ACTIVE_HEALTHY; PostgreSQL 17.11.0.003):
+
+- All 14 public application tables have RLS enabled. Customer profile, order, order-item, support-ticket, role, wishlist, review and payment-proof policies remain scoped as described in section 7.
+- Authenticated has some table-level privileges that are constrained by RLS: `orders` UPDATE and `order_status_events` INSERT/SELECT are available at the grant layer, but their only write-capable policy is administrator-only. `payment_proofs` grants authenticated SELECT only; anon has no proof-row grants. `order_lookup_attempts` has no client policies and only service-role/database-owner grants.
+- Both storage buckets are private. `payment-proofs` has a 5 MiB cap; `payment-qr` has a 2 MiB cap. The proof bucket has no storage-level MIME allowlist, so upload validation remains an application responsibility.
+- `public.has_role(uuid, app_role)` remains SECURITY DEFINER and executable by anon/authenticated. The security advisor reports WARN for both roles. Because several RLS policies call it, remediation requires a coordinated function/policy migration after the approved Supabase cutover; no live change was made.
+- Current main's admin server functions all require authenticated middleware and call the admin role guard. The admin page's browser-side role check is only a UI gate; server handlers and RLS remain the enforcement boundaries. PR #2 separately tightens the guard to accept only an exact boolean `true` and includes regression tests; it is still an unmerged draft.
+- GitHub main remains at `9c745dda3951bc8af616ea09061cb828e16f89d6`; its Quality run [42323805501](https://github.com/eboxont-code/mtdgc/actions/runs/42323805501) passed. Production remains on READY Vercel deployment [`dpl_4nELrLJ21wEGvAAtVbs2g6UPsNhC`](https://vercel.com/boxont/mtdgc/4nELrLJ21wEGvAAtVbs2g6UPsNhC) from older commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`; main's Vercel status is blocked by the free deployment-rate limit.
+- This is metadata/source verification only. No customer or payment records, auth-user records, storage objects, secrets or service-role values were read; no database, storage, auth, deployment or billing writes were performed.
