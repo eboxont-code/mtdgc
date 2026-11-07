@@ -1,0 +1,29 @@
+name: Refresh Bun lockfile for dependency change
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "package.json"
+      - ".github/workflows/lockfile-refresh.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out PR
+        uses: actions/checkout@v4
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+      - name: Generate the lockfile without installing packages
+        run: bun install --lockfile-only
+      - name: Upload generated lockfile
+        uses: actions/upload-artifact@v4
+        with:
+          name: mtdgc-bun-lockfile
+          path: bun.lock
+          if-no-files-found: error
+          retention-days: 1
