@@ -104,6 +104,16 @@ The current customer-facing label for `payment_submitted` is “Payment received
 - The field is for an actual supplier transaction/redemption reference only. It must not contain a redeemable code, customer password, OTP, payment PIN or other credential. Staff are told to leave it blank when no supplier reference was issued; the application does not invent a value or claim a supplier always provides one.
 - This is an order-level audit record, not independent proof that funds settled or that a digital item was delivered/redeemed. The supplier register currently has no verified suppliers or reference-format evidence, and the read-only production snapshot had no completed orders. No historical or live reference values were populated. There is no database uniqueness constraint for reference values.
 
+### 4.4 Game top-up identifier guidance before confirmation
+
+- The current production game-top-ups requirements were checked read-only: Clash of Clans Passes asks for a Supercell ID email and Player tag; Free Fire asks for Player ID and in-game nickname for verification; Mobile Legends asks for User ID and Zone ID; PUBG Mobile asks for Player ID and in-game nickname for verification.
+- Product detail shows a prominent accuracy warning before continuing and field-specific help for Player/User IDs, Player tags, Zone IDs/Servers, nicknames and Supercell ID email. Nickname is explicitly a secondary cross-check.
+- The Supercell ID email is account-specific and is not prefilled from the profile's generic delivery email. Generic delivery-email fields retain their existing prefill behaviour.
+- The final checkout confirmation repeats the account-identifier warning for game top-ups and recognisable legacy cart fields. Existing server-side second-confirmation enforcement is unchanged.
+- The warning says a typo may identify a different account; it does not claim supplier irreversibility, guaranteed recovery, or that MTDGC can independently verify account ownership. No supplier evidence is currently recorded.
+- Code implementation and regression tests: commit 9434a55ad623ab9cdd4a8ee08d66dcf27149f547.
+- This is a presentation/input-guidance change only. It does not change order fields, product records, supplier configuration, payment handling, schema, RLS or production data.
+
 ## 5. Guest Checkout and Order Tracking Architecture
 
 ### Order identity at creation
