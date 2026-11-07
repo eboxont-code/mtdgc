@@ -6,6 +6,7 @@ import { findUnsafeCustomerRequirement, UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE } fr
 import { generateOrderReference, isSupportedOrderReference } from "@/lib/order-reference";
 import { buildOrderItemFieldsSnapshot, hasReservedOrderItemField } from "@/lib/pre-fulfilment";
 import { assertOrderDetailsConfirmed } from "@/lib/order-confirmation";
+import { isSupplierReferenceEventStatus } from "@/lib/supplier-reference";
 import {
   buildPaymentProofAssociation,
   hasOrderAccessToken,
@@ -196,7 +197,7 @@ export const lookupOrder = createServerFn({ method: "POST" })
         createdAt: order.created_at,
         totalMinor: order.total_minor,
         items: (order.order_items ?? []).map((i) => summariseOrderItem(i)),
-        events: (order.order_status_events ?? []).map((e) => ({ status: e.status, at: e.created_at })),
+        events: (order.order_status_events ?? []).filter((e) => !isSupplierReferenceEventStatus(e.status)).map((e) => ({ status: e.status, at: e.created_at })),
       },
     };
   });
@@ -217,7 +218,7 @@ export const listMyOrders = createServerFn({ method: "GET" })
       totalMinor: o.total_minor,
       createdAt: o.created_at,
       items: (o.order_items ?? []).map((i) => summariseOrderItem(i)),
-      events: (o.order_status_events ?? []).map((e) => ({ status: e.status, at: e.created_at })),
+      events: (o.order_status_events ?? []).filter((e) => !isSupplierReferenceEventStatus(e.status)).map((e) => ({ status: e.status, at: e.created_at })),
     }));
   });
 
