@@ -243,7 +243,7 @@ function CheckoutPage() {
             <span className="block text-xs text-muted-foreground">{isGiftCardCategory(line.categorySlug) ? "Face value: " + line.variantName : line.variantName} · Qty {line.quantity}</span>
             <span className="block text-xs text-muted-foreground">{isGiftCardCategory(line.categorySlug) ? "MTDGC selling price" : "Price"}: {formatNpr(line.priceMinor)} each</span>
           </span>
-          <span className="shrink-0 text-right font-mono text-sm font-bold text-price">{formatNpr(line.priceMinor * line.quantity)}{isGiftCardCategory(line.categorySlug) && <span className="block text-[10px] font-normal text-muted-foreground">Line total</span>}</span>
+          <span className="shrink-0 text-right font-mono text-sm font-bold text-price">{formatNpr(line.priceMinor * line.quantity)}<span className="block text-[10px] font-normal text-muted-foreground">Line total</span></span>
         </li>
       ))}
     </ul>
