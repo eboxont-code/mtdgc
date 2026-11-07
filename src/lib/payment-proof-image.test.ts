@@ -87,10 +87,16 @@ test("strips source metadata while preserving the decoded pixels in lossless Web
     },
   }).withExif({ IFD0: { ImageDescription: "payment-proof-test" } }).jpeg().toBuffer());
 
+  const sourceMetadata = await sharp(withExif).metadata();
+  assert.ok(sourceMetadata.exif);
+
+  const sourcePixels = await sharp(withExif).raw().toBuffer();
   const result = await normalizePaymentProofImage(withExif, "image/jpeg");
   assert.equal(result.ok, true);
   if (!result.ok) return;
 
   const metadata = await sharp(result.data).metadata();
   assert.equal(metadata.exif, undefined);
+  const normalizedPixels = await sharp(result.data).raw().toBuffer();
+  assert.deepEqual(normalizedPixels, sourcePixels);
 });

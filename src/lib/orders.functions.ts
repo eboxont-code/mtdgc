@@ -319,7 +319,8 @@ export const submitPaymentProof = createServerFn({ method: "POST" })
     if (latest && !latest.resubmit_requested) return { ok: false as const, error: "We already have a payment proof for this order." };
 
     const file = data.file;
-    if (file.size === 0 || file.size > 5 * 1024 * 1024) {
+    if (file.size === 0) return { ok: false as const, error: "Please attach a non-empty screenshot." };
+    if (file.size > 5 * 1024 * 1024) {
       return { ok: false as const, error: "The screenshot must be 5 MB or smaller." };
     }
     const buffer = new Uint8Array(await file.arrayBuffer());
