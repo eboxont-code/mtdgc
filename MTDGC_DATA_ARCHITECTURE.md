@@ -95,3 +95,20 @@ The 8 November 2026 metadata recheck confirmed the access boundaries above again
 - Current main's admin server functions all require authenticated middleware and call the admin role guard. The admin page's browser-side role check is only a UI gate; server handlers and RLS remain the enforcement boundaries. PR #2 separately tightens the guard to accept only an exact boolean `true` and includes regression tests; it is still an unmerged draft.
 - GitHub main remains at `9c745dda3951bc8af616ea09061cb828e16f89d6`; its Quality run [42323805501](https://github.com/eboxont-code/mtdgc/actions/runs/42323805501) passed. Production remains on READY Vercel deployment [`dpl_4nELrLJ21wEGvAAtVbs2g6UPsNhC`](https://vercel.com/boxont/mtdgc/4nELrLJ21wEGvAAtVbs2g6UPsNhC) from older commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`; main's Vercel status is blocked by the free deployment-rate limit.
 - This is metadata/source verification only. No customer or payment records, auth-user records, storage objects, secrets or service-role values were read; no database, storage, auth, deployment or billing writes were performed.
+
+## 8. Cross-customer order isolation — 8 November 2026
+
+Account-owned and guest orders use distinct access paths:
+
+- Account orders: authenticated server functions validate the Supabase bearer token and compare its subject to `orders.user_id`; authenticated order history also filters by the validated context user ID. Production RLS applies the same owner predicate to `orders` and related `order_items`.
+- Guest orders: the server resolves an order by its unique order number and requires either the order-specific access-token hash or the saved contact verification. The contact fallback is not available for an order with a non-null `user_id`.
+- The public tracking function accepts an optional bearer for account orders. It validates that token with Supabase Auth and allows the order only when the authenticated subject equals the stored owner. Guest tracking continues to require the saved email/phone.
+- Payment-proof submission uses the same guest-only contact helper; account-owned orders require the order token or authenticated owner. Proof row ID, amount and storage path continue to come from the server-resolved order.
+- The service-role client bypasses RLS, so these server-side checks are mandatory. It remains server-only and dynamically imported inside handlers.
+
+Production metadata rechecked read-only: RLS is enabled on `orders`, `order_items` and `order_status_events`; owner SELECT on orders is bound to `auth.uid() = user_id`; order-item SELECT is bound to the related order owner or admin; status events are administrator-only. No customer/order/payment data was queried and no production write or migration was performed.
+
+Synthetic tests cover order-scoped tokens, account owner versus another user, order-number/contact matching, denial of contact fallback for account-owned orders, and server-derived payment-proof association. GitHub Actions Quality run [42405248193](https://github.com/eboxont-code/mtdgc/actions/runs/42405248193) passed lint, full Bun tests, TypeScript and production build on the application commit.
+
+Known separate limitations: the guest lookup rate limiter's database errors are not consistently fail-closed; the `has_role` SECURITY DEFINER warning remains gated on the approved Supabase cutover. No delivered-code storage exists yet; MT-0163 remains blocked pending an approved private storage design and cutover.
+
