@@ -327,7 +327,7 @@ Do not set numerical targets until a reliable baseline exists.
 
 - [ ] **MT-0181 · P0 · TODO** — Test the full purchase journey on common Android phones and narrow mobile screens.
 - [ ] **MT-0182 · P0 · REVIEW** — Availability labels, purchasable counts and disabled coming-soon actions were implemented and rule-tested in the 5 November pack; confirm the current production page before marking complete because the roadmap pack recorded the change as not yet published.
-- [ ] **MT-0183 · P0 · TODO** — Ensure the product card, product page and checkout show matching prices and variants.
+- [x] **MT-0183 · P0 · DONE on PR #17; production rollout pending** — Ensure the product card, product page and checkout show matching prices and variants.
 - [ ] **MT-0184 · P0 · REVIEW** — Product purchase summaries for region, platform, delivery method and required details were implemented in the 5 November pack; confirm the current production page before marking complete because the roadmap pack recorded the change as not yet published.
 - [ ] **MT-0185 · P1 · TODO** — Improve catalog search for brand, product, game, denomination and common abbreviations.
 - [ ] **MT-0186 · P1 · TODO** — Add clear sorting by relevance, price and availability.
@@ -1093,3 +1093,41 @@ No product records, supplier assignments, prices, variants, order records, datab
 - **Release action:** wait until the Vercel free deployment API quota has reset (the returned retry window was 24 hours), confirm the latest documentation-only `main` HEAD has a passing quality run, then deploy that current `main` commit (which includes the tested application-code commit `26a69301856a715a2cbd293da2cf88227d694ca5`) to production and verify both aliases before treating MT-0083 as live. Do not upgrade the plan or change billing to bypass the limit.
 
 **Next P0 task:** MT-0084 — validate uploaded proof file type, size and content handling. The source-level MT-0083 implementation is committed and CI-verified; its production rollout remains subject to the Vercel deployment quota above.
+
+
+## 27. Catalogue price, variant and checkout snapshot consistency — 8 November 2026
+
+**Task:** MT-0183 · P0 · DONE on draft PR #17. Production rollout remains pending; no production deployment was requested.
+
+### Production mismatch verified
+
+- Read-only production catalogue inspection returned 54 published product-variant rows. All inspected product and variant currencies were `NPR`, matching the storefront's `formatNpr` formatter.
+- The production Clash of Clans Passes catalogue has a default Gold Pass at `39,900` minor units (Rs 399) and an Event Pass at `24,900` minor units (Rs 249). The catalog card displays “From Rs 249”, while the product page previously selected Gold Pass at Rs 399 by default. Public page snapshots: https://mtdgc.com/catalog and https://mtdgc.com/products/clash-of-clans-passes.
+- Netflix Subscription is product-level `temporarily_unavailable` while its current variant rows remain marked available. The catalog card correctly reports temporarily unavailable, but the product page previously displayed variant prices (including Rs 350) despite a disabled purchase action. Public page snapshot: https://mtdgc.com/products/netflix-subscription.
+- Checkout stores product/variant/price snapshots in browser cart state. Before this change, `placeOrder` re-resolved current database prices and returned the authoritative total, but the checkout confirmation continued rendering the older client-side line snapshots. A catalogue price/name change between adding to cart and submitting could therefore produce a line-price/total mismatch. This is a code-path risk; no customer order or payment record was queried and no production impact was asserted.
+
+### Implementation
+
+- Added shared purchasable-variant selection. A variant is eligible only when the product and variant are published/orderable, the price is a positive integer, the product and variant currency are both NPR, and the listing is not hidden as a sample/coming-soon item.
+- Catalog starting prices, product-page initial selection, and catalog price sorting now use the same lowest purchasable variant. An explicitly requested, currently purchasable SKU remains selected; otherwise the product page defaults to the lowest purchasable option shown by the card.
+- Product cards only calculate a starting price from purchasable variants. A discount badge/strikethrough is shown only when the deal applies to that same starting variant.
+- Product pages keep unavailable options visible with their availability state, but disable their selectors and suppress their price. Product metadata and structured-data offers include only purchasable variants.
+- Checkout displays each unit price and line total. The current client sends its product-name, variant-name and unit-price snapshot to the server. The server resolves each SKU against current catalogue rows and compares the values before any order insert. If they differ, it returns `cart_changed` with server-resolved line values, the client refreshes the cart and requires the customer to review and submit again. Successful order confirmation uses server-resolved line snapshots.
+- Checkout rejects zero-priced and non-NPR catalogue variants because the current storefront formatter supports NPR only. No database migration was required.
+- Legacy clients that omit snapshot fields remain accepted for backwards compatibility; the server still calculates all order prices from the database. The stale-snapshot review/refresh handshake is used by the current checkout client.
+
+### Tests and verification
+
+- Extended product-availability tests for the shared lowest purchasable variant, explicit SKU selection, unavailable options, and unsupported currencies.
+- Added checkout snapshot tests for unchanged snapshots, changed price, changed product/variant name, legacy clients, SKU/order changes and line-count changes.
+- Updated catalog-search and wishlist type/data projections to carry the product and variant currency required by the shared availability contract.
+- Final GitHub Actions Quality run [42424730368](https://github.com/eboxont-code/mtdgc/actions/runs/42424730368) passed on source commit `42b7ee27fde172c05d78fcfd1b4e472a9e074008`: frozen dependency installation PASS; ESLint PASS (0 errors, 14 existing warnings); full unit suite PASS (46 tests across 11 files); TypeScript typecheck PASS; production build PASS.
+- Earlier CI attempts exposed test-fixture/type-contract issues and were corrected before the final successful run. They are not counted as successful verification.
+
+### Deployment and production boundary
+
+- Vercel preview deployment for the final source head was not verified. Earlier preview build attempts failed on commit `9a2a2a98e4435e1a12c572064fe33058f697661d` because `availabilityCounts` was temporarily missing from the shared module; that export was restored before final source verification. No later READY preview was returned for final head `42b7ee2`.
+- Production remains on the older READY deployment sourced from `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`. The new code has not been deployed to production.
+- No production catalogue, price, variant, order, payment, schema, storage, authentication, RLS, environment, DNS, hosting or billing setting was changed. No test order or payment was created; no supplier/customer was contacted; additional spend was $0.
+
+**Next P0 task:** MT-0184 — verify the product purchase summary for region, platform, delivery method and required customer details against the current production pages. MT-0181 remains blocked pending an owner-provided Android device and authorised end-to-end test window.
