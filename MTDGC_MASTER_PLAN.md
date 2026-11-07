@@ -1102,8 +1102,8 @@ No product records, supplier assignments, prices, variants, order records, datab
 ### Production mismatch verified
 
 - Read-only production catalogue inspection returned 54 published product-variant rows. All inspected product and variant currencies were `NPR`, matching the storefront's `formatNpr` formatter.
-- The production Clash of Clans Passes catalogue has a default Gold Pass at `39,900` minor units (Rs 399) and an Event Pass at `24,900` minor units (Rs 249). The catalog card displays “From Rs 249”, while the product page previously selected Gold Pass at Rs 399 by default. Public page snapshots: https://mtdgc.com/catalog and https://mtdgc.com/products/clash-of-clans-passes.
-- Netflix Subscription is product-level `temporarily_unavailable` while its current variant rows remain marked available. The catalog card correctly reports temporarily unavailable, but the product page previously displayed variant prices (including Rs 350) despite a disabled purchase action. Public page snapshot: https://mtdgc.com/products/netflix-subscription.
+- The production Clash of Clans Passes catalogue has a default Gold Pass at `39,900` minor units (Rs 399) and an Event Pass at `24,900` minor units (Rs 249). The current catalog-card logic displays the lowest price, while the product page previously selected Gold Pass at Rs 399 by default. Given these live rows, the card and initial product-page selection did not match. Relevant production routes: https://mtdgc.com/catalog and https://mtdgc.com/products/clash-of-clans-passes.
+- Netflix Subscription is product-level `temporarily_unavailable` while its current variant rows remain marked available. The catalog-card logic uses product-level availability, while the product-page price renderer previously showed a selected variant price (first variant `35,000` minor units / Rs 350) even though its purchase action was disabled. Relevant production route: https://mtdgc.com/products/netflix-subscription.
 - Checkout stores product/variant/price snapshots in browser cart state. Before this change, `placeOrder` re-resolved current database prices and returned the authoritative total, but the checkout confirmation continued rendering the older client-side line snapshots. A catalogue price/name change between adding to cart and submitting could therefore produce a line-price/total mismatch. This is a code-path risk; no customer order or payment record was queried and no production impact was asserted.
 
 ### Implementation
@@ -1126,7 +1126,7 @@ No product records, supplier assignments, prices, variants, order records, datab
 
 ### Deployment and production boundary
 
-- Vercel preview deployment for the final source head was not verified. Earlier preview build attempts failed on commit `9a2a2a98e4435e1a12c572064fe33058f697661d` because `availabilityCounts` was temporarily missing from the shared module; that export was restored before final source verification. No later READY preview was returned for final head `42b7ee2`.
+- Vercel preview deployments for earlier PR #17 revisions (`2e1e719`, `23046e8`, `9a2a2a9`) were observed in ERROR state. The deployment-event/build logs did not provide a verified cause, and no READY preview was returned for final source head `42b7ee2` or documentation head `5ca6164`. GitHub Actions verification does not substitute for a READY Vercel preview.
 - Production remains on the older READY deployment sourced from `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`. The new code has not been deployed to production.
 - No production catalogue, price, variant, order, payment, schema, storage, authentication, RLS, environment, DNS, hosting or billing setting was changed. No test order or payment was created; no supplier/customer was contacted; additional spend was $0.
 
