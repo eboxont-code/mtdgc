@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.2 · 8 November 2026
+**Version:** 2.3 · 8 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -226,11 +226,11 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** The order state is consistent from checkout to delivery, with a complete audit trail and useful customer visibility.
 
 - [x] **MT-0101 · P0 · DONE** — Map all 13 live order-status enum values, current application writers, generic administrator targets, legacy display aliases and observed transitions; confirm that neither application nor database enforces a complete transition graph. Evidence: section 30 and Data Architecture section 4; current-main source inspection plus read-only production enum, aggregate status-count, column-type, proof-status constraint and order-trigger queries on 8 November 2026.
-- [ ] **MT-0102 · P0 · TODO** — Ensure Payment received, Verified, Processing and Delivered have precise operational definitions.
+- [!] **MT-0102 · P0 · BLOCKED** — Shared customer-facing milestone labels are implemented in draft PR #22, but exact-head Quality run [42441639306](https://github.com/eboxont-code/mtdgc/actions/runs/42441639306) failed before any workflow step started (runner ID 0; no steps or logs). The full repository checks remain unverified. Unblock when a free runner completes the exact-head workflow; do not merge from the scratch harness alone.
 - [ ] **MT-0103 · P0 · TODO** — Add explicit Cancelled, Failed, Refunded and Action required states where applicable.
 - [ ] **MT-0104 · P0 · TODO** — Prevent invalid status jumps, such as Pending directly to Delivered without payment verification.
-- [ ] **MT-0105 · P0 · TODO** — Verify guest order tracking requires the order number plus the matching email or phone.
-- [ ] **MT-0106 · P0 · TODO** — Ensure account order history and guest tracking show the same canonical status.
+- [!] **MT-0105 · P0 · BLOCKED** — The clean main-based implementation and focused tests are in draft PR #23. Exact-head Quality run [42445346808](https://github.com/eboxont-code/mtdgc/actions/runs/42445346808) failed before any workflow step started (empty job steps; logs unavailable). Focused tests and helper typecheck passed, but full repository checks remain unverified.
+- [!] **MT-0106 · P0 · BLOCKED** — Depends on the shared customer-facing status definitions in MT-0102 being verified and promoted; do not change the remaining account-order labels ahead of that release.
 - [ ] **MT-0107 · P1 · TODO** — Record a timestamp and actor for every status transition.
 - [ ] **MT-0108 · P1 · TODO** — Show customers what happens next at each stage and whether they need to act.
 - [ ] **MT-0109 · P1 · TODO** — Allow staff to add internal notes without exposing them to customers.
@@ -300,7 +300,7 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Customer information, payment evidence, order records and staff tools are protected with least-privilege access.
 
-- [ ] **MT-0161 · P0 · TODO** — Audit authentication and authorisation for customer accounts, support requests and admin routes.
+- [!] **MT-0161 · P0 · BLOCKED** — The read-only audit has been refreshed against current main and production metadata in section 33. A clean current-main documentation PR is awaiting its exact-head Quality workflow; do not mark DONE or merge until the required check passes.
 - [ ] **MT-0162 · P0 · TODO** — Verify one customer cannot access another customer's orders by changing an ID or URL.
 - [ ] **MT-0163 · P0 · TODO** — Verify payment uploads and delivered codes are stored privately, not in public buckets.
 - [ ] **MT-0164 · P0 · TODO** — Ensure admin-only actions are enforced server-side, not only hidden in the interface.
@@ -530,7 +530,7 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-task register are authoritative.
+MT-0102 and MT-0105 are blocked by GitHub Actions runner-startup failures. MT-0161 has a refreshed current-main audit in progress and is awaiting its exact-head quality check. The task register remains authoritative.
 
 | Order | Task | Status |
 |---:|---|---|
@@ -539,13 +539,20 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 3 | MT-0061–MT-0063 — build landed cost and order-level gross margin from source costs | BLOCKED; supplier costs, dated FX, payment/settlement fees, refunds and variable fulfilment/support costs are absent |
 | 4 | MT-0064 — approve minimum contribution-margin floor | BLOCKED; business-owner decision required |
 | 5 | MT-0065 — enforce a current-price/margin gate at checkout | BLOCKED; depends on the approved floor and trusted cost/price-expiry data; schema changes remain behind the Supabase cutover |
-| 6 | MT-0085 — restrict payment-proof access to the order owner and authorised staff | MERGED BUT NOT LIVE; PR #20 merged as `a793dff`; Vercel free daily deployment limit blocked production release; see section 29 |
+| 6 | MT-0085 — restrict payment-proof access to the order owner and authorised staff | MERGED BUT NOT LIVE; PR #20 is merged, but the production deployment is still on an older commit |
 | 7 | MT-0086 — require independent payment settlement matching before fulfilment | BLOCKED; no bank-statement feed, provider callback or owner-approved manual settlement evidence is available |
 | 8 | MT-0087 — prevent duplicate transaction references/screenshots across orders | BLOCKED; concurrency-safe uniqueness requires the approved Supabase cutover/migration gate |
-| 9 | MT-0101 — map current order statuses and observed transition paths | DONE; 13-value enum, application writers, UI mappings, production aggregate counts and lack of transition enforcement are documented in section 30 and Data Architecture section 4 |
-| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | NEXT P0; can be documented from the current payment-review code and existing operational evidence without production writes |
-| 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
-| 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
+| 9 | MT-0101 — map current order statuses and observed transition paths | DONE; current status vocabulary and observed application writers are documented in section 30 |
+| 10 | MT-0102 — define the operational meaning of payment proof received, verified, processing and delivered | BLOCKED; draft PR #22 has focused checks, but its exact-head full quality workflow failed before runner startup |
+| 11 | MT-0105 — require order number plus matching saved email or phone for public guest tracking | BLOCKED; draft PR #23 has focused checks, but its exact-head full quality workflow failed before runner startup |
+| 12 | MT-0106 — align authenticated order history and guest tracking status labels | BLOCKED; depends on verified MT-0102 milestone definitions |
+| 13 | MT-0161 — audit authentication and authorisation for customer accounts, support requests and admin routes | BLOCKED pending the exact-head quality check for the refreshed current-main audit in section 33 |
+| 14 | MT-0162 — prevent cross-customer order access by changing an ID or URL | NEXT ELIGIBLE P0 after MT-0161; existing draft PR #13 is stacked on the stale MT-0161 branch and must be reapplied to current main without copying obsolete history |
+| 15 | MT-0163 — verify payment uploads and delivered codes are stored privately | BLOCKED; no delivered-code storage location or approved storage design is evidenced |
+| 16 | MT-0164 — enforce admin-only actions server-side | Existing draft PR #14 is stacked on MT-0162; current main already has server-side auth/admin guards, but its focused coverage must be reconciled after MT-0162 |
+| 17 | MT-0165 — review secrets and payment configuration for accidental exposure | Existing draft PR #15; recheck its evidence against current main before promotion |
+| 18 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
+| 19 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -1334,3 +1341,31 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 No production application code, database/schema, order/payment/customer record, storage object, RLS/grant, credential, environment, DNS, hosting or billing setting changed. No test order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
 
 **Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
+
+## 33. Current authentication and authorisation audit — 8 November 2026
+
+**Task:** MT-0161 · P0 · BLOCKED pending exact-head quality verification. This refresh is based on current GitHub `main` at `ca01edaafa42b5b859089ce18d5decaf6fbd4db3` and read-only production Supabase metadata. It updates the earlier audit without changing application code or production settings.
+
+### Findings
+
+- The authenticated route is a client-side navigation gate. Server-function authentication is enforced separately by global Bearer-token attachment, CSRF middleware for server-function requests, and `requireSupabaseAuth`, which validates claims and supplies a user-scoped client.
+- Customer profile, order, order-item, support-ticket, wishlist, review and user-role access is protected by RLS. All 14 public application tables have RLS enabled. The effective policies restrict profile, order, ticket, wishlist and role access to the relevant owner or administrator; review publication and moderation have separate owner/admin rules.
+- All 14 exported admin server functions use authenticated middleware and call the server-side admin guard. The guard accepts only an error-free exact boolean `true`; the browser-side admin check is presentation only.
+- The service-role client bypasses RLS and is used only in trusted server handlers. Guest order lookup and order-detail paths therefore require explicit server-side access checks.
+- The current order-detail contact fallback still does not exclude account-owned orders. A matching contact can reach an account-owned order through the service-role path; MT-0162 owns the correction and negative tests. The guest lookup rate-limit operations also do not fail closed on every database error.
+- The `payment-proofs` and `payment-qr` buckets are private. Payment-proof reads are limited to the related order owner or administrator; payment-QR object operations are administrator-only. The proof bucket has a 5 MiB cap and the QR bucket a 2 MiB cap; neither has a storage MIME allowlist, so application-side validation remains required.
+- `order_lookup_attempts` has RLS enabled, no client policy and service-role/database-owner privileges only. The Supabase advisor warns that `public.has_role(uuid, app_role)` is SECURITY DEFINER and executable by anon/authenticated. It can disclose role membership for a supplied UUID; no client role-write privilege was observed. Because RLS policies call this function, any remediation must be coordinated with the approved Supabase cutover and policy migration.
+
+### Evidence and verification
+
+- Source inspected on current main: authenticated route, global auth attachment, server auth middleware, server-only Supabase client, all 14 admin server functions, account/support routes, guest order functions and current order-access helpers.
+- Read-only production metadata inspected: all public RLS policies, client table grants, storage object policies, bucket privacy/limits, function security/ACL metadata, table RLS coverage and Supabase security-advisor findings.
+- Current-main Quality run [42437058568](https://github.com/eboxont-code/mtdgc/actions/runs/42437058568) passed on exact base commit `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`. A new exact-head workflow is required for the documentation PR before merge.
+- Production Vercel is READY at [deployment `dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE`](https://vercel.com/boxont/mtdgc/7A2mKAuhBY6nkW2d4FrZGDGQDVUE), deployed commit `3de811c7cfce91eb262cf79523d8053995bfb777`; current main is 15 commits ahead. This audit does not claim current-main code is live.
+- No customer/order/payment/auth-user records or storage objects were read. No production writes, migrations, policy/grant changes, secrets, authentication settings, hosting, DNS or billing settings were changed. Additional spend: $0.
+
+### Remaining gates
+
+- MT-0161 remains BLOCKED until the exact-head full quality workflow passes and the refreshed audit is merged.
+- MT-0162 remains the next independent P0 after this audit; its existing draft is stacked on the old audit branch and must be reconciled to current main.
+- Do not independently change `has_role`, RLS policies, storage settings or authentication configuration. Those actions remain behind the approved Supabase cutover and owner-controlled release gates.
