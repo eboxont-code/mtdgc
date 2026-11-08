@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.2 · 8 November 2026
+**Version:** 2.3 · 8 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -226,10 +226,10 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** The order state is consistent from checkout to delivery, with a complete audit trail and useful customer visibility.
 
 - [x] **MT-0101 · P0 · DONE** — Map all 13 live order-status enum values, current application writers, generic administrator targets, legacy display aliases and observed transitions; confirm that neither application nor database enforces a complete transition graph. Evidence: section 30 and Data Architecture section 4; current-main source inspection plus read-only production enum, aggregate status-count, column-type, proof-status constraint and order-trigger queries on 8 November 2026.
-- [ ] **MT-0102 · P0 · TODO** — Ensure Payment received, Verified, Processing and Delivered have precise operational definitions.
-- [ ] **MT-0103 · P0 · TODO** — Add explicit Cancelled, Failed, Refunded and Action required states where applicable.
-- [ ] **MT-0104 · P0 · TODO** — Prevent invalid status jumps, such as Pending directly to Delivered without payment verification.
-- [ ] **MT-0105 · P0 · TODO** — Verify guest order tracking requires the order number plus the matching email or phone.
+- [x] **MT-0102 · P0 · DONE** — Define Payment proof received, Verified by staff, Processing and Delivered from observed code/schema evidence; remove wording that implies a submitted screenshot is settlement confirmation or that delivery automatically emails a customer. Evidence: section 32 and Data Architecture sections 4.5–4.7; shared status labels, five focused regression tests and exact-head CI.
+- [!] **MT-0103 · P0 · BLOCKED** — Existing `cancelled`, `failed` and `refunded` enum values are present; deciding whether a distinct `action_required` state is needed is an owner workflow/product decision. A new enum value also requires the approved Supabase cutover/migration gate. Unblock with owner-approved action-required use cases and migration approval; do not add a status by assumption.
+- [!] **MT-0104 · P0 · BLOCKED** — The generic admin updater currently accepts seven target statuses from any existing state. Safe enforcement requires an owner-approved transition matrix covering cancellation, refunds, overrides and fulfilment, plus independent payment-settlement evidence under MT-0086. Unblock with the approved transition policy and settlement evidence; do not invent restrictions that could block legitimate operations.
+- [~] **MT-0105 · P0 · IN PROGRESS** — Existing implementation and regression coverage are in draft PR #5; the next action is to reconcile its branch against current `main` and verify its exact head/CI before promotion. Do not repeat the implementation.
 - [ ] **MT-0106 · P0 · TODO** — Ensure account order history and guest tracking show the same canonical status.
 - [ ] **MT-0107 · P1 · TODO** — Record a timestamp and actor for every status transition.
 - [ ] **MT-0108 · P1 · TODO** — Show customers what happens next at each stage and whether they need to act.
@@ -543,7 +543,7 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 7 | MT-0086 — require independent payment settlement matching before fulfilment | BLOCKED; no bank-statement feed, provider callback or owner-approved manual settlement evidence is available |
 | 8 | MT-0087 — prevent duplicate transaction references/screenshots across orders | BLOCKED; concurrency-safe uniqueness requires the approved Supabase cutover/migration gate |
 | 9 | MT-0101 — map current order statuses and observed transition paths | DONE; 13-value enum, application writers, UI mappings, production aggregate counts and lack of transition enforcement are documented in section 30 and Data Architecture section 4 |
-| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | NEXT P0; can be documented from the current payment-review code and existing operational evidence without production writes |
+| 10 | MT-0105 — verify guest order tracking requires the order number plus matching saved email or phone | NEXT P0; existing PR #5 must be reconciled with current main and its exact-head security/quality evidence checked |
 | 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 
@@ -1334,3 +1334,43 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 No production application code, database/schema, order/payment/customer record, storage object, RLS/grant, credential, environment, DNS, hosting or billing setting changed. No test order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
 
 **Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
+
+## 32. MT-0102 customer-facing order milestone semantics — 8 November 2026
+
+**Task:** MT-0102 · P0 · DONE in the MT-0102 implementation PR, pending final merge/release verification. The previous draft PR [#4](https://github.com/eboxont-code/mtdgc/pull/4) is based on an obsolete MT-0101/MT-0085 stack and is not suitable for direct merge; its focused changes were reapplied to a clean branch based on current main commit `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`.
+
+### Operational definitions from observed behaviour
+
+- **Payment proof received** maps only to `payment_submitted`. Uploading a screenshot/reference starts manual review and does not prove that funds reached MTDGC.
+- **Verified by staff** maps to `verified`. It is a manual administrator decision; no independent bank/provider settlement feed is connected.
+- **Processing** maps to `processing`. It is a manual staff update, not a supplier API signal.
+- **Delivered** maps to `delivered`, with legacy aliases `fulfilled` and `completed`. It is staff-marked; no delivery-evidence record or email dispatch is implied.
+- Legacy `paid` is shown separately as “Legacy payment status” and is excluded from the four-step payment-proof progress sequence.
+
+### Implementation
+
+- Added shared `ORDER_STATUS_LABEL` definitions in `src/lib/format.ts`.
+- Updated guest tracking, order detail and authenticated order history to use the same status labels.
+- Added milestone explanations to the order-detail page.
+- Added an explicit notice for legacy `paid` status.
+- Kept the work descriptive only; no enum, transition rule, payment, fulfilment or database behaviour was changed.
+
+### Regression tests
+
+Added `src/lib/order-status.test.ts` with five tests covering:
+1. Proof submission is not described as money received.
+2. Legacy `paid` is not grouped with proof submission or settlement.
+3. `verified` is explicitly staff-marked, not independent settlement.
+4. `processing` is manual, not a supplier signal.
+5. `delivered` is staff-marked and does not promise email dispatch.
+
+### Verification boundary
+
+The production `public.order_status` enum was queried read-only on 8 November 2026 and returned the 13 labels documented in section 30. No order/customer/payment rows were queried. The current main Quality workflow passed on `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`; the MT-0102 PR-head workflow is the required test for the new code and will be recorded in the merge/release addendum. No production database or customer/order/payment data was changed.
+
+### Related tasks and next action
+
+- MT-0103 is BLOCKED on the owner decision whether a distinct `action_required` status is needed; any new enum value also needs the approved migration gate.
+- MT-0104 is BLOCKED on the owner-approved transition matrix and independent settlement evidence under MT-0086.
+- MT-0105 is next P0 and already has draft PR #5; reconcile that branch against current main rather than repeating its existing implementation.
+
