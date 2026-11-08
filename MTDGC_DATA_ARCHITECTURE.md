@@ -126,3 +126,14 @@ The customer progress helper groups `payment_submitted`/`paid`, `verified`, `pro
 - The administrator payment-review queue and signed proof-URL function require a validated Supabase session and an exact successful administrator-role result before any proof lookup or signed URL creation. Signed URLs expire after 300 seconds.
 - `has_role` remains a SECURITY DEFINER function that Supabase's advisor reports as executable by anon/authenticated. Treat its role-membership disclosure as a separate issue; change function execution and dependent policies only through the approved coordinated Supabase migration gate.
 - Guest order access is mediated by server-side order access checks and is not a direct proof-row/object RLS grant. Cross-customer order lookup/contact-fallback isolation remains tracked separately under MT-0162.
+
+
+## 9. Customer credential collection safeguards
+
+- The supplier register's mandatory rejection policy is backed by a shared application deny-list in `src/lib/supplier-safety.ts`. Requirement labels are Unicode-normalised and separator-normalised before checking for passwords/passcodes/passkeys, OTP/2FA/MFA/authenticator codes, PINs, recovery/backup/seed secrets, security answers, account access, session/access tokens, API/private/client secrets, remote access and payment-card credentials.
+- The administrator product form uses the shared message for guidance; the `saveProduct` server schema independently rejects unsafe requirement labels. Client-side form validation is not the security boundary.
+- Product detail uses a fail-closed projection: malformed or unsafe saved requirements yield no customer fields, no field autofill, a review-required unavailable state and disabled purchase actions. Safe identifiers and delivery contacts remain available.
+- `placeOrder` re-reads the current requirements from the product joined to the server-resolved SKU and rejects malformed/unsafe requirements before constructing an order row. It also rejects unsafe client-supplied field keys, including stale carts.
+- Checkout and support free-text areas display the same warning. Free-text order notes and support descriptions are not keyword-blocked because legitimate troubleshooting may mention passwords/reset flows; the warning cannot prevent a customer from voluntarily typing a secret.
+- Production `public.products.requirements` is JSONB. No supplier table or verified supplier/product-scope records are present in the current register/schema, so this safeguard does not claim supplier-side practices have been screened or authorised.
+- No schema migration is required. This is an application input-collection safeguard, not proof of supplier legitimacy, payment settlement, product authority or safe account-sharing fulfilment.
