@@ -129,7 +129,7 @@ The customer progress helper groups `payment_submitted`/`paid`, `verified`, `pro
 - Guest order access is mediated by server-side order access checks and is not a direct proof-row/object RLS grant. Cross-customer order lookup/contact-fallback isolation remains tracked separately under MT-0162.
 
 
-### 5.1 Public guest tracking access and verification
+## 9. Guest order tracking access and verification
 
 - The public server function requires a trimmed order number (4–40 characters) and contact (3–120 characters). It uppercases the order number, queries only that exact order, then invokes the shared `hasOrderContactAccess` helper.
 - The helper normalises email to lowercase and phone numbers to digits. It accepts the SHA-256 hash of the uppercased order number plus normalised contact, or an exact case-insensitive match to the saved `guest_email`. A phone match is therefore tied to the exact order number and cannot be reused to open a different order.
