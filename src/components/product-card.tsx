@@ -3,19 +3,14 @@ import { Link } from "@tanstack/react-router";
 import { ProductArt } from "@/components/product-art";
 import type { CatalogProduct } from "@/lib/catalog.functions";
 import { formatNpr } from "@/lib/format";
-import { availabilityLabel, isPurchasable } from "@/lib/product-availability";
+import { availabilityLabel, isPurchasable, lowestPurchasableVariant } from "@/lib/product-availability";
 import { bestDeal } from "@/lib/pricing";
 import { PRICE_COMING_SOON, pricesHidden } from "@/lib/price-visibility";
 import { isGiftCardCategory } from "@/lib/gift-card-pricing";
 
-/** Lowest real price, or null for sample and coming-soon items (their prices are never shown). */
+/** Lowest currently purchasable price, or null when the product has no eligible NPR variant. */
 export function lowestPrice(product: CatalogProduct): number | null {
-  if (pricesHidden(product)) return null;
-  const prices = product.variants
-    .filter((variant) => variant.status !== "archived")
-    .map((variant) => variant.price_minor)
-    .filter((value) => value > 0);
-  return prices.length ? Math.min(...prices) : null;
+  return lowestPurchasableVariant(product)?.price_minor ?? null;
 }
 
 const HIDDEN_BADGES = new Set(["sample", "coming soon"]);
@@ -32,7 +27,9 @@ export function productMeta(product: CatalogProduct): string {
 export function ProductTile({ product, priority = false, className = "" }: { product: CatalogProduct; priority?: boolean; className?: string }) {
   const price = lowestPrice(product);
   const orderable = isPurchasable(product);
-  const deal = orderable ? bestDeal(product) : null;
+  const lowestVariant = orderable ? lowestPurchasableVariant(product) : null;
+  const candidateDeal = orderable ? bestDeal(product) : null;
+  const deal = candidateDeal?.variant.sku === lowestVariant?.sku ? candidateDeal : null;
   const badge = orderable ? product.badges.find((b) => !HIDDEN_BADGES.has(b.toLowerCase())) : undefined;
 
   return (

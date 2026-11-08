@@ -11,7 +11,7 @@ import { availabilityLabel, isPurchasable } from "@/lib/product-availability";
 import { EmptyState } from "@/components/empty-state";
 import { Heart } from "lucide-react";
 
-type Row = { product_id: string; products: { slug: string; name: string; summary: string; image_url: string | null; status: string; tags: string[]; product_variants: { status: string; price_minor: number }[] } | null };
+type Row = { product_id: string; products: { slug: string; name: string; summary: string; image_url: string | null; status: string; tags: string[]; currency: string; product_variants: { sku: string; name: string; status: string; price_minor: number; currency: string }[] } | null };
 
 export const Route = createFileRoute("/_authenticated/wishlist")({
   head: () => ({
@@ -43,7 +43,7 @@ function WishlistPage() {
     try {
       const { data, error: loadError } = await supabase
       .from("wishlist_items")
-      .select("product_id, products(slug, name, summary, image_url, status, tags, product_variants(status, price_minor))")
+      .select("product_id, products(slug, name, summary, image_url, status, tags, currency, product_variants(sku, name, status, price_minor, currency))")
       .order("created_at", { ascending: false });
       if (loadError) throw loadError;
       setRows((data ?? []) as unknown as Row[]);

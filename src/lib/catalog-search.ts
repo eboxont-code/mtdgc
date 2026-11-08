@@ -8,7 +8,8 @@ type SearchProduct = {
   platform?: string | null;
   category: { name: string } | null;
   tags: readonly string[];
-  variants: readonly { name: string; sku: string; status: string; price_minor: number }[];
+  currency: string;
+  variants: readonly { name: string; sku: string; status: string; price_minor: number; currency: string }[];
   slug: string;
   status: string;
   featured_rank: number | null;

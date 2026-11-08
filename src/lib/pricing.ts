@@ -1,4 +1,5 @@
 import type { CatalogProduct, Variant } from "@/lib/catalog.functions";
+import { purchasableVariants } from "@/lib/product-availability";
 
 /**
  * Real previous prices, keyed by variant SKU, in minor units (paisa).
@@ -20,7 +21,7 @@ export function discountPercent(variant: Pick<Variant, "sku" | "price_minor">): 
 /** The best real discount on a product, or null. */
 export function bestDeal(product: CatalogProduct): { variant: Variant; was: number; percent: number } | null {
   let best: { variant: Variant; was: number; percent: number } | null = null;
-  for (const variant of product.variants) {
+  for (const variant of purchasableVariants(product)) {
     const was = compareAt(variant);
     const percent = discountPercent(variant);
     if (was && percent && (!best || percent > best.percent)) best = { variant, was, percent };

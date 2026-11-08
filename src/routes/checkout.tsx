@@ -13,7 +13,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
-import { useCart } from "@/lib/cart";
+import { useCart, type CartLine } from "@/lib/cart";
 import { formatNpr, SITE_URL } from "@/lib/format";
 import { enabledProviders } from "@/lib/payments";
 import { Check, ChevronDown, Lock, QrCode, ShieldCheck } from "lucide-react";
@@ -42,11 +42,12 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const inputCls = "mt-1 h-11 w-full rounded-lg border bg-background/60 px-3 font-display text-[15px] outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20";
 
 type Errors = Record<string, string>;
+type CheckoutLine = Pick<CartLine, "sku" | "productName" | "variantName" | "priceMinor" | "image" | "categorySlug" | "quantity">;
 
 const CONTACT_KEY = "mtdgc-checkout-contact";
 
 function CheckoutPage() {
-  const { lines, subtotalMinor, updateFields, clear, hydrated } = useCart();
+  const { lines, subtotalMinor, updateFields, updateSnapshot, clear, hydrated } = useCart();
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -57,7 +58,7 @@ function CheckoutPage() {
   const [errors, setErrors] = useState<Errors>({});
   const [sending, setSending] = useState(false);
   const [placeError, setPlaceError] = useState<string | null>(null);
-  const [placed, setPlaced] = useState<{ orderNumber: string; totalMinor: number; lines: typeof lines } | null>(null);
+  const [placed, setPlaced] = useState<{ orderNumber: string; totalMinor: number; lines: CheckoutLine[] } | null>(null);
   const formRef = useRef<HTMLDivElement>(null);
   const restored = useRef(false);
   const placeOrderFn = useServerFn(placeOrder);
@@ -148,7 +149,6 @@ function CheckoutPage() {
     setPlaceError(null);
     try {
       const { data: sess } = await supabase.auth.getSession();
-      const snapshot = [...lines];
       const result = await placeOrderFn({
         data: {
           name: name.trim(),
@@ -156,13 +156,33 @@ function CheckoutPage() {
           email: email.trim(),
           note: note.trim(),
           bearer: sess.session?.access_token,
-          lines: lines.map((l) => ({ sku: l.sku, quantity: l.quantity, fields: l.fields ?? {} })),
+          lines: lines.map((l) => ({
+            sku: l.sku,
+            quantity: l.quantity,
+            fields: l.fields ?? {},
+            expectedProductName: l.productName,
+            expectedVariantName: l.variantName,
+            expectedPriceMinor: l.priceMinor,
+          })),
         },
       });
+      if (result.status === "cart_changed") {
+        for (const line of result.lines) {
+          updateSnapshot(line.sku, {
+            productName: line.productName,
+            variantName: line.variantName,
+            priceMinor: line.priceMinor,
+            image: line.image,
+            categorySlug: line.categorySlug,
+          });
+        }
+        setPlaceError("A product name, option or price changed since this cart was saved. We updated the summary with the current catalogue details. Review the new prices and place the order again.");
+        return;
+      }
       const tokenKey = `mtdgc-order-${result.orderNumber.toUpperCase()}`;
       try { localStorage.setItem(tokenKey, result.accessToken); } catch { /* storage unavailable */ }
       try { sessionStorage.setItem(tokenKey, result.accessToken); sessionStorage.removeItem(CONTACT_KEY); } catch { /* storage unavailable */ }
-      setPlaced({ orderNumber: result.orderNumber, totalMinor: result.totalMinor, lines: snapshot });
+      setPlaced({ orderNumber: result.orderNumber, totalMinor: result.totalMinor, lines: result.lines });
       clear();
       setStep(3);
       window.scrollTo({ top: 0 });
@@ -221,9 +241,9 @@ function CheckoutPage() {
           <span className="min-w-0 flex-1 text-sm">
             <span className="block truncate font-display font-medium">{line.productName}</span>
             <span className="block text-xs text-muted-foreground">{isGiftCardCategory(line.categorySlug) ? "Face value: " + line.variantName : line.variantName} · Qty {line.quantity}</span>
-            {isGiftCardCategory(line.categorySlug) && <span className="block text-xs text-muted-foreground">MTDGC selling price: {formatNpr(line.priceMinor)} each</span>}
+            <span className="block text-xs text-muted-foreground">{isGiftCardCategory(line.categorySlug) ? "MTDGC selling price" : "Price"}: {formatNpr(line.priceMinor)} each</span>
           </span>
-          <span className="shrink-0 text-right font-mono text-sm font-bold text-price">{formatNpr(line.priceMinor * line.quantity)}{isGiftCardCategory(line.categorySlug) && <span className="block text-[10px] font-normal text-muted-foreground">Line total</span>}</span>
+          <span className="shrink-0 text-right font-mono text-sm font-bold text-price">{formatNpr(line.priceMinor * line.quantity)}<span className="block text-[10px] font-normal text-muted-foreground">Line total</span></span>
         </li>
       ))}
     </ul>
