@@ -226,11 +226,11 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** The order state is consistent from checkout to delivery, with a complete audit trail and useful customer visibility.
 
 - [x] **MT-0101 · P0 · DONE** — Map all 13 live order-status enum values, current application writers, generic administrator targets, legacy display aliases and observed transitions; confirm that neither application nor database enforces a complete transition graph. Evidence: section 30 and Data Architecture section 4; current-main source inspection plus read-only production enum, aggregate status-count, column-type, proof-status constraint and order-trigger queries on 8 November 2026.
-- [ ] **MT-0102 · P0 · TODO** — Ensure Payment received, Verified, Processing and Delivered have precise operational definitions.
+- [!] **MT-0102 · P0 · BLOCKED** — Shared customer-facing milestone labels are in draft PR #22, but exact-head Quality run [42441639306](https://github.com/eboxont-code/mtdgc/actions/runs/42441639306) failed before any workflow step started (runner ID 0; no steps or logs). Full repository checks remain unverified.
 - [ ] **MT-0103 · P0 · TODO** — Add explicit Cancelled, Failed, Refunded and Action required states where applicable.
 - [ ] **MT-0104 · P0 · TODO** — Prevent invalid status jumps, such as Pending directly to Delivered without payment verification.
-- [ ] **MT-0105 · P0 · TODO** — Verify guest order tracking requires the order number plus the matching email or phone.
-- [ ] **MT-0106 · P0 · TODO** — Ensure account order history and guest tracking show the same canonical status.
+- [!] **MT-0105 · P0 · BLOCKED** — Implementation and focused tests are in draft PR #23. Exact-head Quality run [42445346808](https://github.com/eboxont-code/mtdgc/actions/runs/42445346808) failed before any workflow step started; focused checks passed, but full repository checks remain unverified.
+- [!] **MT-0106 · P0 · BLOCKED** — Depends on MT-0102 customer-facing milestone definitions being verified and promoted.
 - [ ] **MT-0107 · P1 · TODO** — Record a timestamp and actor for every status transition.
 - [ ] **MT-0108 · P1 · TODO** — Show customers what happens next at each stage and whether they need to act.
 - [ ] **MT-0109 · P1 · TODO** — Allow staff to add internal notes without exposing them to customers.
@@ -300,8 +300,8 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Customer information, payment evidence, order records and staff tools are protected with least-privilege access.
 
-- [ ] **MT-0161 · P0 · TODO** — Audit authentication and authorisation for customer accounts, support requests and admin routes.
-- [ ] **MT-0162 · P0 · TODO** — Verify one customer cannot access another customer's orders by changing an ID or URL.
+- [!] **MT-0161 · P0 · BLOCKED** — Refreshed current-main audit is in draft PR [#26](https://github.com/eboxont-code/mtdgc/pull/26); exact-head Quality run [42453509323](https://github.com/eboxont-code/mtdgc/actions/runs/42453509323) failed before runner startup (runner ID 0, no steps/logs).
+- [~] **MT-0162 · P0 · IN PROGRESS** — Contact fallback is being restricted to guest orders; account orders now require a matching verified account bearer or order-specific token. The current-main implementation, negative test and tracking-session handoff are recorded in section 34; exact-head quality verification is still required.
 - [ ] **MT-0163 · P0 · TODO** — Verify payment uploads and delivered codes are stored privately, not in public buckets.
 - [ ] **MT-0164 · P0 · TODO** — Ensure admin-only actions are enforced server-side, not only hidden in the interface.
 - [ ] **MT-0165 · P0 · TODO** — Review secrets, supplier credentials and payment configuration for accidental exposure.
@@ -530,7 +530,7 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-task register are authoritative.
+MT-0162 is **IN PROGRESS** on a clean branch based on current main. MT-0102, MT-0105 and MT-0161 remain blocked on exact-head GitHub Actions runner startup; MT-0106 depends on MT-0102. Task statuses in the 308-task register remain authoritative.
 
 | Order | Task | Status |
 |---:|---|---|
@@ -539,13 +539,20 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 3 | MT-0061–MT-0063 — build landed cost and order-level gross margin from source costs | BLOCKED; supplier costs, dated FX, payment/settlement fees, refunds and variable fulfilment/support costs are absent |
 | 4 | MT-0064 — approve minimum contribution-margin floor | BLOCKED; business-owner decision required |
 | 5 | MT-0065 — enforce a current-price/margin gate at checkout | BLOCKED; depends on the approved floor and trusted cost/price-expiry data; schema changes remain behind the Supabase cutover |
-| 6 | MT-0085 — restrict payment-proof access to the order owner and authorised staff | MERGED BUT NOT LIVE; PR #20 merged as `a793dff`; Vercel free daily deployment limit blocked production release; see section 29 |
+| 6 | MT-0085 — restrict payment-proof access to the order owner and authorised staff | MERGED BUT NOT LIVE; PR #20 is merged, but production remains on an older commit |
 | 7 | MT-0086 — require independent payment settlement matching before fulfilment | BLOCKED; no bank-statement feed, provider callback or owner-approved manual settlement evidence is available |
 | 8 | MT-0087 — prevent duplicate transaction references/screenshots across orders | BLOCKED; concurrency-safe uniqueness requires the approved Supabase cutover/migration gate |
-| 9 | MT-0101 — map current order statuses and observed transition paths | DONE; 13-value enum, application writers, UI mappings, production aggregate counts and lack of transition enforcement are documented in section 30 and Data Architecture section 4 |
-| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | NEXT P0; can be documented from the current payment-review code and existing operational evidence without production writes |
-| 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
-| 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
+| 9 | MT-0101 — map current order statuses and observed transition paths | DONE; current status vocabulary and observed application writers are documented in section 30 |
+| 10 | MT-0102 — define the operational meaning of payment proof received, verified, processing and delivered | BLOCKED; draft PR #22 exact-head Quality failed before runner startup |
+| 11 | MT-0105 — require order number plus matching saved email or phone for public guest tracking | BLOCKED; draft PR #23 exact-head Quality failed before runner startup |
+| 12 | MT-0106 — align authenticated order history and guest tracking status labels | BLOCKED; depends on verified MT-0102 milestone definitions |
+| 13 | MT-0161 — audit authentication and authorisation for customer accounts, support requests and admin routes | BLOCKED; refreshed audit in draft PR #26, exact-head Quality failed before runner startup |
+| 14 | MT-0162 — prevent cross-customer order access by changing an ID or URL | IN PROGRESS; clean current-main implementation and regression test are in this branch, pending exact-head quality verification |
+| 15 | MT-0163 — verify payment uploads and delivered codes are stored privately | BLOCKED; no delivered-code storage location or approved storage design is evidenced |
+| 16 | MT-0164 — enforce admin-only actions server-side | BLOCKED pending MT-0162 reconciliation; existing PR #14 is stacked on the old MT-0162 branch |
+| 17 | MT-0165 — review secrets and payment configuration for accidental exposure | Existing draft PR #15; recheck its evidence against current main before promotion |
+| 18 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
+| 19 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -1334,3 +1341,34 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 No production application code, database/schema, order/payment/customer record, storage object, RLS/grant, credential, environment, DNS, hosting or billing setting changed. No test order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
 
 **Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
+
+## 34. Cross-customer account-order isolation — 8 November 2026
+
+**Task:** MT-0162 · P0 · IN PROGRESS. This change is based directly on current `main` commit `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`. It reapplies only the MT-0162 access-control change from the old stacked draft; it does not copy the obsolete MT-0161 branch history.
+
+### Security gap
+
+The order functions use the server-only Supabase service-role client, which bypasses RLS. The shared contact fallback previously accepted a matching phone/email and order verification hash even when the order belonged to a signed-in account. Knowing another customer's order number and saved contact could therefore reach an account-owned order through the service-role path.
+
+### Implementation
+
+- The shared contact-access helper now rejects every order with a non-null `user_id`. Contact matching remains available only for guest orders.
+- Account-owned order lookup now loads the server-resolved `user_id` and requires a Bearer token validated by Supabase Auth whose subject exactly matches that owner.
+- The public tracking page forwards the current signed-in session token. A guest still needs the order number plus the matching saved email or phone; an account order cannot fall back to contact matching.
+- Existing order-specific access-token checks and the authenticated-owner paths in order detail and payment-proof submission remain intact.
+- No order schema, RLS policy, database migration or production setting is changed.
+
+### Regression coverage
+
+- Added a negative test proving that matching phone and email values cannot use the contact fallback for an account-owned order.
+- Existing tests continue to cover order-token scoping, exact account-owner matching, guest contact matching and mismatched order/contact denial.
+
+### Verification boundary
+
+- Production RLS metadata already confirms that authenticated order reads are owner-scoped and there is no anonymous order SELECT policy. The service-role path bypasses those policies, which is why the explicit application-level check is necessary.
+- Current-main Quality run [42437058568](https://github.com/eboxont-code/mtdgc/actions/runs/42437058568) passed on the base commit. The focused helper test and strict TypeScript check must be run against this branch, and the exact-head repository Quality workflow must pass before merge.
+- No production customer, order, payment or auth-user records were read or changed. No production writes, migrations, supplier/customer contact, purchases, credentials, hosting, DNS or billing changes. Additional spend: $0.
+
+### Next task
+
+MT-0163 remains blocked because the production storage inventory contains only the private payment-proof and payment-QR buckets; the actual delivered-code storage location and approved design are not evidenced. MT-0164 is the next P0 candidate after MT-0162, but its existing draft is stacked on the old MT-0162 branch and must be reconciled to current main.
