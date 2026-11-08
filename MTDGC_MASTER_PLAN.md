@@ -137,8 +137,8 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0030 · P1 · TODO** — Show required customer information before checkout, not after payment.
 - [ ] **MT-0031 · P1 · TODO** — Show whether a product is single-use, recurring, prepaid, account-bound or redeemable by code.
 - [ ] **MT-0032 · P1 · TODO** — Make product availability freshness visible internally with last supplier confirmation time.
-- [ ] **MT-0033 · P1 · TODO** — Add search synonyms for common product names, abbreviations, game currencies and regional spellings.
-- [ ] **MT-0034 · P1 · TODO** — Add filters that work correctly for category, platform, region, availability and price.
+- [!] **MT-0033 · P1 · BLOCKED** — Add search synonyms for common product names, abbreviations, game currencies and regional spellings. Draft PR [#35](https://github.com/eboxont-code/mtdgc/pull/35) has 36 focused local assertions, but exact-head Quality run [42479110341](https://github.com/eboxont-code/mtdgc/actions/runs/42479110341) failed before the runner started (zero test/build steps). Vercel rejected the preview under the free daily deployment limit. Full repository checks and final preview are unverified; do not repeat unchanged infrastructure retries.
+- [~] **MT-0034 · P1 · IN PROGRESS** — Add filters that work correctly for category, platform, region, availability and price. Dynamic platform/region filters and URL-backed state are implemented in the current task branch with focused regression coverage; exact-head repository checks and production release remain pending. See section 32.
 - [ ] **MT-0035 · P2 · TODO** — Create curated collections such as gaming essentials, entertainment, productivity and Australian shopping cards.
 - [ ] **MT-0036 · P2 · TODO** — Add related products only when they are genuinely compatible and available.
 - [ ] **MT-0037 · P2 · TODO** — Create a discontinued-product process that preserves order history and redirects useful SEO pages.
@@ -1334,3 +1334,39 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 No production application code, database/schema, order/payment/customer record, storage object, RLS/grant, credential, environment, DNS, hosting or billing setting changed. No test order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
 
 **Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
+
+## 32. Catalogue platform and region filters — 8 November 2026
+
+**Task:** MT-0034 · P1 · IN PROGRESS. This change is a storefront filter improvement only; it does not alter product records, prices, variant eligibility or checkout rules.
+
+### What changed
+
+- Added platform and region filters alongside the existing category, availability and NPR price filters.
+- Platform and region choices are derived from the published catalogue response rather than hardcoded. The same options appear in the desktop sidebar and mobile filter sheet.
+- Filters combine with search, category, availability, price and sorting. Platform/region selections are preserved in URL search state, restored on navigation, included in the mobile filter count and cleared by Reset/Clear filters.
+- Matching trims surrounding whitespace and ignores letter case. Empty platform metadata is not invented as a filter option; products without a platform remain visible under All platforms.
+- Existing price filtering continues to use the lowest purchasable NPR price; hidden/coming-soon prices remain excluded.
+
+### Read-only production catalogue evidence — 8 November 2026
+
+- Supabase project `eaomkkswslqtfunkceuc`; read-only queries inspected only published product metadata and aggregate counts.
+- `public.products` contains 36 published rows in the inspected snapshot.
+- Region values: Australia (10), Global (25), Nepal (1).
+- Platform values: Gift card (10), Mobile (4), Mobile and PC (2), PC (5), PC and Mac (1), PC, Mac and mobile (3), Web and mobile (5), Web, mobile and desktop (1), Web, mobile and smart TV (4), Web, PC and Mac (1).
+- These are catalogue labels only; they do not establish issuer redemption compatibility, supplier stock or product availability. No customer, order, payment or support data was queried.
+
+### Verification and release boundary
+
+- Five focused platform/region facet tests passed in a local Node 22.16.0 scratch run. They cover dynamic option derivation, trimming, case-insensitive deduplication, combined filters, and blank platform handling.
+- Full repository Bun tests, ESLint, TypeScript typecheck and production build must still pass on the exact final PR head before merge.
+- The current production deployment is READY at [dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE](https://vercel.com/boxont/mtdgc/7A2mKAuhBY6nkW2d4FrZGDGQDVUE), sourced from commit `3de811c7cfce91eb262cf79523d8053995bfb777`. Current `main` is `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`; the production deployment is 15 commits behind main. Vercel's free daily deployment limit is currently recorded on PR #35. No new deployment was attempted from this task branch.
+- Merge/deployment is not authorised until the exact PR-head checks pass and the existing main-to-production backlog/release is reviewed. A preview is not production.
+
+### Safety
+
+- No production writes, migrations, customer/order/payment mutations, authentication or storage changes.
+- No credentials, environment variables, hosting, DNS or billing settings changed.
+- No supplier/customer contact, purchases or test orders.
+- Additional spend: $0.
+
+**Next candidate after MT-0034:** MT-0187 — verify the mobile filter sheet and product-list usability at narrow screen widths. Use actual responsive/browser evidence; do not mark it complete from source inspection alone.

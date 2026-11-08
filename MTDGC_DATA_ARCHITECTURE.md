@@ -10,6 +10,7 @@ MTDGC (Matrix Digital Goods & Commerce) is a digital marketplace for Nepal. This
 - **Products**: The main entity (e.g., "PUBG Mobile UC").
 - **Variants**: Specific SKUs (e.g., "60 UC", "325 UC").
 - **Metadata**: JSONB field in products to define required customer inputs (e.g., `{"requires_player_id": true, "id_label": "Player ID"}`).
+- **Public catalogue filters**: Category, platform, region, availability and purchasable NPR price filters use published catalogue data. Platform/region choices are derived dynamically from the current published product set, stored in URL search state and matched without changing product rows, variants, prices, availability or checkout eligibility. Blank platform values remain visible under “All platforms” and are not presented as a fabricated option.
 
 ### 2.2 Order & Payment System
 - **Orders**: Tracks the transaction, status, and delivery details. Supports both registered and guest users.

@@ -16,6 +16,38 @@ type SearchProduct = {
   created_at: string;
 };
 
+export type CatalogFacet = "platform" | "region";
+export type CatalogFacetFilters = { platform?: string; region?: string };
+
+function normalizeFacet(value: string | null | undefined): string {
+  return (value ?? "").trim().toLowerCase();
+}
+
+/** Derive facet choices from the published catalogue; never hardcode or mutate listing metadata. */
+export function catalogFacetOptions<T extends SearchProduct>(products: readonly T[], facet: CatalogFacet): string[] {
+  const options = new Map<string, string>();
+  for (const product of products) {
+    const raw = product[facet];
+    if (typeof raw !== "string") continue;
+    const value = raw.trim();
+    if (!value) continue;
+    const key = value.toLowerCase();
+    if (!options.has(key)) options.set(key, value);
+  }
+  return [...options.values()].sort((a, b) => {
+    const left = a.toLowerCase();
+    const right = b.toLowerCase();
+    return left < right ? -1 : left > right ? 1 : a < b ? -1 : a > b ? 1 : 0;
+  });
+}
+
+/** Platform and region are catalogue labels, matched without case or surrounding-space sensitivity. */
+export function matchesCatalogFacets<T extends SearchProduct>(product: T, filters: CatalogFacetFilters): boolean {
+  const matches = (actual: string | null | undefined, expected: string | undefined) =>
+    !expected || expected === "all" || normalizeFacet(actual) === normalizeFacet(expected);
+  return matches(product.platform, filters.platform) && matches(product.region, filters.region);
+}
+
 const aliases: Record<string, string> = {
   ff: "free fire", pubg: "pubg", ml: "mobile legends", mlbb: "mobile legends", nfx: "netflix",
 };
