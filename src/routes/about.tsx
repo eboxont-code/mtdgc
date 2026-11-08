@@ -6,39 +6,40 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { SITE_URL, whatsappLink } from "@/lib/format";
+import { BRAND } from "@/lib/brand";
 import { breadcrumbLd, pageLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About MTDGC | Matrix Digital Goods & Commerce" },
+      { title: `About ${BRAND.name} | ${BRAND.legalName}` },
       {
         name: "description",
         content:
-          "MTDGC is a digital commerce company serving Nepal and Australia selling game top-ups, gift cards and subscriptions, with more digital product lines being prepared.",
+          BRAND.description,
       },
       { property: "og:title", content: "About MTDGC" },
-      { property: "og:description", content: "Who MTDGC is, what we sell and how digital delivery works." },
+      { property: "og:description", content: BRAND.description },
       { name: "twitter:title", content: "About MTDGC"  },
-      { name: "twitter:description", content: "Who MTDGC is, what we sell and how digital delivery works."  },
+      { name: "twitter:description", content: BRAND.description  },
       { property: "og:url", content: `${SITE_URL}/about` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:image", content: `${SITE_URL}/og/mtdgc.png` },
-      { property: "og:image:alt", content: "MTDGC, the digital marketplace for Nepal and Australia" },
+      { property: "og:image:alt", content: BRAND.imageAlt },
       { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/about` }],
     scripts: [
-      pageLd("AboutPage", "About MTDGC", "/about", "Who MTDGC is, what we sell and how digital delivery works.", {
+      pageLd("AboutPage", `About ${BRAND.name}`, "/about", BRAND.description, {
         mainEntity: {
           "@type": "Organization",
-          name: "MTDGC",
-          legalName: "Matrix Digital Goods & Commerce",
+          name: BRAND.name,
+          legalName: BRAND.legalName,
           url: SITE_URL,
           areaServed: ["NP", "AU"],
           description:
-            "Digital commerce company serving Nepal and Australia selling game top-ups, gift cards and subscriptions with manual order review before fulfilment.",
+            BRAND.description,
         },
       }),
       breadcrumbLd([{ name: "Home", path: "/" }, { name: "About", path: "/about" }]),
@@ -54,11 +55,11 @@ function AboutPage() {
       <SiteHeader />
       <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-3xl px-4 pb-16 pt-6">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "About" }]} />
-        <PageHero eyebrow="Company" title="About MTDGC" intro="Matrix Digital Goods and Commerce. Digital products for customers in Nepal and Australia, checked by a person before delivery." />
+        <PageHero eyebrow="Company" title="About MTDGC" intro={BRAND.description} />
 
         <section className="mt-6 space-y-4 text-sm text-foreground/80">
           <p>
-            MTDGC stands for Matrix Digital Goods and Commerce. We are a digital commerce company serving customers
+            {BRAND.description} We are a digital commerce company serving customers
             in Nepal and Australia. Our first product lines are game top-ups, digital gift cards and subscription plans, and the
             catalog is built so we can add software, AI services, mobile products and business services as each line is
             properly sourced.
