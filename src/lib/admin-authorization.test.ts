@@ -132,7 +132,7 @@ function assertAdminGuardIsFailClosed(): boolean {
   const dataIsTrue = ts.isBinaryExpression(expression.right) &&
     expression.right.operatorToken.kind === ts.SyntaxKind.EqualsEqualsEqualsToken &&
     ts.isIdentifier(expression.right.left) && expression.right.left.text === "data" &&
-    expression.right.kind === ts.SyntaxKind.TrueKeyword;
+    expression.right.right.kind === ts.SyntaxKind.TrueKeyword;
 
   return checksCurrentUserAdminRole && delegatesToFailClosedHelper && throwsWhenHelperDenies &&
     errorIsNull && dataIsTrue;
