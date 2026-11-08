@@ -350,7 +350,7 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** MTDGC earns qualified demand through useful category and product information, not thin pages or unsupported claims.
 
-- [~] **MT-0201 · P0 · IN PROGRESS** — Set one canonical brand description and use it consistently across the site and metadata. Implementation is in draft PR #33; release is pending exact-head quality verification and production review.
+- [!] **MT-0201 · P0 · BLOCKED** — Canonical brand description is implemented in draft PR #33, but exact-head Quality run 42470238332 failed before runner startup (zero steps/logs) and the exact-head Vercel preview was rejected by the free daily build limit. Local focused checks passed; full repository quality and production release remain unverified.
 - [ ] **MT-0202 · P0 · TODO** — Resolve the homepage's Nepal-and-Australia positioning against actual checkout and legal-market support.
 - [ ] **MT-0203 · P1 · TODO** — Create original category landing pages for game top-ups, gift cards, subscriptions and software.
 - [ ] **MT-0204 · P1 · TODO** — Write product descriptions that explain what is delivered, how it works and what restrictions apply.
@@ -1357,12 +1357,12 @@ The opening statement in README.md is the approved source of the brand descripti
 
 - Local Node.js 22.16 test run: **2/2 PASS**.
 - Standalone strict TypeScript check of the shared brand definition: **PASS**.
-- Full repository Quality workflow: pending on the final PR head; no full lint, Bun suite, project-wide typecheck or production build is claimed from the local scratch check.
-- No production deployment or live metadata verification is claimed. The current production deployment remains READY on the older commit recorded in section 31; main is not yet deployed.
+- Exact PR-head GitHub Quality run [42470238332](https://github.com/eboxont-code/mtdgc/actions/runs/42470238332) failed before runner startup; the job has zero steps and no logs. Full lint, Bun suite, project-wide typecheck and production build are therefore UNAVAILABLE, not failed application checks. Do not retry unchanged; revisit only after new runner evidence.
+- Vercel rejected the exact-head preview under the free daily build limit; no paid workaround was attempted. No production deployment or live metadata verification is claimed. Production remains READY on older commit 3de811c7cfce91eb262cf79523d8053995bfb777; main is not yet deployed.
 - No production data, database/schema, orders, payments, supplier records, authentication, environment variables, DNS, hosting or billing settings were changed. Additional spend: **$0**.
 
 ### Release state and next candidate
 
-MT-0201 remains IN PROGRESS until the exact PR head passes the repository quality workflow and the merged production commit plus live metadata are verified. No merge commit exists.
+MT-0201 is BLOCKED until a new runner can complete the exact-head quality workflow and the production release can be verified. PR #33 remains OPEN/DRAFT; no merge commit exists and no new metadata is live.
 
 The next independent P0 candidate is **MT-0292 — map personal-data fields and known processors from the current application and project metadata**. The initial map can be completed from source/schema evidence; supplier recipients, external processing locations and retention details that are not present in the records must remain explicitly UNKNOWN/BLOCKED rather than inferred.
