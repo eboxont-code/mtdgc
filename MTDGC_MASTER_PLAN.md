@@ -112,7 +112,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0010 · P1 · TODO** — Decide whether the initial experience is marketplace-style retail or a curated single-operator digital store.
 - [ ] **MT-0011 · P1 · TODO** — Set a product approval process before adding a new category or supplier.
 - [ ] **MT-0012 · P1 · TODO** — Define which products MTDGC will never sell, including unauthorised accounts, stolen codes and credential-based access.
-- [!] **MT-0013 · P1 · BLOCKED** — The internal standard is prepared in [MTDGC_CLAIM_STANDARD.md](./MTDGC_CLAIM_STANDARD.md) and [PR #42](https://github.com/eboxont-code/mtdgc/pull/42); focused document checks passed 12/12. Earlier PR head `24bec29c3afdd5f6aff4cf1cf17d1273a6e1680d` had Quality run [42518306516](https://github.com/eboxont-code/mtdgc/actions/runs/42518306516) fail before runner startup (no steps; log download returned BlobNotFound). The subsequent plan-only head has no exact-head Quality run available, so full repository checks remain unavailable. The Vercel preview was rejected by the free daily deployment limit. Public wording is unchanged; keep the PR draft until exact-head quality and release capacity are available.
+- [!] **MT-0013 · P1 · BLOCKED** — The internal standard is prepared in [MTDGC_CLAIM_STANDARD.md](./MTDGC_CLAIM_STANDARD.md) and [PR #42](https://github.com/eboxont-code/mtdgc/pull/42); focused document checks passed 12/12. Exact-head Quality run [42518468147](https://github.com/eboxont-code/mtdgc/actions/runs/42518468147) on head `cc72ba644cc5bc06d4e844c8304e4b3e0ee9060e` failed before runner startup (no steps; log download returned BlobNotFound), so full repository checks remain unavailable. The subsequent plan-only update has not received a newer exact-head run. The Vercel preview was rejected by the free daily deployment limit. Public wording is unchanged; keep the PR draft until exact-head quality and release capacity are available.
 - [ ] **MT-0014 · P1 · TODO** — Define the customer support languages and service hours that can actually be maintained.
 - [ ] **MT-0015 · P2 · TODO** — Create a concise brand voice guide for product pages, checkout, support and social channels.
 - [ ] **MT-0016 · P2 · TODO** — Create a category naming and taxonomy standard that can grow without renaming existing URLs.
@@ -530,7 +530,7 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-MT-0013 is **BLOCKED** in draft PR #42: 12 focused document checks pass; the prior head's Quality run 42518306516 failed before runner startup, and the latest plan-only head has no exact-head run available. The Vercel preview was rejected by the free daily deployment limit. The next P0 payment/order tasks remain blocked by missing settlement evidence, the Supabase migration gate or exact-head quality runs that failed before a runner started. Task statuses in the 308-task register remain authoritative.
+MT-0013 is **BLOCKED** in draft PR #42: 12 focused document checks pass; exact-head Quality run 42518468147 on head cc72ba644cc5bc06d4e844c8304e4b3e0ee9060e failed before runner startup, and the subsequent plan-only update has no newer run yet. The Vercel preview was rejected by the free daily deployment limit. The next P0 payment/order tasks remain blocked by missing settlement evidence, the Supabase migration gate or exact-head quality runs that failed before a runner started. Task statuses in the 308-task register remain authoritative.
 
 | Order | Task | Status |
 |---:|---|---|
