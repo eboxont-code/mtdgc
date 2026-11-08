@@ -126,3 +126,11 @@ The customer progress helper groups `payment_submitted`/`paid`, `verified`, `pro
 - The administrator payment-review queue and signed proof-URL function require a validated Supabase session and an exact successful administrator-role result before any proof lookup or signed URL creation. Signed URLs expire after 300 seconds.
 - `has_role` remains a SECURITY DEFINER function that Supabase's advisor reports as executable by anon/authenticated. Treat its role-membership disclosure as a separate issue; change function execution and dependent policies only through the approved coordinated Supabase migration gate.
 - Guest order access is mediated by server-side order access checks and is not a direct proof-row/object RLS grant. Cross-customer order lookup/contact-fallback isolation remains tracked separately under MT-0162.
+
+### 9.1 Account-owned order isolation
+
+- Contact-based access is guest-only. The shared `hasOrderContactAccess` helper denies every order with a non-null `user_id`, even when the supplied phone/email matches the saved contact and verification hash.
+- Account-owned orders require either the order-specific access-token hash or a Supabase-authenticated Bearer token whose verified subject exactly matches the order's `user_id`.
+- Public `lookupOrder` now selects the server-resolved `user_id`. For account orders it validates the optional Bearer token with Supabase Auth and checks the exact owner; it never falls back to contact matching. For guest orders it retains the existing order-number-plus-contact check.
+- The tracking page forwards the current session token when one exists. The order-detail and payment-proof paths already pass the session token; their shared contact fallback is now denied for account-owned orders while guest contact access remains unchanged.
+- No order ID, owner ID or access decision is accepted from the browser. The service-role client still bypasses RLS, so these explicit server checks are required. No RLS policy or database schema change is part of this task.
