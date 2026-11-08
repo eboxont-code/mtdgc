@@ -126,3 +126,17 @@ The customer progress helper groups `payment_submitted`/`paid`, `verified`, `pro
 - The administrator payment-review queue and signed proof-URL function require a validated Supabase session and an exact successful administrator-role result before any proof lookup or signed URL creation. Signed URLs expire after 300 seconds.
 - `has_role` remains a SECURITY DEFINER function that Supabase's advisor reports as executable by anon/authenticated. Treat its role-membership disclosure as a separate issue; change function execution and dependent policies only through the approved coordinated Supabase migration gate.
 - Guest order access is mediated by server-side order access checks and is not a direct proof-row/object RLS grant. Cross-customer order lookup/contact-fallback isolation remains tracked separately under MT-0162.
+
+## 9. Personal-data processing map
+
+The source-backed inventory of current personal-data fields, purposes, processors, storage/access locations and unresolved evidence is maintained in [MTDGC_DATA_MAP.md](./MTDGC_DATA_MAP.md).
+
+The current read-only location evidence is:
+- Supabase project (Postgres, Auth and Storage): `ap-southeast-1` (Singapore).
+- Inspected Vercel production application runtime: `iad1` (US East).
+
+These are different boundaries: the Vercel region is an application-processing location, while the Supabase region is the observed project storage/service region. Neither proves the location of every provider backup, log, support session or subprocessor.
+
+The map explicitly leaves the country, retention and access arrangements of Google/Lovable OAuth, WhatsApp, Supabase Auth email delivery, Sentry/Lovable error telemetry, suppliers, banks/payment networks and provider support access as **UNKNOWN** where no authoritative evidence was available. It also records the Preview service-role isolation question without decrypting or changing environment values.
+
+No retention schedule, supplier disclosure route, email-delivery provider or automated bank-settlement processor is inferred from a database column or customer-facing policy statement. Resolve those items only from owner/provider evidence and the relevant project release gates.
