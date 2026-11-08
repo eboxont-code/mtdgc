@@ -89,6 +89,14 @@ The customer progress helper groups `payment_submitted`/`paid`, `verified`, `pro
 - The server derives the `.webp` storage extension and `image/webp` content type from the normalized result; the browser cannot choose the stored MIME or extension.
 - The production `payment-proofs` bucket remains private and unchanged. Its existing storage-level 5 MiB cap is retained; application-side server validation remains the MIME/content gate because the bucket's `allowed_mime_types` setting is NULL. Only the trusted server upload path writes proof objects.
 
+### 4.7 Final checkout confirmation for current top-up and emailed-code categories
+
+- A read-only production catalogue query on 9 November 2026 found four orderable game-top-up products (13 orderable variants) and one orderable gift-card product (two orderable variants). No software or subscription product was orderable in that snapshot. These are catalogue flags, not proof of supplier stock, issuer authority or compatibility.
+- Checkout requires an explicit second review for the current `game-top-ups` and `gift-cards` categories. The dialog displays the product, selected option/face value, quantity, listed region and saved delivery-field values. Older cart lines with delivery fields but no saved category are conservatively prompted.
+- Before inserting an order, `placeOrder` resolves each selected SKU and its product category from the database, then requires the `detailsConfirmed` acknowledgement for those categories. A browser-supplied category is not used for the server decision.
+- This is a customer accuracy acknowledgement, not authentication, cryptographic proof of human review, payment-settlement confirmation, supplier authority, delivery evidence or proof that a supplier action is irreversible. No supplier-specific reversibility rule was inferred; the current schema has no such field and the Supplier Register has no verified supplier/product-scope entries.
+- No table, column, migration, production record or payment/fulfilment rule was changed.
+
 ## 5. Guest Checkout Architecture
 - **No Account Required**: Orders are created with `user_id = NULL`.
 - **Identity**: `guest_email` and `guest_whatsapp` are captured.
