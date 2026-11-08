@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { hasCheckoutPriceSnapshotChanges } from "@/lib/checkout-price-snapshot";
+import { buildOrderItemFieldsSnapshot, hasReservedOrderItemField } from "@/lib/pre-fulfilment";
 import { findUnsafeCustomerRequirement, UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE } from "@/lib/supplier-safety";
 import { generateOrderReference } from "@/lib/order-reference";
 import {
@@ -26,6 +27,9 @@ const lineSchema = z.object({
 }).refine(
   (line) => !findUnsafeCustomerRequirement(Object.keys(line.fields)),
   { message: UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE },
+).refine(
+  (line) => !hasReservedOrderItemField(line.fields),
+  { message: "Reserved order metadata cannot be supplied as a customer detail." },
 ).refine((line) => {
   const snapshotValues = [line.expectedProductName, line.expectedVariantName, line.expectedPriceMinor];
   const supplied = snapshotValues.filter((value) => value !== undefined).length;
@@ -87,7 +91,7 @@ export const placeOrder = createServerFn({ method: "POST" })
     const skus = data.lines.map((l) => l.sku);
     const { data: variants, error } = await supabaseAdmin
       .from("product_variants")
-      .select("id, sku, name, price_minor, currency, status, product_id, products(id, name, image_url, currency, is_published, status, categories(slug))")
+      .select("id, sku, name, price_minor, currency, status, product_id, products(id, name, image_url, currency, is_published, status, region, requirements, categories(slug))")
       .in("sku", skus);
     if (error) throw new Error("Could not load products");
 
@@ -100,6 +104,8 @@ export const placeOrder = createServerFn({ method: "POST" })
         currency: string;
         is_published: boolean;
         status: string;
+        region: string;
+        requirements: unknown;
         categories: { slug: string } | null;
       } | null | undefined;
       const ok = v && p?.is_published && ["available", "low_stock"].includes(v.status) && ["available", "low_stock"].includes(p.status) && Number.isSafeInteger(v.price_minor) && v.price_minor > 0;
@@ -115,7 +121,7 @@ export const placeOrder = createServerFn({ method: "POST" })
           quantity: line.quantity,
           unit_price_minor: v.price_minor,
           line_total_minor: v.price_minor * line.quantity,
-          fields: line.fields,
+          fields: buildOrderItemFieldsSnapshot(line.fields, p.region, p.requirements),
         },
         checkoutLine: {
           sku: v.sku,
