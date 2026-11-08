@@ -107,10 +107,10 @@ Do not set numerical targets until a reliable baseline exists.
 - [!] **MT-0005 · P0 · BLOCKED** — Prioritise customer segments using owner-approved target-market/customer evidence. No validated customer research, sales mix or owner segment choice is recorded; do not infer priority from catalogue categories.
 - [!] **MT-0006 · P0 · BLOCKED** — Approve the primary commercial KPI and its reporting definition with the business owner. The plan suggests fulfilled, profitable orders, but no owner-approved target or measurement window is recorded.
 - [!] **MT-0007 · P0 · BLOCKED** — Implement trusted unit-economics reporting after supplier cost, payment fee, refund and support-cost sources are available. Current supplier costs and payment fee records are not populated; no actual margin figures can be calculated without inventing inputs.
-- [ ] **MT-0008 · P1 · TODO** — Define MTDGC’s own customer value through legitimate sourcing, regional compatibility, clear delivery and reliable support.
-- [ ] **MT-0009 · P1 · TODO** — Define the role of Matrix as the umbrella brand and the role of each product category beneath it.
-- [ ] **MT-0010 · P1 · TODO** — Decide whether the initial experience is marketplace-style retail or a curated single-operator digital store.
-- [ ] **MT-0011 · P1 · TODO** — Set a product approval process before adding a new category or supplier.
+- [!] **MT-0008 · P1 · BLOCKED** — Define MTDGC’s own customer value through legitimate sourcing, regional compatibility, clear delivery and reliable support. Blocked until at least one supplier/product scope has verified authority and region evidence and actual delivery/support performance can be substantiated; the supplier identity and product-scope registers remain empty.
+- [!] **MT-0009 · P1 · BLOCKED** — Define the role of Matrix as the umbrella brand and the role of each product category beneath it. Requires the business owner’s approved brand/category architecture decision; no such decision is recorded in the canonical plan. Do not infer the commercial hierarchy from the current logo or catalogue.
+- [!] **MT-0010 · P1 · BLOCKED** — Decide whether the initial experience is marketplace-style retail or a curated single-operator digital store. Requires the business owner’s operating-model decision; no approved choice is recorded. Do not select the model on the owner’s behalf.
+- [~] **MT-0011 · P1 · IN PROGRESS** — Set a product approval process before adding a new category or supplier. The ordered category/supplier/product-scope gates are documented in section 18.1 and SUPPLIER_REGISTER.md section 10. This is a process definition only; no supplier, category or product is approved. Awaiting exact-head quality verification and merge.
 - [ ] **MT-0012 · P1 · TODO** — Define which products MTDGC will never sell, including unauthorised accounts, stolen codes and credential-based access.
 - [ ] **MT-0013 · P1 · TODO** — Separate customer-facing promises from internal targets and supplier estimates.
 - [ ] **MT-0014 · P1 · TODO** — Define the customer support languages and service hours that can actually be maintained.
@@ -809,6 +809,34 @@ Do not ask customers for passwords, OTPs or payment PINs. Do not describe a shar
 **Verification:** `SUPPLIER_REGISTER.md` exists on `main`; README links to it; the register fields cover the supplier identity and verification status required by MT-0041. No supplier/product/price/database records were changed.
 
 
+
+## 18.1 Product and supplier approval workflow — 9 November 2026
+
+**Task:** MT-0011 · P1 · IN PROGRESS. The detailed workflow is in [SUPPLIER_REGISTER.md section 10](./SUPPLIER_REGISTER.md#10-product-and-supplier-approval-workflow).
+
+### What was defined
+
+- A category proposal must have a documented customer need, demand evidence and an approved market/journey before it becomes a public catalogue category.
+- Supplier identity, rights-holder authority, product origin and resale permission are checked for the actual legal entity and exact product scope.
+- Compatibility is assessed by SKU, denomination, issuing/redemption region, platform/account type, currency and delivery route; approval never transfers automatically to another scope.
+- Customer-data minimisation and the existing credential/unsafe-access rejection rule are mandatory.
+- Commercial terms, dated costs, settlement, delivery/failure/refund handling, support escalation and data sharing must be recorded before a product can be considered launch-ready.
+- Legal, tax, payment-processor, privacy, technical, security and test-order gates remain separate requirements; the business owner approves the exact final scope.
+- Re-review is required when any material supplier, product, region, price, payment, data or fulfilment fact changes.
+
+### Evidence and boundaries
+
+- The existing supplier register has no supplier identity or approved product-scope rows. The current MTDGC production schema has no supplier table or supplier foreign key; the read-only project metadata shows 11 applied migrations. No schema change is proposed, and the existing Supabase cutover/migration gate is unchanged.
+- The process is documentation only. It does not screen or approve a supplier, authorise resale, validate a product/region, establish a margin, set a delivery SLA, or make a listing orderable.
+- No supplier/customer was contacted, no purchase/test order was made, and no production database, catalogue, customer, order, payment, credential, hosting or billing setting was changed.
+
+### P0 queue scan and next eligible task
+
+The P0 queue was checked before selecting this P1 task. The nearest independent order-lifecycle candidates are not currently releasable: MT-0102 is in draft PR [#22](https://github.com/eboxont-code/mtdgc/pull/22) and its exact-head Quality run [42441639306](https://github.com/eboxont-code/mtdgc/actions/runs/42441639306) failed before runner startup (job 128611921162 has no steps/logs); MT-0105 is in draft PR [#32](https://github.com/eboxont-code/mtdgc/pull/32) and exact-head run [42465628668](https://github.com/eboxont-code/mtdgc/actions/runs/42465628668) also failed before runner startup (job 128684358774 has no steps/logs). Other open P0 implementation PRs #24–#28 and #31 have the same no-runner result on their recorded heads; P0 items without PRs remain gated by supplier/issuer or bank-settlement evidence, owner-approved workflow/legal decisions, physical mobile test access, or the approved Supabase cutover. These failures are not application test failures; no full checks ran.
+
+The first eligible P1 task after MT-0011 is **MT-0012** — define the prohibited product categories using the existing supplier credential-rejection and product-legitimacy rules. Do not approve any actual supplier or product while doing that policy work.
+
+**Verification boundary:** The current main Quality run [42437058568](https://github.com/eboxont-code/mtdgc/actions/runs/42437058568) passed on ca01edaafa42b5b859089ce18d5decaf6fbd4db3. Main is unprotected, but the repository Quality workflow remains an applicable release check and will not be bypassed. The Vercel project’s current main status is failure with the Hobby/free build-rate-limit target; the latest production deployment is READY at [dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE](https://vercel.com/boxont/mtdgc/7A2mKAuhBY6nkW2d4FrZGDGQDVUE), commit 3de811c7cfce91eb262cf79523d8053995bfb777, while current main is 15 commits ahead. A merge would trigger a production deployment of that backlog, so this documentation PR will remain draft unless its exact-head checks pass and the existing release gates permit publication. Additional spend: $0.
 
 ## 19. Automated engineering quality gate implemented and verified — 6 November 2026
 
