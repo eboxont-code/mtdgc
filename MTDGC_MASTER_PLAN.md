@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.2 · 8 November 2026
+**Version:** 2.3 · 8 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -226,11 +226,11 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** The order state is consistent from checkout to delivery, with a complete audit trail and useful customer visibility.
 
 - [x] **MT-0101 · P0 · DONE** — Map all 13 live order-status enum values, current application writers, generic administrator targets, legacy display aliases and observed transitions; confirm that neither application nor database enforces a complete transition graph. Evidence: section 30 and Data Architecture section 4; current-main source inspection plus read-only production enum, aggregate status-count, column-type, proof-status constraint and order-trigger queries on 8 November 2026.
-- [ ] **MT-0102 · P0 · TODO** — Ensure Payment received, Verified, Processing and Delivered have precise operational definitions.
+- [!] **MT-0102 · P0 · BLOCKED** — Current-main implementation is in draft PR #22. Exact-head Quality run [42441639306](https://github.com/eboxont-code/mtdgc/actions/runs/42441639306) failed before any runner step started; full repository checks remain unverified. Do not merge or mark complete from focused scratch assertions alone.
 - [ ] **MT-0103 · P0 · TODO** — Add explicit Cancelled, Failed, Refunded and Action required states where applicable.
 - [ ] **MT-0104 · P0 · TODO** — Prevent invalid status jumps, such as Pending directly to Delivered without payment verification.
-- [ ] **MT-0105 · P0 · TODO** — Verify guest order tracking requires the order number plus the matching email or phone.
-- [ ] **MT-0106 · P0 · TODO** — Ensure account order history and guest tracking show the same canonical status.
+- [!] **MT-0105 · P0 · BLOCKED** — Current-main implementation is in draft PR #23. Exact-head Quality run [42445346808](https://github.com/eboxont-code/mtdgc/actions/runs/42445346808) failed before any runner step started; focused checks passed, but full repository checks remain unverified.
+- [!] **MT-0106 · P0 · BLOCKED** — Depends on reviewed/promoted customer-facing milestone definitions under MT-0102; do not introduce a second status-label mapping while PR #22 remains blocked.
 - [ ] **MT-0107 · P1 · TODO** — Record a timestamp and actor for every status transition.
 - [ ] **MT-0108 · P1 · TODO** — Show customers what happens next at each stage and whether they need to act.
 - [ ] **MT-0109 · P1 · TODO** — Allow staff to add internal notes without exposing them to customers.
@@ -300,11 +300,11 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Customer information, payment evidence, order records and staff tools are protected with least-privilege access.
 
-- [ ] **MT-0161 · P0 · TODO** — Audit authentication and authorisation for customer accounts, support requests and admin routes.
-- [ ] **MT-0162 · P0 · TODO** — Verify one customer cannot access another customer's orders by changing an ID or URL.
-- [ ] **MT-0163 · P0 · TODO** — Verify payment uploads and delivered codes are stored privately, not in public buckets.
-- [ ] **MT-0164 · P0 · TODO** — Ensure admin-only actions are enforced server-side, not only hidden in the interface.
-- [ ] **MT-0165 · P0 · TODO** — Review secrets, supplier credentials and payment configuration for accidental exposure.
+- [!] **MT-0161 · P0 · BLOCKED** — The current-main audit is in draft PR #26. Exact-head Quality run [42453509323](https://github.com/eboxont-code/mtdgc/actions/runs/42453509323) failed before runner startup; full repository checks remain unverified.
+- [!] **MT-0162 · P0 · BLOCKED** — The current-main order-isolation fix is in draft PR #27. Exact-head Quality run [42454086289](https://github.com/eboxont-code/mtdgc/actions/runs/42454086289) failed before runner startup; do not merge until the exact head passes the full quality workflow.
+- [!] **MT-0163 · P0 · BLOCKED** — Payment-proof and QR buckets are private, but the current schema/bucket inventory does not evidence a dedicated delivered-code table or bucket. An approved private storage/retention design and the Supabase cutover are still missing.
+- [!] **MT-0164 · P0 · BLOCKED** — A clean current-main regression contract is in draft PR #31. It covers all 14 exported admin server functions and the extracted exact-true role helper; full exact-head quality verification is still required before completion or merge.
+- [!] **MT-0165 · P0 · BLOCKED** — The current-main audit is in draft PR #28. Exact-head Quality run [42454303736](https://github.com/eboxont-code/mtdgc/actions/runs/42454303736) failed before runner startup; do not repeat unchanged retries or alter secrets/settings.
 - [ ] **MT-0166 · P1 · TODO** — Enable strong admin authentication and remove unused staff accounts.
 - [ ] **MT-0167 · P1 · TODO** — Apply least-privilege roles for payment review, fulfilment, support and catalogue editing.
 - [ ] **MT-0168 · P1 · TODO** — Log sensitive admin actions such as refunds, code reveal, payment verification and status overrides.
@@ -543,9 +543,16 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 7 | MT-0086 — require independent payment settlement matching before fulfilment | BLOCKED; no bank-statement feed, provider callback or owner-approved manual settlement evidence is available |
 | 8 | MT-0087 — prevent duplicate transaction references/screenshots across orders | BLOCKED; concurrency-safe uniqueness requires the approved Supabase cutover/migration gate |
 | 9 | MT-0101 — map current order statuses and observed transition paths | DONE; 13-value enum, application writers, UI mappings, production aggregate counts and lack of transition enforcement are documented in section 30 and Data Architecture section 4 |
-| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | NEXT P0; can be documented from the current payment-review code and existing operational evidence without production writes |
-| 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
-| 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
+| 10 | MT-0102 — define customer-facing payment/order milestones | BLOCKED; draft PR #22 exact-head Quality run 42441639306 failed before runner startup |
+| 11 | MT-0105 — require order number plus matching saved email or phone for public guest tracking | BLOCKED; draft PR #23 exact-head Quality run 42445346808 failed before runner startup |
+| 12 | MT-0106 — align authenticated order history and guest tracking labels | BLOCKED; depends on verified MT-0102 definitions |
+| 13 | MT-0161 — refresh authentication/authorisation audit | BLOCKED; draft PR #26 exact-head Quality run 42453509323 failed before runner startup |
+| 14 | MT-0162 — isolate account-owned orders from guest contact lookup | BLOCKED; draft PR #27 exact-head Quality run 42454086289 failed before runner startup |
+| 15 | MT-0163 — verify private delivery-code storage | BLOCKED; no approved delivery-code storage/retention design or Supabase cutover |
+| 16 | MT-0164 — enforce server-side administrator authorization with regression coverage | BLOCKED pending full exact-head Quality run; clean current-main PR #31 is open in draft |
+| 17 | MT-0165 — review secrets and payment configuration | BLOCKED; draft PR #28 exact-head Quality run 42454303736 failed before runner startup |
+| 18 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
+| 19 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -1333,4 +1340,44 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 
 No production application code, database/schema, order/payment/customer record, storage object, RLS/grant, credential, environment, DNS, hosting or billing setting changed. No test order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
 
-**Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
+**Next P0 queue:** MT-0102 and MT-0105 are blocked by exact-head GitHub Actions runner-startup failures; MT-0106 depends on MT-0102. The next independent security task is MT-0164, refreshed against current main in PR #31. See section 32.
+
+
+## 32. Server-side administrator authorization regression contract — 8 November 2026
+
+**Task:** MT-0164 · P0 · BLOCKED pending a successful full quality run. A clean current-main draft PR #31 adds the regression contract; the earlier draft PR #14 is stacked on the old MT-0162 branch and is not suitable for direct merge.
+
+### Current-main source audit
+
+- Canonical base: `main` at `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`.
+- The current `src/lib/admin.functions.ts` exports exactly 14 administrator server functions: `updateOrderStatus`, `addOrderNote`, `approveReview`, `saveProduct`, `archiveProduct`, `saveVariant`, `archiveVariant`, `saveCategory`, `getAdminPaymentSettings`, `savePaymentSettings`, `uploadPaymentQr`, `listPaymentsToVerify`, `getPaymentProofUrl` and `reviewPayment`.
+- A current-main source audit confirms every export uses `requireSupabaseAuth` middleware and awaits `assertAdmin(context)` as the first handler statement, before any read, write, storage action or signed URL creation.
+- `assertAdmin` calls `has_role` for the validated `context.userId` and role `admin`, then delegates to `isAdminRoleConfirmed(data, error)`. The shared helper returns true only when the RPC has no error and its data is the exact boolean `true`.
+- Existing `admin-access.test.ts` regression tests cover exact-true success and denial for false, missing, ambiguous and error-bearing role results.
+- The older PR #14 test expected the role RPC error check to be inline. Current main extracted that check into `admin-access.ts`; the refreshed AST contract now verifies the helper delegation and the helper's exact-true implementation instead of incorrectly requiring the old inline expression.
+
+### Regression contract added
+
+- Pin the exact 14 exported administrator server functions; a new, removed or restructured export requires an explicit review.
+- Require authenticated middleware on every exported endpoint.
+- Require `await assertAdmin(context)` to be the first handler statement, before any endpoint work.
+- Verify that the shared guard checks the current user's admin role and delegates failures to the exact-true helper.
+- Verify the helper rejects RPC errors and every value other than boolean true.
+- No application behaviour, database schema, RLS policy, role, credential or production setting is changed by this task.
+
+### Production and platform evidence
+
+- Read-only Supabase metadata on 8 November 2026 confirms project `eaomkkswslqtfunkceuc` is ACTIVE_HEALTHY on PostgreSQL 17.11.0.003.
+- The current production RLS policy inventory includes administrator policies for orders, order-status events, categories, products, variants, payment settings and review moderation, plus separate owner/published-read policies.
+- The production `public.has_role(uuid, app_role)` function remains SECURITY DEFINER and executable by `anon` and `authenticated`. This role-membership disclosure finding is separate from the per-request server guard and remains cutover-gated because its function privileges and dependent RLS policies must be changed together. No function, policy, grant or role was changed.
+- GitHub `main` is currently unprotected and reports no required status checks. This does not waive the repository quality workflow or this task's exact-head verification requirement.
+- Vercel project `mtdgc` is Git-linked to this repository. Its latest observed production deployment is READY at `dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE`, deployed commit `3de811c7cfce91eb262cf79523d8053995bfb777`. Current main is 15 commits ahead of production; merging any PR to main triggers a deployment attempt for that full backlog. Do not merge this PR until the exact-head checks pass and the complete production backlog/release gates are reviewed.
+
+### Verification and safety
+
+- The prior PR #14 quality run [42410620615](https://github.com/eboxont-code/mtdgc/actions/runs/42410620615) passed all six workflow stages on its historical test commit. It is not current-main evidence because its branch predates the extracted `admin-access.ts` helper.
+- Current-main source inspection confirms 14/14 exported endpoints have authenticated middleware and the administrator guard as the first handler statement. The helper source confirms exact-true, error-free role validation.
+- New exact-head GitHub Actions verification is required on PR #31. The task remains BLOCKED until the full repository workflow passes.
+- No production deployment, database write, migration, order/payment/customer read or mutation, role/RLS/grant change, secret/environment/DNS/hosting/billing change, supplier/customer contact or purchase occurred. Additional spend: $0.
+
+**Next P0 after MT-0164:** MT-0165 — the current-main secrets/payment audit in draft PR #28. Its exact-head quality run is also blocked before runner startup; if that remains unchanged, continue to the next independent task rather than waiting.

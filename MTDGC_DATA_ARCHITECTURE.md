@@ -126,3 +126,13 @@ The customer progress helper groups `payment_submitted`/`paid`, `verified`, `pro
 - The administrator payment-review queue and signed proof-URL function require a validated Supabase session and an exact successful administrator-role result before any proof lookup or signed URL creation. Signed URLs expire after 300 seconds.
 - `has_role` remains a SECURITY DEFINER function that Supabase's advisor reports as executable by anon/authenticated. Treat its role-membership disclosure as a separate issue; change function execution and dependent policies only through the approved coordinated Supabase migration gate.
 - Guest order access is mediated by server-side order access checks and is not a direct proof-row/object RLS grant. Cross-customer order lookup/contact-fallback isolation remains tracked separately under MT-0162.
+
+
+## 9. Administrator server-function authorization contract
+
+- The current `src/lib/admin.functions.ts` exposes 14 administrator server functions. Every export uses `requireSupabaseAuth` middleware and awaits `assertAdmin(context)` as the first handler statement, before any read or mutation.
+- `assertAdmin` queries `has_role` for the validated `context.userId` and role `admin`. It delegates the result to `isAdminRoleConfirmed`; the helper permits access only when the RPC has no error and returns the exact boolean `true`.
+- The AST regression contract in `src/lib/admin-authorization.test.ts` pins the 14-function inventory, checks authenticated middleware and first-statement authorization, and verifies the guard/helper contract. Existing `admin-access.test.ts` tests exact-true success and false, missing, ambiguous and error-bearing denial cases.
+- The administrator page's browser-side role check remains a navigation/presentation gate only. The server middleware and handler guard are the enforcement boundary; database RLS remains a separate defence for direct authenticated-client access.
+- Residual finding: production `public.has_role(uuid, app_role)` remains SECURITY DEFINER and executable by `anon` and `authenticated`. Remediation must coordinate function privileges and dependent RLS policies after the approved Supabase cutover. No production function, policy, grant or role was changed.
+- Evidence: current-main source audit and read-only Supabase policy/function metadata on 8 November 2026; draft PR #31. Full exact-head quality verification is still required before this task can be marked DONE.
