@@ -27,7 +27,7 @@ function firstHandlerStatement(source: string): string {
   assert.notEqual(handler, -1, "server function handler must exist");
   const arrow = source.indexOf("=> {", handler);
   assert.notEqual(arrow, -1, "server function handler must use a block body");
-  return source.slice(arrow + 4).trimStart().split("\n")[0].trim();
+  return source.slice(arrow + 4).trimStart().split("\n")[0]?.trim() ?? "";
 }
 
 describe("MT-0085 payment-proof access policy contract", () => {
