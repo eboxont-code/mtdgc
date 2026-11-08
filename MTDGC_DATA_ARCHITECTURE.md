@@ -127,6 +127,8 @@ The customer progress helper groups `payment_submitted`/`paid`, `verified`, `pro
 - `has_role` remains a SECURITY DEFINER function that Supabase's advisor reports as executable by anon/authenticated. Treat its role-membership disclosure as a separate issue; change function execution and dependent policies only through the approved coordinated Supabase migration gate.
 - Guest order access is mediated by server-side order access checks and is not a direct proof-row/object RLS grant. Cross-customer order lookup/contact-fallback isolation remains tracked separately under MT-0162.
 
+## 9. Guest order access and account-order isolation
+
 ### 9.1 Account-owned order isolation
 
 - Contact-based access is guest-only. The shared `hasOrderContactAccess` helper denies every order with a non-null `user_id`, even when the supplied phone/email matches the saved contact and verification hash.
