@@ -114,7 +114,7 @@ function CategoryPage() {
         {CATEGORY_INTROS[category.slug] && (
           <p className="mt-3 max-w-[70ch] text-sm text-foreground/80">
             {CATEGORY_INTROS[category.slug]}{" "}
-            <Link to="/how-it-works" className="text-primary underline-offset-4 hover:underline">
+            <Link to="/how-it-works" className="text-primary underline underline-offset-4">
               See how ordering works
             </Link>
             .

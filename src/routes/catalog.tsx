@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SearchX, SlidersHorizontal, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { EmptyState } from "@/components/empty-state";
@@ -77,6 +77,7 @@ function CatalogPage() {
   const [price, setPrice] = useState(search.price ?? "all");
   const [shown, setShown] = useState(PAGE_SIZE);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const filterButtonRef = useRef<HTMLButtonElement>(null);
   useEffect(() => { setQuery((search.q ?? "").slice(0, 100)); }, [search.q]);
   useEffect(() => { setCategory(search.category ?? "all"); }, [search.category]);
   useEffect(() => { setAvailability(search.availability ?? "all"); setPrice(search.price ?? "all"); }, [search.availability, search.price]);
@@ -215,7 +216,7 @@ function CatalogPage() {
             </nav>
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <Button variant="outline" onClick={() => setFiltersOpen(true)} className="h-11 gap-1.5 rounded-full border-border bg-card px-3 text-[13px] md:hidden">
+              <Button ref={filterButtonRef} variant="outline" onClick={() => setFiltersOpen(true)} className="h-11 gap-1.5 rounded-full border-border bg-card px-3 text-[13px] md:hidden">
                 <SlidersHorizontal className="size-4 text-primary" /> Filters{filterCount ? ` (${filterCount})` : ""}
               </Button>
               {sortSelect}
@@ -262,7 +263,7 @@ function CatalogPage() {
       </main>
 
       <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
-        <SheetContent side="bottom" aria-describedby={undefined} className="max-h-[85dvh] overflow-y-auto rounded-t-lg border-border bg-background px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-5 [&>button]:flex [&>button]:size-11 [&>button]:items-center [&>button]:justify-center motion-reduce:transition-none motion-reduce:animate-none">
+        <SheetContent side="bottom" onCloseAutoFocus={() => filterButtonRef.current?.focus()} aria-describedby={undefined} className="max-h-[85dvh] overflow-y-auto rounded-t-lg border-border bg-background px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-5 [&>button]:flex [&>button]:size-11 [&>button]:items-center [&>button]:justify-center motion-reduce:transition-none motion-reduce:animate-none">
           <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-foreground/20" aria-hidden="true" />
           <SheetTitle className="font-display text-lg font-semibold">Filters</SheetTitle>
           <fieldset className="mt-4">
