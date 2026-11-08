@@ -107,11 +107,11 @@ Do not set numerical targets until a reliable baseline exists.
 - [!] **MT-0005 · P0 · BLOCKED** — Prioritise customer segments using owner-approved target-market/customer evidence. No validated customer research, sales mix or owner segment choice is recorded; do not infer priority from catalogue categories.
 - [!] **MT-0006 · P0 · BLOCKED** — Approve the primary commercial KPI and its reporting definition with the business owner. The plan suggests fulfilled, profitable orders, but no owner-approved target or measurement window is recorded.
 - [!] **MT-0007 · P0 · BLOCKED** — Implement trusted unit-economics reporting after supplier cost, payment fee, refund and support-cost sources are available. Current supplier costs and payment fee records are not populated; no actual margin figures can be calculated without inventing inputs.
-- [ ] **MT-0008 · P1 · TODO** — Define MTDGC’s own customer value through legitimate sourcing, regional compatibility, clear delivery and reliable support.
-- [ ] **MT-0009 · P1 · TODO** — Define the role of Matrix as the umbrella brand and the role of each product category beneath it.
-- [ ] **MT-0010 · P1 · TODO** — Decide whether the initial experience is marketplace-style retail or a curated single-operator digital store.
-- [ ] **MT-0011 · P1 · TODO** — Set a product approval process before adding a new category or supplier.
-- [ ] **MT-0012 · P1 · TODO** — Define which products MTDGC will never sell, including unauthorised accounts, stolen codes and credential-based access.
+- [!] **MT-0008 · P1 · BLOCKED** — A substantiated customer-value promise depends on verified supplier/source records, product-region compatibility, measured delivery performance and support capacity. The Supplier Register still has no verified supplier or product-scope records, and no measured delivery/support baseline is recorded. Unblock only when those facts are supplied and verified; do not invent a sourcing, availability or delivery guarantee.
+- [x] **MT-0009 · P1 · DONE** — Define Matrix as the umbrella brand element, Matrix Digital Goods & Commerce as the canonical full name, MTDGC as the storefront short form, and the four current product-family roles without creating sub-brands or asserting a legal entity. Evidence: MTDGC_BRAND_ARCHITECTURE.md and section 37.
+- [!] **MT-0010 · P1 · BLOCKED** — The marketplace-versus-single-operator model is an owner business decision. The public site uses “digital marketplace” wording while the Terms describe MTDGC selling digital products to Nepal customers; neither wording nor the current schema proves the intended operating model. Unblock only with the owner's explicit choice; do not infer it from existing copy.
+- [!] **MT-0011 · P1 · BLOCKED** — The approval workflow is prepared in draft [PR #39](https://github.com/eboxont-code/mtdgc/pull/39), exact head `1d3a703b90e33a0850083519d0628b03d1e9fcf1`. Exact-head Quality run [42498280073](https://github.com/eboxont-code/mtdgc/actions/runs/42498280073) failed before any job step ran (no steps/logs); Vercel rejected the preview under the free daily deployment limit. Keep the PR open/draft; no supplier is approved by the document.
+- [!] **MT-0012 · P1 · BLOCKED** — The prohibited-product and hold policy is prepared in draft [PR #40](https://github.com/eboxont-code/mtdgc/pull/40), exact head `25839b3e84472de9e10f621ab764cc794e1d3c2f`. Exact-head Quality run [42504136364](https://github.com/eboxont-code/mtdgc/actions/runs/42504136364) failed before any job step ran (no steps/logs); Vercel rejected the preview under the free daily deployment limit. Keep the PR open/draft; no supplier or product is approved by the document.
 - [ ] **MT-0013 · P1 · TODO** — Separate customer-facing promises from internal targets and supplier estimates.
 - [ ] **MT-0014 · P1 · TODO** — Define the customer support languages and service hours that can actually be maintained.
 - [ ] **MT-0015 · P2 · TODO** — Create a concise brand voice guide for product pages, checkout, support and social channels.
@@ -546,6 +546,10 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | NEXT P0; can be documented from the current payment-review code and existing operational evidence without production writes |
 | 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
+
+
+
+**P1 queue after MT-0009:** MT-0008 is blocked by missing supplier, regional-compatibility and measured delivery/support evidence; MT-0010 is blocked on the owner's commercial-model decision; MT-0011 and MT-0012 are prepared in draft PRs #39 and #40 but cannot be verified/released while their exact-head quality jobs have no steps and Vercel's free daily deployment limit is active. The next eligible P1 task is **MT-0013 — separate customer-facing promises from internal targets and supplier estimates**. The P0 queue has no currently eligible implementation task: the next order-status work is blocked by exact-head runner startup or its documented owner/settlement dependencies, while supplier, legal, Android-device and schema-cutover items retain their existing gates.
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -1334,3 +1338,35 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 No production application code, database/schema, order/payment/customer record, storage object, RLS/grant, credential, environment, DNS, hosting or billing setting changed. No test order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
 
 **Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
+
+## 37. MT-0009 Matrix / MTDGC brand architecture — 9 November 2026
+
+**Task:** MT-0009 · P1 · DONE. The current brand hierarchy and product-family roles are documented in [MTDGC_BRAND_ARCHITECTURE.md](./MTDGC_BRAND_ARCHITECTURE.md). This is a naming and taxonomy definition only; it does not create a legal entity, new sub-brand, market identity or commercial-model decision.
+
+### Defined current hierarchy
+
+- **Matrix** is the umbrella brand element in the existing name.
+- **Matrix Digital Goods & Commerce** is the canonical full name; **MTDGC** is its short form and the current digital-commerce storefront identity.
+- Game Top-Ups, Gift Cards, Subscriptions and Software are product families under the same MTDGC identity, not separate brands.
+- Deals is a merchandising collection, not a fifth category or sub-brand. The repository instructions keep it as an empty UI state until real sale data exists.
+- Nepal domestic, Australia-to-Nepal gifting and Australia-local are purchase journeys/market routes, not brand subdivisions. Nepal remains the first operating-stability priority; the other routes remain independently gated.
+- Supplier, issuer, publisher and platform names identify third-party products or sources; they do not imply MTDGC affiliation or authorised-reseller status.
+
+### Evidence and boundaries
+
+- The current README and master plan use Matrix Digital Goods & Commerce (MTDGC) as one identity. The public About page describes the same name and the current catalogue families.
+- The current public catalogue groups products under Game Top-Ups, Gift Cards, Subscriptions and Software. AGENTS.md explicitly treats Deals as a UI-only empty state until real sale data exists.
+- SUPPLIER_REGISTER.md contains no verified supplier identity or product-scope records. The connected production schema has no supplier table or supplier foreign key. Therefore no issuer/supplier name is treated as a sub-brand or proof of product authority.
+- Public copy currently uses “digital marketplace” wording, while the Terms describe sales to customers in Nepal. The commercial model and supported-market discrepancy are not resolved here; MT-0010, MT-0002 and MT-0202 remain separate owner/legal decisions.
+- No legal seller name, registered entity, jurisdiction, tax position, supplier authority, SKU availability, price, delivery SLA or refund interpretation was invented or approved by this architecture.
+
+### Verification
+
+- Checked the canonical MTDGC_MASTER_PLAN.md, README.md, AGENTS.md, SUPPLIER_REGISTER.md and MTDGC_DATA_ARCHITECTURE.md on main commit ca01edaafa42b5b859089ce18d5decaf6fbd4db3.
+- Read the public homepage, About, catalogue, Terms, Delivery policy, Refund policy, FAQ and How-it-works pages without signing in or submitting a form.
+- Confirmed the connected Supabase project is ACTIVE_HEALTHY; schema inspection was read-only and showed no supplier table. No customer/order/payment rows were queried.
+- Current-main Quality run [42437058568](https://github.com/eboxont-code/mtdgc/actions/runs/42437058568) passed on exact main SHA ca01edaafa42b5b859089ce18d5decaf6fbd4db3 (lint, unit tests, typecheck and production build).
+- The production Vercel deployment [dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE](https://vercel.com/boxont/mtdgc/dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE) is READY on 3de811c7cfce91eb262cf79523d8053995bfb777. Merging a PR to main triggers the Git-linked production deployment; main is ahead of production and the free daily deployment limit has recently been reached. This documentation task was not merged or deployed.
+- No production data, catalogue records, customer/order/payment records, schema, storage, authentication, credentials, environment, DNS, hosting or billing settings were changed. No supplier/customer was contacted and no purchase or test order occurred. Additional spend: $0.
+
+**Next eligible P1 task:** MT-0013 — separate customer-facing promises from internal targets and supplier estimates. MT-0010 remains blocked pending the owner's explicit commercial-model decision.
