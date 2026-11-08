@@ -1303,6 +1303,34 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 ### Verification and safety
 
 - The current `main` Quality run [42433858650](https://github.com/eboxont-code/mtdgc/actions/runs/42433858650) passed on `67e67c76d28dfe85da8d37078332df4623e7d59d`: install, lint, unit tests, TypeScript and production build.
-- This is documentation-only; no application source or test files were changed. A fresh PR targeting `main` will run the repository quality workflow on its exact head.
+- This is documentation-only; no application source or test files were changed. PR [#21](https://github.com/eboxont-code/mtdgc/pull/21) targeted `main`, and exact PR-head Quality run [42436780870](https://github.com/eboxont-code/mtdgc/actions/runs/42436780870) passed on `d788703187fdaa152883b783fea13f48d466653e`; the merge-commit Quality run is recorded in section 31.
 - Vercel project `mtdgc` is Git-linked to `eboxont-code/mtdgc`; previous main merges triggered automatic production deployment attempts. At this audit, the main combined Vercel status reports the Hobby/free build-rate-limit failure. The latest READY production deployment is `dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE` on commit `3de811c7cfce91eb262cf79523d8053995bfb777`, which is 10 commits behind the current main HEAD; it is not this task's deployment.
 - All production database inspection was read-only. No order/customer/payment values, proof contents or storage objects were accessed. No schema, RLS, grants, roles, status values, credentials, environment variables, deployments, DNS, hosting or billing settings were changed. No supplier/customer was contacted and no purchase or test order was made. Additional spend: $0.
+
+
+
+## 31. MT-0101 merge and release verification — 8 November 2026
+
+**Task:** MT-0101 · P0 · DONE in canonical `main` (documentation-only). [PR #21](https://github.com/eboxont-code/mtdgc/pull/21) merged to `main` using the merge-commit method. PR head: `d788703187fdaa152883b783fea13f48d466653e`. Merge commit: `9df212f268c44aeae130dd89ce21cae903aab494`.
+
+### Merge and quality evidence
+
+- The final PR diff contained only `MTDGC_MASTER_PLAN.md` and `MTDGC_DATA_ARCHITECTURE.md`; it was based directly on the current main SHA `67e67c76d28dfe85da8d37078332df4623e7d59d`.
+- PR-head GitHub Actions Quality run [42436780870](https://github.com/eboxont-code/mtdgc/actions/runs/42436780870) passed on the exact PR head: Bun setup, frozen install, ESLint, full unit tests, TypeScript typecheck and production build.
+- Main merge-commit Quality run [42436853815](https://github.com/eboxont-code/mtdgc/actions/runs/42436853815) passed on exact merge commit `9df212f268c44aeae130dd89ce21cae903aab494`: all six quality stages passed.
+- PR #21 had no submitted reviews or unresolved review threads. The repository main branch is unprotected and reports no required status checks. Merge used the exact expected PR head SHA.
+- The old stacked draft [PR #3](https://github.com/eboxont-code/mtdgc/pull/3), which targeted the superseded MT-0085 branch and duplicated this task's documentation, was closed as superseded; its published branch/history was not modified.
+
+### Vercel production result
+
+- The Vercel project `mtdgc` is Git-linked to `eboxont-code/mtdgc`; merging PR #21 triggered the existing Git deployment integration.
+- No production deployment exists for merge SHA `9df212f268c44aeae130dd89ce21cae903aab494`. The main commit's Vercel status is failure with `api-deployments-free-per-day` / Hobby build-rate-limit target. No paid workaround or repeated unchanged retry was attempted.
+- The PR preview reached READY at deployment [`dpl_HWZkZCvWVqB7EvmfgL9xRACx3yM8`](https://vercel.com/boxont/mtdgc/HWZkZCvWVqB7EvmfgL9xRACx3yM8), URL [mtdgc-adi6oy3dk-boxont.vercel.app](https://mtdgc-adi6oy3dk-boxont.vercel.app), target `null` (preview only; not production).
+- Latest production deployment remains READY at [`dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE`](https://vercel.com/boxont/mtdgc/7A2mKAuhBY6nkW2d4FrZGDGQDVUE), deployed commit `3de811c7cfce91eb262cf79523d8053995bfb777`, 13 commits behind the MT-0101 merge commit. Production aliases remain `mtdgc.com` and `www.mtdgc.com`.
+- A non-destructive live GET of [`/track-order`](https://mtdgc.com/track-order) succeeded and rendered the existing four-step status explainer. No order number, contact, customer data or form submission was used. Because MT-0101 changes documentation only, the production UI is unchanged; this smoke check confirms availability, not deployment of the documentation or a new status workflow.
+
+### Final production boundary
+
+No production application code, database/schema, order/payment/customer record, storage object, RLS/grant, credential, environment, DNS, hosting or billing setting changed. No test order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
+
+**Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
