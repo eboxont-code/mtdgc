@@ -17,6 +17,7 @@ import { BottomNav } from "../components/bottom-nav";
 import { ScrollReveals } from "../components/scroll-reveals";
 import { WhatsAppFab } from "../components/whatsapp-fab";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { BRAND } from "../lib/brand";
 
 function NotFoundComponent() {
 
@@ -96,8 +97,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     const pageMeta = matches.flatMap((match) => match.meta ?? []);
     const titleMeta = [...pageMeta].reverse().find((meta) => meta && "title" in meta);
     const descriptionMeta = [...pageMeta].reverse().find((meta) => meta && "name" in meta && meta.name === "description");
-    const title = titleMeta && "title" in titleMeta ? String(titleMeta.title) : "MTDGC | Digital Marketplace for Nepal and Australia";
-    const description = descriptionMeta && "content" in descriptionMeta ? String(descriptionMeta.content) : "Subscriptions and gift cards for Nepal and Australia, priced in NPR.";
+    const title = titleMeta && "title" in titleMeta ? String(titleMeta.title) : BRAND.title;
+    const description = descriptionMeta && "content" in descriptionMeta ? String(descriptionMeta.content) : BRAND.description;
     const canonical = [...matches].reverse().flatMap((match) => match.links ?? []).find((link) => link?.rel === "canonical");
     const leafOgTitle = [...pageMeta].reverse().find((meta) => meta && "property" in meta && meta.property === "og:title");
     const leafOgDescription = [...pageMeta].reverse().find((meta) => meta && "property" in meta && meta.property === "og:description");
@@ -115,8 +116,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         : []),
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "theme-color", content: "#070b09" },
-      { name: "author", content: "MTDGC" },
-      { property: "og:site_name", content: "MTDGC" },
+      { name: "author", content: BRAND.name },
+      { property: "og:site_name", content: BRAND.name },
       { property: "og:type", content: "website" },
       { property: "og:title", content: title },
       { property: "og:description", content: description },
