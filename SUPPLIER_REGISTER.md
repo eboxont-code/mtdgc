@@ -1,8 +1,9 @@
 # MTDGC Supplier Register
 
 **Owner:** MTDGC  
-**Register version:** 1.1  
+**Register version:** 1.2  
 **Created:** 6 November 2026  
+**Updated:** 9 November 2026  
 **Canonical use:** Supplier identity, authority, product scope and verification evidence for MTDGC digital goods.
 
 > **Important:** This is an internal due-diligence register, not a list of approved suppliers. No supplier is considered verified merely because a product exists in the catalogue, a price is available, a supplier claims to be a wholesaler, or a test message is received.
@@ -124,3 +125,57 @@ Coming-soon listings are not sourcing approvals. Add each one to the product-sco
 - A persistent supplier table/migration was not added. The repository master plan holds backend migrations until the Boxont-controlled Supabase cutover and database reconciliation are complete. Keep this register in Git until that migration gate is formally cleared.
 
 **Initial status:** Register structure and mandatory credential-rejection policy created. No supplier has been screened or rejected because the supplier identity register remains empty; actual supplier population, evidence review and test transactions remain separate dependency-gated tasks under MT-0042–MT-0046.
+
+
+## 10. Product and supplier approval workflow — 9 November 2026
+
+This workflow is mandatory before MTDGC adds a new public product category, onboards a supplier for commercial use, makes a new product/SKU orderable, or expands an existing approval to another issuer, denomination, region, platform, account type or delivery route.
+
+**A completed form or a supplier status by itself is not approval.** The exact product scope must pass every applicable gate below, and the business owner must approve the recorded scope before it can be made orderable.
+
+### 10.1 Open a scoped proposal
+
+Record the proposal before changing the public catalogue:
+
+- For a new category: the customer need, evidence of demand (customer interviews, search demand or completed-order evidence), proposed product families, target market/journey and why an existing category is not suitable.
+- For a supplier: the actual legal contracting/invoicing entity and a supplier identity row. A trading name or chat contact alone is not enough.
+- For each product scope: issuer/brand, exact product family and SKU, denomination/variant, issuing and redemption region, allowed customer region, platform/account type, currency, required customer inputs and delivery method.
+- Record unknown facts as “Not supplied”, “Not verified” or “NOT ASSESSED”. Do not fill gaps from catalogue copy, a supplier claim, a price listing or assumptions.
+
+A category may be kept as an internal proposal while evidence is gathered. Do not present a new category as a purchasable offer until at least one product in it has passed the product launch gate. A public roadmap/coming-soon label must remain truthful and must not enable checkout.
+
+### 10.2 Pass the approval gates in order
+
+| Gate | Evidence required | Stop condition |
+|---|---|---|
+| 1. Category and market fit | Documented customer need and demand evidence; intended Nepal, Australia-local or Australia-to-Nepal journey; proposed category and product scope. | No owner-approved category decision or no evidence that the category serves a real customer need: keep it internal; do not expand the public catalogue. |
+| 2. Supplier identity | Legal entity, registration/operating country, official domain, independently checked business contact and the entity that will contract and invoice MTDGC. | Identity or contracting party is unknown or inconsistent: supplier remains NOT ASSESSED; no orderable product. |
+| 3. Authority and origin | Rights-holder/issuer authorisation or an independently verifiable official partner/distributor record for the exact product and territory; traceable source of origin; applicable resale and supplier terms. | A supplier's unsupported statement, website, invoice or chat alone is not proof of issuer authority. Missing or failed authority evidence means NOT ASSESSED or REJECTED; no test transaction or sale. |
+| 4. Product and region compatibility | Exact SKU, denomination, issuing/redemption country, permitted customer region, currency, platform, account type, activation restrictions and required customer fields. | Any material region, account, denomination or platform fact is unknown: do not claim compatibility or make the scope orderable. |
+| 5. Customer safety and data | Only the identifiers/contact details needed for the exact official fulfilment route; documented supplier data sharing, access, location and retention; no password, OTP, PIN, recovery code, token or unsafe account/device access. | Any supplier flow requires prohibited credentials or unsafe access: REJECT the supplier and affected scope under section 1.1. Unclear requirements remain NOT ASSESSED. |
+| 6. Commercial and operational readiness | Dated supplier cost and currency, quote source/expiry, minimum order, settlement route/fees, refund/failure allocation, delivery steps/window, cut-off/timezone, outage process and accountable escalation contact. | Missing or expired costs/terms, unsupported delivery promises or no accountable escalation route: no margin claim, SLA or orderable status. Apply the owner-approved margin floor when one exists. |
+| 7. Market, policy and payment readiness | Correct seller/operator, customer terms, refund/delivery/privacy disclosures, tax/payment review where required, permitted payment method and support responsibilities for the exact journey. | Owner decision, processor eligibility or qualified legal/tax review is missing where required: keep that market/journey disabled. Do not interpret legal requirements on the owner's behalf. |
+| 8. Technical and security readiness | Correct product/variant/region/price/customer-field data; server-side purchase validation; unavailable-item protection; private storage and least-privilege access; regression tests for the exact journey. | Any checkout, access-control, data-protection or migration prerequisite is unresolved: do not publish or bypass the release gate. Schema work remains subject to the approved Supabase cutover. |
+| 9. Test and owner approval | A successful low-value end-to-end test for the exact product family and region, plus documented failure/refund handling; evidence references recorded without customer secrets. Explicit business-owner approval for the exact supplier + SKU/denomination + region + delivery route + market. | No test evidence or owner sign-off: the scope stays UNDER REVIEW or NOT ASSESSED and cannot be made orderable. |
+
+### 10.3 Record the decision and its limits
+
+For every decision, retain a dated record with:
+
+- Supplier ID and scope ID.
+- Exact MTDGC product/SKU, issuer, denomination, region, platform/account type and delivery route.
+- Reviewer and business-owner decision-maker.
+- Evidence references and the date each item was checked.
+- Outcome, approved limitations, rejected conditions and next review/expiry date.
+
+Use the existing statuses in section 5. VERIFIED — LIMITED SCOPE applies only to the exact approved rows and restrictions; it does not approve other SKUs, countries, denominations or routes. Even VERIFIED does not bypass the separate product, payment, market, policy, technical and test-order launch gates.
+
+Only after all applicable gates and the recorded owner approval pass may an authorised operator request the normal reviewed catalogue release that makes the exact scope orderable. Do not change production product status, prices, supplier records or database schema as part of this documentation process.
+
+### 10.4 Re-review and pause rules
+
+Reopen the relevant gates whenever the legal supplier, source, issuer, SKU, denomination, region, platform/account model, price/quote, payment route, customer data shared, fulfilment method or supplier terms change; when evidence expires; or after an invalid/duplicate code, payment dispute, delivery failure or security incident. Suspend the affected scope while material evidence is rechecked. Preserve prior decisions and record the new outcome as a forward-dated change.
+
+### 10.5 Current status
+
+This workflow defines the approval process only. The supplier identity and product-scope tables above remain empty; no supplier, new category, product or market has been approved by this document. No supplier/customer was contacted, no purchase or test transaction was made, and no production catalogue or database record was changed. The register remains in Git until the approved Supabase cutover permits a separately reviewed persistent supplier model.
