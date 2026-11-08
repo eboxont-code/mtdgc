@@ -126,3 +126,53 @@ The customer progress helper groups `payment_submitted`/`paid`, `verified`, `pro
 - The administrator payment-review queue and signed proof-URL function require a validated Supabase session and an exact successful administrator-role result before any proof lookup or signed URL creation. Signed URLs expire after 300 seconds.
 - `has_role` remains a SECURITY DEFINER function that Supabase's advisor reports as executable by anon/authenticated. Treat its role-membership disclosure as a separate issue; change function execution and dependent policies only through the approved coordinated Supabase migration gate.
 - Guest order access is mediated by server-side order access checks and is not a direct proof-row/object RLS grant. Cross-customer order lookup/contact-fallback isolation remains tracked separately under MT-0162.
+
+## 10. Current authentication and authorisation audit — 8 November 2026
+
+This is a source and metadata audit of current GitHub `main` at `ca01edaafa42b5b859089ce18d5decaf6fbd4db3` and read-only production Supabase metadata. It is not a penetration test and does not prove that current-main changes are deployed.
+
+### Authentication and server-function boundary
+
+- The authenticated route calls Supabase `auth.getUser()` and redirects signed-out visitors to `/auth`. The route is client-only, so this is a navigation gate rather than the security boundary for data.
+- `src/start.ts` registers the global `attachSupabaseAuth` function middleware and CSRF middleware for server-function requests. The client middleware attaches the current session access token as a Bearer header.
+- `requireSupabaseAuth` validates the Bearer token with Supabase `getClaims`, requires a subject ID, and provides a user-scoped Supabase client plus the validated user ID to protected handlers.
+- The sign-in route uses Supabase Auth for sign-in, sign-up, password reset and recovery. Its redirect validator accepts only local paths beginning with one slash and rejects protocol-relative paths.
+
+### Customer account and support boundaries
+
+- `profiles` has owner-only SELECT, INSERT and UPDATE policies using `auth.uid() = id`.
+- `orders` has an owner/admin SELECT policy and a separate admin-only ALL policy. The authenticated role has a table-level UPDATE grant, but there is no customer-owned UPDATE policy; RLS still blocks customer updates.
+- `order_items` SELECT requires a related order owned by the signed-in user or an administrator.
+- `order_status_events` has an admin-only ALL policy. The authenticated role has table-level INSERT and SELECT grants, but the policy does not permit ordinary customers to use them.
+- `support_tickets` allows an authenticated customer to insert a ticket only with `user_id = auth.uid()`, and to read only their own tickets; the administrator policy is separate. The support form obtains the current user and sets the inserted `user_id` from that session.
+- `wishlist_items` has an owner-only ALL policy. `user_roles` permits users to read their own role rows but does not grant client-side role mutation.
+- Reviews allow public reads of approved reviews, owners to read their own reviews, and authenticated customers to submit only unapproved, non-verified-purchase reviews. Moderation is administrator-only.
+
+### Administrator boundary
+
+- All 14 exported server functions in `src/lib/admin.functions.ts` use `requireSupabaseAuth` and call the server-side administrator guard before performing their operation.
+- The guard uses `isAdminRoleConfirmed`, which accepts only an error-free exact boolean `true` from the role lookup. False, missing, ambiguous or error-bearing results deny access.
+- The browser-side role check in the admin page controls what the interface displays; it is not treated as the authorization boundary. Server handlers and database RLS remain the enforcement layers.
+
+### Guest order and payment-proof access
+
+- Public guest tracking calls a server function that uses the server-only Supabase client and requires the order number plus matching order contact. There is no anonymous SELECT policy on `orders`.
+- `getOrderForViewer` supports an order-scoped access-token hash, a validated authenticated account owner, and a rate-limited contact fallback. The current shared contact helper does not reject records with a non-null `user_id`; a matching contact can therefore still reach an account-owned order through the service-role path. This is the separate cross-customer isolation gap tracked under MT-0162; it is not claimed fixed by this audit.
+- Guest lookup and order-view rate-limit operations do not inspect every delete/count/insert error. A failed count can fall back to zero, so throttling may fail open. This is a separate abuse-control follow-up.
+- `payment_proofs` has RLS enabled and an authenticated SELECT policy limited to the related order owner or an administrator. The authenticated table grant is SELECT only; anon has no proof-row grant. Administrator proof-review handlers perform their own validated session and admin-role checks before proof lookup or signed URL creation.
+- The `payment-proofs` and `payment-qr` storage buckets are private. Payment-proof object reads are limited to related order owners or administrators; payment-QR object operations are administrator-only. No anonymous policy was found for either bucket.
+
+### Read-only production metadata — 8 November 2026
+
+- Supabase project `eaomkkswslqtfunkceuc` is `ACTIVE_HEALTHY`, PostgreSQL `17.11.0.003`.
+- All 14 public application tables have RLS enabled.
+- `order_lookup_attempts` has RLS enabled and no client policy. Its table privileges are limited to `service_role` and the database owner, matching its server-only use.
+- Storage bucket inventory: `payment-proofs` is private with a 5 MiB cap; `payment-qr` is private with a 2 MiB cap. Both have `allowed_mime_types = NULL`, so application-side content validation remains important.
+- The Supabase security advisor reports that `public.has_role(uuid, app_role)` is SECURITY DEFINER and executable by anon and authenticated. Because several RLS policies call it, changing its execution rights independently could break dependent policies. Treat the warning as a role-membership disclosure risk and coordinate any remediation with the approved Supabase cutover and policy migration. No role-write privilege for anon/authenticated was observed.
+- Table-level grants are broader than the effective row access in some places (notably orders and order-status events); the inspected RLS policies remain the controlling row boundary. Do not infer effective access from grants alone.
+
+### Deployment and verification boundary
+
+- The current-main Quality workflow passed on exact commit `ca01edaafa42b5b859089ce18d5decaf6fbd4db3` in run [42437058568](https://github.com/eboxont-code/mtdgc/actions/runs/42437058568).
+- The Vercel project is linked to `eboxont-code/mtdgc`. The latest inspected production deployment is READY at [`dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE`](https://vercel.com/boxont/mtdgc/7A2mKAuhBY6nkW2d4FrZGDGQDVUE), deployed from `3de811c7cfce91eb262cf79523d8053995bfb777`. Current main is 15 commits ahead of that production commit, so this audit does not claim all current-main controls are live.
+- Inspection used source, policy, grant, bucket and advisor metadata only. No customer, order, payment, auth-user or storage-object records were read. No production writes, migrations, policy/grant changes, secrets, authentication settings, hosting, DNS or billing settings were changed.
