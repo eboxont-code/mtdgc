@@ -1370,4 +1370,4 @@ No production application code, database/schema, order/payment/customer record, 
 
 ### Next task-selection pass
 
-MT-0031 and MT-0032 depend on product attributes and supplier confirmation data that are not currently structured or verified. MT-0033 has an existing draft PR #35; its exact-head Quality run `42479110341` failed and Vercel reports the free daily build limit. Do not rebuild that work or retry unchanged failures. The next pass should continue through the P1 register for an independent task whose evidence and dependencies are available.
+MT-0031 and MT-0032 depend on product attributes and supplier confirmation data that are not currently structured or verified. MT-0033 has an existing draft PR #35; its exact-head Quality run `42479110341` failed and Vercel reports the free daily build limit. Do not rebuild that work or retry unchanged failures. The next pass should continue scanning the remaining P0 register, record exact blockers for the open P0 drafts, and only then proceed to the first eligible P1 task.
