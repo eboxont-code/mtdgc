@@ -201,7 +201,7 @@ describe("MT-0165 secret and payment configuration safeguards", () => {
     const publicSettings = sectionBetween(
       orders,
       'export const getPaymentSettings =',
-      'function sniffImage',
+      'export const submitPaymentProof',
     );
 
     assert.match(
