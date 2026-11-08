@@ -72,6 +72,15 @@ const catalogueProduct = (
 describe("MT-0033 catalog search synonyms", () => {
   const aliases = [
     ["freefire", catalogueProduct("Free Fire Diamonds", { brand: "Garena", tags: ["free fire", "diamonds"] })],
+    ["pubgmobileuc", catalogueProduct("PUBG Mobile UC", { brand: "Krafton", tags: ["pubg", "uc"], variantNames: ["60 UC"] })],
+    ["mobilelegendsdiamonds", catalogueProduct("Mobile Legends Diamonds", { brand: "Moonton", tags: ["mobile legends", "mlbb", "diamonds"] })],
+    ["clashofclans", catalogueProduct("Clash of Clans Passes", { brand: "Supercell", tags: ["clash of clans"], variantNames: ["Gold Pass"] })],
+    ["valorantpoints", catalogueProduct("Valorant Points", { brand: "Riot Games", tags: ["valorant"], variantNames: ["475 VP"] })],
+    ["robloxgiftcard", catalogueProduct("Roblox Gift Card", { brand: "Roblox", tags: ["robux", "gift card"], variantNames: ["USD 10 Card"] })],
+    ["steamwalletcode", catalogueProduct("Steam Wallet Code", { brand: "Valve", tags: ["steam", "wallet", "gift card"], variantNames: ["USD 10 Wallet Code"] })],
+    ["netflixsubscription", catalogueProduct("Netflix Subscription", { brand: "Netflix", region: "Nepal", tags: ["streaming", "subscription"], variantNames: ["1 Month Plan"] })],
+    ["microsoft365", catalogueProduct("Microsoft 365", { brand: "Microsoft", tags: ["office", "onedrive"], variantNames: ["Personal, 12 months"] })],
+    ["chatgptplus", catalogueProduct("ChatGPT Plus", { brand: "OpenAI", tags: ["chatgpt", "ai"], variantNames: ["1 month"] })],
     ["pubgm", catalogueProduct("PUBG Mobile UC", { brand: "Krafton", tags: ["pubg", "uc"], variantNames: ["60 UC"] })],
     ["UC", catalogueProduct("PUBG Mobile UC", { brand: "Krafton", tags: ["pubg", "uc"], variantNames: ["60 UC"] })],
     ["mlbb", catalogueProduct("Mobile Legends Diamonds", { brand: "Moonton", tags: ["mobile legends", "mlbb", "diamonds"], variantNames: ["Weekly Diamond Pass"] })],
@@ -124,7 +133,9 @@ describe("MT-0033 catalog search synonyms", () => {
     const roblox = catalogueProduct("Roblox Gift Card", { tags: ["robux", "gift card"] });
 
     assert.ok(searchScore(windows, "license key") > 0);
+    assert.ok(searchScore(windows, "licenses") > 0);
     assert.ok(searchScore(freeFire, "topup") > 0);
     assert.ok(searchScore(roblox, "giftcard") > 0);
+    assert.ok(searchScore(roblox, "giftcards") > 0);
   });
 });
