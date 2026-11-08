@@ -300,7 +300,7 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Customer information, payment evidence, order records and staff tools are protected with least-privilege access.
 
-- [!] **MT-0161 · P0 · BLOCKED** — The read-only audit has been refreshed against current main and production metadata in section 33. A clean current-main documentation PR is awaiting its exact-head Quality workflow; do not mark DONE or merge until the required check passes.
+- [!] **MT-0161 · P0 · BLOCKED** — The read-only audit has been refreshed against current main and production metadata in section 33. Clean current-main draft PR [#26](https://github.com/eboxont-code/mtdgc/pull/26) is awaiting its exact-head Quality workflow; do not mark DONE or merge until the required check passes.
 - [ ] **MT-0162 · P0 · TODO** — Verify one customer cannot access another customer's orders by changing an ID or URL.
 - [ ] **MT-0163 · P0 · TODO** — Verify payment uploads and delivered codes are stored privately, not in public buckets.
 - [ ] **MT-0164 · P0 · TODO** — Ensure admin-only actions are enforced server-side, not only hidden in the interface.
@@ -1344,7 +1344,7 @@ No production application code, database/schema, order/payment/customer record, 
 
 ## 33. Current authentication and authorisation audit — 8 November 2026
 
-**Task:** MT-0161 · P0 · BLOCKED pending exact-head quality verification. This refresh is based on current GitHub `main` at `ca01edaafa42b5b859089ce18d5decaf6fbd4db3` and read-only production Supabase metadata. It updates the earlier audit without changing application code or production settings.
+**Task:** MT-0161 · P0 · BLOCKED pending exact-head quality verification. Clean current-main draft [PR #26](https://github.com/eboxont-code/mtdgc/pull/26) contains this refresh, based on GitHub `main` at `ca01edaafa42b5b859089ce18d5decaf6fbd4db3` and read-only production Supabase metadata. It updates the earlier audit without changing application code or production settings.
 
 ### Findings
 
