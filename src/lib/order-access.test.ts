@@ -68,6 +68,15 @@ describe("MT-0083 payment proof ownership and association", () => {
 });
 
 describe("MT-0162 account-order isolation", () => {
+  test("an account order's access token remains scoped to that order", async () => {
+    const tokenA = "a".repeat(64);
+    const orderA = { user_id: "customer-a", access_token_hash: await sha256Hex(tokenA) };
+    const orderB = { user_id: "customer-b", access_token_hash: await sha256Hex("b".repeat(64)) };
+
+    assert.equal(await hasOrderAccessToken(orderA, tokenA), true);
+    assert.equal(await hasOrderAccessToken(orderB, tokenA), false);
+  });
+
   test("matching phone or email cannot use guest contact fallback for an account-owned order", async () => {
     const phone = "+61 412 345 678";
     const accountOrder = {
