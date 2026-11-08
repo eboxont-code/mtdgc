@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.1 · 7 November 2026
+**Version:** 2.2 · 8 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -225,7 +225,7 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** The order state is consistent from checkout to delivery, with a complete audit trail and useful customer visibility.
 
-- [ ] **MT-0101 · P0 · TODO** — Map every current order status and the allowed transitions between them.
+- [x] **MT-0101 · P0 · DONE** — Map all 13 live order-status enum values, current application writers, generic administrator targets, legacy display aliases and observed transitions; confirm that neither application nor database enforces a complete transition graph. Evidence: section 30 and Data Architecture section 4; current-main source inspection plus read-only production enum, aggregate status-count, column-type, proof-status constraint and order-trigger queries on 8 November 2026.
 - [ ] **MT-0102 · P0 · TODO** — Ensure Payment received, Verified, Processing and Delivered have precise operational definitions.
 - [ ] **MT-0103 · P0 · TODO** — Add explicit Cancelled, Failed, Refunded and Action required states where applicable.
 - [ ] **MT-0104 · P0 · TODO** — Prevent invalid status jumps, such as Pending directly to Delivered without payment verification.
@@ -542,9 +542,10 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 6 | MT-0085 — restrict payment-proof access to the order owner and authorised staff | MERGED BUT NOT LIVE; PR #20 merged as `a793dff`; Vercel free daily deployment limit blocked production release; see section 29 |
 | 7 | MT-0086 — require independent payment settlement matching before fulfilment | BLOCKED; no bank-statement feed, provider callback or owner-approved manual settlement evidence is available |
 | 8 | MT-0087 — prevent duplicate transaction references/screenshots across orders | BLOCKED; concurrency-safe uniqueness requires the approved Supabase cutover/migration gate |
-| 9 | MT-0101 — map current order statuses and allowed transitions | NEXT P0 after MT-0085; can be mapped from current source without production writes |
-| 10 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
-| 11 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
+| 9 | MT-0101 — map current order statuses and observed transition paths | DONE; 13-value enum, application writers, UI mappings, production aggregate counts and lack of transition enforcement are documented in section 30 and Data Architecture section 4 |
+| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | NEXT P0; can be documented from the current payment-review code and existing operational evidence without production writes |
+| 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
+| 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -1234,3 +1235,74 @@ No product records, supplier assignments, prices, variants, order records, datab
 No production database write, migration, grant/policy/bucket change, customer/order/payment read or mutation, storage-object access, auth-setting change, secret/environment change, DNS/hosting/billing change, supplier/customer contact, purchase or additional spend occurred. Additional spend: $0.
 
 **Next P0 after MT-0085:** MT-0101 — map the current order statuses and allowed transitions. MT-0086 remains blocked by missing independent settlement evidence; MT-0087 remains blocked by the approved Supabase cutover/migration gate.
+
+
+
+## 30. Current order-status map and observed transition audit — 8 November 2026
+
+**Task:** MT-0101 · P0 · DONE at documentation/source-audit level. This records the live status vocabulary and transitions actually written by the application. It is not an owner-approved business state machine, and it does not claim that the current generic administrator updater enforces safe transitions.
+
+### Source and live-schema evidence
+
+- Canonical `main` HEAD inspected: `67e67c76d28dfe85da8d37078332df4623e7d59d`. Repository instructions in `AGENTS.md`, `README.md`, the complete master plan, the historical roadmap and the existing stacked MT-0101 PR #3 were inspected before reapplying the work to current main.
+- Current source inspected: `src/lib/orders.functions.ts`, `src/lib/admin.functions.ts`, `src/lib/format.ts`, `src/components/admin/order-detail-panel.tsx`, `src/components/admin/orders-panel.tsx`, `src/routes/track-order.tsx`, `src/routes/order.$orderNumber.tsx` and `src/routes/_authenticated/orders.tsx`.
+- Read-only production SQL on 8 November 2026 reconfirmed exactly 13 `public.order_status` enum values: `pending`, `processing`, `paid`, `failed`, `cancelled`, `refunded`, `fulfilled`, `completed`, `pending_payment`, `payment_submitted`, `verified`, `rejected` and `delivered`.
+- The production `orders.status` column uses the `order_status` enum. `order_status_events.status` is plain text. `payment_proofs.status` is plain text constrained to `submitted`, `verified` or `rejected`; `resubmit_requested` is a separate boolean.
+- Aggregate-only production counts: 8 orders, all `pending_payment`; 8 order-status events, all labelled `pending_payment`. No order identifiers, customer fields, contacts, payment amounts, proof rows or storage objects were queried.
+- No non-internal trigger exists on `public.orders`. Observed table constraints cover the primary key, unique order number and non-negative discount/subtotal/total amounts; no transition-specific constraint was found.
+
+### Status inventory
+
+| Stored status | Current writer / observed use | Compatibility and evidence notes |
+|---|---|---|
+| `pending` | Database default only; no current checkout writer. | Legacy initial state; current checkout explicitly writes `pending_payment`. |
+| `processing` | Generic admin `updateOrderStatus`. | Staff-selected fulfilment-in-progress label; no automated supplier processing is implied. |
+| `paid` | Generic admin `updateOrderStatus`. | Legacy/manual label; `reviewPayment` does not write it and it is not independent settlement evidence. |
+| `failed` | No current order/admin writer found. | Legacy enum value; the tracking/order page has a display label. |
+| `cancelled` | Generic admin `updateOrderStatus`. | Status only; no cancellation/refund workflow is performed by this update. |
+| `refunded` | Generic admin `updateOrderStatus`. | Status only; it does not execute or verify a money return. |
+| `fulfilled` | No current order/admin writer found. | Legacy delivery alias displayed with Delivered. |
+| `completed` | No current order/admin writer found. | Legacy delivery alias displayed with Delivered. |
+| `pending_payment` | `placeOrder`; also `reviewPayment` when rejection requests a replacement proof. | Current initial checkout state and proof-resubmission state. |
+| `payment_submitted` | `submitPaymentProof`. | Screenshot/reference submitted for manual review; not independent settlement confirmation. |
+| `verified` | `reviewPayment` when an admin accepts a submitted proof; also generic admin updater. | Manual proof-review result; no bank-statement feed or provider settlement callback is consulted. |
+| `rejected` | `reviewPayment` when an admin rejects without requesting another proof; also generic admin updater. | Separate from rejection that returns the order to `pending_payment` for resubmission. |
+| `delivered` | Generic admin `updateOrderStatus`. | Staff-selected delivery label; no delivery-evidence record is required by the status setter. |
+
+### Transitions currently implemented in application code
+
+These are observed code paths, not an approved business transition policy.
+
+| Trigger | Starting state | Result | Guard / limitation |
+|---|---|---|---|
+| `placeOrder` | New order | `pending_payment` | Explicit initial state. |
+| `submitPaymentProof` | `pending_payment` | `payment_submitted` | Conditional update requires the current status to remain `pending_payment`. |
+| `reviewPayment` — verify | `payment_submitted` | `verified` | Conditional update requires `payment_submitted`; manual administrator decision. |
+| `reviewPayment` — reject and request new proof | `payment_submitted` | `pending_payment` | Returns the order for proof resubmission. |
+| `reviewPayment` — reject | `payment_submitted` | `rejected` | Conditional update requires `payment_submitted`. |
+| `updateOrderStatus` | Any existing state | `paid`, `verified`, `rejected`, `processing`, `delivered`, `cancelled`, `refunded` | Authenticated administrator only, but no previous-state, proof-review or payment prerequisite is checked; direct jumps are possible. |
+| `addOrderNote` | Any | No order-state change | Inserts a free-text event label/note only; it does not update `orders.status`. |
+
+There is **no complete application-enforced allowed-transition graph**. The proof submission/review paths have their own conditional status checks, but the generic administrator updater accepts its seven target values from any current state. The database enum restricts labels, not transitions. MT-0104 owns enforcement after the required business rules and payment prerequisites are resolved.
+
+### Customer and staff display mapping
+
+- `ORDER_STEPS` groups `payment_submitted` and legacy `paid` under “Payment received”; `verified` under “Verified”; `processing` under “Processing”; and `delivered`, `fulfilled` and `completed` under “Delivered”.
+- `ORDER_NOTICE` supplies separate notices for `pending`, `pending_payment`, `rejected`, `cancelled` and `refunded`.
+- The order-detail route has individual display labels for all 13 stored values. The tracking route combines shared status labels with legacy overrides. The account-order view uses `ORDER_STEPS` and `ORDER_NOTICE`.
+- The administrator selector exposes the seven targets accepted by `updateOrderStatus`; the orders dashboard groups `pending`/`pending_payment`, `processing`, and `delivered`/`fulfilled`/`completed` for summary tiles.
+
+### Related tasks and limits
+
+- MT-0102 remains separate: define customer-facing milestone wording and operational meaning without treating a submitted screenshot as independent settlement evidence.
+- MT-0103 owns the owner/business decision about legacy `cancelled`, `failed`, `refunded` and whether an `action_required` state is needed. A new enum value would require the approved Supabase cutover/migration gate.
+- MT-0104 owns transition enforcement. No transition rule or business approval was invented in this audit.
+- MT-0086 remains blocked because there is no independent bank/provider settlement evidence. A manual screenshot review is not a substitute.
+- MT-0087 remains blocked by the concurrency-safe uniqueness migration and approved Supabase cutover.
+
+### Verification and safety
+
+- The current `main` Quality run [42433858650](https://github.com/eboxont-code/mtdgc/actions/runs/42433858650) passed on `67e67c76d28dfe85da8d37078332df4623e7d59d`: install, lint, unit tests, TypeScript and production build.
+- This is documentation-only; no application source or test files were changed. A fresh PR targeting `main` will run the repository quality workflow on its exact head.
+- Vercel project `mtdgc` is Git-linked to `eboxont-code/mtdgc`; previous main merges triggered automatic production deployment attempts. At this audit, the main combined Vercel status reports the Hobby/free build-rate-limit failure. The latest READY production deployment is `dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE` on commit `3de811c7cfce91eb262cf79523d8053995bfb777`, which is 10 commits behind the current main HEAD; it is not this task's deployment.
+- All production database inspection was read-only. No order/customer/payment values, proof contents or storage objects were accessed. No schema, RLS, grants, roles, status values, credentials, environment variables, deployments, DNS, hosting or billing settings were changed. No supplier/customer was contacted and no purchase or test order was made. Additional spend: $0.
