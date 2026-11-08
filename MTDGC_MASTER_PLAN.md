@@ -138,7 +138,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0031 · P1 · TODO** — Show whether a product is single-use, recurring, prepaid, account-bound or redeemable by code.
 - [ ] **MT-0032 · P1 · TODO** — Make product availability freshness visible internally with last supplier confirmation time.
 - [!] **MT-0033 · P1 · BLOCKED** — Add search synonyms for common product names, abbreviations, game currencies and regional spellings. Draft PR [#35](https://github.com/eboxont-code/mtdgc/pull/35) has 36 focused local assertions, but exact-head Quality run [42479110341](https://github.com/eboxont-code/mtdgc/actions/runs/42479110341) failed before the runner started (zero test/build steps). Vercel rejected the preview under the free daily deployment limit. Full repository checks and final preview are unverified; do not repeat unchanged infrastructure retries.
-- [~] **MT-0034 · P1 · IN PROGRESS** — Add filters that work correctly for category, platform, region, availability and price. Dynamic platform/region filters and URL-backed state are implemented in the current task branch with focused regression coverage; exact-head repository checks and production release remain pending. See section 32.
+- [!] **MT-0034 · P1 · BLOCKED** — Add filters that work correctly for category, platform, region, availability and price. Draft PR [#36](https://github.com/eboxont-code/mtdgc/pull/36) contains the implementation and five focused local tests. Exact source-head Quality run [42483355423](https://github.com/eboxont-code/mtdgc/actions/runs/42483355423) failed before any runner steps started; full repository checks are unavailable. The exact-head Vercel preview is READY, but no browser smoke test was possible and it is not production. Main is 15 commits ahead of production, and GitHub branch-protection settings are not readable by the connected integration. Do not merge or deploy until checks and release gates are verified.
 - [ ] **MT-0035 · P2 · TODO** — Create curated collections such as gaming essentials, entertainment, productivity and Australian shopping cards.
 - [ ] **MT-0036 · P2 · TODO** — Add related products only when they are genuinely compatible and available.
 - [ ] **MT-0037 · P2 · TODO** — Create a discontinued-product process that preserves order history and redirects useful SEO pages.
@@ -1337,7 +1337,7 @@ No production application code, database/schema, order/payment/customer record, 
 
 ## 32. Catalogue platform and region filters — 8 November 2026
 
-**Task:** MT-0034 · P1 · IN PROGRESS. This change is a storefront filter improvement only; it does not alter product records, prices, variant eligibility or checkout rules.
+**Task:** MT-0034 · P1 · BLOCKED — implementation is in draft PR #36, not merged or live. This change is a storefront filter improvement only; it does not alter product records, prices, variant eligibility or checkout rules.
 
 ### What changed
 
@@ -1358,9 +1358,9 @@ No production application code, database/schema, order/payment/customer record, 
 ### Verification and release boundary
 
 - Five focused platform/region facet tests passed in a local Node 22.16.0 scratch run. They cover dynamic option derivation, trimming, case-insensitive deduplication, combined filters, and blank platform handling.
-- Full repository Bun tests, ESLint, TypeScript typecheck and production build must still pass on the exact final PR head before merge.
-- The current production deployment is READY at [dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE](https://vercel.com/boxont/mtdgc/7A2mKAuhBY6nkW2d4FrZGDGQDVUE), sourced from commit `3de811c7cfce91eb262cf79523d8053995bfb777`. Current `main` is `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`; the production deployment is 15 commits behind main. Vercel's free daily deployment limit is currently recorded on PR #35. No new deployment was attempted from this task branch.
-- Do not merge or deploy until the exact PR-head checks pass and the existing main-to-production backlog/release is reviewed. A preview is not production.
+- Exact source-head Quality run [42483355423](https://github.com/eboxont-code/mtdgc/actions/runs/42483355423) failed before runner startup; its only job has no steps/logs. No full Bun suite, ESLint, repository typecheck or production build ran. The isolated facet helper strict TypeScript check and five focused tests passed locally.
+- PR [#36](https://github.com/eboxont-code/mtdgc/pull/36) is open and draft. Its exact head at the source verification point was `c85455c63ce8aa15f0fa6dd8e85101fe6ef3982f`. The exact-head preview [dpl_H7QmeREPiYFLs2aeVkqPUypwRyZg](https://vercel.com/boxont/mtdgc/H7QmeREPiYFLs2aeVkqPUypwRyZg) reached READY for that SHA; this is preview only. The browser tool could not access the preview URL, so no interactive smoke test is claimed. Production remains READY at [dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE](https://vercel.com/boxont/mtdgc/7A2mKAuhBY6nkW2d4FrZGDGQDVUE), sourced from `3de811c7cfce91eb262cf79523d8053995bfb777`. Current `main` is `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`, 15 commits ahead of production. GitHub branch-protection reads returned 403 for the connected integration; the exact protection/ruleset requirements remain unverified.
+- Do not merge or deploy until the exact final PR-head checks pass, branch-protection/review requirements are verified, and the existing main-to-production backlog/release is reviewed. A preview is not production.
 
 ### Safety
 
