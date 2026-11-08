@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.2 · 8 November 2026
+**Version:** 2.3 · 8 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -226,11 +226,11 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** The order state is consistent from checkout to delivery, with a complete audit trail and useful customer visibility.
 
 - [x] **MT-0101 · P0 · DONE** — Map all 13 live order-status enum values, current application writers, generic administrator targets, legacy display aliases and observed transitions; confirm that neither application nor database enforces a complete transition graph. Evidence: section 30 and Data Architecture section 4; current-main source inspection plus read-only production enum, aggregate status-count, column-type, proof-status constraint and order-trigger queries on 8 November 2026.
-- [ ] **MT-0102 · P0 · TODO** — Ensure Payment received, Verified, Processing and Delivered have precise operational definitions.
-- [ ] **MT-0103 · P0 · TODO** — Add explicit Cancelled, Failed, Refunded and Action required states where applicable.
-- [ ] **MT-0104 · P0 · TODO** — Prevent invalid status jumps, such as Pending directly to Delivered without payment verification.
-- [ ] **MT-0105 · P0 · TODO** — Verify guest order tracking requires the order number plus the matching email or phone.
-- [ ] **MT-0106 · P0 · TODO** — Ensure account order history and guest tracking show the same canonical status.
+- [!] **MT-0102 · P0 · BLOCKED** — Customer-facing definitions/shared labels are in draft PR #22. Exact-head Quality run `42441639306` failed before any runner step (runner ID 0; no steps/logs); earlier runs `42441262247` and `42441579039` failed the same way and one retry also failed before startup. Unblock when a free GitHub Actions runner executes the full workflow; do not merge on focused tests alone.
+- [!] **MT-0103 · P0 · BLOCKED** — Existing cancelled/failed/refunded values are present; deciding whether `action_required` is needed is an owner/product decision. Any new enum value also requires the approved Supabase cutover/migration gate.
+- [!] **MT-0104 · P0 · BLOCKED** — Requires an owner-approved transition matrix covering cancellation, refunds, overrides and fulfilment, plus independent settlement evidence under MT-0086. Do not infer policy from the generic administrator updater.
+- [!] **MT-0105 · P0 · BLOCKED** — Focused implementation is in draft PR #23. Exact-head Quality run `42445346808` failed before runner startup (runner ID 0; no steps/logs). Focused tests passed, but the full suite/lint/typecheck/build did not execute. Unblock when a free runner completes the full workflow.
+- [!] **MT-0106 · P0 · BLOCKED** — Depends on the shared status definitions in MT-0102 and guest-tracking promotion in MT-0105; both remain blocked pending exact-head quality verification.
 - [ ] **MT-0107 · P1 · TODO** — Record a timestamp and actor for every status transition.
 - [ ] **MT-0108 · P1 · TODO** — Show customers what happens next at each stage and whether they need to act.
 - [ ] **MT-0109 · P1 · TODO** — Allow staff to add internal notes without exposing them to customers.
@@ -250,12 +250,12 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Orders are delivered accurately and on time, while manual checks are gradually replaced only by safe, tested automation.
 
-- [ ] **MT-0121 · P0 · TODO** — Document the current manual fulfilment steps for each active product family.
-- [ ] **MT-0122 · P0 · TODO** — Create a pre-fulfilment checklist for player ID, zone, server, region, denomination and email.
-- [ ] **MT-0123 · P0 · TODO** — Require a second confirmation for irreversible top-ups and code releases.
-- [ ] **MT-0124 · P0 · TODO** — Record the supplier transaction or redemption reference for each completed order.
-- [ ] **MT-0125 · P0 · TODO** — Capture delivery evidence and attach it to the correct order.
-- [ ] **MT-0126 · P0 · TODO** — Never request a customer's game password, subscription password, OTP or payment PIN.
+- [!] **MT-0121 · P0 · BLOCKED** — Requires verified supplier identities, product-family scope and documented supplier fulfilment instructions. The current Supplier Register contains no verified supplier/product scope; do not invent manual steps.
+- [~] **MT-0122 · P0 · IN PROGRESS** — Server-owned order-time snapshot and admin pre-fulfilment checklist are in clean main-based draft PR #25, branch `automation/mt-0122-pre-fulfilment-checklist-main-20261108`, application commit `45c072154dbd0d47df3f5c84ebbaebd0d5a2f37d`. Exact-head Quality, merge, production deployment and live smoke verification remain pending.
+- [!] **MT-0123 · P0 · BLOCKED** — Requires issuer/supplier evidence about which actions are irreversible and an owner-approved confirmation/cancellation policy. Do not assert irreversibility without source evidence.
+- [!] **MT-0124 · P0 · BLOCKED** — Requires a verified supplier transaction/redemption reference format and approved order-data retention/access design; no supplier reference contract is available.
+- [!] **MT-0125 · P0 · BLOCKED** — Requires verified supplier delivery evidence, an approved private storage/retention design and the Supabase migration/cutover gate where schema or storage changes are needed.
+- [!] **MT-0126 · P0 · BLOCKED** — Clean main-based PR #24 is open/draft at head `bce19b3d719bbdefb2692592fe2d6dcfb38663ba`. Exact-head Quality run `42450087288` failed before any workflow step (job `128637225886`, no runner log; log download `BlobNotFound`). Focused Node.js tests passed 6/6 and standalone helper strict typecheck passed, but full Bun/ESLint/project typecheck/build did not execute. Final-head Vercel preview failed with `api-deployments-free-per-day`; do not retry unchanged. Unblock when a free runner executes the full exact-head workflow and the free Vercel deployment quota permits release.
 - [ ] **MT-0127 · P1 · TODO** — Define realistic delivery-time ranges per product based on measured fulfilment history.
 - [ ] **MT-0128 · P1 · TODO** — Pause new orders when a supplier is unavailable or a product cannot be delivered.
 - [ ] **MT-0129 · P1 · TODO** — Create a queue sorted by paid status, promised delivery window and risk.
@@ -275,11 +275,11 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Policies match real operations, customers can resolve problems quickly, and trust claims are supported by evidence.
 
-- [ ] **MT-0141 · P0 · TODO** — Review the current Terms, Privacy, Delivery and Refund policies for consistency across Nepal and Australia.
-- [ ] **MT-0142 · P0 · TODO** — Resolve any conflict between the advertised markets and the markets covered by legal terms.
-- [ ] **MT-0143 · P0 · TODO** — Ensure refund rules distinguish undelivered, supplier-failed, incorrect-item and successfully redeemed digital goods.
-- [ ] **MT-0144 · P0 · TODO** — Make region-lock warnings prominent before payment for every region-restricted code.
-- [ ] **MT-0145 · P0 · TODO** — Make wrong-player-ID warnings visible before confirming an irreversible top-up.
+- [!] **MT-0141 · P0 · BLOCKED** — Requires owner-approved supported-market/seller-entity scope and qualified legal/privacy review; no legal interpretation will be inferred.
+- [!] **MT-0142 · P0 · BLOCKED** — Requires an owner decision on supported markets and seller entity plus qualified legal review of the applicable terms.
+- [!] **MT-0143 · P0 · BLOCKED** — Requires an approved remedy matrix, verified supplier reversal/redemption evidence and qualified legal review; none is available in the current supplier register.
+- [!] **MT-0144 · P0 · BLOCKED** — Requires current issuer/supplier region and redemption restrictions for each orderable SKU. The Supplier Register has no verified product-scope evidence; catalogue region labels alone are not issuer compatibility proof.
+- [!] **MT-0145 · P0 · BLOCKED** — Requires supplier/issuer evidence about whether a wrong player ID can be corrected or cancelled after submission and an owner-approved warning/remedy policy. The Supplier Register is empty and no completed authorised test order exists.
 - [ ] **MT-0146 · P1 · TODO** — Publish support response hours only after they are operationally staffed.
 - [ ] **MT-0147 · P1 · TODO** — Create ticket categories for payment, delayed delivery, invalid code, wrong item, refund and account access.
 - [ ] **MT-0148 · P1 · TODO** — Require an order number for order-specific support while allowing pre-purchase questions.
@@ -530,7 +530,7 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-task register are authoritative.
+MT-0122 is **IN PROGRESS** in a clean main-based branch/PR #25. MT-0102, MT-0105 and MT-0126 are **BLOCKED** by exact-head GitHub Actions runner startup failures; MT-0126's final Vercel preview also hit the free daily deployment limit. Task statuses in the 308-task register remain authoritative.
 
 | Order | Task | Status |
 |---:|---|---|
@@ -542,14 +542,19 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 6 | MT-0085 — restrict payment-proof access to the order owner and authorised staff | MERGED BUT NOT LIVE; PR #20 merged as `a793dff`; Vercel free daily deployment limit blocked production release; see section 29 |
 | 7 | MT-0086 — require independent payment settlement matching before fulfilment | BLOCKED; no bank-statement feed, provider callback or owner-approved manual settlement evidence is available |
 | 8 | MT-0087 — prevent duplicate transaction references/screenshots across orders | BLOCKED; concurrency-safe uniqueness requires the approved Supabase cutover/migration gate |
-| 9 | MT-0101 — map current order statuses and observed transition paths | DONE; 13-value enum, application writers, UI mappings, production aggregate counts and lack of transition enforcement are documented in section 30 and Data Architecture section 4 |
-| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | NEXT P0; can be documented from the current payment-review code and existing operational evidence without production writes |
-| 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
-| 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
+| 9 | MT-0101 — map current order statuses and observed transition paths | DONE; 13-value enum, application writers and lack of transition enforcement are documented in section 30 and Data Architecture section 4 |
+| 10 | MT-0102 — define operational order milestone meanings | BLOCKED; draft PR #22 exact-head Quality run failed before runner startup |
+| 11 | MT-0105 — require order number plus matching saved email/phone for guest tracking | BLOCKED; draft PR #23 focused tests passed, but exact-head Quality run failed before runner startup |
+| 12 | MT-0121 — document manual fulfilment steps per active product family | BLOCKED; no verified supplier identities, product scope or supplier instructions |
+| 13 | MT-0122 — capture order-time player/zone/server/region/denomination/email details | IN PROGRESS in clean main-based draft PR #25; six existing helper tests and current main schema support are being revalidated |
+| 14 | MT-0126 — prohibit customer passwords, OTPs and payment PINs | BLOCKED; PR #24 exact-head runner failure and Vercel free deployment-rate limit; no merge/release |
+| 15 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
+| 16 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
+| 17 | MT-0161 — refresh the authentication/authorisation audit against current main and production metadata | NEXT ELIGIBLE P0 after MT-0122; MT-0123–MT-0126 and MT-0141–MT-0145 require owner/supplier/legal/infra evidence; existing PR #12 is stale and must not be merged as-is |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
-**Release note:** The latest verified production build before the documentation/security cleanup was READY at `087f0ed5e9f94016dd14476b0c05218adce6e135` on `mtdgc.com`. Recheck the latest deployment after the current documentation commits. The backend PR remains on HOLD until the Supabase cutover.
+**Release note:** The latest observed production deployment is READY at `dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE`, commit `3de811c7cfce91eb262cf79523d8053995bfb777`, 15 commits behind current main `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`. Recheck after any merge; a READY preview is not production. The backend PR remains on HOLD until the Supabase cutover.
 
 
 ## 11. Sources and verification
@@ -1333,4 +1338,37 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 
 No production application code, database/schema, order/payment/customer record, storage object, RLS/grant, credential, environment, DNS, hosting or billing setting changed. No test order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
 
-**Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
+**Next eligible P0 after MT-0122:** MT-0161 — refresh the authentication/authorisation audit against current main and production metadata. MT-0102/MT-0105/MT-0126 are blocked by GitHub Actions runner or Vercel limits; MT-0123–MT-0125 and MT-0141–MT-0145 require owner/supplier/legal evidence.
+
+
+## 32. MT-0122 — order-time pre-fulfilment checklist — 8 November 2026
+
+**Task:** MT-0122 · P0 · IN PROGRESS in [draft PR #25](https://github.com/eboxont-code/mtdgc/pull/25), branch `automation/mt-0122-pre-fulfilment-checklist-main-20261108`, based directly on current main `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`. Application commit: `45c072154dbd0d47df3f5c84ebbaebd0d5a2f37d`. The older [PR #6](https://github.com/eboxont-code/mtdgc/pull/6) is stale (63 commits behind current main); only its MT-0122 scope was reapplied, preserving current checkout price-snapshot and order-access code.
+
+### Implementation
+
+- New `src/lib/pre-fulfilment.ts` stores a versioned server-owned snapshot under reserved key `__mtdgc_snapshot` inside the existing `order_items.fields` JSONB. It records the product region and exact configured requirement labels at order creation; customer-provided field values remain top-level strings. The selected denomination/option remains in the existing `variant_name` column.
+- `placeOrder` reads `region` and `requirements` from the product joined to the server-resolved SKU. The browser cannot choose these values. It builds the snapshot before any order insert and retains the current server-resolved price/currency and checkout price-snapshot checks.
+- The order input schema rejects a browser-supplied `__mtdgc_snapshot` key, preventing a customer from forging the order-time metadata.
+- The admin order-detail panel shows selected option/denomination, product region at order time, each configured player ID/zone/server/email requirement and its captured value, and flags missing values for customer confirmation. Additional saved fields remain separately visible to authorised staff.
+- The panel reads only the saved snapshot; it never substitutes today's catalogue region/requirements for historical order facts. Legacy order items without a snapshot are labelled not captured, and unknown snapshot versions are labelled unrecognised. No missing historical requirement is inferred.
+- The panel explicitly states that a recorded value is not proof of supplier acceptance or identifier correctness. This checklist is an internal review aid, not a supplier fulfilment confirmation or proof that a top-up was delivered.
+
+### Production schema evidence — read-only
+
+- Supabase project `eaomkkswslqtfunkceuc` (`mtdgc`) is ACTIVE_HEALTHY on PostgreSQL 17.11.0.003.
+- `public.order_items.fields` is JSONB NOT NULL; `public.products.region` is text NOT NULL; `public.products.requirements` is JSONB NOT NULL. The existing schema supports this snapshot without a migration.
+- The public/guest order summary source selects item names, variants, quantities and totals but not `order_items.fields`; the new checklist is shown in the existing administrator order-detail panel. No RLS, grants or storage policy changes are needed.
+- No customer/order/payment/auth-user rows were queried or changed. No order was created and no migration was run.
+
+### Tests and verification
+
+- `src/lib/pre-fulfilment.test.ts` contains six focused tests: server-sourced region/required labels; reserved-key forgery rejection; missing player/zone/server/email values; no-requirement products; historical items without snapshots; and unknown snapshot versions.
+- The old PR #6 exact-head Quality run [42372566787](https://github.com/eboxont-code/mtdgc/actions/runs/42372566787) passed on its stale branch; it is historical evidence only, not verification of PR #25. Current main Quality run [42437058568](https://github.com/eboxont-code/mtdgc/actions/runs/42437058568) passed on base `ca01edaafa42b5b859089ce18d5decaf6fbd4db3` before this change. Exact PR #25 head must pass all six current Quality stages before merge.
+- No production database/schema, order/customer/payment record, storage object, RLS/grant, credential, environment variable, DNS, hosting or billing setting was changed. No supplier/customer was contacted; no purchase or test transaction occurred. Additional spend: $0.
+
+### Merge, deployment and live verification
+
+- PR #25 targets `main`. Merging triggers the existing Vercel Git production workflow. After merge, verify the exact deployment SHA is READY and smoke-check an admin-only order-detail journey without opening or mutating a real customer order; use a safe test fixture if available, otherwise do not inspect customer records.
+- Until exact-head CI passes, PR #25 remains draft/unmerged. The current production deployment is READY on older SHA `3de811c7cfce91eb262cf79523d8053995bfb777`; the new snapshot/checklist is NOT LIVE.
+- The old PR #6 remains open/draft and based on stale history. Close it as superseded only after PR #25 is safely merged; do not rewrite its published branch.

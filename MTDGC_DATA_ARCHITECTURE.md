@@ -89,6 +89,16 @@ The customer progress helper groups `payment_submitted`/`paid`, `verified`, `pro
 - The server derives the `.webp` storage extension and `image/webp` content type from the normalized result; the browser cannot choose the stored MIME or extension.
 - The production `payment-proofs` bucket remains private and unchanged. Its existing storage-level 5 MiB cap is retained; application-side server validation remains the MIME/content gate because the bucket's `allowed_mime_types` setting is NULL. Only the trusted server upload path writes proof objects.
 
+### 4.7 Order-time pre-fulfilment snapshot
+
+- New order items store a versioned server-owned snapshot under the reserved `__mtdgc_snapshot` key inside the existing `order_items.fields` JSONB. The snapshot records the server-resolved product region and exact product requirement labels at order creation. Customer-provided field values remain top-level strings; the selected option/denomination remains in the existing `variant_name` column.
+- `placeOrder` reads `region` and `requirements` from the product joined to the server-resolved SKU. It does not accept these values from the browser. The order input schema rejects a client-supplied reserved snapshot key.
+- The administrator order-detail panel uses `getPreFulfilmentChecklist` to show the selected option, order-time region, configured player ID/zone/server/email labels, captured values and missing values. Missing required values are flagged for confirmation before fulfilment.
+- The checklist reads the saved order-time snapshot only; it never substitutes current catalogue values for historical facts. Legacy items without a snapshot are labelled not captured; unknown versions are labelled unrecognised. The UI does not infer missing historical region or requirements.
+- The checklist is an internal review aid. A recorded customer value is not proof that the identifier is correct or that a supplier accepted/fulfilled it. No supplier delivery confirmation is implied.
+- Production schema evidence confirms `order_items.fields` is JSONB NOT NULL, `products.region` is text NOT NULL and `products.requirements` is JSONB NOT NULL. No migration is required. RLS/grants and storage policies remain unchanged.
+- Public/guest order-summary functions do not select `order_items.fields`; the new checklist is shown in the existing administrator order-detail panel only.
+
 ## 5. Guest Checkout Architecture
 - **No Account Required**: Orders are created with `user_id = NULL`.
 - **Identity**: `guest_email` and `guest_whatsapp` are captured.
