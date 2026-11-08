@@ -90,10 +90,11 @@ The customer progress helper groups `payment_submitted`/`paid`, `verified`, `pro
 - The production `payment-proofs` bucket remains private and unchanged. Its existing storage-level 5 MiB cap is retained; application-side server validation remains the MIME/content gate because the bucket's `allowed_mime_types` setting is NULL. Only the trusted server upload path writes proof objects.
 
 ## 5. Guest Checkout Architecture
-- **No Account Required**: Orders are created with `user_id = NULL`.
-- **Identity**: `guest_email` and `guest_whatsapp` are captured.
-- **Security**: A unique `guest_access_token` (UUID) is generated for each order.
-- **Tracking**: Users can view order status via a URL containing the `order_id` and `guest_access_token`.
+- **No Account Required**: Guest orders are created with `user_id = NULL`; authenticated checkout may associate an order with the validated account user.
+- **Identity**: Checkout stores the submitted guest email and phone in the order record where provided.
+- **Order-specific bearer access**: Checkout generates a random 32-byte access token for the order, returns the plaintext token to the customer once, and stores only its SHA-256 hash in `orders.access_token_hash`.
+- **Public guest tracking**: The `/track-order` form requires the order number plus the email address or phone used at checkout. The server resolves the order number and validates the contact against the order-scoped verification hash or saved guest email; the order number alone is not an access credential.
+- **Order detail access**: `getOrderForViewer` separately supports the order-specific access token, validated authenticated account ownership, or the order-scoped contact fallback after its rate-limit check.
 
 ## 6. Launch Strategy (Separation)
 
@@ -126,3 +127,28 @@ The customer progress helper groups `payment_submitted`/`paid`, `verified`, `pro
 - The administrator payment-review queue and signed proof-URL function require a validated Supabase session and an exact successful administrator-role result before any proof lookup or signed URL creation. Signed URLs expire after 300 seconds.
 - `has_role` remains a SECURITY DEFINER function that Supabase's advisor reports as executable by anon/authenticated. Treat its role-membership disclosure as a separate issue; change function execution and dependent policies only through the approved coordinated Supabase migration gate.
 - Guest order access is mediated by server-side order access checks and is not a direct proof-row/object RLS grant. Cross-customer order lookup/contact-fallback isolation remains tracked separately under MT-0162.
+
+## 9. Guest order tracking access
+
+### Public tracking contract
+
+- The public `/track-order` form requires both an order number and the email address or phone number used for the order. The client requires both values, and the `lookupOrder` server input schema independently trims and bounds the order number (4–40 characters) and contact (3–120 characters).
+- The server uppercases the order number, resolves that exact `orders.order_number`, then calls the shared `hasOrderContactAccess` helper before returning an order summary.
+- The helper trims and lowercases email values, normalises phone values to digits, and checks the order-scoped SHA-256 value generated at checkout from the uppercase order number plus the normalised contact. It also accepts an exact case-insensitive match to that order's saved `guest_email`.
+- Missing, whitespace-only or mismatched contact is denied. A missing order and a mismatched contact both return the same generic `not_found` result.
+- `lookupOrder` uses the server-only Supabase client; the browser does not receive direct order-table read access. Production `public.orders` has RLS enabled with an authenticated-owner/admin SELECT policy and no anonymous SELECT policy.
+
+### Other order-view paths
+
+- `getOrderForViewer` first checks the order-specific access-token hash, then validates an authenticated bearer against the order's `user_id`, then uses the shared contact helper after its rate-limit check.
+- `submitPaymentProof` uses the same token/account-owner/contact checks and still requires the resolved order to be in `pending_payment`.
+- This task does not change those access paths or claim to resolve the separate account-owned contact-fallback isolation risk tracked under MT-0162.
+
+### Rate-limit limitation
+
+- `lookupOrder` deletes old attempts, counts recent attempts and inserts the current attempt, but the current code does not inspect errors returned by those three database operations. A failed count query can fall back to zero, so throttling can fail open. This does not bypass the separate order-number/contact comparison, but it weakens abuse throttling and remains a separate security follow-up; MT-0105 does not claim to fix it.
+
+### Production schema evidence and scope
+
+- Read-only production metadata on 8 November 2026 confirms `orders.order_number`, `verification_hash`, `guest_email`, `guest_phone`, `user_id` and `access_token_hash`, plus the `order_lookup_attempts` table with `ip_hash` and `created_at`. RLS is enabled on both tables. The observed `orders` policies are authenticated-owner/admin only; no anonymous SELECT policy is present.
+- No order identifiers, contact values, access tokens, payment values or customer rows were read. No production database, schema, order, payment, storage, authentication or policy changes were made.

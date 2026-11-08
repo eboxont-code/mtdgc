@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.2 · 8 November 2026
+**Version:** 2.3 · 8 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -226,11 +226,11 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** The order state is consistent from checkout to delivery, with a complete audit trail and useful customer visibility.
 
 - [x] **MT-0101 · P0 · DONE** — Map all 13 live order-status enum values, current application writers, generic administrator targets, legacy display aliases and observed transitions; confirm that neither application nor database enforces a complete transition graph. Evidence: section 30 and Data Architecture section 4; current-main source inspection plus read-only production enum, aggregate status-count, column-type, proof-status constraint and order-trigger queries on 8 November 2026.
-- [ ] **MT-0102 · P0 · TODO** — Ensure Payment received, Verified, Processing and Delivered have precise operational definitions.
+- [!] **MT-0102 · P0 · BLOCKED** — Customer-facing milestone definitions and shared labels are implemented in open draft PR #22, but exact-head Quality run [42441639306](https://github.com/eboxont-code/mtdgc/actions/runs/42441639306) failed before any workflow step started (one job failed, runner ID 0, no steps/logs). Full Bun tests, ESLint, typecheck and build remain unverified for that head. Unblock when a free GitHub Actions runner completes the full quality workflow successfully; do not merge or claim completion from the five-test scratch harness alone.
 - [ ] **MT-0103 · P0 · TODO** — Add explicit Cancelled, Failed, Refunded and Action required states where applicable.
 - [ ] **MT-0104 · P0 · TODO** — Prevent invalid status jumps, such as Pending directly to Delivered without payment verification.
-- [ ] **MT-0105 · P0 · TODO** — Verify guest order tracking requires the order number plus the matching email or phone.
-- [ ] **MT-0106 · P0 · TODO** — Ensure account order history and guest tracking show the same canonical status.
+- [~] **MT-0105 · P0 · IN PROGRESS** — Reconcile the existing draft PR #5 implementation onto a clean branch based on current main. The shared `hasOrderContactAccess` helper already exists; this task changes `lookupOrder` to reuse it and adds missing/blank-contact regression coverage. Preserve the separate rate-limit error-handling limitation and MT-0162 account-owned isolation follow-up.
+- [!] **MT-0106 · P0 · BLOCKED** — Depends on reviewed/promoted canonical customer-facing status definitions under MT-0102. PR #22 remains open/draft with exact-head GitHub Actions failure before runner startup; do not silently rename customer-visible states before that task is verified.
 - [ ] **MT-0107 · P1 · TODO** — Record a timestamp and actor for every status transition.
 - [ ] **MT-0108 · P1 · TODO** — Show customers what happens next at each stage and whether they need to act.
 - [ ] **MT-0109 · P1 · TODO** — Allow staff to add internal notes without exposing them to customers.
@@ -530,7 +530,7 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-task register are authoritative.
+MT-0105 is **IN PROGRESS** on a clean branch based on current main. MT-0102 is **BLOCKED** pending a successful exact-head GitHub Actions Quality run for draft PR #22; task statuses in the 308-task register remain authoritative.
 
 | Order | Task | Status |
 |---:|---|---|
@@ -543,9 +543,12 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 7 | MT-0086 — require independent payment settlement matching before fulfilment | BLOCKED; no bank-statement feed, provider callback or owner-approved manual settlement evidence is available |
 | 8 | MT-0087 — prevent duplicate transaction references/screenshots across orders | BLOCKED; concurrency-safe uniqueness requires the approved Supabase cutover/migration gate |
 | 9 | MT-0101 — map current order statuses and observed transition paths | DONE; 13-value enum, application writers, UI mappings, production aggregate counts and lack of transition enforcement are documented in section 30 and Data Architecture section 4 |
-| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | NEXT P0; can be documented from the current payment-review code and existing operational evidence without production writes |
-| 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
-| 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
+| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | BLOCKED; PR #22 exact-head Quality run failed before runner startup (runner ID 0, zero steps/logs); full checks remain unverified |
+| 11 | MT-0105 — require order number plus matching saved email or phone for public guest tracking | IN PROGRESS; clean main-based branch reuses the existing order-scoped helper, adds edge-case regression coverage and documents production schema/RLS evidence |
+| 12 | MT-0106 — align authenticated order history and guest tracking status labels | BLOCKED; depends on MT-0102 definitions being verified and promoted |
+| 13 | MT-0162 — prevent cross-customer order access by changing an ID or URL | NEXT ELIGIBLE P0 after MT-0105; inspect owner/token/contact boundaries and add negative tests without production writes |
+| 14 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
+| 15 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -1333,4 +1336,27 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 
 No production application code, database/schema, order/payment/customer record, storage object, RLS/grant, credential, environment, DNS, hosting or billing setting changed. No test order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
 
-**Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
+**Next eligible P0 task:** MT-0105 — consolidate the existing guest order tracking contact check onto the shared order-scoped helper. MT-0102 remains blocked until a free GitHub Actions runner completes its full quality workflow.
+
+## 32. MT-0105 guest order tracking contact verification — 8 November 2026
+
+**Task:** MT-0105 · P0 · IN PROGRESS on a clean branch based on canonical `main` commit `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`. The older draft PR #5 is 63 commits behind current main and must not be merged as-is; its focused change is being reapplied without rewriting its published branch.
+
+### Implementation
+
+- `lookupOrder` continues to require a trimmed order number (4–40 characters) and contact (3–120 characters), resolves the uppercase order number on the server, and now calls the existing shared `hasOrderContactAccess` helper rather than duplicating the hash/email comparison inline.
+- The helper binds the normalised email/phone to the resolved order number using the checkout-generated verification hash, with the saved guest email as the existing email fallback.
+- Existing order-specific bearer-token and authenticated-owner paths in `getOrderForViewer` and `submitPaymentProof` are unchanged.
+- Added regression coverage for missing and whitespace-only contact values. Existing tests already cover matching phone/email, wrong order number and mismatched contact.
+
+### Production schema/security evidence
+
+- Read-only Supabase metadata confirms the required order columns (`order_number`, `verification_hash`, `guest_email`, `guest_phone`, `user_id`, `access_token_hash`) and the `order_lookup_attempts` table. RLS is enabled on `orders` and `order_lookup_attempts`.
+- The observed `orders` policies permit authenticated owner reads and administrator access; no anonymous SELECT policy is present. No customer/order/contact values were read.
+- The lookup rate-limit delete/count/insert calls still do not inspect database errors; a failed count can fall back to zero. This is a separate hardening item and is not claimed fixed here.
+- Account-owned contact-fallback isolation remains separate under MT-0162; this task does not change or claim to resolve it.
+
+### Verification and release state
+
+- The exact branch-head GitHub Actions Quality workflow, Vercel preview, PR number, merge and production smoke outcome will be recorded after the branch is pushed and checks complete. No production database writes/migrations, order/payment/customer mutations, credentials, hosting or billing changes are permitted.
+- No production data values were accessed. Additional spend: $0.
