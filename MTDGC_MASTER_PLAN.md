@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.2 · 8 November 2026
+**Version:** 2.3 · 9 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -110,8 +110,8 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0008 · P1 · TODO** — Define MTDGC’s own customer value through legitimate sourcing, regional compatibility, clear delivery and reliable support.
 - [ ] **MT-0009 · P1 · TODO** — Define the role of Matrix as the umbrella brand and the role of each product category beneath it.
 - [ ] **MT-0010 · P1 · TODO** — Decide whether the initial experience is marketplace-style retail or a curated single-operator digital store.
-- [ ] **MT-0011 · P1 · TODO** — Set a product approval process before adding a new category or supplier.
-- [ ] **MT-0012 · P1 · TODO** — Define which products MTDGC will never sell, including unauthorised accounts, stolen codes and credential-based access.
+- [!] **MT-0011 · P1 · BLOCKED** — Product approval workflow is prepared in draft PR #39, but exact-head Quality run [42498280073](https://github.com/eboxont-code/mtdgc/actions/runs/42498280073) failed before any workflow step (job 128785263225 has no steps/logs). Full lint, tests, typecheck and build are unverified; unblock when a free runner completes the exact-head workflow.
+- [~] **MT-0012 · P1 · IN PROGRESS** — Defined the hard-reject and hold rules in [MTDGC_PROHIBITED_PRODUCTS.md](./MTDGC_PROHIBITED_PRODUCTS.md). Draft PR #40 records the policy and current queue evidence; exact-head quality, merge and release remain pending.
 - [ ] **MT-0013 · P1 · TODO** — Separate customer-facing promises from internal targets and supplier estimates.
 - [ ] **MT-0014 · P1 · TODO** — Define the customer support languages and service hours that can actually be maintained.
 - [ ] **MT-0015 · P2 · TODO** — Create a concise brand voice guide for product pages, checkout, support and social channels.
@@ -205,8 +205,8 @@ Do not set numerical targets until a reliable baseline exists.
 - [x] **MT-0083 · P0 · DONE** — Bind payment-proof authorization and storage/database association to the server-resolved order. Shared order-access helpers now cover access-token, authenticated-owner and rate-limited contact checks; proof storage path, order ID, transaction reference and amount are derived from the resolved order, not client-supplied identifiers. Four focused tests and the full quality workflow passed. Evidence and the separate production deployment blocker are recorded in section 26.
 - [!] **MT-0084 · P0 · MERGED BUT NOT LIVE** — Validate uploaded proof file type, size and content handling. PR #18 merged as `53e518d589d49b5f751bcae3a4c99b276a586b8e`; production deployment is blocked by Vercel's `api-deployments-free-per-day` limit.
 - [!] **MT-0085 · P0 · MERGED BUT NOT LIVE** — Restrict direct payment-proof row/object reads to the related order owner or authorised staff; require authenticated administrator authorization before proof-review reads and signed URL creation. PR #20 merged as `a793dff15370f6bcd90673e4309e144cb597655d`; exact-head and merge-commit quality workflows passed. Vercel's free deployment-rate limit prevented a production deployment; evidence is in section 29.
-- [ ] **MT-0086 · P0 · TODO** — Prevent fulfilment until payment is independently matched to the correct amount and order.
-- [ ] **MT-0087 · P0 · TODO** — Prevent the same transaction reference or screenshot from being accepted for multiple orders.
+- [!] **MT-0086 · P0 · BLOCKED** — No bank-statement feed, provider settlement callback or owner-approved manual settlement evidence is available. A screenshot/reference is not independent proof that funds cleared for the correct order.
+- [!] **MT-0087 · P0 · BLOCKED** — Concurrency-safe transaction-reference uniqueness requires the approved Supabase cutover/migration gate; the current schema has no unique transaction-reference constraint.
 - [ ] **MT-0088 · P1 · TODO** — Show exact payment amount, account details, expiry window and reference instructions on the order page.
 - [ ] **MT-0089 · P1 · TODO** — Add a clear payment-pending state and explain what action the customer must take.
 - [ ] **MT-0090 · P1 · TODO** — Record who verified payment, when it was verified and the transaction reference.
@@ -226,11 +226,11 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** The order state is consistent from checkout to delivery, with a complete audit trail and useful customer visibility.
 
 - [x] **MT-0101 · P0 · DONE** — Map all 13 live order-status enum values, current application writers, generic administrator targets, legacy display aliases and observed transitions; confirm that neither application nor database enforces a complete transition graph. Evidence: section 30 and Data Architecture section 4; current-main source inspection plus read-only production enum, aggregate status-count, column-type, proof-status constraint and order-trigger queries on 8 November 2026.
-- [ ] **MT-0102 · P0 · TODO** — Ensure Payment received, Verified, Processing and Delivered have precise operational definitions.
-- [ ] **MT-0103 · P0 · TODO** — Add explicit Cancelled, Failed, Refunded and Action required states where applicable.
-- [ ] **MT-0104 · P0 · TODO** — Prevent invalid status jumps, such as Pending directly to Delivered without payment verification.
-- [ ] **MT-0105 · P0 · TODO** — Verify guest order tracking requires the order number plus the matching email or phone.
-- [ ] **MT-0106 · P0 · TODO** — Ensure account order history and guest tracking show the same canonical status.
+- [!] **MT-0102 · P0 · BLOCKED** — Draft PR #22 exact head 5caac222b49cb2e2d5ac9dfd60c7bca092bbed98; Quality run [42441639306](https://github.com/eboxont-code/mtdgc/actions/runs/42441639306) failed before workflow steps (job 128611921162 has no steps/logs). Full quality checks are unavailable; do not merge until a free runner completes the exact-head workflow.
+- [!] **MT-0103 · P0 · BLOCKED** — Deciding whether action_required is needed is an owner/product decision. Any new enum value also requires the approved Supabase cutover/migration gate.
+- [!] **MT-0104 · P0 · BLOCKED** — Requires an owner-approved transition matrix covering cancellation, refunds, overrides and fulfilment, plus independent settlement evidence under MT-0086. Do not infer policy from the generic administrator updater.
+- [!] **MT-0105 · P0 · BLOCKED** — Draft PR #32 exact head 707c1a7f40f70c5c8f79c4cf1007a3d31bbaea37; Quality run [42465628668](https://github.com/eboxont-code/mtdgc/actions/runs/42465628668) failed before workflow steps (job 128684358774 has no steps/logs). Focused tests do not replace the unavailable full quality workflow.
+- [!] **MT-0106 · P0 · BLOCKED** — Depends on the shared status definitions in MT-0102 and guest-tracking verification in MT-0105; both remain blocked pending exact-head quality checks.
 - [ ] **MT-0107 · P1 · TODO** — Record a timestamp and actor for every status transition.
 - [ ] **MT-0108 · P1 · TODO** — Show customers what happens next at each stage and whether they need to act.
 - [ ] **MT-0109 · P1 · TODO** — Allow staff to add internal notes without exposing them to customers.
@@ -250,12 +250,12 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Orders are delivered accurately and on time, while manual checks are gradually replaced only by safe, tested automation.
 
-- [ ] **MT-0121 · P0 · TODO** — Document the current manual fulfilment steps for each active product family.
-- [ ] **MT-0122 · P0 · TODO** — Create a pre-fulfilment checklist for player ID, zone, server, region, denomination and email.
-- [ ] **MT-0123 · P0 · TODO** — Require a second confirmation for irreversible top-ups and code releases.
-- [ ] **MT-0124 · P0 · TODO** — Record the supplier transaction or redemption reference for each completed order.
-- [ ] **MT-0125 · P0 · TODO** — Capture delivery evidence and attach it to the correct order.
-- [ ] **MT-0126 · P0 · TODO** — Never request a customer's game password, subscription password, OTP or payment PIN.
+- [!] **MT-0121 · P0 · BLOCKED** — The Supplier Register has no verified supplier identity or product-scope records, so current manual fulfilment steps cannot be documented from supplier evidence without guessing.
+- [!] **MT-0122 · P0 · BLOCKED** — Clean main-based PR #25 exact head 7ed11745a82c3d901e7835dec0d977167a078870; run [42450532929](https://github.com/eboxont-code/mtdgc/actions/runs/42450532929) and one rerun both failed before any workflow step (jobs 128638570203 and 128801018439 have no steps/logs). Focused Node tests passed 6/6 and the standalone helper typecheck passed, but full Bun/ESLint/project typecheck/build remain unavailable. The Vercel preview also hit the free daily deployment limit; do not retry unchanged.
+- [!] **MT-0123 · P0 · BLOCKED** — Requires issuer/supplier evidence about which actions are irreversible and an owner-approved confirmation/cancellation policy. Do not assert irreversibility without source evidence.
+- [!] **MT-0124 · P0 · BLOCKED** — Requires a verified supplier transaction/redemption reference format and an approved order-data retention/access design; no supplier reference contract is available.
+- [!] **MT-0125 · P0 · BLOCKED** — Requires verified supplier delivery evidence, a private storage/retention design and the approved Supabase cutover/migration gate where schema or storage changes are needed.
+- [!] **MT-0126 · P0 · BLOCKED** — Clean main-based PR #24 exact head bce19b3d719bbdefb2692592fe2d6dcfb38663ba; Quality run [42450087288](https://github.com/eboxont-code/mtdgc/actions/runs/42450087288) failed before workflow steps (job 128637225886 has no steps/logs). Focused tests passed, but full quality checks are unavailable and the preview hit the free daily deployment limit.
 - [ ] **MT-0127 · P1 · TODO** — Define realistic delivery-time ranges per product based on measured fulfilment history.
 - [ ] **MT-0128 · P1 · TODO** — Pause new orders when a supplier is unavailable or a product cannot be delivered.
 - [ ] **MT-0129 · P1 · TODO** — Create a queue sorted by paid status, promised delivery window and risk.
@@ -275,11 +275,11 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Policies match real operations, customers can resolve problems quickly, and trust claims are supported by evidence.
 
-- [ ] **MT-0141 · P0 · TODO** — Review the current Terms, Privacy, Delivery and Refund policies for consistency across Nepal and Australia.
-- [ ] **MT-0142 · P0 · TODO** — Resolve any conflict between the advertised markets and the markets covered by legal terms.
-- [ ] **MT-0143 · P0 · TODO** — Ensure refund rules distinguish undelivered, supplier-failed, incorrect-item and successfully redeemed digital goods.
-- [ ] **MT-0144 · P0 · TODO** — Make region-lock warnings prominent before payment for every region-restricted code.
-- [ ] **MT-0145 · P0 · TODO** — Make wrong-player-ID warnings visible before confirming an irreversible top-up.
+- [!] **MT-0141 · P0 · BLOCKED** — Requires owner-approved supported-market/seller-entity scope and qualified legal/privacy review; no legal interpretation will be inferred.
+- [!] **MT-0142 · P0 · BLOCKED** — Requires an owner decision on supported markets and seller entity plus qualified legal review of the applicable terms.
+- [!] **MT-0143 · P0 · BLOCKED** — Requires an approved remedy matrix, verified supplier reversal/redemption evidence and qualified legal review; none is available in the current Supplier Register.
+- [!] **MT-0144 · P0 · BLOCKED** — Requires current issuer/supplier region and redemption restrictions for each orderable SKU. Catalogue region labels alone are not issuer-compatibility proof, and the Supplier Register has no verified product-scope evidence.
+- [!] **MT-0145 · P0 · BLOCKED** — Requires supplier/issuer evidence about wrong-player-ID correction or cancellation after submission and an owner-approved warning/remedy policy; no authorised test order exists.
 - [ ] **MT-0146 · P1 · TODO** — Publish support response hours only after they are operationally staffed.
 - [ ] **MT-0147 · P1 · TODO** — Create ticket categories for payment, delayed delivery, invalid code, wrong item, refund and account access.
 - [ ] **MT-0148 · P1 · TODO** — Require an order number for order-specific support while allowing pre-purchase questions.
@@ -300,11 +300,11 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Customer information, payment evidence, order records and staff tools are protected with least-privilege access.
 
-- [ ] **MT-0161 · P0 · TODO** — Audit authentication and authorisation for customer accounts, support requests and admin routes.
-- [ ] **MT-0162 · P0 · TODO** — Verify one customer cannot access another customer's orders by changing an ID or URL.
-- [ ] **MT-0163 · P0 · TODO** — Verify payment uploads and delivered codes are stored privately, not in public buckets.
-- [ ] **MT-0164 · P0 · TODO** — Ensure admin-only actions are enforced server-side, not only hidden in the interface.
-- [ ] **MT-0165 · P0 · TODO** — Review secrets, supplier credentials and payment configuration for accidental exposure.
+- [!] **MT-0161 · P0 · BLOCKED** — Draft PR #26 exact-head Quality run [42453509323](https://github.com/eboxont-code/mtdgc/actions/runs/42453509323) failed before workflow steps (job 128647529463 has no steps/logs). Full security audit checks remain unverified.
+- [!] **MT-0162 · P0 · BLOCKED** — Draft PR #27 exact-head Quality run [42454086289](https://github.com/eboxont-code/mtdgc/actions/runs/42454086289) failed before workflow steps (job 128649277537 has no steps/logs). Cross-customer isolation must not be marked complete without the full checks.
+- [!] **MT-0163 · P0 · BLOCKED** — No delivered-code storage table, bucket or path exists in the current production design. A private storage/access/retention design and any required schema work need owner approval and the Supabase cutover gate.
+- [!] **MT-0164 · P0 · BLOCKED** — Draft PR #31 exact-head Quality run [42461648403](https://github.com/eboxont-code/mtdgc/actions/runs/42461648403) failed before workflow steps (job 128672012258 has no steps/logs). Admin-action security tests have not completed the full workflow.
+- [!] **MT-0165 · P0 · BLOCKED** — Draft PR #28 exact-head Quality run [42454303736](https://github.com/eboxont-code/mtdgc/actions/runs/42454303736) failed before workflow steps (job 128649941685 has no steps/logs). The full secrets/payment-configuration review checks remain unavailable.
 - [ ] **MT-0166 · P1 · TODO** — Enable strong admin authentication and remove unused staff accounts.
 - [ ] **MT-0167 · P1 · TODO** — Apply least-privilege roles for payment review, fulfilment, support and catalogue editing.
 - [ ] **MT-0168 · P1 · TODO** — Log sensitive admin actions such as refunds, code reveal, payment verification and status overrides.
@@ -325,7 +325,7 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Customers can discover the right digital item, understand restrictions and complete an order without confusion.
 
-- [ ] **MT-0181 · P0 · TODO** — Test the full purchase journey on common Android phones and narrow mobile screens.
+- [!] **MT-0181 · P0 · BLOCKED** — Requires an owner-provided Android device and an authorised end-to-end test window; do not claim physical mobile testing from a desktop preview.
 - [ ] **MT-0182 · P0 · REVIEW** — Availability labels, purchasable counts and disabled coming-soon actions were implemented and rule-tested in the 5 November pack; confirm the current production page before marking complete because the roadmap pack recorded the change as not yet published.
 - [x] **MT-0183 · P0 · DONE AND LIVE** — Ensure the product card, product page and checkout show matching prices and variants; PR #17 merged at `9f944ec36ec3f87e3e603ff308b20979a1013183` and production deployment `dpl_cfXAs4hrfTSgdurWL1Veb5prUA5v` is READY on that exact SHA.
 - [ ] **MT-0184 · P0 · REVIEW** — Production purchase summaries were checked on five orderable pages on 8 November. Mobile Legends user-ID guidance is inaccurate in production; correction and regression coverage are in draft PR #19. See section 28; production and visual/mobile verification remain pending.
@@ -350,8 +350,8 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** MTDGC earns qualified demand through useful category and product information, not thin pages or unsupported claims.
 
-- [ ] **MT-0201 · P0 · TODO** — Set one canonical brand description and use it consistently across the site and metadata.
-- [ ] **MT-0202 · P0 · TODO** — Resolve the homepage's Nepal-and-Australia positioning against actual checkout and legal-market support.
+- [!] **MT-0201 · P0 · BLOCKED** — Draft PR #33 exact-head Quality run [42470288565](https://github.com/eboxont-code/mtdgc/actions/runs/42470288565) failed before workflow steps (job 128699221218 has no steps/logs). Full checks are unavailable and the preview hit the free daily deployment limit.
+- [!] **MT-0202 · P0 · BLOCKED** — Requires the owner's decision on supported markets and a qualified review against actual checkout/legal support; do not infer the operating market from site copy.
 - [ ] **MT-0203 · P1 · TODO** — Create original category landing pages for game top-ups, gift cards, subscriptions and software.
 - [ ] **MT-0204 · P1 · TODO** — Write product descriptions that explain what is delivered, how it works and what restrictions apply.
 - [ ] **MT-0205 · P1 · TODO** — Add unique title tags and meta descriptions for indexable product and category pages.
@@ -375,10 +375,10 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** The operator can manage the business from reliable dashboards and expand only when each market and category passes its launch gate.
 
-- [ ] **MT-0221 · P0 · TODO** — Create a single order dashboard showing paid, awaiting verification, processing, overdue, delivered, failed and refunded orders.
-- [ ] **MT-0222 · P0 · TODO** — Create a daily reconciliation report for order value, payments received, supplier costs and refunds.
-- [ ] **MT-0223 · P0 · TODO** — Track contribution margin per order and category after direct costs.
-- [ ] **MT-0224 · P0 · TODO** — Track order completion rate, failed fulfilment rate and refund rate.
+- [!] **MT-0221 · P0 · BLOCKED** — Production orders have no order-level due/ETA field; products.delivery_time is free text only. No approved per-SKU SLA or measured supplier times exist, so overdue cannot be calculated truthfully. Unblock with an owner-approved SLA and a reliable order-level due-date source.
+- [!] **MT-0222 · P0 · BLOCKED** — Requires source-backed bank/settlement receipts, supplier costs and refund records; the current payment audit found no bank-statement feed/provider callback and no populated supplier cost register.
+- [!] **MT-0223 · P0 · BLOCKED** — Requires trusted supplier costs, dated FX, payment fees, refunds and variable fulfilment/support costs; those source inputs are not available.
+- [!] **MT-0224 · P0 · BLOCKED** — Requires reliable completed/failed/refunded fulfilment outcomes; the latest documented production snapshot contained only pending-payment orders, so a meaningful operating rate cannot be calculated.
 - [ ] **MT-0225 · P1 · TODO** — Track time from order creation to payment verification and from verification to delivery.
 - [ ] **MT-0226 · P1 · TODO** — Track support contacts per 100 orders and the most common issue categories.
 - [ ] **MT-0227 · P1 · TODO** — Track product availability and supplier confirmation freshness.
@@ -530,22 +530,25 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-task register are authoritative.
+The current P0 queue has no task that can be safely completed and released with the evidence and free capacity available. The blockers below are not permission to bypass supplier, owner, legal, database or release gates. MT-0012 is the next independent P1 task in progress in draft PR #40.
 
 | Order | Task | Status |
 |---:|---|---|
-| 1 | MT-0045 — test one low-value transaction per supplier/product family | BLOCKED; no identified/verified supplier or product scope; a real transaction and fulfilment would require external evidence and spend |
-| 2 | MT-0046 — document supplier delivery times, cut-off, failure process and escalation | BLOCKED; no supplier identity or documented operational terms/contact |
-| 3 | MT-0061–MT-0063 — build landed cost and order-level gross margin from source costs | BLOCKED; supplier costs, dated FX, payment/settlement fees, refunds and variable fulfilment/support costs are absent |
-| 4 | MT-0064 — approve minimum contribution-margin floor | BLOCKED; business-owner decision required |
-| 5 | MT-0065 — enforce a current-price/margin gate at checkout | BLOCKED; depends on the approved floor and trusted cost/price-expiry data; schema changes remain behind the Supabase cutover |
-| 6 | MT-0085 — restrict payment-proof access to the order owner and authorised staff | MERGED BUT NOT LIVE; PR #20 merged as `a793dff`; Vercel free daily deployment limit blocked production release; see section 29 |
-| 7 | MT-0086 — require independent payment settlement matching before fulfilment | BLOCKED; no bank-statement feed, provider callback or owner-approved manual settlement evidence is available |
-| 8 | MT-0087 — prevent duplicate transaction references/screenshots across orders | BLOCKED; concurrency-safe uniqueness requires the approved Supabase cutover/migration gate |
-| 9 | MT-0101 — map current order statuses and observed transition paths | DONE; 13-value enum, application writers, UI mappings, production aggregate counts and lack of transition enforcement are documented in section 30 and Data Architecture section 4 |
-| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | NEXT P0; can be documented from the current payment-review code and existing operational evidence without production writes |
-| 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
-| 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
+| 1 | MT-0086–MT-0087 — independent payment settlement and duplicate-reference controls | BLOCKED; no independent bank/provider settlement evidence, and uniqueness requires the approved Supabase cutover |
+| 2 | MT-0102 — define operational order milestones | BLOCKED; PR #22 exact-head Quality run failed before any workflow step |
+| 3 | MT-0103–MT-0104 — add terminal/action-required states and enforce transitions | BLOCKED; owner-approved transition/remedy rules and settlement prerequisites are missing |
+| 4 | MT-0105–MT-0106 — guest tracking and canonical account/guest status | BLOCKED; PR #32 exact-head Quality run failed before any workflow step; MT-0106 depends on the status/guest checks |
+| 5 | MT-0121–MT-0126 — fulfilment checklist, confirmation, evidence and credential controls | BLOCKED; supplier evidence, owner policy, Supabase cutover or exact-head quality runs are missing; see section 34 |
+| 6 | MT-0141–MT-0145 — policy/legal review, region warnings and wrong-player remedies | BLOCKED; owner/legal decisions and exact issuer/supplier evidence are missing |
+| 7 | MT-0161–MT-0165 — authentication, order isolation, delivered-code storage, admin and secrets controls | BLOCKED; exact-head quality runs for the open security PRs failed before workflow steps; delivered-code storage also lacks an approved design |
+| 8 | MT-0181 — physical Android/mobile journey test | BLOCKED; requires an owner-provided device and authorised test window |
+| 9 | MT-0182 / MT-0184 — availability and purchase-summary production review | Production evidence is recorded in open documentation PRs #29 and #30; those records are not yet merged into the canonical plan |
+| 10 | MT-0201–MT-0202 — brand consistency and supported-market positioning | BLOCKED; PR #33 exact-head quality run did not start, and market positioning needs an owner decision |
+| 11 | MT-0221–MT-0224 — order dashboard and operating metrics | BLOCKED; no order-level due date/approved SLA, supplier cost data, independent settlement records or reliable completed-order outcomes |
+| 12 | MT-0012 — define prohibited products and fulfilment methods | IN PROGRESS in draft PR #40; policy prepared, exact-head checks and release pending |
+| 13 | MT-0013 — separate customer promises from internal targets and supplier estimates | NEXT ELIGIBLE P1 after MT-0012; can be documented from current published claims and evidence without inventing service levels |
+
+**Current production/release boundary:** Production remains READY at deployment dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE, commit 3de811c7cfce91eb262cf79523d8053995bfb777. Current main is ca01edaafa42b5b859089ce18d5decaf6fbd4db3, 15 commits ahead of production. Merging to main triggers the existing Vercel production workflow; recent previews have hit the free daily deployment limit. Do not merge a PR that would release the backlog until exact-head checks and free production capacity are verified.
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -784,6 +787,8 @@ Do not ask customers for passwords, OTPs or payment PINs. Do not describe a shar
 
 **Task:** MT-0041 · P0 · DONE  
 **Canonical register:** [`SUPPLIER_REGISTER.md`](./SUPPLIER_REGISTER.md)
+
+**Prohibited-product policy:** [`MTDGC_PROHIBITED_PRODUCTS.md`](./MTDGC_PROHIBITED_PRODUCTS.md) — hard-reject and hold rules for products and fulfilment methods.
 
 ### What was created
 
@@ -1334,3 +1339,44 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 No production application code, database/schema, order/payment/customer record, storage object, RLS/grant, credential, environment, DNS, hosting or billing setting changed. No test order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
 
 **Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
+
+## 34. Prohibited-product policy and P0 queue scan — 9 November 2026
+
+**Task:** MT-0012 · P1 · IN PROGRESS in [draft PR #40](https://github.com/eboxont-code/mtdgc/pull/40).
+
+### Policy delivered
+
+- Added [MTDGC_PROHIBITED_PRODUCTS.md](./MTDGC_PROHIBITED_PRODUCTS.md) and linked it from the README and this plan.
+- Defined hard rejection rules for unauthorised account access/transfer, customer credentials and authentication secrets, confirmed stolen/compromised/used codes, counterfeit or pirated software, circumvention/misrepresentation, money movement/cash-out and expressly unauthorised resale.
+- Separated confirmed prohibitions from missing evidence: unknown supplier/source/region/rights/terms are held as NOT ASSESSED / EVIDENCE REQUESTED / UNDER REVIEW / EXPIRED, not falsely labelled stolen or illegal; held scopes are not orderable.
+- Added product-family boundaries for game top-ups, gift cards, subscriptions, software and other digital goods.
+- Kept exact-SKU/region/denomination scope, owner approval, evidence references and qualified review gates. The policy does not approve any current product or supplier and makes no legal determination.
+
+### Evidence and checks
+
+- Current Supplier Register has no verified supplier identity or product-scope rows.
+- Existing server-side customer-requirement checks cover passwords, OTP/2FA, PINs, recovery/backup codes, session/access tokens, private keys and unsafe remote access.
+- Five document consistency checks passed: prohibited-category coverage, reject-versus-hold distinction, supplier/owner evidence gate, no invented approvals and no legal conclusion.
+- This is documentation-only. No application code, supplier record, catalogue item, price, availability, customer/order/payment record, production schema, storage object, credential, environment, DNS, hosting or billing setting was changed.
+- No supplier/customer was contacted and no purchase, test order or payment was made. Additional spend: $0.
+
+### P0 queue scan and exact blockers
+
+- **MT-0102:** PR #22 exact head 5caac222b49cb2e2d5ac9dfd60c7bca092bbed98; run [42441639306](https://github.com/eboxont-code/mtdgc/actions/runs/42441639306) failed before any workflow step (job 128611921162 has no steps/logs).
+- **MT-0105:** PR #32 exact head 707c1a7f40f70c5c8f79c4cf1007a3d31bbaea37; run [42465628668](https://github.com/eboxont-code/mtdgc/actions/runs/42465628668) failed before any workflow step (job 128684358774 has no steps/logs).
+- **MT-0122:** PR #25 exact head 7ed11745a82c3d901e7835dec0d977167a078870; run [42450532929](https://github.com/eboxont-code/mtdgc/actions/runs/42450532929) and one rerun both failed before workflow steps (jobs 128638570203 and 128801018439 have no steps/logs). Its six focused Node tests and standalone strict helper typecheck passed, but full repository quality is unavailable; its preview hit the free daily deployment limit.
+- **MT-0121 / MT-0123–MT-0125:** no verified supplier identity, product scope, delivery instructions, transaction-reference contract or delivery evidence; MT-0123 also needs an owner-approved confirmation/remedy policy and MT-0125 is behind the storage/cutover gate.
+- **MT-0126:** PR #24 exact head bce19b3d719bbdefb2692592fe2d6dcfb38663ba; run [42450087288](https://github.com/eboxont-code/mtdgc/actions/runs/42450087288) failed before workflow steps (job 128637225886 has no steps/logs); the preview also hit the free daily deployment limit.
+- **MT-0141–MT-0143:** require owner-approved market/seller scope, qualified legal review and verified supplier remedy/reversal evidence.
+- **MT-0144–MT-0145:** catalogue labels are not issuer evidence. Region/redeem restrictions and wrong-player-ID correction/cancellation rules need current issuer/supplier evidence; MT-0145 also needs an owner-approved remedy policy.
+- **MT-0161 / MT-0162 / MT-0164 / MT-0165:** exact-head Quality runs [42453509323](https://github.com/eboxont-code/mtdgc/actions/runs/42453509323), [42454086289](https://github.com/eboxont-code/mtdgc/actions/runs/42454086289), [42461648403](https://github.com/eboxont-code/mtdgc/actions/runs/42461648403) and [42454303736](https://github.com/eboxont-code/mtdgc/actions/runs/42454303736) failed before workflow steps; their jobs contain no steps/logs. MT-0163 additionally lacks an approved private delivered-code storage/access/retention design and the required schema/cutover path.
+- **MT-0181:** physical Android testing still needs an owner-provided device and authorised test window. Availability and purchase-summary live evidence is recorded separately in draft PRs #29 and #30; neither documentation PR is merged.
+- **MT-0201:** PR #33 exact-head run [42470288565](https://github.com/eboxont-code/mtdgc/actions/runs/42470288565) failed before workflow steps (job 128699221218 has no steps/logs). MT-0202 requires the owner's supported-market decision and qualified review.
+- **MT-0221:** read-only production schema inspection found no order-level due/ETA field; products.delivery_time is free text. No approved per-SKU SLA or measured supplier times exist, so an overdue state cannot be calculated without an owner-approved SLA and reliable order-level due-date source.
+- **MT-0222–MT-0224:** supplier costs, independent payment settlement/refund records and reliable completed/failed fulfilment outcomes are not available for truthful operating metrics.
+
+### Release state and next task
+
+- PR #40 targets main from the exact current main base ca01edaafa42b5b859089ce18d5decaf6fbd4db3. The policy is not live in the production website and no production deployment was triggered.
+- Production remains READY at dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE on 3de811c7cfce91eb262cf79523d8053995bfb777; main is 15 commits ahead. Merging would trigger the existing Vercel production workflow, and the free daily deployment limit is still a release gate.
+- **Next eligible task after MT-0012:** MT-0013 — separate customer-facing promises from internal targets and supplier estimates using the current site copy and verified evidence only.
