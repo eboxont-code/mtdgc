@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { Wordmark } from "@/components/brand/wordmark";
 import { PaymentsRow } from "@/components/trust-band";
 import { SUPPORT_MESSAGE, WHATSAPP_DISPLAY, whatsappLink } from "@/lib/format";
+import { BRAND } from "@/lib/brand";
 
 const GROUPS: { title: string; links: { to: string; label: string }[] }[] = [
   {
@@ -45,10 +46,7 @@ export function SiteFooter() {
         <div className="grid gap-8 md:grid-cols-[1.2fr_repeat(3,0.6fr)]">
           <div>
             <Wordmark size="lg" />
-            <p className="mt-2 max-w-[46ch] text-xs text-muted-foreground">
-              A digital marketplace for Nepal and Australia: subscriptions and gift cards first, with software, deals and
-              game top-ups too. Prices in NPR.
-            </p>
+            <p className="mt-2 max-w-[46ch] text-xs text-muted-foreground">{BRAND.description}</p>
             <p className="mt-3 text-xs text-muted-foreground">
               MTDGC will never ask for your password, OTP or payment PIN.
             </p>
