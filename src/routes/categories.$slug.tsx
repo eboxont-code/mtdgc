@@ -1,5 +1,9 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 
+import { PackageOpen } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
+import { StorefrontError, StorefrontLoading } from "@/components/storefront-state";
+
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { ProductCard } from "@/components/product-card";
 import { SiteFooter } from "@/components/site-footer";
@@ -80,6 +84,8 @@ export const Route = createFileRoute("/categories/$slug")({
     };
   },
   component: CategoryPage,
+  pendingComponent: StorefrontLoading,
+  errorComponent: StorefrontError,
 });
 
 const CATEGORY_INTROS: Record<string, string> = {
@@ -108,7 +114,7 @@ function CategoryPage() {
         {CATEGORY_INTROS[category.slug] && (
           <p className="mt-3 max-w-[70ch] text-sm text-foreground/80">
             {CATEGORY_INTROS[category.slug]}{" "}
-            <Link to="/how-it-works" className="text-primary underline-offset-4 hover:underline">
+            <Link to="/how-it-works" className="text-primary underline underline-offset-4">
               See how ordering works
             </Link>
             .
@@ -129,15 +135,7 @@ function CategoryPage() {
             </div>
           </>
         ) : (
-          <div className="mt-8 rounded-lg border border-border py-14 text-center">
-            <p className="font-display font-medium">We are adding listings here.</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Tell us what you are looking for.
-            </p>
-            <Button asChild variant="outline" className="mt-3 min-h-11">
-              <Link to="/support">Contact support</Link>
-            </Button>
-          </div>
+          <EmptyState icon={PackageOpen} title="No listings in this category" text="Tell us what you are looking for." action={<Button asChild variant="outline"><Link to="/support">Contact support</Link></Button>} />
         )}
 
         <section className="mt-12 rounded-lg bg-panel p-5">

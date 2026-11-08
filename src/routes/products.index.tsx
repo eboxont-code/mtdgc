@@ -1,5 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
+import { PackageOpen } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
+import { StorefrontError, StorefrontLoading } from "@/components/storefront-state";
+
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { ProductCard } from "@/components/product-card";
 import { SiteFooter } from "@/components/site-footer";
@@ -38,6 +42,8 @@ export const Route = createFileRoute("/products/")({
     ],
   }),
   component: ProductsIndexPage,
+  pendingComponent: StorefrontLoading,
+  errorComponent: StorefrontError,
 });
 
 function ProductsIndexPage() {
@@ -71,11 +77,7 @@ function ProductsIndexPage() {
             ))}
           </div>
         ) : (
-          <div className="mt-8 rounded-lg border border-border py-14 text-center">
-            <p className="font-display font-medium">No products are listed yet</p>
-            <p className="mt-1 text-sm text-muted-foreground">Check back shortly, or message our support team on WhatsApp.</p>
-            <Button asChild className="mt-4"><Link to="/support">Contact support</Link></Button>
-          </div>
+          <EmptyState icon={PackageOpen} title="No products are listed yet" text="Contact support about the product you are looking for." action={<Button asChild><Link to="/support">Contact support</Link></Button>} />
         )}
       </main>
       <SiteFooter />

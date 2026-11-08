@@ -1,5 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
+import { PackageOpen } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
+import { StorefrontError, StorefrontLoading } from "@/components/storefront-state";
+
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -34,6 +38,8 @@ export const Route = createFileRoute("/categories/")({
     ],
   }),
   component: CategoriesIndexPage,
+  pendingComponent: StorefrontLoading,
+  errorComponent: StorefrontError,
 });
 
 function CategoriesIndexPage() {
@@ -73,10 +79,7 @@ function CategoriesIndexPage() {
             })}
           </ul>
         ) : (
-          <div className="mt-8 rounded-lg border border-border py-14 text-center">
-            <p className="font-display font-medium">No categories are published yet</p>
-            <Button asChild className="mt-4"><Link to="/catalog">Browse the catalog</Link></Button>
-          </div>
+          <EmptyState icon={PackageOpen} title="No categories are published yet" text="Browse the catalog or contact support about the product you need." action={<Button asChild><Link to="/catalog">Browse the catalog</Link></Button>} />
         )}
 
         <section className="mt-10 rounded-lg bg-panel p-4">
