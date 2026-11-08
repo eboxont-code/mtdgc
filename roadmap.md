@@ -5,6 +5,9 @@
 > This file is preserved as a dated implementation and verification history. Checkboxes below record the status claimed by each historical pack when it was written; they are not a second live TODO register. When an old pack conflicts with the Master Plan, use the Master Plan and refresh the implementation evidence before changing task status.
 
 ## 5 Nov ordered pack
+- [ ] MT-0195: shared storefront loading/retry presentation and remaining empty states; phone and failure-path verification pending; protected surfaces preserved; not published.
+- [ ] MT-0196: option focus, required-field descriptions, selection/result announcements and 44px controls; keyboard and screen-reader checks pending; not published.
+- [ ] MT-0197: reduce eager catalog images to first row; shared product art already has lazy loading, dimensions and async decoding; protected global scripts unchanged; verification pending; not published.
 - [ ] MT-0188: existing plan URL remains the selection source; back-navigation and reload verification pending; not published.
 - [ ] MT-0189: product forms already render listing requirements only; restored and submitted fields now exclude unrelated keys; protected checkout contact fields and legacy cart-line cleanup skipped; verification pending; not published.
 - [x] MT-0185: client-side brand/name/game/denomination search and FF/PUBG/ML/MLBB/NFX aliases; URL state retained; rule tests and real FF search passed; not published.

@@ -4,6 +4,7 @@ import { Check, Clock, Globe, MessageCircle, ShieldCheck, ShoppingBag, Zap } fro
 import { useEffect, useRef, useState } from "react";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { StorefrontError, StorefrontLoading } from "@/components/storefront-state";
 import { ProductArt } from "@/components/product-art";
 import { ProductRail, SectionHeader } from "@/components/home/rails";
 import { SiteFooter } from "@/components/site-footer";
@@ -120,6 +121,8 @@ export const Route = createFileRoute("/products/$slug")({
     };
   },
   component: ProductPage,
+  pendingComponent: StorefrontLoading,
+  errorComponent: StorefrontError,
 });
 
 function ProductPage() {
@@ -316,6 +319,7 @@ function ProductPage() {
               <p className="mt-2 text-sm text-muted-foreground">{product.summary}</p>
             </div>
 
+            <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">{variant?.name ? `${variant.name}. ` : ""}{selectedAvailability}{orderable && variant && !hidePrices ? `. ${formatNpr(variant.price_minor)}` : ""}</p>
             <ul className="mt-1 flex flex-wrap gap-1.5 md:mt-4">
               <li className={`rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.08em] ${orderable ? "border-primary/40 text-primary" : "border-warn/40 text-warn"}`}>{selectedAvailability}</li>
               {!isPlan && deliveryMethod && <li className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-[11px]"><Zap className="size-3.5 text-primary" />{deliveryMethod}</li>}
@@ -334,17 +338,18 @@ function ProductPage() {
               <section className="mt-6 rounded-2xl border border-border bg-card p-4 md:p-5">
                 <StepTitle n={1}>Your details</StepTitle>
                 <div className="mt-4 space-y-3">
-                  {product.requirements.map((requirement) => {
+                  {product.requirements.map((requirement, index) => {
                     const help = requirementHelp(requirement);
-                    const id = `req-${requirement.replace(/\W+/g, "-").toLowerCase()}`;
+                    const id = `req-${index}-${requirement.replace(/\W+/g, "-").toLowerCase()}`;
                     return (
                       <div key={requirement}>
                         <label htmlFor={id} className="font-display text-xs text-muted-foreground">{requirement}</label>
                         <input
                           ref={(node) => { fieldRefs.current[requirement] = node; }}
                           id={id}
+                          required
                           aria-invalid={invalidFields.includes(requirement)}
-                          aria-describedby={`${id}-help${invalidFields.includes(requirement) ? ` ${id}-error` : ""}`}
+                          aria-describedby={[help ? `${id}-help` : "", invalidFields.includes(requirement) ? `${id}-error` : ""].filter(Boolean).join(" ") || undefined}
                           value={fields[requirement] ?? ""}
                           onChange={(event) => { const v = event.target.value; setFields((current) => ({ ...current, [requirement]: v })); try { const all = JSON.parse(localStorage.getItem("mtdgc-fields-v1") ?? "{}"); all[requirement] = v; localStorage.setItem("mtdgc-fields-v1", JSON.stringify(all)); } catch { /* ignore */ } }}
                           className="mt-1 h-11 w-full rounded-xl border border-border bg-secondary px-3 font-mono text-sm outline-none focus:border-primary aria-[invalid=true]:border-destructive"
@@ -371,7 +376,7 @@ function ProductPage() {
                       return (
                         <label
                           key={item.sku}
-                          className={`relative flex ${itemOrderable ? "cursor-pointer" : "cursor-not-allowed opacity-60"} flex-col gap-1 rounded-xl border p-3 transition-colors ${selected ? "border-primary bg-primary/10" : "border-border bg-secondary/60 hover:border-primary/40"}`}
+                          className={`relative flex has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-background ${itemOrderable ? "cursor-pointer" : "cursor-not-allowed opacity-60"} flex-col gap-1 rounded-xl border p-3 transition-colors ${selected ? "border-primary bg-primary/10" : "border-border bg-secondary/60 hover:border-primary/40"}`}
                         >
                           <input type="radio" name="variant" value={item.sku} checked={selected} disabled={!itemOrderable} onChange={() => void navigate({ to: "/products/$slug", params: { slug: product.slug }, search: (previous) => ({ ...previous, plan: item.sku }), replace: true })} className="sr-only" />
                           {selected && <Check className="absolute right-2 top-2 size-4 text-primary" aria-hidden="true" />}
@@ -438,9 +443,9 @@ function ProductPage() {
 
             <Tabs defaultValue="about" className="mt-6 rounded-2xl border border-border bg-card p-3 md:p-4">
               <TabsList className="grid h-auto w-full grid-cols-3 gap-1 bg-secondary/60 p-1">
-                <TabsTrigger value="about" className="min-h-10 px-1 text-xs data-[state=active]:text-primary sm:text-sm">About</TabsTrigger>
-                <TabsTrigger value="redeem" className="min-h-10 px-1 text-xs data-[state=active]:text-primary sm:text-sm">How to redeem</TabsTrigger>
-                <TabsTrigger value="refund" className="min-h-10 px-1 text-xs data-[state=active]:text-primary sm:text-sm">Refunds</TabsTrigger>
+                <TabsTrigger value="about" className="min-h-11 px-1 text-xs data-[state=active]:text-primary sm:text-sm">About</TabsTrigger>
+                <TabsTrigger value="redeem" className="min-h-11 px-1 text-xs data-[state=active]:text-primary sm:text-sm">How to redeem</TabsTrigger>
+                <TabsTrigger value="refund" className="min-h-11 px-1 text-xs data-[state=active]:text-primary sm:text-sm">Refunds</TabsTrigger>
               </TabsList>
               <TabsContent value="about" className="px-1 pt-2">
                 <h2 className="sr-only">About this product</h2>

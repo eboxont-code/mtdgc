@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { SlidersHorizontal, X } from "lucide-react";
+import { SearchX, SlidersHorizontal, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { EmptyState } from "@/components/empty-state";
+import { StorefrontError, StorefrontLoading } from "@/components/storefront-state";
 import { ProductCard, lowestPrice } from "@/components/product-card";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { SiteFooter } from "@/components/site-footer";
@@ -49,6 +51,8 @@ export const Route = createFileRoute("/catalog")({
     ],
   }),
   component: CatalogPage,
+  pendingComponent: StorefrontLoading,
+  errorComponent: StorefrontError,
 });
 
 const SORTS = [
@@ -168,17 +172,17 @@ function CatalogPage() {
                 <ul className="mt-2 space-y-0.5">
                   {[{ slug: "all", name: "All products" }, ...categories].map((item) => (
                     <li key={item.slug}>
-                      <button
+                      <Button variant="ghost"
                         type="button"
                         aria-current={category === item.slug ? "page" : undefined}
                         onClick={() => { setCategory(item.slug); syncUrl({ q: query, category: item.slug, sort, availability, price }); }}
-                        className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm ${category === item.slug ? "bg-primary/12 text-primary" : "text-foreground/85 hover:bg-secondary"}`}
+                        className={`flex min-h-11 h-auto w-full items-center justify-between gap-2 whitespace-normal rounded-lg px-3 py-2 text-left text-sm ${category === item.slug ? "bg-primary/12 text-primary" : "text-foreground/85 hover:bg-secondary"}`}
                       >
                         {item.name}
                         <span className="font-mono text-[11px] text-muted-foreground">
                           {availabilityCounts(item.slug === "all" ? products : products.filter((p) => p.category?.slug === item.slug)).available} available now
                         </span>
-                      </button>
+                      </Button>
                     </li>
                   ))}
                 </ul>
@@ -227,28 +231,27 @@ function CatalogPage() {
                 <h2 className="sr-only">All products</h2>
                 <div className="mt-4 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4">
                   {visible.slice(0, shown).map((product, index) => (
-                    <ProductCard key={product.id} product={product} priority={index < 4} />
+                    <ProductCard key={product.id} product={product} priority={index < 2} />
                   ))}
                 </div>
                 {visible.length > shown && (
                   <div className="mt-6 text-center">
-                    <Button variant="outline" onClick={() => setShown((n) => n + PAGE_SIZE)}>
+                    <Button variant="outline" onClick={() => setShown((n) => n + PAGE_SIZE)} aria-controls="catalog-load-status">
                       Show more ({visible.length - shown} left)
                     </Button>
                   </div>
                 )}
               </>
             ) : (
-              <div className="mt-8 rounded-2xl border border-border py-14 text-center">
-                <p className="font-display font-medium">No products match that search</p>
-                <p className="mt-1 text-sm text-muted-foreground">Try a different word, or clear the filters.</p>
-                <Button variant="ghost" size="sm" className="mt-3" onClick={clearAll}>Clear filters</Button>
+              <EmptyState icon={SearchX} title="No products match that search" text="Try a different word, or clear the filters." action={<>
+                <Button variant="ghost" size="sm" onClick={clearAll}>Clear filters</Button>
                 <nav aria-label="Browse product categories" className="mt-3 flex flex-wrap justify-center gap-3 text-sm">
                   {categories.map((item) => <Link key={item.id} to="/categories/$slug" params={{ slug: item.slug }} className="inline-flex min-h-11 items-center text-primary underline">{item.name}</Link>)}
                 </nav>
-                <div className="mt-3 flex flex-wrap justify-center gap-3 text-sm"><a href="/categories" className="underline">Browse categories</a><a href="/faq" className="underline">Read the FAQ</a><a href="/support" className="underline">Ask support</a></div>
-              </div>
+                <div className="mt-3 flex flex-wrap justify-center gap-3 text-sm"><Link to="/categories" className="inline-flex min-h-11 items-center underline">Browse categories</Link><Link to="/faq" className="inline-flex min-h-11 items-center underline">Read the FAQ</Link><Link to="/support" className="inline-flex min-h-11 items-center underline">Ask support</Link></div>
+              </>} />
             )}
+            <p id="catalog-load-status" role="status" aria-live="polite" aria-atomic="true" className="sr-only">Showing {Math.min(shown, visible.length)} of {visible.length} products.</p>
 
             <p className="mt-10 max-w-[62ch] text-xs text-muted-foreground">
               {activeCategory?.description ||
