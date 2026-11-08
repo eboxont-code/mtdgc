@@ -20,7 +20,11 @@ import { enabledProviders } from "@/lib/payments";
 import { compareAt } from "@/lib/pricing";
 import { GIFT_CARD_PRICE_DISCLOSURE, isGiftCardCategory } from "@/lib/gift-card-pricing";
 import { productFaqs, requirementHelp } from "@/lib/product-help";
-import { CUSTOMER_CREDENTIAL_WARNING, getSafeCustomerRequirements, isSafeCustomerRequirements } from "@/lib/supplier-safety";
+import {
+  CUSTOMER_CREDENTIAL_WARNING,
+  getSafeCustomerRequirements,
+  isSafeCustomerRequirements,
+} from "@/lib/supplier-safety";
 import { AccordionList } from "@/components/sections/accordion-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -204,7 +208,7 @@ function ProductPage() {
   };
 
   const hasDetails = safeRequirements.length > 0;
-  const packStep = hasDetails ? 2 : 1;
+  const packStep = hasDetails || unsafeRequirement ? 2 : 1;
   const payStep = packStep + 1;
   const wa = whatsappLink(`${SUPPORT_MESSAGE} with ${product.name}`);
   const providers = enabledProviders();
@@ -377,7 +381,7 @@ function ProductPage() {
                   <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
                     {product.variants.map((item) => {
                       const selected = selectedSku === item.sku;
-                      const itemOrderable = isPurchasableVariant(product, item);
+                      const itemOrderable = !unsafeRequirement && isPurchasableVariant(product, item);
                       const was = itemOrderable ? compareAt(item) : null;
                       const itemAvailability = availabilityLabel({ ...product, variants: [item] });
                       return (

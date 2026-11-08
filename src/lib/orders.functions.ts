@@ -106,7 +106,7 @@ export const placeOrder = createServerFn({ method: "POST" })
       const ok = v && p?.is_published && ["available", "low_stock"].includes(v.status) && ["available", "low_stock"].includes(p.status) && Number.isSafeInteger(v.price_minor) && v.price_minor > 0;
       if (!ok || !v || !p) throw new Error(`An item in your cart is no longer available (${line.sku}).`);
       if (v.currency !== "NPR" || p.currency !== "NPR") throw new Error("This item's price currency is not supported by checkout.");
-      const requirements = p.requirements ?? [];
+      const requirements = p.requirements;
       if (!isSafeCustomerRequirements(requirements)) throw new Error(UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE);
       return {
         orderItem: {
