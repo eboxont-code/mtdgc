@@ -90,10 +90,11 @@ The customer progress helper groups `payment_submitted`/`paid`, `verified`, `pro
 - The production `payment-proofs` bucket remains private and unchanged. Its existing storage-level 5 MiB cap is retained; application-side server validation remains the MIME/content gate because the bucket's `allowed_mime_types` setting is NULL. Only the trusted server upload path writes proof objects.
 
 ## 5. Guest Checkout Architecture
-- **No Account Required**: Orders are created with `user_id = NULL`.
-- **Identity**: `guest_email` and `guest_whatsapp` are captured.
-- **Security**: A unique `guest_access_token` (UUID) is generated for each order.
-- **Tracking**: Users can view order status via a URL containing the `order_id` and `guest_access_token`.
+- **No Account Required**: Guest orders are created with `user_id = NULL`.
+- **Identity**: The order stores the supplied `guest_email` and `guest_phone`. `verification_hash` stores a SHA-256 digest of the order number plus the normalised primary contact; it is not a replacement for the saved contact fields.
+- **Order access token**: Checkout generates a per-order 256-bit bearer token, stores only its SHA-256 digest in `access_token_hash`, and returns the token to the customer.
+- **Public tracking**: The `/track-order` form requires the order number and the email or phone used on that order. The server resolves the exact order first and then checks the order-scoped contact proof. The browser does not query `public.orders` directly.
+- **Other order views**: `getOrderForViewer` accepts the order-specific access token, the authenticated account owner, or a contact fallback after its rate-limit check.
 
 ## 6. Launch Strategy (Separation)
 
@@ -126,3 +127,13 @@ The customer progress helper groups `payment_submitted`/`paid`, `verified`, `pro
 - The administrator payment-review queue and signed proof-URL function require a validated Supabase session and an exact successful administrator-role result before any proof lookup or signed URL creation. Signed URLs expire after 300 seconds.
 - `has_role` remains a SECURITY DEFINER function that Supabase's advisor reports as executable by anon/authenticated. Treat its role-membership disclosure as a separate issue; change function execution and dependent policies only through the approved coordinated Supabase migration gate.
 - Guest order access is mediated by server-side order access checks and is not a direct proof-row/object RLS grant. Cross-customer order lookup/contact-fallback isolation remains tracked separately under MT-0162.
+
+
+### 5.1 Public guest tracking access and verification
+
+- The public server function requires a trimmed order number (4–40 characters) and contact (3–120 characters). It uppercases the order number, queries only that exact order, then invokes the shared `hasOrderContactAccess` helper.
+- The helper normalises email to lowercase and phone numbers to digits. It accepts the SHA-256 hash of the uppercased order number plus normalised contact, or an exact case-insensitive match to the saved `guest_email`. A phone match is therefore tied to the exact order number and cannot be reused to open a different order.
+- Missing orders and mismatched contacts return the same generic `not_found` response. The order number alone is not an authentication credential.
+- Read-only production inspection on 8 November 2026 confirmed RLS is enabled on `public.orders`. The SELECT policy applies to authenticated users and requires `auth.uid() = user_id` or administrator role; table grants include no `anon` SELECT privilege. Guest tracking is mediated by the server-only lookup function.
+- The lookup-attempt counter is a separate abuse-throttling control. Its current count-query fallback can fail open if the database query errors, and insert/cleanup errors are not surfaced. The contact proof still applies, but rate-limit error handling remains a separate hardening task.
+- No production order, contact, token, payment or customer values were read for this verification. No production schema, RLS policy or grant was changed.
