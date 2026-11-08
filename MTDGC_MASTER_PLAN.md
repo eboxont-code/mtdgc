@@ -137,7 +137,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0030 · P1 · TODO** — Show required customer information before checkout, not after payment.
 - [ ] **MT-0031 · P1 · TODO** — Show whether a product is single-use, recurring, prepaid, account-bound or redeemable by code.
 - [ ] **MT-0032 · P1 · TODO** — Make product availability freshness visible internally with last supplier confirmation time.
-- [ ] **MT-0033 · P1 · TODO** — Add search synonyms for common product names, abbreviations, game currencies and regional spellings.
+- [~] **MT-0033 · P1 · IN PROGRESS** — Catalogue-derived query aliases and currency-code matching are implemented with focused regression coverage in draft PR #35. Local Node 22.16 harness passed 36 assertions and strict helper TypeScript checking passed in an isolated scratch workspace. Exact-head GitHub Quality run [42478941997](https://github.com/eboxont-code/mtdgc/actions/runs/42478941997) was queued at the time of this plan update; full repository checks and production release remain pending.
 - [ ] **MT-0034 · P1 · TODO** — Add filters that work correctly for category, platform, region, availability and price.
 - [ ] **MT-0035 · P2 · TODO** — Create curated collections such as gaming essentials, entertainment, productivity and Australian shopping cards.
 - [ ] **MT-0036 · P2 · TODO** — Add related products only when they are genuinely compatible and available.
@@ -226,10 +226,10 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** The order state is consistent from checkout to delivery, with a complete audit trail and useful customer visibility.
 
 - [x] **MT-0101 · P0 · DONE** — Map all 13 live order-status enum values, current application writers, generic administrator targets, legacy display aliases and observed transitions; confirm that neither application nor database enforces a complete transition graph. Evidence: section 30 and Data Architecture section 4; current-main source inspection plus read-only production enum, aggregate status-count, column-type, proof-status constraint and order-trigger queries on 8 November 2026.
-- [ ] **MT-0102 · P0 · TODO** — Ensure Payment received, Verified, Processing and Delivered have precise operational definitions.
+- [!] **MT-0102 · P0 · BLOCKED** — Customer-facing milestone definitions and shared labels are implemented in draft PR #22. Exact-head Quality run [42441639306](https://github.com/eboxont-code/mtdgc/actions/runs/42441639306) failed before any runner step started; full repository checks remain unverified. Unblock when the free runner executes the full workflow successfully.
 - [ ] **MT-0103 · P0 · TODO** — Add explicit Cancelled, Failed, Refunded and Action required states where applicable.
 - [ ] **MT-0104 · P0 · TODO** — Prevent invalid status jumps, such as Pending directly to Delivered without payment verification.
-- [ ] **MT-0105 · P0 · TODO** — Verify guest order tracking requires the order number plus the matching email or phone.
+- [~] **MT-0105 · P0 · IN PROGRESS** — Shared order-scoped guest contact verification and six focused assertions are in draft PR #32. Exact-head Quality run [42465628668](https://github.com/eboxont-code/mtdgc/actions/runs/42465628668) failed before runner startup; no full repository checks ran. Do not repeat the implementation; unblock when the exact-head full workflow can run.
 - [ ] **MT-0106 · P0 · TODO** — Ensure account order history and guest tracking show the same canonical status.
 - [ ] **MT-0107 · P1 · TODO** — Record a timestamp and actor for every status transition.
 - [ ] **MT-0108 · P1 · TODO** — Show customers what happens next at each stage and whether they need to act.
@@ -302,7 +302,7 @@ Do not set numerical targets until a reliable baseline exists.
 
 - [ ] **MT-0161 · P0 · TODO** — Audit authentication and authorisation for customer accounts, support requests and admin routes.
 - [ ] **MT-0162 · P0 · TODO** — Verify one customer cannot access another customer's orders by changing an ID or URL.
-- [ ] **MT-0163 · P0 · TODO** — Verify payment uploads and delivered codes are stored privately, not in public buckets.
+- [!] **MT-0163 · P0 · BLOCKED** — Read-only production inspection confirms `payment-proofs` and `payment-qr` are both private buckets; proof-object reads are limited to authenticated order owners/admins. Production has no delivered-code table or dedicated delivery-code bucket/storage path, so privacy of delivered codes cannot yet be verified. Unblock after an approved delivery-code storage design and implementation defines owner/admin access and retention; do not create a public bucket.
 - [ ] **MT-0164 · P0 · TODO** — Ensure admin-only actions are enforced server-side, not only hidden in the interface.
 - [ ] **MT-0165 · P0 · TODO** — Review secrets, supplier credentials and payment configuration for accidental exposure.
 - [ ] **MT-0166 · P1 · TODO** — Enable strong admin authentication and remove unused staff accounts.
@@ -530,7 +530,7 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-task register are authoritative.
+MT-0105 is **IN PROGRESS** in draft PR #32; its exact-head quality run failed before runner startup. MT-0102 is **BLOCKED** on a successful exact-head workflow. MT-0163 is **BLOCKED** because no delivered-code storage feature exists to audit. MT-0033 is the next independent P1 task in draft PR #35. Task statuses in the 308-task register are authoritative.
 
 | Order | Task | Status |
 |---:|---|---|
@@ -543,9 +543,12 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 7 | MT-0086 — require independent payment settlement matching before fulfilment | BLOCKED; no bank-statement feed, provider callback or owner-approved manual settlement evidence is available |
 | 8 | MT-0087 — prevent duplicate transaction references/screenshots across orders | BLOCKED; concurrency-safe uniqueness requires the approved Supabase cutover/migration gate |
 | 9 | MT-0101 — map current order statuses and observed transition paths | DONE; 13-value enum, application writers, UI mappings, production aggregate counts and lack of transition enforcement are documented in section 30 and Data Architecture section 4 |
-| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | NEXT P0; can be documented from the current payment-review code and existing operational evidence without production writes |
+| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | BLOCKED; draft PR #22 exact-head Quality run failed before runner startup; full checks unavailable |
 | 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
+| 13 | MT-0105 — verify guest order tracking requires the order number plus matching saved email or phone | IN PROGRESS; draft PR #32 has six focused assertions, but exact-head Quality run failed before runner startup |
+| 14 | MT-0163 — verify payment uploads and delivered-code storage privacy | BLOCKED; payment buckets are private, but no delivered-code table/bucket/storage path exists; approved private storage and retention design is required |
+| 15 | MT-0033 — add catalogue search synonyms | NEXT ELIGIBLE P1; draft PR #35 has 36 focused local assertions and strict helper typecheck; exact-head full Quality workflow is pending |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -1334,3 +1337,43 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 No production application code, database/schema, order/payment/customer record, storage object, RLS/grant, credential, environment, DNS, hosting or billing setting changed. No test order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
 
 **Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
+
+
+## 33. Catalogue search synonyms and storage-privacy queue evidence — 8 November 2026
+
+**Task in progress:** MT-0033 · P1 · [PR #35](https://github.com/eboxont-code/mtdgc/pull/35), based on main commit `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`. The PR is open and draft; it is not merged or live.
+
+### Catalogue evidence
+
+- Read-only production catalogue metadata inspection on 8 November 2026 covered published product names, brands, regions, tags, variant labels/SKUs and currency codes. No customer, order or payment data was queried.
+- The current catalogue includes Free Fire Diamonds, PUBG Mobile UC, Mobile Legends Diamonds, Clash of Clans Passes, Valorant Points, Roblox Gift Cards, Steam Wallet Codes, Netflix, Disney+ Hotstar, Microsoft 365, ChatGPT Plus, YouTube Premium, Google One, Adobe Creative Cloud and CapCut Pro. It includes Australia and Nepal region labels, plus AUD and NPR product currency codes.
+- Before this change, query aliases covered only FF, PUBG, ML, MLBB and NFX. The current catalogue also has distinct game denominations (UC, VP, Diamonds, Robux, Gold Pass, Event Pass and Weekly Diamond Pass) and compact/common product spellings that were not covered by those aliases.
+
+### Implementation
+
+- Expanded query-only aliases for catalogue-backed game names, abbreviations, denominations, subscriptions, software, gift cards and wallet codes.
+- Added AU/AUS and NP regional abbreviations, AUD/NPR currency-code matching, gift-card/top-up spacing variants and US/UK licence spelling.
+- Search now considers the product currency and non-archived variant currency codes. It still does not search prices, and aliases never rewrite stored product names, tags, SKUs, availability or offers.
+- The alias targets are based on the current production catalogue snapshot; revisit them when catalogue products or regions change.
+
+### Regression coverage and verification
+
+- Added regression cases for 29 catalogue aliases, cross-product isolation for UC, AU/AUS and NP region matching, AUD/NPR currency matching, and gift-card/top-up/licence spelling variants.
+- Local Node 22.16 focused harness: 36 assertions passed. Strict TypeScript check of the search helper passed in an isolated scratch workspace. The repository's full Bun suite, ESLint, project typecheck and production build have not run locally because the repository working tree/dependencies are not mounted in this execution environment.
+- The exact code-bearing PR-head Quality run [42478941997](https://github.com/eboxont-code/mtdgc/actions/runs/42478941997) was queued when first inspected. The final PR head must still have a successful exact-head Quality run before this task can be promoted.
+- Vercel rejected the PR preview with its free daily deployment limit; no preview for the final head is available. No paid upgrade or retry was attempted.
+
+### Higher-priority blockers checked during task selection
+
+- MT-0102 remains BLOCKED in draft PR #22: exact-head Quality run [42441639306](https://github.com/eboxont-code/mtdgc/actions/runs/42441639306) failed before runner startup.
+- MT-0105 remains IN PROGRESS in draft PR #32: exact-head Quality run [42465628668](https://github.com/eboxont-code/mtdgc/actions/runs/42465628668) failed before runner startup. Its implementation was not repeated.
+- MT-0163 is BLOCKED. Read-only production storage metadata shows only two buckets: `payment-proofs` (private, 5 MiB cap, no MIME allowlist) and `payment-qr` (private, 2 MiB cap, no MIME allowlist). The only payment-proof object policy is authenticated SELECT for the related order owner or admin; payment-QR object policies are admin-only. Production has no delivered-code table, delivery-code bucket or code-storage path, so no delivered-code privacy guarantee can be claimed. An approved private storage/access/retention design and a delivered-code implementation are required before that part can be verified.
+
+### Release boundary
+
+- PR #35 targets `main`; exact head and current CI must be rechecked after this plan update. No merge commit exists. No production deployment was triggered by this work.
+- Current production remains READY at deployment [dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE](https://vercel.com/boxont/mtdgc/dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE), deployed commit `3de811c7cfce91eb262cf79523d8053995bfb777`. The new search aliases are not live.
+- Main's current Vercel status reports the free daily deployment limit. The GitHub branch-protection endpoint was not readable through the connected integration (403), so branch-protection requirements could not be independently rechecked in this run. No merge was attempted.
+- No product, price, availability, supplier, checkout, database, RLS, storage, customer, order, payment, authentication, credential, DNS, hosting or billing data/settings were changed. Additional spend: $0.
+
+**Next action:** keep PR #35 draft until its exact final head passes the full GitHub Quality workflow; then verify the release gate and production deployment trigger before any merge. MT-0163 remains blocked until delivered-code storage is designed and implemented privately.
