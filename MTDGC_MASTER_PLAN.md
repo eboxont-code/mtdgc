@@ -111,7 +111,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0009 · P1 · TODO** — Define the role of Matrix as the umbrella brand and the role of each product category beneath it.
 - [ ] **MT-0010 · P1 · TODO** — Decide whether the initial experience is marketplace-style retail or a curated single-operator digital store.
 - [!] **MT-0011 · P1 · BLOCKED** — Product approval workflow is prepared in draft PR #39, but exact-head Quality run [42498280073](https://github.com/eboxont-code/mtdgc/actions/runs/42498280073) failed before any workflow step (job 128785263225 has no steps/logs). Full lint, tests, typecheck and build are unverified; unblock when a free runner completes the exact-head workflow.
-- [~] **MT-0012 · P1 · IN PROGRESS** — Defined the hard-reject and hold rules in [MTDGC_PROHIBITED_PRODUCTS.md](./MTDGC_PROHIBITED_PRODUCTS.md). Draft PR #40 records the policy and current queue evidence; exact-head quality, merge and release remain pending.
+- [!] **MT-0012 · P1 · BLOCKED** — Policy prepared in draft PR #40. Exact head 5318393c8890fa7bb78a74ccca609d570cd0ed5e failed Quality run [42503976100](https://github.com/eboxont-code/mtdgc/actions/runs/42503976100) before runner startup (job 128802514343 has no steps/logs); no lint, tests, typecheck or build ran. Vercel reported the free daily build-rate limit and created no preview. Unblock when exact-head checks execute and the free production release gate is clear.
 - [ ] **MT-0013 · P1 · TODO** — Separate customer-facing promises from internal targets and supplier estimates.
 - [ ] **MT-0014 · P1 · TODO** — Define the customer support languages and service hours that can actually be maintained.
 - [ ] **MT-0015 · P2 · TODO** — Create a concise brand voice guide for product pages, checkout, support and social channels.
@@ -545,7 +545,7 @@ The current P0 queue has no task that can be safely completed and released with 
 | 9 | MT-0182 / MT-0184 — availability and purchase-summary production review | Production evidence is recorded in open documentation PRs #29 and #30; those records are not yet merged into the canonical plan |
 | 10 | MT-0201–MT-0202 — brand consistency and supported-market positioning | BLOCKED; PR #33 exact-head quality run did not start, and market positioning needs an owner decision |
 | 11 | MT-0221–MT-0224 — order dashboard and operating metrics | BLOCKED; no order-level due date/approved SLA, supplier cost data, independent settlement records or reliable completed-order outcomes |
-| 12 | MT-0012 — define prohibited products and fulfilment methods | IN PROGRESS in draft PR #40; policy prepared, exact-head checks and release pending |
+| 12 | MT-0012 — define prohibited products and fulfilment methods | BLOCKED; PR #40 exact-head Quality run failed before runner startup and Vercel free daily build-rate limit prevented a preview |
 | 13 | MT-0013 — separate customer promises from internal targets and supplier estimates | NEXT ELIGIBLE P1 after MT-0012; can be documented from current published claims and evidence without inventing service levels |
 
 **Current production/release boundary:** Production remains READY at deployment dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE, commit 3de811c7cfce91eb262cf79523d8053995bfb777. Current main is ca01edaafa42b5b859089ce18d5decaf6fbd4db3, 15 commits ahead of production. Merging to main triggers the existing Vercel production workflow; recent previews have hit the free daily deployment limit. Do not merge a PR that would release the backlog until exact-head checks and free production capacity are verified.
@@ -1378,5 +1378,6 @@ No production application code, database/schema, order/payment/customer record, 
 ### Release state and next task
 
 - PR #40 targets main from the exact current main base ca01edaafa42b5b859089ce18d5decaf6fbd4db3. The policy is not live in the production website and no production deployment was triggered.
+- Exact PR head 5318393c8890fa7bb78a74ccca609d570cd0ed5e had Quality run [42503976100](https://github.com/eboxont-code/mtdgc/actions/runs/42503976100) fail before runner startup; its only job (128802514343) has no steps/logs. Vercel's combined status was failure with the free daily build-rate limit, and no preview deployment exists for the branch.
 - Production remains READY at dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE on 3de811c7cfce91eb262cf79523d8053995bfb777; main is 15 commits ahead. Merging would trigger the existing Vercel production workflow, and the free daily deployment limit is still a release gate.
 - **Next eligible task after MT-0012:** MT-0013 — separate customer-facing promises from internal targets and supplier estimates using the current site copy and verified evidence only.
