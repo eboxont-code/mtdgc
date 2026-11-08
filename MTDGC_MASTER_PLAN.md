@@ -203,7 +203,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [x] **MT-0081 · P0 · DONE** — Audit completed against the current application code, production schema/data snapshot, storage configuration and access policies. Findings and follow-up gaps are recorded in section 24; this completes the audit task, not a claim that all payment controls are secure.
 - [x] **MT-0082 · P0 · DONE** — Generate new order references with 128 bits of cryptographic randomness, retain the database UNIQUE constraint as the collision guard, and keep legacy tracking formats working. Evidence: section 25; CI run `42241329123` passed lint, tests, typecheck and production build; Vercel deployment for code commit `d81e1fc51ed2e1203defb63ec6a71dbcd21e889b` reached READY.
 - [x] **MT-0083 · P0 · DONE** — Bind payment-proof authorization and storage/database association to the server-resolved order. Shared order-access helpers now cover access-token, authenticated-owner and rate-limited contact checks; proof storage path, order ID, transaction reference and amount are derived from the resolved order, not client-supplied identifiers. Four focused tests and the full quality workflow passed. Evidence and the separate production deployment blocker are recorded in section 26.
-- [ ] **MT-0084 · P0 · TODO** — Validate uploaded proof file type, size and content handling.
+- [!] **MT-0084 · P0 · MERGED BUT NOT LIVE** — Validate uploaded proof file type, size and content handling. PR #18 merged as `53e518d589d49b5f751bcae3a4c99b276a586b8e`; production deployment is blocked by Vercel's `api-deployments-free-per-day` limit.
 - [ ] **MT-0085 · P0 · TODO** — Restrict payment-proof access to the customer who owns the order and authorised staff.
 - [ ] **MT-0086 · P0 · TODO** — Prevent fulfilment until payment is independently matched to the correct amount and order.
 - [ ] **MT-0087 · P0 · TODO** — Prevent the same transaction reference or screenshot from being accepted for multiple orders.
@@ -327,8 +327,8 @@ Do not set numerical targets until a reliable baseline exists.
 
 - [ ] **MT-0181 · P0 · TODO** — Test the full purchase journey on common Android phones and narrow mobile screens.
 - [ ] **MT-0182 · P0 · REVIEW** — Availability labels, purchasable counts and disabled coming-soon actions were implemented and rule-tested in the 5 November pack; confirm the current production page before marking complete because the roadmap pack recorded the change as not yet published.
-- [x] **MT-0183 · P0 · DONE on PR #17; production rollout pending** — Ensure the product card, product page and checkout show matching prices and variants.
-- [ ] **MT-0184 · P0 · REVIEW** — Product purchase summaries for region, platform, delivery method and required details were implemented in the 5 November pack; confirm the current production page before marking complete because the roadmap pack recorded the change as not yet published.
+- [x] **MT-0183 · P0 · DONE AND LIVE** — Ensure the product card, product page and checkout show matching prices and variants; PR #17 merged at `9f944ec36ec3f87e3e603ff308b20979a1013183` and production deployment `dpl_cfXAs4hrfTSgdurWL1Veb5prUA5v` is READY on that exact SHA.
+- [ ] **MT-0184 · P0 · REVIEW** — Production purchase summaries were checked on five orderable pages on 8 November. Mobile Legends user-ID guidance is inaccurate in production; correction and regression coverage are in draft PR #19. See section 28; production and visual/mobile verification remain pending.
 - [ ] **MT-0185 · P1 · TODO** — Improve catalog search for brand, product, game, denomination and common abbreviations.
 - [ ] **MT-0186 · P1 · TODO** — Add clear sorting by relevance, price and availability.
 - [ ] **MT-0187 · P1 · TODO** — Make filters usable on mobile without hiding the product list behind oversized controls.
@@ -1092,12 +1092,32 @@ No product records, supplier assignments, prices, variants, order records, datab
 - Vercel's last-hour runtime-error query found no runtime-error clusters, and the last-30-minute production error/fatal log query returned no entries. These monitoring results do not prove a payment submission succeeded; there were no orders created after the intermediate deployment in the read-only snapshot.
 - **Release action:** wait until the Vercel free deployment API quota has reset (the returned retry window was 24 hours), confirm the latest documentation-only `main` HEAD has a passing quality run, then deploy that current `main` commit (which includes the tested application-code commit `26a69301856a715a2cbd293da2cf88227d694ca5`) to production and verify both aliases before treating MT-0083 as live. Do not upgrade the plan or change billing to bypass the limit.
 
-**Next P0 task:** MT-0084 — validate uploaded proof file type, size and content handling. The source-level MT-0083 implementation is committed and CI-verified; its production rollout remains subject to the Vercel deployment quota above.
+**Next P0 task:** MT-0085 — verify and promote the existing payment-proof access-control implementation; reconcile its tests and production RLS evidence without duplicating the existing work.
 
+
+## 26.1. Payment-proof image content validation — 8 November 2026
+
+**Task:** MT-0084 · P0 · MERGED BUT NOT LIVE. PR #18 merged to `main` at 2026-11-08T00:24:44Z using GitHub's merge-commit method. PR head: `f26bb2651a6681ba91352649c8c889082aa0baf9`. Merge commit: `53e518d589d49b5f751bcae3a4c99b276a586b8e`.
+
+- Reapplied the existing MT-0084 implementation to a fresh branch from current `main` (`9f944ec36ec3f87e3e603ff308b20979a1013183`). The original PR #11 branch was 34 commits behind current `main`; no force-push, rebase, amendment or published-history rewrite was used. PR #11 was closed as superseded after PR #18 merged; its published branch was retained unchanged.
+- Added exact direct dependency `sharp@0.35.5` (Apache-2.0) and the lockfile generated by the repository's Ubuntu GitHub Actions runner using `bun install --lockfile-only` (original lock-generation run [42396113373](https://github.com/eboxont-code/mtdgc/actions/runs/42396113373)). Current `main` package and lock files were byte-identical to the original PR's base versions before the dependency was applied.
+- Replaced leading-byte-only sniffing with server-side format detection and full decoding. The declared MIME must match the decoder-detected JPEG, PNG or WebP format.
+- Decoder options fail on warnings, cap input at 20,000,000 pixels and four channels, and reject malformed, truncated, mismatched, multi-page, empty and over-limit inputs.
+- Applies EXIF orientation and converts decoded pixels to lossless WebP. Default Sharp output strips source metadata. The normalized output remains within the existing 5 MiB cap and is stored under a server-derived `.webp` path with `image/webp` content type.
+- The helper is dynamically imported inside the server upload handler, keeping Sharp out of browser code. The existing order-resolution, access-token/account-owner/contact authorization, pending-payment state check, storage path association and proof metadata flow are preserved.
+- Generated-fixture tests cover JPEG, PNG and WebP normalization, MIME mismatch, truncated data, empty/oversized files, excessive decoded pixels, EXIF removal and lossless pixel preservation. The original PR #11 head's full quality run [42396471115](https://github.com/eboxont-code/mtdgc/actions/runs/42396471115) passed 47 tests, but it is historical only; the current-main PR #18 must pass a fresh full quality run before merge.
+- Read-only production inspection confirmed the existing `payment-proofs` bucket remains private with its 5 MiB cap and NULL storage MIME allowlist. Server-side decoding/normalization remains the content gate; no bucket setting, policy, migration, order, payment, storage object or customer record was changed.
+- PR-head Quality run [42429513668](https://github.com/eboxont-code/mtdgc/actions/runs/42429513668) passed on exact PR head `f26bb2651a6681ba91352649c8c889082aa0baf9`: **54 tests across 12 files**, ESLint 0 errors / 14 warnings, TypeScript typecheck and production build all PASS.
+- Main-branch push Quality run [42429627052](https://github.com/eboxont-code/mtdgc/actions/runs/42429627052) passed on exact merge commit `53e518d589d49b5f751bcae3a4c99b276a586b8e`.
+- The Vercel preview status failed with `api-deployments-free-per-day` (more than 100 free deployments/day). After merge, the Vercel deployment inventory contained **no deployment** sourced from merge SHA `53e518d589d49b5f751bcae3a4c99b276a586b8e`. The latest production deployment remains READY on the prior main SHA `9f944ec36ec3f87e3e603ff308b20979a1013183`: deployment [`dpl_cfXAs4hrfTSgdurWL1Veb5prUA5v`](https://vercel.com/boxont/mtdgc/cfXAs4hrfTSgdurWL1Veb5prUA5v).
+- Therefore the code is **MERGED BUT NOT LIVE**. No production upload-route smoke test is claimed because the new code is not deployed. Do not create a test order, submit a real payment proof, upgrade Vercel or retry unchanged deployment attempts. Revisit only after the free-tier limit resets or new deployment evidence becomes available.
+- PR #11 was closed as superseded by current-main PR #18; its published branch was retained unchanged.
+
+**Next P0 task:** MT-0085 — verify and promote the existing payment-proof access-control implementation already represented by draft PR #2.
 
 ## 27. Catalogue price, variant and checkout snapshot consistency — 8 November 2026
 
-**Task:** MT-0183 · P0 · DONE on draft PR #17. Production rollout remains pending; no production deployment was requested.
+**Task:** MT-0183 · P0 · DONE AND LIVE. PR #17 merged to `main` at `9f944ec36ec3f87e3e603ff308b20979a1013183`; the existing Vercel Git integration automatically deployed that exact commit to production.
 
 ### Production mismatch verified
 
@@ -1126,8 +1146,42 @@ No product records, supplier assignments, prices, variants, order records, datab
 
 ### Deployment and production boundary
 
-- Vercel preview deployments for earlier PR #17 revisions (`2e1e719`, `23046e8`, `9a2a2a9`) were observed in ERROR state. The deployment-event/build logs did not provide a verified cause, and no READY preview was returned for final source head `42b7ee2` or documentation head `5ca6164`. GitHub Actions verification does not substitute for a READY Vercel preview.
-- Production remains on the older READY deployment sourced from `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`. The new code has not been deployed to production.
+- PR #17 was merged to `main` at 2026-11-08T00:06:11Z using GitHub's merge-commit method. Merge commit: `9f944ec36ec3f87e3e603ff308b20979a1013183`. The main-branch Quality run [42428222304](https://github.com/eboxont-code/mtdgc/actions/runs/42428222304) passed on that exact SHA.
+- The merge triggered the existing Vercel Git integration for `main`. Production deployment [`dpl_cfXAs4hrfTSgdurWL1Veb5prUA5v`](https://vercel.com/boxont/mtdgc/cfXAs4hrfTSgdurWL1Veb5prUA5v) reached **READY** on the exact same SHA `9f944ec36ec3f87e3e603ff308b20979a1013183`; Vercel reports `mtdgc.com`, `www.mtdgc.com`, and the existing Vercel aliases assigned to that deployment.
+- Non-destructive live smoke checks on 8 November 2026: `https://mtdgc.com/catalog` returned the Clash of Clans Passes card at “From Rs 249”; `https://mtdgc.com/products/clash-of-clans-passes` initially selected Event Pass at Rs 249, matching the card. The live Netflix page continues to show `Temporarily unavailable` without a purchasable price. The checkout snapshot/refresh path is present in the deployed main source and covered by the passing tests; no test order or payment was created. The `www` alias was observed redirecting to the canonical `mtdgc.com` host; the web fetcher could not complete the redirect, while Vercel's deployment metadata confirms both aliases.
 - No production catalogue, price, variant, order, payment, schema, storage, authentication, RLS, environment, DNS, hosting or billing setting was changed. No test order or payment was created; no supplier/customer was contacted; additional spend was $0.
 
-**Next P0 task:** MT-0184 — verify the product purchase summary for region, platform, delivery method and required customer details against the current production pages. MT-0181 remains blocked pending an owner-provided Android device and authorised end-to-end test window.
+**Next P0 task:** MT-0085 — verify and promote the existing payment-proof access-control implementation already represented by draft PR #2. MT-0181 remains blocked pending an owner-provided Android device and authorised end-to-end test window.
+
+
+## 28. Product purchase summary and delivery-field audit — 8 November 2026
+
+**Task:** MT-0184 · P0 · REVIEW. Production content was checked on five currently orderable listings. The remaining Mobile Legends helper mismatch has a source correction and regression test in draft [PR #19](https://github.com/eboxont-code/mtdgc/pull/19); the production listing is unchanged until an authorized release.
+
+### Production evidence
+
+- Read-only public page review confirmed the region, platform, delivery method and required customer-detail summary against the corresponding visible field labels on [PUBG Mobile UC](https://mtdgc.com/products/pubg-mobile-uc), [Free Fire Diamonds](https://mtdgc.com/products/free-fire-diamonds), [Mobile Legends Diamonds](https://mtdgc.com/products/mobile-legends-diamonds), [Clash of Clans Passes](https://mtdgc.com/products/clash-of-clans-passes), and [Roblox Gift Card](https://mtdgc.com/products/roblox-gift-card).
+- The Mobile Legends summary and fields ask for a user ID and Zone ID. Its user-ID helper instead said “The mobile number we should contact about this order.” The generic help matcher tested “mobile” before recognizing “user ID”, so the product name triggered phone-contact guidance.
+- The [Netflix Subscription](https://mtdgc.com/products/netflix-subscription) listing remains temporarily unavailable; its purchase control is disabled and the page does not show a purchasable price. It was not counted among orderable pages.
+- No form was submitted and no customer, order, payment, catalogue or supplier data was accessed or changed.
+
+### Source correction
+
+- PR #19 adds “user ID” to the game-identifier guidance matcher and adds regression tests for both Mobile Legends user-ID guidance and genuine mobile contact fields.
+- Product requirements, stored listing data, cart contents and order flow are unchanged.
+- The production route source uses programmatic labels (label htmlFor paired with input IDs); the page content exposes the same required field names in both the summary and form.
+
+### Quality-standard evidence
+
+- **184 — PASS at source review:** form labels are associated with their inputs in the product route.
+- **201 — PASS by public content review:** the product context and “Your details” step explain the form purpose.
+- **204 — PARTIAL:** field names are present, but the Mobile Legends help text gives misleading instructions in production; the proposed fix is not live.
+- **206 — PARTIAL:** pre-submission guidance is present, but Mobile Legends guidance is inaccurate until PR #19 is released.
+- **218 — UNVERIFIED:** the CUA browser surface was unavailable during this run, so viewport and mobile interaction checks could not be repeated.
+- No overall 500-point score is assigned from this focused audit.
+
+### Verification and limits
+
+- GitHub Actions Quality run [42429760581](https://github.com/eboxont-code/mtdgc/actions/runs/42429760581) passed on source head a5adeb2efeffcc33ee7df7d561a23fabfb540bef (lint, unit tests, typecheck and production build). This run preceded the documentation-only synchronization with current main.
+- Vercel did not create a preview for PR #19: its deployment status reports the daily free deployment quota was exceeded (api-deployments-free-per-day). No upgrade or spend was made. The production fix therefore remains unverified and undeployed.
+- No production change or deployment was made. MT-0184 remains open until the corrected live page and responsive purchase journey are verified. Keep MT-0085 as the next P0 priority from section 27 after this open release check.

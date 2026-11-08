@@ -300,15 +300,6 @@ export const getPaymentSettings = createServerFn({ method: "GET" }).handler(asyn
   return { configured: Boolean(qrUrl || (data.bank_name && data.account_number)), ...out };
 });
 
-function sniffImage(bytes: Uint8Array): "jpg" | "png" | "webp" | null {
-  if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return "jpg";
-  if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) return "png";
-  if (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 && bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50) return "webp";
-  return null;
-}
-
-const MIME_EXT: Record<string, "jpg" | "png" | "webp"> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
-
 export const submitPaymentProof = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => {
     if (!(data instanceof FormData)) throw new Error("Invalid form");
@@ -360,15 +351,18 @@ export const submitPaymentProof = createServerFn({ method: "POST" })
     if (latest && !latest.resubmit_requested) return { ok: false as const, error: "We already have a payment proof for this order." };
 
     const file = data.file;
-    if (file.size > 5242880) return { ok: false as const, error: "The screenshot must be 5 MB or smaller." };
-    const ext = MIME_EXT[file.type];
+    if (file.size === 0) return { ok: false as const, error: "Please attach a non-empty screenshot." };
+    if (file.size > 5 * 1024 * 1024) {
+      return { ok: false as const, error: "The screenshot must be 5 MB or smaller." };
+    }
     const buffer = new Uint8Array(await file.arrayBuffer());
-    const sniffed = sniffImage(buffer);
-    if (!ext || !sniffed || sniffed !== ext) return { ok: false as const, error: "Please upload a JPG, PNG or WebP image." };
+    const { normalizePaymentProofImage } = await import("@/lib/payment-proof-image");
+    const normalized = await normalizePaymentProofImage(buffer, file.type);
+    if (!normalized.ok) return { ok: false as const, error: normalized.error };
 
     const rand = [...crypto.getRandomValues(new Uint8Array(16))].map((b) => b.toString(16).padStart(2, "0")).join("");
-    const association = buildPaymentProofAssociation(order, rand, ext, data.transactionRef);
-    const up = await supabaseAdmin.storage.from("payment-proofs").upload(association.storagePath, buffer, { contentType: file.type });
+    const association = buildPaymentProofAssociation(order, rand, normalized.extension, data.transactionRef);
+    const up = await supabaseAdmin.storage.from("payment-proofs").upload(association.storagePath, normalized.data, { contentType: normalized.contentType });
     if (up.error) return { ok: false as const, error: "Upload failed. Please try again." };
 
     const { data: moved } = await supabaseAdmin.from("orders").update({ status: "payment_submitted", updated_at: new Date().toISOString() }).eq("id", association.proof.order_id).eq("status", "pending_payment").select("id");
