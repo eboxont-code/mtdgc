@@ -44,3 +44,87 @@ describe("MT-0186 catalog sorting", () => {
     assert.ok(compareCatalogProducts(cheap, incidental, "relevance", "FF", price) < 0);
   });
 });
+
+const catalogueProduct = (
+  name: string,
+  options: {
+    brand?: string;
+    region?: string;
+    tags?: string[];
+    currency?: string;
+    variantNames?: string[];
+    variantCurrency?: string;
+  } = {},
+) => ({
+  ...product(name, options.brand ?? name),
+  region: options.region ?? "Global",
+  tags: options.tags ?? [],
+  currency: options.currency ?? "NPR",
+  variants: (options.variantNames ?? ["100 Diamonds"]).map((variantName, index) => ({
+    name: variantName,
+    sku: `TEST-${index}`,
+    status: "available",
+    price_minor: 10000,
+    currency: options.variantCurrency ?? "NPR",
+  })),
+});
+
+describe("MT-0033 catalog search synonyms", () => {
+  const aliases = [
+    ["freefire", catalogueProduct("Free Fire Diamonds", { brand: "Garena", tags: ["free fire", "diamonds"] })],
+    ["pubgm", catalogueProduct("PUBG Mobile UC", { brand: "Krafton", tags: ["pubg", "uc"], variantNames: ["60 UC"] })],
+    ["UC", catalogueProduct("PUBG Mobile UC", { brand: "Krafton", tags: ["pubg", "uc"], variantNames: ["60 UC"] })],
+    ["mlbb", catalogueProduct("Mobile Legends Diamonds", { brand: "Moonton", tags: ["mobile legends", "mlbb", "diamonds"], variantNames: ["Weekly Diamond Pass"] })],
+    ["ml", catalogueProduct("Mobile Legends Diamonds", { brand: "Moonton", tags: ["mobile legends", "mlbb", "diamonds"] })],
+    ["coc", catalogueProduct("Clash of Clans Passes", { brand: "Supercell", tags: ["clash of clans"], variantNames: ["Gold Pass", "Event Pass"] })],
+    ["goldpass", catalogueProduct("Clash of Clans Passes", { brand: "Supercell", tags: ["clash of clans"], variantNames: ["Gold Pass", "Event Pass"] })],
+    ["eventpass", catalogueProduct("Clash of Clans Passes", { brand: "Supercell", tags: ["clash of clans"], variantNames: ["Gold Pass", "Event Pass"] })],
+    ["weeklypass", catalogueProduct("Mobile Legends Diamonds", { brand: "Moonton", tags: ["mobile legends", "mlbb", "diamonds"], variantNames: ["Weekly Diamond Pass"] })],
+    ["vp", catalogueProduct("Valorant Points", { brand: "Riot Games", tags: ["valorant"], variantNames: ["475 VP"] })],
+    ["robux", catalogueProduct("Roblox Gift Card", { brand: "Roblox", tags: ["robux", "gift card"], variantNames: ["USD 10 Card"] })],
+    ["steamwallet", catalogueProduct("Steam Wallet Code", { brand: "Valve", tags: ["steam", "wallet", "gift card"], variantNames: ["USD 10 Wallet Code"] })],
+    ["nfx", catalogueProduct("Netflix Subscription", { brand: "Netflix", region: "Nepal", tags: ["streaming", "subscription"], variantNames: ["1 Month Plan"] })],
+    ["disneyplus", catalogueProduct("Disney+ Hotstar", { brand: "Disney", tags: ["hotstar", "streaming"], variantNames: ["3 months"] })],
+    ["m365", catalogueProduct("Microsoft 365", { brand: "Microsoft", tags: ["office", "onedrive"], variantNames: ["Personal, 12 months"] })],
+    ["gpt", catalogueProduct("ChatGPT Plus", { brand: "OpenAI", tags: ["chatgpt", "ai"], variantNames: ["1 month"] })],
+    ["ytpremium", catalogueProduct("YouTube Premium", { brand: "Google", tags: ["youtube", "streaming"], variantNames: ["1 month"] })],
+    ["googleone", catalogueProduct("Google One 100 GB", { brand: "Google", tags: ["google one", "cloud storage"], variantNames: ["12 months"] })],
+    ["adobecc", catalogueProduct("Adobe Creative Cloud", { brand: "Adobe", tags: ["photoshop", "illustrator"], variantNames: ["1 month"] })],
+    ["capcutpro", catalogueProduct("CapCut Pro", { brand: "ByteDance", tags: ["capcut", "video editing"], variantNames: ["1 month"] })],
+  ] as const;
+
+  for (const [query, item] of aliases) {
+    test(`${query} finds its current catalogue product`, () => {
+      assert.ok(searchScore(item, query) > 0);
+    });
+  }
+
+  test("keeps game-currency aliases scoped to the matching product", () => {
+    assert.equal(searchScore(catalogueProduct("Free Fire Diamonds"), "UC"), 0);
+  });
+
+  test("supports regional abbreviations and currency codes", () => {
+    const australia = catalogueProduct("Amart Furniture Gift Card (Australia)", {
+      region: "Australia",
+      tags: ["australian gift cards", "gift card", "australia"],
+      currency: "AUD",
+      variantNames: [],
+    });
+    const nepal = catalogueProduct("Netflix Subscription", { region: "Nepal", currency: "NPR" });
+
+    assert.ok(searchScore(australia, "AUS") > 0);
+    assert.ok(searchScore(nepal, "NP") > 0);
+    assert.ok(searchScore(australia, "AUD") > 0);
+    assert.ok(searchScore(nepal, "NPR") > 0);
+  });
+
+  test("normalizes common spacing and regional spelling variants", () => {
+    const windows = catalogueProduct("Windows 11 Pro", { brand: "Microsoft", tags: ["windows", "licence key"] });
+    const freeFire = catalogueProduct("Free Fire Diamonds", { tags: ["top up"] });
+    const roblox = catalogueProduct("Roblox Gift Card", { tags: ["robux", "gift card"] });
+
+    assert.ok(searchScore(windows, "license key") > 0);
+    assert.ok(searchScore(freeFire, "topup") > 0);
+    assert.ok(searchScore(roblox, "giftcard") > 0);
+  });
+});
