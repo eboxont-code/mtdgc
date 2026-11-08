@@ -229,7 +229,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [!] **MT-0102 · P0 · BLOCKED** — Customer-facing milestone definitions and shared labels are implemented in open draft PR #22, but exact-head Quality run [42441639306](https://github.com/eboxont-code/mtdgc/actions/runs/42441639306) failed before any workflow step started (one job failed, runner ID 0, no steps/logs). Full Bun tests, ESLint, typecheck and build remain unverified for that head. Unblock when a free GitHub Actions runner completes the full quality workflow successfully; do not merge or claim completion from the five-test scratch harness alone.
 - [ ] **MT-0103 · P0 · TODO** — Add explicit Cancelled, Failed, Refunded and Action required states where applicable.
 - [ ] **MT-0104 · P0 · TODO** — Prevent invalid status jumps, such as Pending directly to Delivered without payment verification.
-- [~] **MT-0105 · P0 · IN PROGRESS** — Reconcile the existing draft PR #5 implementation onto a clean branch based on current main. The shared `hasOrderContactAccess` helper already exists; this task changes `lookupOrder` to reuse it and adds missing/blank-contact regression coverage. Preserve the separate rate-limit error-handling limitation and MT-0162 account-owned isolation follow-up.
+- [!] **MT-0105 · P0 · BLOCKED** — Implementation and focused regression coverage are in draft PR #23 on a clean main-based branch. Exact-head Quality run [42445225098](https://github.com/eboxont-code/mtdgc/actions/runs/42445225098) failed before any step started (one job, no steps; log download returned BlobNotFound). Node 22.16 scratch execution passed 5/5 focused tests and strict TypeScript checking of `order-access.ts` passed, but full Bun tests, ESLint, project typecheck and production build remain unverified. Unblock when a free GitHub Actions runner completes the full exact-head Quality workflow; do not merge or claim task completion from focused checks alone. The rate-limit error-handling limitation and MT-0162 account-owned isolation remain separate.
 - [!] **MT-0106 · P0 · BLOCKED** — Depends on reviewed/promoted canonical customer-facing status definitions under MT-0102. PR #22 remains open/draft with exact-head GitHub Actions failure before runner startup; do not silently rename customer-visible states before that task is verified.
 - [ ] **MT-0107 · P1 · TODO** — Record a timestamp and actor for every status transition.
 - [ ] **MT-0108 · P1 · TODO** — Show customers what happens next at each stage and whether they need to act.
@@ -530,7 +530,7 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-MT-0105 is **IN PROGRESS** on a clean branch based on current main. MT-0102 is **BLOCKED** pending a successful exact-head GitHub Actions Quality run for draft PR #22; task statuses in the 308-task register remain authoritative.
+MT-0102 and MT-0105 are **BLOCKED** on exact-head GitHub Actions runner startup; PR #22 and PR #23 remain draft. MT-0105's focused Node tests and helper typecheck pass, but the repository quality workflow has not executed. Task statuses in the 308-task register remain authoritative.
 
 | Order | Task | Status |
 |---:|---|---|
@@ -544,9 +544,9 @@ MT-0105 is **IN PROGRESS** on a clean branch based on current main. MT-0102 is *
 | 8 | MT-0087 — prevent duplicate transaction references/screenshots across orders | BLOCKED; concurrency-safe uniqueness requires the approved Supabase cutover/migration gate |
 | 9 | MT-0101 — map current order statuses and observed transition paths | DONE; 13-value enum, application writers, UI mappings, production aggregate counts and lack of transition enforcement are documented in section 30 and Data Architecture section 4 |
 | 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | BLOCKED; PR #22 exact-head Quality run failed before runner startup (runner ID 0, zero steps/logs); full checks remain unverified |
-| 11 | MT-0105 — require order number plus matching saved email or phone for public guest tracking | IN PROGRESS; clean main-based branch reuses the existing order-scoped helper, adds edge-case regression coverage and documents production schema/RLS evidence |
+| 11 | MT-0105 — require order number plus matching saved email or phone for public guest tracking | BLOCKED; PR #23 exact-head Quality run 42445225098 failed before runner startup; focused Node tests 5/5 and strict helper typecheck pass, full repository checks unavailable |
 | 12 | MT-0106 — align authenticated order history and guest tracking status labels | BLOCKED; depends on MT-0102 definitions being verified and promoted |
-| 13 | MT-0162 — prevent cross-customer order access by changing an ID or URL | NEXT ELIGIBLE P0 after MT-0105; inspect owner/token/contact boundaries and add negative tests without production writes |
+| 13 | MT-0162 — prevent cross-customer order access by changing an ID or URL | NEXT ELIGIBLE P0 once a free GitHub Actions runner can execute the required exact-head quality workflow; inspect owner/token/contact boundaries and add negative tests without production writes |
 | 14 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 15 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 
@@ -1336,11 +1336,11 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 
 No production application code, database/schema, order/payment/customer record, storage object, RLS/grant, credential, environment, DNS, hosting or billing setting changed. No test order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
 
-**Next eligible P0 task:** MT-0105 — consolidate the existing guest order tracking contact check onto the shared order-scoped helper. MT-0102 remains blocked until a free GitHub Actions runner completes its full quality workflow.
+**Next eligible P0 task after GitHub Actions runner recovery:** MT-0162 — verify cross-customer order isolation by changing an ID or URL. MT-0102 and MT-0105 remain blocked pending successful exact-head full quality workflows; do not repeat unchanged runner retries.
 
 ## 32. MT-0105 guest order tracking contact verification — 8 November 2026
 
-**Task:** MT-0105 · P0 · IN PROGRESS on a clean branch based on canonical `main` commit `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`. The older draft PR #5 is 63 commits behind current main and must not be merged as-is; its focused change is being reapplied without rewriting its published branch.
+**Task:** MT-0105 · P0 · BLOCKED pending full quality verification. [PR #23](https://github.com/eboxont-code/mtdgc/pull/23) is open/draft on a clean branch based on canonical `main` commit `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`; exact PR head is `351aff65c1e4d16fdb97fe57b844e3853fa6be8a`. The older draft PR #5 is 63 commits behind current main and must not be merged as-is; its focused change was reapplied without rewriting its published branch.
 
 ### Implementation
 
@@ -1358,5 +1358,8 @@ No production application code, database/schema, order/payment/customer record, 
 
 ### Verification and release state
 
-- The exact branch-head GitHub Actions Quality workflow, Vercel preview, PR number, merge and production smoke outcome will be recorded after the branch is pushed and checks complete. No production database writes/migrations, order/payment/customer mutations, credentials, hosting or billing changes are permitted.
+- Exact-head GitHub Actions Quality run [42445225098](https://github.com/eboxont-code/mtdgc/actions/runs/42445225098) failed before workflow steps started: the job has no steps and the log endpoint returned BlobNotFound. No retry was made because this is the same runner-startup failure already observed on PR #22.
+- Node 22.16.0 scratch execution of the current `order-access.ts` and branch test assertions passed 5/5; strict TypeScript checking of `order-access.ts` with TypeScript 5.8.3 passed. The full Bun suite, ESLint, project typecheck and production build are unavailable because Bun and a complete local dependency checkout are not present; these checks remain required in GitHub Actions.
+- Vercel preview deployment [`dpl_Cn844SJ3uWEAHb623RtTtUPFYr2z`](https://vercel.com/boxont/mtdgc/Cn844SJ3uWEAHb623RtTtUPFYr2z) for exact head `351aff65c1e4d16fdb97fe57b844e3853fa6be8a` was BUILDING at final inspection with target `null` (preview only). Production remains READY at [`dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE`](https://vercel.com/boxont/mtdgc/7A2mKAuhBY6nkW2d4FrZGDGQDVUE), deployed SHA `3de811c7cfce91eb262cf79523d8053995bfb777`; no deployment for PR #23 exists.
+- PR #23 remains OPEN/DRAFT and has not been merged. No production smoke test of the new code was claimed. No production database writes/migrations, order/payment/customer mutations, credentials, hosting or billing changes were made.
 - No production data values were accessed. Additional spend: $0.
