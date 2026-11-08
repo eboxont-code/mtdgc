@@ -16,11 +16,11 @@ import { breadcrumbLd, itemListLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/catalog")({
   validateSearch: (search: Record<string, unknown>): { q?: string | undefined; category?: string | undefined; sort?: string | undefined; availability?: string | undefined; price?: string | undefined; platform?: string | undefined; region?: string | undefined } => ({
-    q: typeof search["q"] === "string" ? (search["q"] as string).slice(0, 100) : undefined,
-    category: typeof search["category"] === "string" ? (search["category"] as string).slice(0, 80) : undefined,
-    sort: typeof search["sort"] === "string" ? (search["sort"] as string).slice(0, 40) : undefined,
-    availability: typeof search["availability"] === "string" ? (search["availability"] as string).slice(0, 40) : undefined,
-    price: typeof search["price"] === "string" ? (search["price"] as string).slice(0, 40) : undefined,
+    q: typeof search["q"] === "string" ? (search["q"] as string) : undefined,
+    category: typeof search["category"] === "string" ? search["category"] as string : undefined,
+    sort: typeof search["sort"] === "string" ? search["sort"] as string : undefined,
+    availability: typeof search["availability"] === "string" ? search["availability"] as string : undefined,
+    price: typeof search["price"] === "string" ? search["price"] as string : undefined,
     platform: typeof search["platform"] === "string" ? (search["platform"] as string).slice(0, 80) : undefined,
     region: typeof search["region"] === "string" ? (search["region"] as string).slice(0, 80) : undefined,
   }),

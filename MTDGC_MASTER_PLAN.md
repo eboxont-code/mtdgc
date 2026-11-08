@@ -1360,7 +1360,7 @@ No production application code, database/schema, order/payment/customer record, 
 - Five focused platform/region facet tests passed in a local Node 22.16.0 scratch run. They cover dynamic option derivation, trimming, case-insensitive deduplication, combined filters, and blank platform handling.
 - Full repository Bun tests, ESLint, TypeScript typecheck and production build must still pass on the exact final PR head before merge.
 - The current production deployment is READY at [dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE](https://vercel.com/boxont/mtdgc/7A2mKAuhBY6nkW2d4FrZGDGQDVUE), sourced from commit `3de811c7cfce91eb262cf79523d8053995bfb777`. Current `main` is `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`; the production deployment is 15 commits behind main. Vercel's free daily deployment limit is currently recorded on PR #35. No new deployment was attempted from this task branch.
-- Merge/deployment is not authorised until the exact PR-head checks pass and the existing main-to-production backlog/release is reviewed. A preview is not production.
+- Do not merge or deploy until the exact PR-head checks pass and the existing main-to-production backlog/release is reviewed. A preview is not production.
 
 ### Safety
 
