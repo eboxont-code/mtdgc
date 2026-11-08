@@ -301,7 +301,7 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** Customer information, payment evidence, order records and staff tools are protected with least-privilege access.
 
 - [!] **MT-0161 · P0 · BLOCKED** — Refreshed current-main audit is in draft PR [#26](https://github.com/eboxont-code/mtdgc/pull/26); exact-head Quality run [42453509323](https://github.com/eboxont-code/mtdgc/actions/runs/42453509323) failed before runner startup (runner ID 0, no steps/logs).
-- [~] **MT-0162 · P0 · IN PROGRESS** — Contact fallback is being restricted to guest orders; account orders now require a matching verified account bearer or order-specific token. The current-main implementation, negative tests and tracking-session handoff are recorded in section 34; six focused helper assertions and the standalone helper's strict TypeScript check have passed locally, while exact-head full quality verification is still required.
+- [~] **MT-0162 · P0 · IN PROGRESS** — Contact fallback is being restricted to guest orders; account orders now require a matching verified account bearer or order-specific token. The clean current-main implementation and negative tests are in draft [PR #27](https://github.com/eboxont-code/mtdgc/pull/27), recorded in section 34; six focused helper assertions and the standalone helper's strict TypeScript check have passed locally, while exact-head full quality verification is still required.
 - [ ] **MT-0163 · P0 · TODO** — Verify payment uploads and delivered codes are stored privately, not in public buckets.
 - [ ] **MT-0164 · P0 · TODO** — Ensure admin-only actions are enforced server-side, not only hidden in the interface.
 - [ ] **MT-0165 · P0 · TODO** — Review secrets, supplier credentials and payment configuration for accidental exposure.
@@ -547,7 +547,7 @@ MT-0162 is **IN PROGRESS** on a clean branch based on current main. MT-0102, MT-
 | 11 | MT-0105 — require order number plus matching saved email or phone for public guest tracking | BLOCKED; draft PR #23 exact-head Quality failed before runner startup |
 | 12 | MT-0106 — align authenticated order history and guest tracking status labels | BLOCKED; depends on verified MT-0102 milestone definitions |
 | 13 | MT-0161 — audit authentication and authorisation for customer accounts, support requests and admin routes | BLOCKED; refreshed audit in draft PR #26, exact-head Quality failed before runner startup |
-| 14 | MT-0162 — prevent cross-customer order access by changing an ID or URL | IN PROGRESS; clean current-main implementation and regression test are in this branch, pending exact-head quality verification |
+| 14 | MT-0162 — prevent cross-customer order access by changing an ID or URL | IN PROGRESS; clean current-main implementation and regression tests are in draft [PR #27](https://github.com/eboxont-code/mtdgc/pull/27), pending exact-head quality verification |
 | 15 | MT-0163 — verify payment uploads and delivered codes are stored privately | BLOCKED; no delivered-code storage location or approved storage design is evidenced |
 | 16 | MT-0164 — enforce admin-only actions server-side | BLOCKED pending MT-0162 reconciliation; existing PR #14 is stacked on the old MT-0162 branch |
 | 17 | MT-0165 — review secrets and payment configuration for accidental exposure | Existing draft PR #15; recheck its evidence against current main before promotion |
@@ -1344,7 +1344,7 @@ No production application code, database/schema, order/payment/customer record, 
 
 ## 34. Cross-customer account-order isolation — 8 November 2026
 
-**Task:** MT-0162 · P0 · IN PROGRESS. This change is based directly on current `main` commit `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`. It reapplies only the MT-0162 access-control change from the old stacked draft; it does not copy the obsolete MT-0161 branch history.
+**Task:** MT-0162 · P0 · IN PROGRESS. Clean current-main draft [PR #27](https://github.com/eboxont-code/mtdgc/pull/27) is based directly on `main` commit `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`. It reapplies only the MT-0162 access-control change from the old stacked draft; it does not copy the obsolete MT-0161 branch history.
 
 ### Security gap
 
