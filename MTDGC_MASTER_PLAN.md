@@ -112,7 +112,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0010 · P1 · TODO** — Decide whether the initial experience is marketplace-style retail or a curated single-operator digital store.
 - [ ] **MT-0011 · P1 · TODO** — Set a product approval process before adding a new category or supplier.
 - [ ] **MT-0012 · P1 · TODO** — Define which products MTDGC will never sell, including unauthorised accounts, stolen codes and credential-based access.
-- [~] **MT-0013 · P1 · IN PROGRESS** — Separate customer-facing promises from internal targets and supplier estimates. Internal standard prepared in [MTDGC_CLAIM_STANDARD.md](./MTDGC_CLAIM_STANDARD.md); public wording is unchanged pending evidence and owner/qualified review.
+- [~] **MT-0013 · P1 · IN PROGRESS** — Separate customer-facing promises from internal targets and supplier estimates. Internal standard prepared in [MTDGC_CLAIM_STANDARD.md](./MTDGC_CLAIM_STANDARD.md) in [PR #42](https://github.com/eboxont-code/mtdgc/pull/42); public wording is unchanged pending evidence and owner/qualified review.
 - [ ] **MT-0014 · P1 · TODO** — Define the customer support languages and service hours that can actually be maintained.
 - [ ] **MT-0015 · P2 · TODO** — Create a concise brand voice guide for product pages, checkout, support and social channels.
 - [ ] **MT-0016 · P2 · TODO** — Create a category naming and taxonomy standard that can grow without renaming existing URLs.
