@@ -203,7 +203,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [x] **MT-0081 · P0 · DONE** — Audit completed against the current application code, production schema/data snapshot, storage configuration and access policies. Findings and follow-up gaps are recorded in section 24; this completes the audit task, not a claim that all payment controls are secure.
 - [x] **MT-0082 · P0 · DONE** — Generate new order references with 128 bits of cryptographic randomness, retain the database UNIQUE constraint as the collision guard, and keep legacy tracking formats working. Evidence: section 25; CI run `42241329123` passed lint, tests, typecheck and production build; Vercel deployment for code commit `d81e1fc51ed2e1203defb63ec6a71dbcd21e889b` reached READY.
 - [x] **MT-0083 · P0 · DONE** — Bind payment-proof authorization and storage/database association to the server-resolved order. Shared order-access helpers now cover access-token, authenticated-owner and rate-limited contact checks; proof storage path, order ID, transaction reference and amount are derived from the resolved order, not client-supplied identifiers. Four focused tests and the full quality workflow passed. Evidence and the separate production deployment blocker are recorded in section 26.
-- [ ] **MT-0084 · P0 · TODO** — Validate uploaded proof file type, size and content handling.
+- [x] **MT-0084 · P0 · DONE on PR #18 (repository/code level; production release pending)** — Validate uploaded proof file type, size and content handling.
 - [ ] **MT-0085 · P0 · TODO** — Restrict payment-proof access to the customer who owns the order and authorised staff.
 - [ ] **MT-0086 · P0 · TODO** — Prevent fulfilment until payment is independently matched to the correct amount and order.
 - [ ] **MT-0087 · P0 · TODO** — Prevent the same transaction reference or screenshot from being accepted for multiple orders.
@@ -327,7 +327,7 @@ Do not set numerical targets until a reliable baseline exists.
 
 - [ ] **MT-0181 · P0 · TODO** — Test the full purchase journey on common Android phones and narrow mobile screens.
 - [ ] **MT-0182 · P0 · REVIEW** — Availability labels, purchasable counts and disabled coming-soon actions were implemented and rule-tested in the 5 November pack; confirm the current production page before marking complete because the roadmap pack recorded the change as not yet published.
-- [x] **MT-0183 · P0 · DONE on PR #17; production rollout pending** — Ensure the product card, product page and checkout show matching prices and variants.
+- [x] **MT-0183 · P0 · DONE AND LIVE** — Ensure the product card, product page and checkout show matching prices and variants; PR #17 merged at `9f944ec36ec3f87e3e603ff308b20979a1013183` and production deployment `dpl_cfXAs4hrfTSgdurWL1Veb5prUA5v` is READY on that exact SHA.
 - [ ] **MT-0184 · P0 · REVIEW** — Product purchase summaries for region, platform, delivery method and required details were implemented in the 5 November pack; confirm the current production page before marking complete because the roadmap pack recorded the change as not yet published.
 - [ ] **MT-0185 · P1 · TODO** — Improve catalog search for brand, product, game, denomination and common abbreviations.
 - [ ] **MT-0186 · P1 · TODO** — Add clear sorting by relevance, price and availability.
@@ -1092,12 +1092,28 @@ No product records, supplier assignments, prices, variants, order records, datab
 - Vercel's last-hour runtime-error query found no runtime-error clusters, and the last-30-minute production error/fatal log query returned no entries. These monitoring results do not prove a payment submission succeeded; there were no orders created after the intermediate deployment in the read-only snapshot.
 - **Release action:** wait until the Vercel free deployment API quota has reset (the returned retry window was 24 hours), confirm the latest documentation-only `main` HEAD has a passing quality run, then deploy that current `main` commit (which includes the tested application-code commit `26a69301856a715a2cbd293da2cf88227d694ca5`) to production and verify both aliases before treating MT-0083 as live. Do not upgrade the plan or change billing to bypass the limit.
 
-**Next P0 task:** MT-0084 — validate uploaded proof file type, size and content handling. The source-level MT-0083 implementation is committed and CI-verified; its production rollout remains subject to the Vercel deployment quota above.
+**Next P0 task:** MT-0085 — verify and promote the existing payment-proof access-control implementation; reconcile its tests and production RLS evidence without duplicating the existing work.
 
+
+## 26.1. Payment-proof image content validation — 8 November 2026
+
+**Task:** MT-0084 · P0 · DONE on PR #18 at repository/code level; production release remains pending until the current-main PR is merged and its exact production deployment is verified.
+
+- Reapplied the existing MT-0084 implementation to a fresh branch from current `main` (`9f944ec36ec3f87e3e603ff308b20979a1013183`). The original PR #11 branch was 34 commits behind current `main`; no force-push, rebase, amendment or published-history rewrite was used. PR #11 will be closed as superseded after the current-main PR is merged.
+- Added exact direct dependency `sharp@0.35.5` (Apache-2.0) and the lockfile generated by the repository's Ubuntu GitHub Actions runner using `bun install --lockfile-only` (original lock-generation run [42396113373](https://github.com/eboxont-code/mtdgc/actions/runs/42396113373)). Current `main` package and lock files were byte-identical to the original PR's base versions before the dependency was applied.
+- Replaced leading-byte-only sniffing with server-side format detection and full decoding. The declared MIME must match the decoder-detected JPEG, PNG or WebP format.
+- Decoder options fail on warnings, cap input at 20,000,000 pixels and four channels, and reject malformed, truncated, mismatched, multi-page, empty and over-limit inputs.
+- Applies EXIF orientation and converts decoded pixels to lossless WebP. Default Sharp output strips source metadata. The normalized output remains within the existing 5 MiB cap and is stored under a server-derived `.webp` path with `image/webp` content type.
+- The helper is dynamically imported inside the server upload handler, keeping Sharp out of browser code. The existing order-resolution, access-token/account-owner/contact authorization, pending-payment state check, storage path association and proof metadata flow are preserved.
+- Generated-fixture tests cover JPEG, PNG and WebP normalization, MIME mismatch, truncated data, empty/oversized files, excessive decoded pixels, EXIF removal and lossless pixel preservation. The original PR #11 head's full quality run [42396471115](https://github.com/eboxont-code/mtdgc/actions/runs/42396471115) passed 47 tests, but it is historical only; the current-main PR #18 must pass a fresh full quality run before merge.
+- Read-only production inspection confirmed the existing `payment-proofs` bucket remains private with its 5 MiB cap and NULL storage MIME allowlist. Server-side decoding/normalization remains the content gate; no bucket setting, policy, migration, order, payment, storage object or customer record was changed.
+- Current-main PR #18 is the release candidate. Final head SHA, fresh CI result, Vercel deployment ID, deployed SHA and live upload-route smoke outcome must be appended after merge/deployment; no real payment proof will be uploaded during smoke testing.
+
+**Next P0 task:** MT-0085 — verify and promote the existing payment-proof access-control implementation already represented by draft PR #2.
 
 ## 27. Catalogue price, variant and checkout snapshot consistency — 8 November 2026
 
-**Task:** MT-0183 · P0 · DONE on draft PR #17. Production rollout remains pending; no production deployment was requested.
+**Task:** MT-0183 · P0 · DONE AND LIVE. PR #17 merged to `main` at `9f944ec36ec3f87e3e603ff308b20979a1013183`; the existing Vercel Git integration automatically deployed that exact commit to production.
 
 ### Production mismatch verified
 
@@ -1126,8 +1142,9 @@ No product records, supplier assignments, prices, variants, order records, datab
 
 ### Deployment and production boundary
 
-- Vercel preview deployments for earlier PR #17 revisions (`2e1e719`, `23046e8`, `9a2a2a9`) were observed in ERROR state. The deployment-event/build logs did not provide a verified cause, and no READY preview was returned for final source head `42b7ee2` or documentation head `5ca6164`. GitHub Actions verification does not substitute for a READY Vercel preview.
-- Production remains on the older READY deployment sourced from `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`. The new code has not been deployed to production.
+- PR #17 was merged to `main` at 2026-11-08T00:06:11Z using GitHub's merge-commit method. Merge commit: `9f944ec36ec3f87e3e603ff308b20979a1013183`. The main-branch Quality run [42428222304](https://github.com/eboxont-code/mtdgc/actions/runs/42428222304) passed on that exact SHA.
+- The merge triggered the existing Vercel Git integration for `main`. Production deployment [`dpl_cfXAs4hrfTSgdurWL1Veb5prUA5v`](https://vercel.com/boxont/mtdgc/cfXAs4hrfTSgdurWL1Veb5prUA5v) reached **READY** on the exact same SHA `9f944ec36ec3f87e3e603ff308b20979a1013183`; Vercel reports `mtdgc.com`, `www.mtdgc.com`, and the existing Vercel aliases assigned to that deployment.
+- Non-destructive live smoke checks on 8 November 2026: `https://mtdgc.com/catalog` returned the Clash of Clans Passes card at “From Rs 249”; `https://mtdgc.com/products/clash-of-clans-passes` initially selected Event Pass at Rs 249, matching the card. The live Netflix page continues to show `Temporarily unavailable` without a purchasable price. The checkout snapshot/refresh path is present in the deployed main source and covered by the passing tests; no test order or payment was created. The `www` alias was observed redirecting to the canonical `mtdgc.com` host; the web fetcher could not complete the redirect, while Vercel's deployment metadata confirms both aliases.
 - No production catalogue, price, variant, order, payment, schema, storage, authentication, RLS, environment, DNS, hosting or billing setting was changed. No test order or payment was created; no supplier/customer was contacted; additional spend was $0.
 
-**Next P0 task:** MT-0184 — verify the product purchase summary for region, platform, delivery method and required customer details against the current production pages. MT-0181 remains blocked pending an owner-provided Android device and authorised end-to-end test window.
+**Next P0 task:** MT-0085 — verify and promote the existing payment-proof access-control implementation already represented by draft PR #2. MT-0181 remains blocked pending an owner-provided Android device and authorised end-to-end test window.
