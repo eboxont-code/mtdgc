@@ -240,8 +240,8 @@ function ProductPage() {
   const trust = (
     <ul className="space-y-2 text-[13px] text-foreground/85">
       <li className="flex gap-2"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />We verify your payment and deliver once it is checked.</li>
-      <li className="flex gap-2"><Check className="mt-0.5 size-4 shrink-0 text-primary" /><span>Refunds follow our <Link to="/policies/refunds" className="text-primary underline-offset-2 hover:underline">refund policy</Link>.</span></li>
-      {wa && <li className="flex gap-2"><MessageCircle className="mt-0.5 size-4 shrink-0 text-primary" /><span>Questions first? <a href={wa} target="_blank" rel="noopener noreferrer" className="text-primary underline-offset-2 hover:underline">Ask on WhatsApp</a>.</span></li>}
+      <li className="flex gap-2"><Check className="mt-0.5 size-4 shrink-0 text-primary" /><span>Refunds follow our <Link to="/policies/refunds" className="text-primary underline underline-offset-2">refund policy</Link>.</span></li>
+      {wa && <li className="flex gap-2"><MessageCircle className="mt-0.5 size-4 shrink-0 text-primary" /><span>Questions first? <a href={wa} target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2">Ask on WhatsApp</a>.</span></li>}
     </ul>
   );
 
@@ -458,7 +458,7 @@ function ProductPage() {
               <TabsContent value="refund" className="px-1 pt-2">
                 <h2 className="sr-only">Refund eligibility</h2>
                 <p className="text-sm text-foreground/80">{product.refund_eligibility}</p>
-                <Link to="/policies/refunds" className="mt-2 inline-block text-xs text-primary underline-offset-2 hover:underline">Read the full refund policy</Link>
+                <Link to="/policies/refunds" className="mt-2 inline-block text-xs text-primary underline underline-offset-2">Read the full refund policy</Link>
               </TabsContent>
             </Tabs>
 
@@ -470,7 +470,7 @@ function ProductPage() {
               />
               <p className="mt-3 text-xs text-muted-foreground">
                 Payment, delivery and refund basics are the same for every product. See{" "}
-                <Link to="/how-it-works" className="text-primary underline-offset-2 hover:underline">how it works</Link>.
+                <Link to="/how-it-works" className="text-primary underline underline-offset-2">how it works</Link>.
               </p>
             </section>
           </div>
