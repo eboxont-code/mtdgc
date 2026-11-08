@@ -66,3 +66,17 @@ describe("MT-0083 payment proof ownership and association", () => {
     assert.throws(() => buildPaymentProofAssociation({ id: "resolved-order-a", total_minor: 1299 }, "not-random", "png", "TXN-12345"));
   });
 });
+
+describe("MT-0162 account-order isolation", () => {
+  test("matching phone or email cannot use guest contact fallback for an account-owned order", async () => {
+    const phone = "+61 412 345 678";
+    const accountOrder = {
+      user_id: "customer-a",
+      verification_hash: await sha256Hex("MTA" + normaliseContact(phone)),
+      guest_email: "buyer-a@example.com",
+    };
+
+    assert.equal(await hasOrderContactAccess(accountOrder, "MTA", phone), false);
+    assert.equal(await hasOrderContactAccess(accountOrder, "MTA", "buyer-a@example.com"), false);
+  });
+});
