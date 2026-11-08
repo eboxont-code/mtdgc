@@ -328,7 +328,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0181 · P0 · TODO** — Test the full purchase journey on common Android phones and narrow mobile screens.
 - [ ] **MT-0182 · P0 · REVIEW** — Availability labels, purchasable counts and disabled coming-soon actions were implemented and rule-tested in the 5 November pack; confirm the current production page before marking complete because the roadmap pack recorded the change as not yet published.
 - [x] **MT-0183 · P0 · DONE AND LIVE** — Ensure the product card, product page and checkout show matching prices and variants; PR #17 merged at `9f944ec36ec3f87e3e603ff308b20979a1013183` and production deployment `dpl_cfXAs4hrfTSgdurWL1Veb5prUA5v` is READY on that exact SHA.
-- [ ] **MT-0184 · P0 · REVIEW** — Production purchase summaries were checked on five orderable pages on 8 November. Mobile Legends user-ID guidance is inaccurate in production; correction and regression coverage are in draft PR #19. See section 28; production and visual/mobile verification remain pending.
+- [x] **MT-0184 · P0 · DONE AND LIVE** — Correct Mobile Legends user-ID guidance is merged in PR #19 (`3de811c7cfce91eb262cf79523d8053995bfb777`) and verified on the READY production deployment `dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE`. The live page now tells customers to copy the number under their in-game profile name; see section 33. Responsive/mobile interaction testing remains separately tracked under MT-0181.
 - [ ] **MT-0185 · P1 · TODO** — Improve catalog search for brand, product, game, denomination and common abbreviations.
 - [ ] **MT-0186 · P1 · TODO** — Add clear sorting by relevance, price and availability.
 - [ ] **MT-0187 · P1 · TODO** — Make filters usable on mobile without hiding the product list behind oversized controls.
@@ -1334,3 +1334,35 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 No production application code, database/schema, order/payment/customer record, storage object, RLS/grant, credential, environment, DNS, hosting or billing setting changed. No test order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
 
 **Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
+
+
+
+## 33. MT-0184 live Mobile Legends guidance verification — 8 November 2026
+
+**Task:** MT-0184 · P0 · DONE AND LIVE. The source correction, merge, production deployment and affected live page have all been verified. The separate responsive/mobile interaction check remains under MT-0181 and is not claimed complete here.
+
+### Merge and quality evidence
+
+- PR [#19](https://github.com/eboxont-code/mtdgc/pull/19) merged to `main`. Exact PR head: `21102f8816158e3cf31d0ef450c7298cb22869e5`; merge commit: `3de811c7cfce91eb262cf79523d8053995bfb777`.
+- Exact-head Quality run [42430253311](https://github.com/eboxont-code/mtdgc/actions/runs/42430253311) passed: dependency installation, lint, unit tests, TypeScript typecheck and production build.
+- PR #19 had no submitted reviews and no unresolved review threads.
+- The focused regression tests cover both Mobile Legends user-ID guidance and genuine mobile-number contact guidance. The source change adds `user ID` to the game-identifier matcher; product requirements, saved catalogue data, cart contents and checkout behaviour were not changed.
+
+### Production deployment and live check
+
+- The existing Vercel Git integration deployed the PR #19 merge commit to Production. Deployment [`dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE`](https://vercel.com/boxont/mtdgc/7A2mKAuhBY6nkW2d4FrZGDGQDVUE) is `READY`, target `production`, with `mtdgc.com` and `www.mtdgc.com` aliases and no alias error.
+- The deployment's exact source commit is `3de811c7cfce91eb262cf79523d8053995bfb777`, the MT-0184 merge commit.
+- A non-destructive public GET of [the live Mobile Legends Diamonds page](https://mtdgc.com/products/mobile-legends-diamonds) returned the correct customer instructions in both the order summary and form: the required details are Mobile Legends user ID and Zone ID; the user-ID helper says to open the game, tap the profile picture and copy the number under the name; the Zone ID helper says it is shown next to the Player ID, usually in brackets.
+- No form was submitted and no customer, order, payment or supplier data was accessed.
+- Current `main` is 15 commits ahead of this production deployment. This finding verifies the specific MT-0184 change is live; it does not claim that all later main-branch changes are deployed.
+
+### Remaining separate verification
+
+- Responsive viewport and mobile interaction checks remain UNVERIFIED because the connected browser surface was unavailable. Keep this under MT-0181; do not claim mobile usability testing was completed.
+- No overall 500-point quality score is assigned from this focused live check.
+
+### Safety and cost
+
+No production data, catalogue record, order, payment, schema, storage, authentication, environment, DNS, hosting or billing setting was changed. No test order or payment was created; no supplier/customer was contacted. Additional spend: $0.
+
+**Next P0 after this task:** MT-0102. Its current PR #22 is blocked because the exact-head GitHub quality job failed before starting a runner; do not repeat the unchanged failure. MT-0105 PR #23 and MT-0162 PR #27 show the same runner-startup blocker. After runner recovery, continue with the next independent P0 work rather than waiting on supplier, legal or owner-only blockers.
