@@ -137,7 +137,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0030 · P1 · TODO** — Show required customer information before checkout, not after payment.
 - [ ] **MT-0031 · P1 · TODO** — Show whether a product is single-use, recurring, prepaid, account-bound or redeemable by code.
 - [ ] **MT-0032 · P1 · TODO** — Make product availability freshness visible internally with last supplier confirmation time.
-- [~] **MT-0033 · P1 · IN PROGRESS** — Catalogue-derived query aliases and currency-code matching are implemented with focused regression coverage in draft PR #35. Local Node 22.16 harness passed 36 assertions and strict helper TypeScript checking passed in an isolated scratch workspace. Exact-head GitHub Quality run [42478941997](https://github.com/eboxont-code/mtdgc/actions/runs/42478941997) was queued at the time of this plan update; full repository checks and production release remain pending.
+- [!] **MT-0033 · P1 · BLOCKED** — Catalogue-derived query aliases and currency-code matching are implemented with focused regression coverage in draft PR #35. Local Node 22.16 harness passed 36 assertions and strict helper TypeScript checking passed in an isolated scratch workspace. Quality run [42478941997](https://github.com/eboxont-code/mtdgc/actions/runs/42478941997) failed before runner startup on code-bearing head `a9560bab839104fd4de8929d37e529892b6344dd` (zero steps; logs unavailable); final plan-reconciliation head `37e877a25909499149960df0b4d8e2bc4cd61fcd` has no associated Quality run. Unblock only when the final exact head receives a successful full repository workflow.
 - [ ] **MT-0034 · P1 · TODO** — Add filters that work correctly for category, platform, region, availability and price.
 - [ ] **MT-0035 · P2 · TODO** — Create curated collections such as gaming essentials, entertainment, productivity and Australian shopping cards.
 - [ ] **MT-0036 · P2 · TODO** — Add related products only when they are genuinely compatible and available.
@@ -530,7 +530,7 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-MT-0105 is **IN PROGRESS** in draft PR #32; its exact-head quality run failed before runner startup. MT-0102 is **BLOCKED** on a successful exact-head workflow. MT-0163 is **BLOCKED** because no delivered-code storage feature exists to audit. MT-0033 is the next independent P1 task in draft PR #35. Task statuses in the 308-task register are authoritative.
+MT-0105 is **IN PROGRESS** in draft PR #32; its exact-head quality run failed before runner startup. MT-0102 is **BLOCKED** on a successful exact-head workflow. MT-0163 is **BLOCKED** because no delivered-code storage feature exists to audit. MT-0033 is BLOCKED after its code-bearing Quality run failed before runner startup; MT-0034 is the next independent P1 candidate because existing catalogue fields are available for platform and region filters. Task statuses in the 308-task register are authoritative.
 
 | Order | Task | Status |
 |---:|---|---|
@@ -548,7 +548,7 @@ MT-0105 is **IN PROGRESS** in draft PR #32; its exact-head quality run failed be
 | 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 | 13 | MT-0105 — verify guest order tracking requires the order number plus matching saved email or phone | IN PROGRESS; draft PR #32 has six focused assertions, but exact-head Quality run failed before runner startup |
 | 14 | MT-0163 — verify payment uploads and delivered-code storage privacy | BLOCKED; payment buckets are private, but no delivered-code table/bucket/storage path exists; approved private storage and retention design is required |
-| 15 | MT-0033 — add catalogue search synonyms | NEXT ELIGIBLE P1; draft PR #35 has 36 focused local assertions and strict helper typecheck; exact-head full Quality workflow is pending |
+| 15 | MT-0033 — add catalogue search synonyms | BLOCKED; code-bearing Quality run #42478941997 failed before runner startup; final plan-only head has no Quality run |\n| 16 | MT-0034 — add category, platform, region, availability and price filters | NEXT ELIGIBLE P1; current catalogue route already has category, availability and price filters; platform and region fields are available in catalogue data but not yet exposed as filters |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -1341,7 +1341,7 @@ No production application code, database/schema, order/payment/customer record, 
 
 ## 33. Catalogue search synonyms and storage-privacy queue evidence — 8 November 2026
 
-**Task in progress:** MT-0033 · P1 · [PR #35](https://github.com/eboxont-code/mtdgc/pull/35), based on main commit `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`. The PR is open and draft; it is not merged or live.
+**Task blocked:** MT-0033 · P1 · [PR #35](https://github.com/eboxont-code/mtdgc/pull/35), based on main commit `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`. The PR is open and draft; it is not merged or live.
 
 ### Catalogue evidence
 
@@ -1360,7 +1360,7 @@ No production application code, database/schema, order/payment/customer record, 
 
 - Added regression cases for 29 catalogue aliases, cross-product isolation for UC, AU/AUS and NP region matching, AUD/NPR currency matching, and gift-card/top-up/licence spelling variants.
 - Local Node 22.16 focused harness: 36 assertions passed. Strict TypeScript check of the search helper passed in an isolated scratch workspace. The repository's full Bun suite, ESLint, project typecheck and production build have not run locally because the repository working tree/dependencies are not mounted in this execution environment.
-- The exact code-bearing PR-head Quality run [42478941997](https://github.com/eboxont-code/mtdgc/actions/runs/42478941997) was queued when first inspected. The final PR head must still have a successful exact-head Quality run before this task can be promoted.
+- The exact code-bearing PR-head Quality run [42478941997](https://github.com/eboxont-code/mtdgc/actions/runs/42478941997) failed before runner startup (job had zero steps; logs unavailable). It ran against the code-bearing commit before the plan-only reconciliation. The final plan-reconciliation head `37e877a25909499149960df0b4d8e2bc4cd61fcd` has no associated Quality run; full repository checks remain unverified.
 - Vercel rejected the PR preview with its free daily deployment limit; no preview for the final head is available. No paid upgrade or retry was attempted.
 
 ### Higher-priority blockers checked during task selection
@@ -1376,4 +1376,4 @@ No production application code, database/schema, order/payment/customer record, 
 - Main's current Vercel status reports the free daily deployment limit. The GitHub branch-protection endpoint was not readable through the connected integration (403), so branch-protection requirements could not be independently rechecked in this run. No merge was attempted.
 - No product, price, availability, supplier, checkout, database, RLS, storage, customer, order, payment, authentication, credential, DNS, hosting or billing data/settings were changed. Additional spend: $0.
 
-**Next action:** keep PR #35 draft until its exact final head passes the full GitHub Quality workflow; then verify the release gate and production deployment trigger before any merge. MT-0163 remains blocked until delivered-code storage is designed and implemented privately.
+**Next action:** keep PR #35 draft; do not merge until the final exact head passes the full GitHub Quality workflow and release gates are verified. MT-0034 is the next independent P1 candidate. MT-0163 remains blocked until delivered-code storage is designed and implemented privately.
