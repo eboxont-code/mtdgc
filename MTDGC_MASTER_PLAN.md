@@ -112,7 +112,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0010 · P1 · TODO** — Decide whether the initial experience is marketplace-style retail or a curated single-operator digital store.
 - [ ] **MT-0011 · P1 · TODO** — Set a product approval process before adding a new category or supplier.
 - [ ] **MT-0012 · P1 · TODO** — Define which products MTDGC will never sell, including unauthorised accounts, stolen codes and credential-based access.
-- [~] **MT-0013 · P1 · IN PROGRESS** — Separate customer-facing promises from internal targets and supplier estimates. Internal standard prepared in [MTDGC_CLAIM_STANDARD.md](./MTDGC_CLAIM_STANDARD.md) in [PR #42](https://github.com/eboxont-code/mtdgc/pull/42); public wording is unchanged pending evidence and owner/qualified review.
+- [!] **MT-0013 · P1 · BLOCKED** — The internal standard is prepared in [MTDGC_CLAIM_STANDARD.md](./MTDGC_CLAIM_STANDARD.md) and [PR #42](https://github.com/eboxont-code/mtdgc/pull/42); focused document checks passed 12/12. Exact-head Quality run [42518306516](https://github.com/eboxont-code/mtdgc/actions/runs/42518306516) failed before runner startup (no steps; log download returned BlobNotFound), so full repository checks are unavailable. The Vercel preview was rejected by the free daily deployment limit. Public wording is unchanged; keep the PR draft until exact-head quality and release capacity are available.
 - [ ] **MT-0014 · P1 · TODO** — Define the customer support languages and service hours that can actually be maintained.
 - [ ] **MT-0015 · P2 · TODO** — Create a concise brand voice guide for product pages, checkout, support and social channels.
 - [ ] **MT-0016 · P2 · TODO** — Create a category naming and taxonomy standard that can grow without renaming existing URLs.
@@ -530,7 +530,7 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-MT-0013 is **IN PROGRESS** on the current task branch. The next P0 payment/order tasks remain blocked by missing settlement evidence, the Supabase migration gate or exact-head quality runs that failed before a runner started. Task statuses in the 308-task register remain authoritative.
+MT-0013 is **BLOCKED** in draft PR #42: 12 focused document checks pass, but exact-head Quality run 42518306516 failed before runner startup and the Vercel preview was rejected by the free daily deployment limit. The next P0 payment/order tasks remain blocked by missing settlement evidence, the Supabase migration gate or exact-head quality runs that failed before a runner started. Task statuses in the 308-task register remain authoritative.
 
 | Order | Task | Status |
 |---:|---|---|
@@ -548,7 +548,7 @@ MT-0013 is **IN PROGRESS** on the current task branch. The next P0 payment/order
 | 12 | MT-0162 — prevent cross-customer order access by changing an ID or URL | BLOCKED; current-main draft PR #27 exact-head Quality run 42453860327 failed before runner startup; focused checks do not replace full repository quality |
 | 13 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 14 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
-| 15 | MT-0013 — separate customer-facing promises from internal targets and supplier estimates | IN PROGRESS; draft internal standard in this branch; public copy unchanged |
+| 15 | MT-0013 — separate customer-facing promises from internal targets and supplier estimates | BLOCKED; PR #42 exact-head Quality run 42518306516 failed before runner startup; Vercel preview rejected by free daily deployment limit; public copy unchanged |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
