@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { listCatalog } from "@/lib/catalog.functions";
 import type { CatalogProduct } from "@/lib/catalog.functions";
 import { SITE_URL, isOrderable, whatsappLink } from "@/lib/format";
+import { BRAND } from "@/lib/brand";
 import { bestDeal } from "@/lib/pricing";
 
 const FAQS = [
@@ -41,27 +42,27 @@ const FAQS = [
 export const Route = createFileRoute("/")({
   head: ({ loaderData }) => ({
     meta: [
-      { title: "MTDGC | Software and subscriptions in Nepal" },
+      { title: BRAND.title },
       {
         name: "description",
         content:
-          "Software licences, subscriptions and digital deals in Nepal, priced in NPR. Pay by QR or bank transfer and track every order.",
+          BRAND.description,
       },
-      { property: "og:title", content: "MTDGC | Software and subscriptions in Nepal" },
+      { property: "og:title", content: BRAND.title },
       {
         property: "og:description",
-        content: "Software licences, subscriptions and digital deals in Nepal, priced in NPR. Pay by QR or bank transfer and track every order.",
+        content: BRAND.description,
       },
       { property: "og:url", content: `${SITE_URL}/` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:image", content: `${SITE_URL}/og/mtdgc.png` },
-      { property: "og:image:alt", content: "MTDGC, the digital marketplace for Nepal and Australia" },
+      { property: "og:image:alt", content: BRAND.imageAlt },
       { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
-      { name: "twitter:title", content: "MTDGC | Software and subscriptions in Nepal" },
+      { name: "twitter:title", content: BRAND.title },
       {
         name: "twitter:description",
-        content: "Software licences, subscriptions and digital deals in Nepal, priced in NPR. Pay by QR or bank transfer and track every order.",
+        content: BRAND.description,
       },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/` }],
@@ -146,10 +147,10 @@ function Index() {
   const orgJsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "MTDGC",
-    alternateName: "Matrix Digital Goods & Commerce",
+    name: BRAND.name,
+    alternateName: BRAND.legalName,
     url: `${SITE_URL}/`,
-    description: "Digital commerce company serving Nepal and Australia selling game top-ups, gift cards and subscriptions.",
+    description: BRAND.description,
     logo: `${SITE_URL}/og/mtdgc.png`,
     contactPoint: {
       "@type": "ContactPoint",
@@ -161,7 +162,7 @@ function Index() {
   const siteJsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "MTDGC",
+    name: BRAND.name,
     url: `${SITE_URL}/`,
     potentialAction: {
       "@type": "SearchAction",
