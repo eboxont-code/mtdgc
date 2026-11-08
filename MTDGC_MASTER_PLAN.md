@@ -826,7 +826,7 @@ Do not ask customers for passwords, OTPs or payment PINs. Do not describe a shar
 
 ### Evidence and boundaries
 
-- The existing supplier register has no supplier identity or approved product-scope rows. The current MTDGC production schema has no supplier table or supplier foreign key; the read-only project metadata shows 11 applied migrations. No schema change is proposed, and the existing Supabase cutover/migration gate is unchanged.
+- The existing supplier register has no supplier identity or approved product-scope rows. Read-only Supabase inspection on 9 November 2026 found 14 public tables and no supplier-related table or supplier foreign-key column; the migration history lists 12 applied migrations (0000–0011). No schema change is proposed, and the existing Supabase cutover/migration gate is unchanged.
 - The process is documentation only. It does not screen or approve a supplier, authorise resale, validate a product/region, establish a margin, set a delivery SLA, or make a listing orderable.
 - No supplier/customer was contacted, no purchase/test order was made, and no production database, catalogue, customer, order, payment, credential, hosting or billing setting was changed.
 
