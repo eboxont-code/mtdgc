@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.2 · 8 November 2026
+**Version:** 2.3 · 8 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -226,10 +226,10 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** The order state is consistent from checkout to delivery, with a complete audit trail and useful customer visibility.
 
 - [x] **MT-0101 · P0 · DONE** — Map all 13 live order-status enum values, current application writers, generic administrator targets, legacy display aliases and observed transitions; confirm that neither application nor database enforces a complete transition graph. Evidence: section 30 and Data Architecture section 4; current-main source inspection plus read-only production enum, aggregate status-count, column-type, proof-status constraint and order-trigger queries on 8 November 2026.
-- [ ] **MT-0102 · P0 · TODO** — Ensure Payment received, Verified, Processing and Delivered have precise operational definitions.
+- [!] **MT-0102 · P0 · BLOCKED** — Customer-facing milestone definitions and shared labels are implemented in draft PR #22, but its exact current head `5caac222b49cb2e2d5ac9dfd60c7bca092bbed98` has no successful full quality run. GitHub Actions run `42441639306` failed before any job step started (zero steps); Vercel also reports the free build-rate limit. Keep the PR draft; unblock only when the exact head passes the full free quality workflow and the production release path is available.
 - [ ] **MT-0103 · P0 · TODO** — Add explicit Cancelled, Failed, Refunded and Action required states where applicable.
 - [ ] **MT-0104 · P0 · TODO** — Prevent invalid status jumps, such as Pending directly to Delivered without payment verification.
-- [ ] **MT-0105 · P0 · TODO** — Verify guest order tracking requires the order number plus the matching email or phone.
+- [~] **MT-0105 · P0 · IN PROGRESS** — Reuse the shared order-scoped contact check in the public guest tracker and add regression coverage for matching phone/email, wrong order number, wrong contact and missing/blank contact. Clean main-based draft PR #32; exact-head quality and release verification remain pending.
 - [ ] **MT-0106 · P0 · TODO** — Ensure account order history and guest tracking show the same canonical status.
 - [ ] **MT-0107 · P1 · TODO** — Record a timestamp and actor for every status transition.
 - [ ] **MT-0108 · P1 · TODO** — Show customers what happens next at each stage and whether they need to act.
@@ -530,7 +530,7 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-task register are authoritative.
+MT-0105 is **IN PROGRESS** in clean main-based draft PR #32. MT-0102 is **BLOCKED** pending a successful exact-head quality run. Task statuses in the 308-task register are authoritative.
 
 | Order | Task | Status |
 |---:|---|---|
@@ -543,7 +543,7 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 7 | MT-0086 — require independent payment settlement matching before fulfilment | BLOCKED; no bank-statement feed, provider callback or owner-approved manual settlement evidence is available |
 | 8 | MT-0087 — prevent duplicate transaction references/screenshots across orders | BLOCKED; concurrency-safe uniqueness requires the approved Supabase cutover/migration gate |
 | 9 | MT-0101 — map current order statuses and observed transition paths | DONE; 13-value enum, application writers, UI mappings, production aggregate counts and lack of transition enforcement are documented in section 30 and Data Architecture section 4 |
-| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | NEXT P0; can be documented from the current payment-review code and existing operational evidence without production writes |
+| 10 | MT-0105 — verify guest order tracking requires the order number plus matching saved email or phone | NEXT ELIGIBLE P0; clean main-based PR #32 reuses the shared server-side check and adds regression coverage; exact-head quality and release verification pending |
 | 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 
@@ -1333,4 +1333,46 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 
 No production application code, database/schema, order/payment/customer record, storage object, RLS/grant, credential, environment, DNS, hosting or billing setting changed. No test order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
 
-**Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
+**Next eligible P0 task:** MT-0105 — verify guest order tracking requires the order number plus matching saved email or phone. MT-0102 remains blocked pending a successful full quality run for PR #22; do not bypass that check or describe a preview as live.
+
+
+## 32. MT-0102 customer-facing order milestone definitions — 8 November 2026
+
+**Task:** MT-0102 · P0 · BLOCKED pending full exact-head verification. [PR #22](https://github.com/eboxont-code/mtdgc/pull/22) targets `main` and is based directly on `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`. Its current head is `5caac222b49cb2e2d5ac9dfd60c7bca092bbed98` (9 commits ahead, 0 behind); it remains open and draft.
+
+- The proposed customer labels distinguish **Payment proof received** from money actually received, identify **Verified by staff** as a manual decision, describe **Processing** as a staff update, and make **Delivered** a staff-marked state without promising email dispatch.
+- Five focused regression tests are included in the PR. A Node 22.16 scratch harness previously passed all five assertions, but this does not replace the repository quality workflow.
+- Exact-head GitHub Actions Quality run [42441639306](https://github.com/eboxont-code/mtdgc/actions/runs/42441639306) failed before the runner started. The job had zero steps; no Bun tests, lint, typecheck or production build ran. This is an infrastructure failure, not an observed application-test failure.
+- The exact-head Vercel status is failed with the Hobby/free build-rate limit. No final-head READY preview is available. The current production deployment remains READY at [`dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE`](https://vercel.com/boxont/mtdgc/7A2mKAuhBY6nkW2d4FrZGDGQDVUE), commit `3de811c7cfce91eb262cf79523d8053995bfb777`; MT-0102 is not live.
+- No merge, production deployment, database write, migration, order/payment/customer mutation or paid workaround was attempted. Additional spend: $0.
+
+**Unblock condition:** a free GitHub runner must complete the full quality workflow for the exact PR head. Keep the PR draft until that evidence exists; do not treat the Vercel preview or an unrelated main-branch run as a substitute.
+
+## 33. MT-0105 guest order tracking contact verification — 8 November 2026
+
+**Task:** MT-0105 · P0 · IN PROGRESS. [PR #32](https://github.com/eboxont-code/mtdgc/pull/32) is a clean, draft PR based directly on current `main` commit `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`. The earlier [PR #5](https://github.com/eboxont-code/mtdgc/pull/5) is stale: it is 9 commits ahead and 63 behind current main, remains draft, and is not mergeable. Its old passing CI result does not verify this new main-based head; only the focused source/test change was reapplied.
+
+### Current access contract
+
+- The public `/track-order` form requires both an order number and the email or phone used on that order. The server input validator independently requires both.
+- The server normalises the order number, resolves that exact order, then checks the order-scoped contact verification hash or the saved guest email through `hasOrderContactAccess`.
+- The shared helper normalises phone numbers to digits and email addresses to lowercase. A phone hash is bound to the order number; the saved email comparison is case-insensitive.
+- Missing, blank or mismatched contact returns the same generic `not_found` response. The order number alone is not an access credential.
+- The guest browser does not query `public.orders` directly. Production RLS is enabled; read-only policy inspection on 8 November showed the SELECT policy is restricted to authenticated order owners/admins, and table grants include no `anon` SELECT privilege. The guest lookup remains a server-side operation.
+- The existing lookup-attempt counter has a separate error-handling limitation: count-query errors can fall back to a zero count, and insert/cleanup errors are not surfaced. This PR does not claim to fix that rate-limiter issue.
+
+### Implementation and regression coverage
+
+- Updated `lookupOrder` to call the same order-scoped helper already used by order viewing and payment-proof submission, removing its duplicate inline hash/email comparison.
+- Added one focused regression test with six assertions: matching saved phone, case-insensitive saved email, wrong order number, wrong contact, missing contact and whitespace-only contact.
+- No schema, RLS, grants, authentication, payment or order lifecycle behaviour was changed.
+
+### Verification and release boundary
+
+- Strict TypeScript compilation of the shared order-access helper passed in an isolated Node 22.16 workspace.
+- A focused Node 22.16 harness executed all six guest-contact assertions successfully.
+- The full repository Bun test suite, ESLint, project typecheck and production build are pending the exact PR #32 GitHub Actions run. Bun is not installed in the available local environment.
+- The repository main branch is reported unprotected with no required status checks. That does not waive the project's quality requirement; PR #32 remains draft until its exact-head checks pass.
+- No merge or production deployment was attempted. The new guest-tracking behaviour is not live. No production order/contact values were read or changed; no test order or payment was created. Additional spend: $0.
+
+**Next task-selection pass:** continue with the next independent P0 item after MT-0105. Do not repeat the stale PR #5 investigation or the unchanged MT-0102 runner failure.
