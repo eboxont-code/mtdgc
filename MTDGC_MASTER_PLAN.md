@@ -325,8 +325,8 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Customers can discover the right digital item, understand restrictions and complete an order without confusion.
 
-- [ ] **MT-0181 · P0 · TODO** — Test the full purchase journey on common Android phones and narrow mobile screens.
-- [ ] **MT-0182 · P0 · REVIEW** — Availability labels, purchasable counts and disabled coming-soon actions were implemented and rule-tested in the 5 November pack; confirm the current production page before marking complete because the roadmap pack recorded the change as not yet published.
+- [!] **MT-0181 · P0 · BLOCKED** — Test the full purchase journey on common Android phones and narrow mobile screens. This run has no physical Android-device access or approved non-production test environment. The available Preview is treated as potentially privileged against production because Preview service-role isolation has not been owner-verified; no production test order or payment is authorised. Unblock with an owner-provided Android test device/window and a verified isolated test environment or explicit test-order approval.
+- [x] **MT-0182 · P0 · DONE AND LIVE** — Verify production availability labels, purchasable counts and disabled coming-soon actions. On 9 November 2026, the READY production deployment and live catalog/product pages matched read-only Supabase product/category/variant metadata: 36 published listings, 5 available, 30 coming soon and 1 unavailable; coming-soon and temporarily unavailable purchase actions are disabled. Exact production-source blobs for the availability helper, tests, price visibility, cards and catalog/product/category routes match current main. Evidence: section 33.
 - [x] **MT-0183 · P0 · DONE AND LIVE** — Ensure the product card, product page and checkout show matching prices and variants; PR #17 merged at `9f944ec36ec3f87e3e603ff308b20979a1013183` and production deployment `dpl_cfXAs4hrfTSgdurWL1Veb5prUA5v` is READY on that exact SHA.
 - [ ] **MT-0184 · P0 · REVIEW** — Production purchase summaries were checked on five orderable pages on 8 November. Mobile Legends user-ID guidance is inaccurate in production; correction and regression coverage are in draft PR #19. See section 28; production and visual/mobile verification remain pending.
 - [ ] **MT-0185 · P1 · TODO** — Improve catalog search for brand, product, game, denomination and common abbreviations.
@@ -1334,3 +1334,38 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 No production application code, database/schema, order/payment/customer record, storage object, RLS/grant, credential, environment, DNS, hosting or billing setting changed. No test order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
 
 **Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
+
+
+## 33. Production availability verification — 9 November 2026
+
+**Task:** MT-0182 · P0 · DONE AND LIVE. This was a read-only production verification; no application or catalogue changes were made.
+
+### Current production deployment and live-page checks
+
+- Vercel project mtdgc is Git-linked to eboxont-code/mtdgc. The latest production deployment inspected was [dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE](https://vercel.com/boxont/mtdgc/7A2mKAuhBY6nkW2d4FrZGDGQDVUE), status READY, target production, source main commit 3de811c7cfce91eb262cf79523d8053995bfb777, with mtdgc.com and www.mtdgc.com aliases.
+- A fresh read-only fetch of [/catalog](https://mtdgc.com/catalog) returned HTTP 200 and server-rendered 36 listed / 5 available now / 30 coming soon / 1 unavailable. Its category sidebar showed Game Top-Ups 4, Gift Cards 1, Subscriptions 0 and Software 0 available now.
+- Fresh product-page fetches returned HTTP 200: [Steam Wallet Code](https://mtdgc.com/products/steam-wallet-code) showed Coming soon; [Netflix Subscription](https://mtdgc.com/products/netflix-subscription) showed Temporarily unavailable; [Roblox Gift Card](https://mtdgc.com/products/roblox-gift-card) showed Available now and Buy now.
+- The deployed product page renders the non-orderable product CTA as a disabled button with aria-disabled=true; non-orderable variant choices are disabled. The available Roblox page retains its purchase action. No order, cart submission or payment was attempted.
+- Some category-page search snapshots returned a crawl timestamp two weeks old and stale Netflix availability wording. Those stale snapshots were explicitly excluded; the current catalog and product-page fetches above were used for live status.
+
+### Read-only Supabase reconciliation
+
+- Project eaomkkswslqtfunkceuc (mtdgc) was ACTIVE_HEALTHY. Read-only queries inspected only published products, categories and product_variants metadata; no customer, order, payment, profile or authentication-user data was queried.
+- Production returned 36 published products and 54 variants. Product statuses were 5 available, 30 coming_soon and 1 temporarily_unavailable, matching the live catalog's 5/30/1 breakdown.
+- Published product counts by category: Game Top-Ups 6 (4 available, 2 coming soon); Gift Cards 12 (1 available, 11 coming soon); Subscriptions 7 (0 available, 6 coming soon, 1 temporarily unavailable); Software 11 (0 available, 11 coming soon).
+- Netflix's three variants have positive NPR prices and available variant statuses, but the parent product is temporarily_unavailable; the shared eligibility helper correctly excludes all three because product-level status must also be orderable. This confirms the unavailable product is not incorrectly counted as purchasable merely because its variants retain prices/statuses.
+
+### Source and quality verification
+
+- The production source commit 3de811c7cfce91eb262cf79523d8053995bfb777 and current main ca01edaafa42b5b859089ce18d5decaf6fbd4db3 have identical Git blob SHAs for: src/lib/product-availability.ts, src/lib/product-availability.test.ts, src/lib/price-visibility.ts, src/components/product-card.tsx, src/routes/products.$slug.tsx, src/routes/catalog.tsx and src/routes/categories.$slug.tsx.
+- The shared helper requires an orderable product, NPR currency and at least one orderable positive-price NPR variant; sample/coming-soon prices are hidden. Product cards and product pages use the same helper, and the product page disables both the main purchase CTA and non-orderable variant controls.
+- Existing product-availability.test.ts covers coming-soon exclusion, positive-price/orderable variants, hidden sample prices, out-of-stock/temporarily-unavailable labels, shared card/initial-option selection and product-level/currency rejection.
+- Current main Quality run [42437058568](https://github.com/eboxont-code/mtdgc/actions/runs/42437058568) passed on exact main HEAD ca01edaafa42b5b859089ce18d5decaf6fbd4db3: Bun setup, frozen dependency installation, lint, unit tests, TypeScript typecheck and production build all passed. No application source changed after this run.
+
+### Result and boundaries
+
+- MT-0182 acceptance is met on the actual production deployment: live counts and labels agree with read-only catalogue metadata; coming-soon and temporarily unavailable product actions are disabled; and the production implementation is identical to the current-main implementation and its regression tests.
+- MT-0181 is BLOCKED until physical Android-device access and a safe, owner-approved non-production end-to-end test environment are available.
+- Next eligible P0 review: MT-0184 — verify the already-merged Mobile Legends purchase-summary guidance on the current production page and complete the remaining visual/mobile checks. Its application correction is included in production commit 3de811c7cfce91eb262cf79523d8053995bfb777; do not repeat the implementation.
+- The existing draft PR #16 contains an older 8 November production snapshot and is based on an earlier main revision. This current-main-based documentation update supersedes that stale evidence; do not merge PR #16 independently.
+- No production writes, migrations, catalogue/variant changes, order/payment/customer changes, storage/auth/credential/environment changes, deployment, DNS/hosting/billing changes, supplier/customer contact or purchases occurred. Additional spend: $0.
