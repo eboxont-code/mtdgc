@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.2 · 8 November 2026
+**Version:** 2.3 · 8 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -301,7 +301,7 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** Customer information, payment evidence, order records and staff tools are protected with least-privilege access.
 
 - [!] **MT-0161 · P0 · BLOCKED** — Refreshed current-main audit is in draft PR [#26](https://github.com/eboxont-code/mtdgc/pull/26); exact-head Quality run [42453509323](https://github.com/eboxont-code/mtdgc/actions/runs/42453509323) failed before runner startup (runner ID 0, no steps/logs).
-- [~] **MT-0162 · P0 · IN PROGRESS** — Contact fallback is being restricted to guest orders; account orders now require a matching verified account bearer or order-specific token. The current-main implementation, negative test and tracking-session handoff are recorded in section 34; exact-head quality verification is still required.
+- [~] **MT-0162 · P0 · IN PROGRESS** — Contact fallback is being restricted to guest orders; account orders now require a matching verified account bearer or order-specific token. The current-main implementation, negative tests and tracking-session handoff are recorded in section 34; six focused helper assertions and the standalone helper's strict TypeScript check have passed locally, while exact-head full quality verification is still required.
 - [ ] **MT-0163 · P0 · TODO** — Verify payment uploads and delivered codes are stored privately, not in public buckets.
 - [ ] **MT-0164 · P0 · TODO** — Ensure admin-only actions are enforced server-side, not only hidden in the interface.
 - [ ] **MT-0165 · P0 · TODO** — Review secrets, supplier credentials and payment configuration for accidental exposure.
@@ -1366,7 +1366,7 @@ The order functions use the server-only Supabase service-role client, which bypa
 ### Verification boundary
 
 - Production RLS metadata already confirms that authenticated order reads are owner-scoped and there is no anonymous order SELECT policy. The service-role path bypasses those policies, which is why the explicit application-level check is necessary.
-- Current-main Quality run [42437058568](https://github.com/eboxont-code/mtdgc/actions/runs/42437058568) passed on the base commit. The focused helper test and strict TypeScript check must be run against this branch, and the exact-head repository Quality workflow must pass before merge.
+- Current-main Quality run [42437058568](https://github.com/eboxont-code/mtdgc/actions/runs/42437058568) passed on the base commit. Six focused helper assertions passed in a Node 22.16.0 harness, and the standalone helper passed strict TypeScript checking. A local repository checkout and Bun are not available in this runtime, so the full Bun lint/test/typecheck suite was not run locally; the exact-head repository Quality workflow must pass before merge.
 - No production customer, order, payment or auth-user records were read or changed. No production writes, migrations, supplier/customer contact, purchases, credentials, hosting, DNS or billing changes. Additional spend: $0.
 
 ### Next task
