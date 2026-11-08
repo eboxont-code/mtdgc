@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.2 · 8 November 2026
+**Version:** 2.3 · 9 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -330,7 +330,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [x] **MT-0183 · P0 · DONE AND LIVE** — Ensure the product card, product page and checkout show matching prices and variants; PR #17 merged at `9f944ec36ec3f87e3e603ff308b20979a1013183` and production deployment `dpl_cfXAs4hrfTSgdurWL1Veb5prUA5v` is READY on that exact SHA.
 - [ ] **MT-0184 · P0 · REVIEW** — Production purchase summaries were checked on five orderable pages on 8 November. Mobile Legends user-ID guidance is inaccurate in production; correction and regression coverage are in draft PR #19. See section 28; production and visual/mobile verification remain pending.
 - [ ] **MT-0185 · P1 · TODO** — Improve catalog search for brand, product, game, denomination and common abbreviations.
-- [ ] **MT-0186 · P1 · TODO** — Add clear sorting by relevance, price and availability.
+- [x] **MT-0186 · P1 · DONE** — Add clear sorting by relevance, price and availability. The existing catalogue control and comparator are present in current `main` and the deployed production commit; four focused sorting tests pass in the latest main Quality run, and production URL smoke evidence is recorded in section 10 (9 November 2026).
 - [ ] **MT-0187 · P1 · TODO** — Make filters usable on mobile without hiding the product list behind oversized controls.
 - [ ] **MT-0188 · P1 · TODO** — Keep cart contents and selected variants stable when customers navigate back.
 - [ ] **MT-0189 · P1 · TODO** — Reduce checkout fields to only the information required for that product.
@@ -546,6 +546,8 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | NEXT P0; can be documented from the current payment-review code and existing operational evidence without production writes |
 | 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
+
+**MT-0186 production verification — 9 November 2026 (DONE AND LIVE).** The catalogue exposes Relevance, Price low-high, Price high-low and Availability. The shared comparator uses the existing display-price callback, leaves products without a public display price last in both price directions, prioritises purchasable products for Availability, and uses query relevance with the existing featured-rank tie-breaker. Four focused sorting tests cover ascending/descending prices, hidden prices, availability ordering and relevance. The helper and test-file blobs are identical between current `main` and production commit `3de811c7cfce91eb262cf79523d8053995bfb777`. Main Quality run [42437058568](https://github.com/eboxont-code/mtdgc/actions/runs/42437058568) passed Bun setup, frozen install, lint, unit tests, TypeScript typecheck and production build on `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`. The READY production deployment is [dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE](https://vercel.com/boxont/mtdgc/dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE). Non-destructive GETs to `/catalog?sort=relevance`, `price-asc`, `price-desc` and `availability` all returned HTTP 200, selected the matching sort option in server-rendered HTML and returned the corresponding first-product order. Availability placed the five currently purchasable listings ahead of the first unavailable listing. No interactive touch/keyboard test was performed; this is URL/SSR smoke evidence only. Current `main` is 15 commits ahead of production overall, so this confirms only that the sorting helper, tests and catalogue page are already deployed—not that the entire main backlog is live. No catalogue, customer, order or payment data was changed; no order/payment was created; additional spend: $0.
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
