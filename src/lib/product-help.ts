@@ -1,7 +1,7 @@
 import type { CatalogProduct } from "@/lib/catalog.functions";
 
 const HELP: Array<[RegExp, string]> = [
-  [/player id|uid/i, "Open the game, tap your profile picture and copy the number shown under your name."],
+  [/player id|user id|uid/i, "Open the game, tap your profile picture and copy the number shown under your name."],
   [/server|zone/i, "Shown next to your Player ID on the profile screen, usually in brackets."],
   [/region/i, "Must match the region your account was created in, or the top-up may not apply."],
   [/email/i, "We send codes and order updates here. Check it for typos before you continue."],

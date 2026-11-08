@@ -328,7 +328,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0181 · P0 · TODO** — Test the full purchase journey on common Android phones and narrow mobile screens.
 - [ ] **MT-0182 · P0 · REVIEW** — Availability labels, purchasable counts and disabled coming-soon actions were implemented and rule-tested in the 5 November pack; confirm the current production page before marking complete because the roadmap pack recorded the change as not yet published.
 - [x] **MT-0183 · P0 · DONE AND LIVE** — Ensure the product card, product page and checkout show matching prices and variants; PR #17 merged at `9f944ec36ec3f87e3e603ff308b20979a1013183` and production deployment `dpl_cfXAs4hrfTSgdurWL1Veb5prUA5v` is READY on that exact SHA.
-- [ ] **MT-0184 · P0 · REVIEW** — Product purchase summaries for region, platform, delivery method and required details were implemented in the 5 November pack; confirm the current production page before marking complete because the roadmap pack recorded the change as not yet published.
+- [ ] **MT-0184 · P0 · REVIEW** — Production purchase summaries were checked on five orderable pages on 8 November. Mobile Legends user-ID guidance is inaccurate in production; correction and regression coverage are in draft PR #19. See section 28; production and visual/mobile verification remain pending.
 - [ ] **MT-0185 · P1 · TODO** — Improve catalog search for brand, product, game, denomination and common abbreviations.
 - [ ] **MT-0186 · P1 · TODO** — Add clear sorting by relevance, price and availability.
 - [ ] **MT-0187 · P1 · TODO** — Make filters usable on mobile without hiding the product list behind oversized controls.
@@ -1152,3 +1152,36 @@ No product records, supplier assignments, prices, variants, order records, datab
 - No production catalogue, price, variant, order, payment, schema, storage, authentication, RLS, environment, DNS, hosting or billing setting was changed. No test order or payment was created; no supplier/customer was contacted; additional spend was $0.
 
 **Next P0 task:** MT-0085 — verify and promote the existing payment-proof access-control implementation already represented by draft PR #2. MT-0181 remains blocked pending an owner-provided Android device and authorised end-to-end test window.
+
+
+## 28. Product purchase summary and delivery-field audit — 8 November 2026
+
+**Task:** MT-0184 · P0 · REVIEW. Production content was checked on five currently orderable listings. The remaining Mobile Legends helper mismatch has a source correction and regression test in draft [PR #19](https://github.com/eboxont-code/mtdgc/pull/19); the production listing is unchanged until an authorized release.
+
+### Production evidence
+
+- Read-only public page review confirmed the region, platform, delivery method and required customer-detail summary against the corresponding visible field labels on [PUBG Mobile UC](https://mtdgc.com/products/pubg-mobile-uc), [Free Fire Diamonds](https://mtdgc.com/products/free-fire-diamonds), [Mobile Legends Diamonds](https://mtdgc.com/products/mobile-legends-diamonds), [Clash of Clans Passes](https://mtdgc.com/products/clash-of-clans-passes), and [Roblox Gift Card](https://mtdgc.com/products/roblox-gift-card).
+- The Mobile Legends summary and fields ask for a user ID and Zone ID. Its user-ID helper instead said “The mobile number we should contact about this order.” The generic help matcher tested “mobile” before recognizing “user ID”, so the product name triggered phone-contact guidance.
+- The [Netflix Subscription](https://mtdgc.com/products/netflix-subscription) listing remains temporarily unavailable; its purchase control is disabled and the page does not show a purchasable price. It was not counted among orderable pages.
+- No form was submitted and no customer, order, payment, catalogue or supplier data was accessed or changed.
+
+### Source correction
+
+- PR #19 adds “user ID” to the game-identifier guidance matcher and adds regression tests for both Mobile Legends user-ID guidance and genuine mobile contact fields.
+- Product requirements, stored listing data, cart contents and order flow are unchanged.
+- The production route source uses programmatic labels (label htmlFor paired with input IDs); the page content exposes the same required field names in both the summary and form.
+
+### Quality-standard evidence
+
+- **184 — PASS at source review:** form labels are associated with their inputs in the product route.
+- **201 — PASS by public content review:** the product context and “Your details” step explain the form purpose.
+- **204 — PARTIAL:** field names are present, but the Mobile Legends help text gives misleading instructions in production; the proposed fix is not live.
+- **206 — PARTIAL:** pre-submission guidance is present, but Mobile Legends guidance is inaccurate until PR #19 is released.
+- **218 — UNVERIFIED:** the CUA browser surface was unavailable during this run, so viewport and mobile interaction checks could not be repeated.
+- No overall 500-point score is assigned from this focused audit.
+
+### Verification and limits
+
+- GitHub Actions Quality run [42429760581](https://github.com/eboxont-code/mtdgc/actions/runs/42429760581) passed on source head a5adeb2efeffcc33ee7df7d561a23fabfb540bef (lint, unit tests, typecheck and production build). This run preceded the documentation-only synchronization with current main.
+- Vercel did not create a preview for PR #19: its deployment status reports the daily free deployment quota was exceeded (api-deployments-free-per-day). No upgrade or spend was made. The production fix therefore remains unverified and undeployed.
+- No production change or deployment was made. MT-0184 remains open until the corrected live page and responsive purchase journey are verified. Keep MT-0085 as the next P0 priority from section 27 after this open release check.
