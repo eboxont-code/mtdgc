@@ -304,7 +304,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [!] **MT-0162 · P0 · BLOCKED** — Clean current-main fix is in draft PR [#27](https://github.com/eboxont-code/mtdgc/pull/27). Code-bearing head `4673e249ba680d248fc205915169e0ec9df203b7` failed Quality run [42453860327](https://github.com/eboxont-code/mtdgc/actions/runs/42453860327) before runner startup; the later documentation-only head `23cde910f6a8ba96409d62d1d76eefa9e84af8b8` has no new workflow run. Vercel rejected the PR preview because the free daily deployment limit was exceeded.
 - [ ] **MT-0163 · P0 · TODO** — Verify payment uploads and delivered codes are stored privately, not in public buckets.
 - [ ] **MT-0164 · P0 · TODO** — Ensure admin-only actions are enforced server-side, not only hidden in the interface.
-- [~] **MT-0165 · P0 · IN PROGRESS** — The existing audit PR #15 is 63 commits behind current main. Its tests and findings are being reapplied to a clean current-main branch; the Preview service-role variable remains an owner-only configuration risk and will not be changed or decrypted.
+- [~] **MT-0165 · P0 · IN PROGRESS** — The old audit PR #15 is 63 commits behind current main. The refreshed audit and regression guardrails are in clean current-main draft [PR #28](https://github.com/eboxont-code/mtdgc/pull/28); initial code/test head `48ddda203ca48f2e1078c1bc6fddc3628f2cbdba`. The Preview service-role variable remains an owner-only configuration risk and will not be changed or decrypted.
 - [ ] **MT-0166 · P1 · TODO** — Enable strong admin authentication and remove unused staff accounts.
 - [ ] **MT-0167 · P1 · TODO** — Apply least-privilege roles for payment review, fulfilment, support and catalogue editing.
 - [ ] **MT-0168 · P1 · TODO** — Log sensitive admin actions such as refunds, code reveal, payment verification and status overrides.
@@ -550,7 +550,7 @@ MT-0165 is **IN PROGRESS** on a clean branch based on current main. MT-0102, MT-
 | 14 | MT-0162 — prevent cross-customer order access by changing an ID or URL | BLOCKED; draft PR #27 exact-head runner failed and Vercel preview was rejected by the free daily deployment limit |
 | 15 | MT-0163 — verify payment uploads and delivered codes are stored privately | BLOCKED; no delivered-code storage location or approved storage design is evidenced |
 | 16 | MT-0164 — enforce admin-only actions server-side | BLOCKED pending MT-0162; existing PR #14 is stacked on the old MT-0162 branch |
-| 17 | MT-0165 — review secrets and payment configuration for accidental exposure | IN PROGRESS; clean current-main audit and regression guardrails are being prepared, with no environment values decrypted or changed |
+| 17 | MT-0165 — review secrets and payment configuration for accidental exposure | IN PROGRESS; clean current-main audit and regression guardrails are in draft [PR #28](https://github.com/eboxont-code/mtdgc/pull/28), with no environment values decrypted or changed |
 | 18 | MT-0181 — test the full purchase journey on common Android phones and narrow mobile screens | BLOCKED; requires a physical Android device and an owner-authorised real test order/payment |
 | 19 | MT-0182 — verify availability labels, purchasable counts and disabled coming-soon actions on production | NEXT P0 after MT-0165; read-only production-page review can proceed once the current security audit is settled |
 | 20 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
@@ -1346,7 +1346,7 @@ No production application code, database/schema, order/payment/customer record, 
 
 ## 35. Secrets, supplier credentials and payment configuration audit — 8 November 2026
 
-**Task:** MT-0165 · P0 · IN PROGRESS. This is a clean current-main refresh based on commit `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`. The earlier draft [PR #15](https://github.com/eboxont-code/mtdgc/pull/15) is 63 commits behind current main and is not being merged or treated as current-main evidence.
+**Task:** MT-0165 · P0 · IN PROGRESS. Clean current-main draft [PR #28](https://github.com/eboxont-code/mtdgc/pull/28) contains this refresh, based on commit `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`; its initial code/test head was `48ddda203ca48f2e1078c1bc6fddc3628f2cbdba`. The earlier draft [PR #15](https://github.com/eboxont-code/mtdgc/pull/15) is 63 commits behind current main and is not being merged or treated as current-main evidence.
 
 ### Current repository and application evidence
 
