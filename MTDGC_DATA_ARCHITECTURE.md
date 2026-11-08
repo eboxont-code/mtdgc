@@ -82,3 +82,12 @@ MTDGC (Matrix Digital Goods & Commerce) is a digital marketplace for Nepal. This
 - Legacy clients may omit the optional expectation fields for backwards compatibility. They still receive server-calculated order prices, but the explicit stale-snapshot refresh/review handshake is provided by the current checkout client.
 - The current implementation supports NPR only. Non-NPR product/variant rows fail closed in storefront purchasability and server order creation; no foreign-currency conversion or exchange-rate assumption is made.
 - No schema change or migration is required for this control.
+
+
+## 8. Payment-proof access boundaries
+
+- Direct reads of `public.payment_proofs` are available only to authenticated users whose `auth.uid()` matches the `user_id` of the related order, or to administrators. RLS is enabled; authenticated clients receive SELECT only for this table, while service-role writes remain server-side.
+- Direct reads from `storage.objects` for the private `payment-proofs` bucket are limited to authenticated related-order owners or administrators. The object path's first folder segment is the server-resolved order ID. No anonymous policy is present for this bucket.
+- The administrator payment-review queue and signed proof-URL function require a validated Supabase session and an exact successful administrator-role result before any proof lookup or signed URL creation. Signed URLs expire after 300 seconds.
+- `has_role` remains a SECURITY DEFINER function that Supabase's advisor reports as executable by anon/authenticated. Treat its role-membership disclosure as a separate issue; change function execution and dependent policies only through the approved coordinated Supabase migration gate.
+- Guest order access is mediated by server-side order access checks and is not a direct proof-row/object RLS grant. Cross-customer order lookup/contact-fallback isolation remains tracked separately under MT-0162.

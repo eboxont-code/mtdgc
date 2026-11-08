@@ -5,12 +5,13 @@ import type { Database } from "@/integrations/supabase/types";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { findUnsafeCustomerRequirement, UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE } from "@/lib/supplier-safety";
+import { isAdminRoleConfirmed } from "@/lib/admin-access";
 
 type Ctx = { supabase: SupabaseClient<Database>; userId: string };
 
 async function assertAdmin(context: Ctx) {
   const { data, error } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
-  if (error || !data) throw new Error("Admin access required");
+  if (!isAdminRoleConfirmed(data, error)) throw new Error("Admin access required");
 }
 
 const productStatus = z.enum(["available", "low_stock", "coming_soon", "out_of_stock", "temporarily_unavailable", "archived"]);
