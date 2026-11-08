@@ -350,7 +350,7 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** MTDGC earns qualified demand through useful category and product information, not thin pages or unsupported claims.
 
-- [ ] **MT-0201 · P0 · TODO** — Set one canonical brand description and use it consistently across the site and metadata.
+- [~] **MT-0201 · P0 · IN PROGRESS** — Set one canonical brand description and use it consistently across the site and metadata. Implementation is in draft PR #33; release is pending exact-head quality verification and production review.
 - [ ] **MT-0202 · P0 · TODO** — Resolve the homepage's Nepal-and-Australia positioning against actual checkout and legal-market support.
 - [ ] **MT-0203 · P1 · TODO** — Create original category landing pages for game top-ups, gift cards, subscriptions and software.
 - [ ] **MT-0204 · P1 · TODO** — Write product descriptions that explain what is delivered, how it works and what restrictions apply.
@@ -1334,3 +1334,35 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 No production application code, database/schema, order/payment/customer record, storage object, RLS/grant, credential, environment, DNS, hosting or billing setting changed. No test order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
 
 **Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
+
+
+## 33. Canonical MTDGC brand description — 8 November 2026
+
+**Task:** MT-0201 · P0 · IN PROGRESS. [PR #33](https://github.com/eboxont-code/mtdgc/pull/33) is open and draft, based on current main `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`. The source/test commit at PR creation is `c069a825dad0ae0b66db67adc35a43bfa788c79e`; the plan-record commit is a documentation-only descendant.
+
+### Canonical source
+
+The opening statement in README.md is the approved source of the brand description:
+
+> Matrix Digital Goods & Commerce is a digital-goods storefront for game top-ups, gift cards, subscriptions and software.
+
+### Implementation
+
+- Added one shared brand definition for the public name, legal name, page title, canonical description and image alt text.
+- Reused it in the homepage title/description, Open Graph and Twitter metadata, Organization structured data, root metadata fallbacks, About-page metadata/structured data/hero introduction and the shared site footer.
+- Added two regression tests: one pins the approved wording and brand identity; the other prevents the canonical description from implying a live market, current availability, reseller authorisation or instant delivery.
+- Separate market-positioning content and the existing About-page `areaServed` data remain unchanged for MT-0002/MT-0202 review. Legal policies, product availability, prices, supplier claims and fulfilment rules were not changed.
+
+### Verification boundary
+
+- Local Node.js 22.16 test run: **2/2 PASS**.
+- Standalone strict TypeScript check of the shared brand definition: **PASS**.
+- Full repository Quality workflow: pending on the final PR head; no full lint, Bun suite, project-wide typecheck or production build is claimed from the local scratch check.
+- No production deployment or live metadata verification is claimed. The current production deployment remains READY on the older commit recorded in section 31; main is not yet deployed.
+- No production data, database/schema, orders, payments, supplier records, authentication, environment variables, DNS, hosting or billing settings were changed. Additional spend: **$0**.
+
+### Release state and next candidate
+
+MT-0201 remains IN PROGRESS until the exact PR head passes the repository quality workflow and the merged production commit plus live metadata are verified. No merge commit exists.
+
+The next independent P0 candidate is **MT-0292 — map personal-data fields and known processors from the current application and project metadata**. The initial map can be completed from source/schema evidence; supplier recipients, external processing locations and retention details that are not present in the records must remain explicitly UNKNOWN/BLOCKED rather than inferred.
