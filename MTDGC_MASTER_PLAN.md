@@ -1363,7 +1363,9 @@ No production application code, database/schema, order/payment/customer record, 
 
 - No production database, catalogue, customer, order, payment, authentication, storage, hosting, DNS or billing setting changed.
 - No test order or payment was created and no customer record was read or changed.
-- No merge or deployment was triggered by this run. The current main Vercel status is blocked by the free daily build limit; exact-head quality is still required for this documentation PR before merge.
+- Live smoke check: the public Mobile Legends product page returned HTTP 200 and rendered the order summary, “Required customer details”, Mobile Legends user ID and Zone ID inputs, and both help instructions before the purchase actions; no form was submitted ([live page](https://mtdgc.com/products/mobile-legends-diamonds)).
+- The documentation PR received a READY Vercel preview at [deployment `dpl_62JvXcKtypmFzv9QddeGwkSpAdzs`](https://vercel.com/boxont/mtdgc/62JvXcKtypmFzv9QddeGwkSpAdzs), built from exact head `6601ff8ce92f8dafde3fd58374d1a991f93abbf9`. This is a preview, not production.
+- Exact PR-head Quality run [42533558828](https://github.com/eboxont-code/mtdgc/actions/runs/42533558828) failed before any job steps were available (the job returned no steps or logs). Do not merge until the exact head passes required checks. No merge or production deployment was triggered.
 - Additional spend: $0.
 
 ### Next task-selection pass
