@@ -20,6 +20,7 @@ import { enabledProviders } from "@/lib/payments";
 import { compareAt } from "@/lib/pricing";
 import { GIFT_CARD_PRICE_DISCLOSURE, isGiftCardCategory } from "@/lib/gift-card-pricing";
 import { productFaqs, requirementHelp } from "@/lib/product-help";
+import { CUSTOMER_CREDENTIAL_WARNING, getSafeCustomerRequirements, isSafeCustomerRequirements } from "@/lib/supplier-safety";
 import { AccordionList } from "@/components/sections/accordion-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -128,14 +129,16 @@ function ProductPage() {
   const { plan } = Route.useSearch();
   const selectedVariant = selectProductVariant(product, plan);
   const selectedSku = selectedVariant?.sku ?? "";
+  const unsafeRequirement = !isSafeCustomerRequirements(product.requirements);
+  const safeRequirements = getSafeCustomerRequirements(product.requirements);
   const [fields, setFields] = useState<Record<string, string>>({});
   useEffect(() => {
     let active = true;
     let saved: Record<string, string> = {};
     try { saved = JSON.parse(localStorage.getItem("mtdgc-fields-v1") ?? "{}"); } catch { /* ignore */ }
     const initial: Record<string, string> = {};
-    for (const r of product.requirements) if (saved[r]) initial[r] = saved[r];
-    setFields(requiredProductFields(product.requirements, initial));
+    for (const r of safeRequirements) if (saved[r]) initial[r] = saved[r];
+    setFields(requiredProductFields(safeRequirements, initial));
     void (async () => {
       const { data } = await supabase.auth.getUser();
       if (!data.user) return;
@@ -144,7 +147,7 @@ function ProductPage() {
       if (!mail || !active) return;
       setFields((c) => {
         const n = { ...c };
-        for (const r of product.requirements) if (/email/i.test(r) && !n[r]) n[r] = mail;
+        for (const r of safeRequirements) if (/email/i.test(r) && !n[r]) n[r] = mail;
         return n;
       });
     })();
@@ -156,10 +159,12 @@ function ProductPage() {
 
   const variant = selectedVariant;
   const hidePrices = pricesHidden(product);
-  const orderable = !!variant && isPurchasableVariant(product, variant);
-  const selectedAvailability = variant
-    ? availabilityLabel({ ...product, variants: [variant] })
-    : availabilityLabel(product);
+  const orderable = !unsafeRequirement && !!variant && isPurchasableVariant(product, variant);
+  const selectedAvailability = unsafeRequirement
+    ? "Temporarily unavailable"
+    : variant
+      ? availabilityLabel({ ...product, variants: [variant] })
+      : availabilityLabel(product);
 
   const regionText = product.region?.trim() ?? "";
   const needsRegionConfirm = categoryTypeFromSlug(product.category?.slug ?? "") === "gift_card" && regionText.length > 0;
@@ -174,7 +179,7 @@ function ProductPage() {
       regionRef.current?.focus();
       return;
     }
-    const missing = product.requirements.filter((requirement) => !(fields[requirement] ?? "").trim());
+    const missing = safeRequirements.filter((requirement) => !(fields[requirement] ?? "").trim());
     if (missing.length) {
       setError(`Please fill in: ${missing.join(", ")}.`);
       setInvalidFields(missing);
@@ -192,13 +197,13 @@ function ProductPage() {
       image: product.image_url,
       region: product.region,
       categorySlug: product.category?.slug,
-      fields: requiredProductFields(product.requirements, fields),
+      fields: requiredProductFields(safeRequirements, fields),
     });
     if (buyNow) void navigate({ to: "/checkout" });
     else setDrawerOpen(true);
   };
 
-  const hasDetails = product.requirements.length > 0;
+  const hasDetails = safeRequirements.length > 0;
   const packStep = hasDetails ? 2 : 1;
   const payStep = packStep + 1;
   const wa = whatsappLink(`${SUPPORT_MESSAGE} with ${product.name}`);
@@ -214,7 +219,7 @@ function ProductPage() {
     { label: "Region", value: product.region?.trim() },
     { label: "Platform", value: product.platform?.trim() },
     { label: "Delivery method", value: deliveryMethod },
-    { label: "Required customer details", value: product.requirements.map((item) => item.trim()).filter(Boolean).join(", ") },
+    { label: "Required customer details", value: unsafeRequirement ? "Unavailable pending review" : safeRequirements.map((item) => item.trim()).filter(Boolean).join(", ") },
   ].filter((item) => item.value);
   const purchaseDetailsBlock = purchaseDetails.length > 0 ? (
     <dl aria-label="Product purchase details" className="grid min-w-0 grid-cols-2 gap-x-3 gap-y-2 border-t border-border pt-3 text-xs">
@@ -238,6 +243,7 @@ function ProductPage() {
     <ul className="space-y-2 text-[13px] text-foreground/85">
       <li className="flex gap-2"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />We verify your payment and deliver once it is checked.</li>
       <li className="flex gap-2"><Check className="mt-0.5 size-4 shrink-0 text-primary" /><span>Refunds follow our <Link to="/policies/refunds" className="text-primary underline-offset-2 hover:underline">refund policy</Link>.</span></li>
+      <li className="flex gap-2"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" /><span>{CUSTOMER_CREDENTIAL_WARNING}</span></li>
       {wa && <li className="flex gap-2"><MessageCircle className="mt-0.5 size-4 shrink-0 text-primary" /><span>Questions first? <a href={wa} target="_blank" rel="noopener noreferrer" className="text-primary underline-offset-2 hover:underline">Ask on WhatsApp</a>.</span></li>}
     </ul>
   );
@@ -330,11 +336,17 @@ function ProductPage() {
               </dl>
             )}
 
-            {hasDetails && (
+            {unsafeRequirement ? (
+              <section role="alert" className="mt-6 rounded-2xl border border-destructive/40 bg-card p-4 md:p-5">
+                <StepTitle n={1}>Ordering temporarily unavailable</StepTitle>
+                <p className="mt-3 text-sm text-muted-foreground">The saved customer requirements include information MTDGC must not collect. Ordering is paused until the listing is reviewed. {CUSTOMER_CREDENTIAL_WARNING}</p>
+              </section>
+            ) : hasDetails && (
               <section className="mt-6 rounded-2xl border border-border bg-card p-4 md:p-5">
                 <StepTitle n={1}>Your details</StepTitle>
+                <p role="note" className="mt-3 text-xs text-muted-foreground">{CUSTOMER_CREDENTIAL_WARNING}</p>
                 <div className="mt-4 space-y-3">
-                  {product.requirements.map((requirement) => {
+                  {safeRequirements.map((requirement) => {
                     const help = requirementHelp(requirement);
                     const id = `req-${requirement.replace(/\W+/g, "-").toLowerCase()}`;
                     return (

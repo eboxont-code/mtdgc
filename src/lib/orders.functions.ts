@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { hasCheckoutPriceSnapshotChanges } from "@/lib/checkout-price-snapshot";
-import { findUnsafeCustomerRequirement, UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE } from "@/lib/supplier-safety";
+import { findUnsafeCustomerRequirement, isSafeCustomerRequirements, UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE } from "@/lib/supplier-safety";
 import { generateOrderReference } from "@/lib/order-reference";
 import {
   buildPaymentProofAssociation,
@@ -87,7 +87,7 @@ export const placeOrder = createServerFn({ method: "POST" })
     const skus = data.lines.map((l) => l.sku);
     const { data: variants, error } = await supabaseAdmin
       .from("product_variants")
-      .select("id, sku, name, price_minor, currency, status, product_id, products(id, name, image_url, currency, is_published, status, categories(slug))")
+      .select("id, sku, name, price_minor, currency, status, product_id, products(id, name, image_url, currency, is_published, status, requirements, categories(slug))")
       .in("sku", skus);
     if (error) throw new Error("Could not load products");
 
@@ -100,11 +100,14 @@ export const placeOrder = createServerFn({ method: "POST" })
         currency: string;
         is_published: boolean;
         status: string;
+        requirements: unknown;
         categories: { slug: string } | null;
       } | null | undefined;
       const ok = v && p?.is_published && ["available", "low_stock"].includes(v.status) && ["available", "low_stock"].includes(p.status) && Number.isSafeInteger(v.price_minor) && v.price_minor > 0;
       if (!ok || !v || !p) throw new Error(`An item in your cart is no longer available (${line.sku}).`);
       if (v.currency !== "NPR" || p.currency !== "NPR") throw new Error("This item's price currency is not supported by checkout.");
+      const requirements = p.requirements ?? [];
+      if (!isSafeCustomerRequirements(requirements)) throw new Error(UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE);
       return {
         orderItem: {
           product_id: p.id,

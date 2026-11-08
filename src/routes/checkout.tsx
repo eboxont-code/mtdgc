@@ -15,6 +15,7 @@ import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { useCart, type CartLine } from "@/lib/cart";
 import { formatNpr, SITE_URL } from "@/lib/format";
+import { CUSTOMER_CREDENTIAL_WARNING } from "@/lib/supplier-safety";
 import { enabledProviders } from "@/lib/payments";
 import { Check, ChevronDown, Lock, QrCode, ShieldCheck } from "lucide-react";
 
@@ -263,7 +264,7 @@ function CheckoutPage() {
   const reassurance = (
     <ul className="mt-4 space-y-2 border-t border-border pt-4 text-xs text-muted-foreground">
       <li className="flex gap-2"><ShieldCheck className="size-4 shrink-0 text-primary" />We check every order before delivery.</li>
-      <li className="flex gap-2"><Lock className="size-4 shrink-0 text-primary" />We never ask for your password, OTP, recovery code or payment PIN.</li>
+      <li className="flex gap-2"><Lock className="size-4 shrink-0 text-primary" />{CUSTOMER_CREDENTIAL_WARNING}</li>
     </ul>
   );
 
@@ -384,7 +385,8 @@ function CheckoutPage() {
 
                   <label htmlFor="co-note" className="mt-4 block">
                     <span className="font-display text-xs text-muted-foreground">Anything else we should know (optional)</span>
-                    <textarea id="co-note" value={note} rows={3} onChange={(e) => setNote(e.target.value)} className="mt-1 w-full rounded-lg border border-border bg-background/60 p-3 font-display text-[15px] outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
+                    <textarea id="co-note" aria-describedby="co-note-safety" value={note} rows={3} onChange={(e) => setNote(e.target.value)} className="mt-1 w-full rounded-lg border border-border bg-background/60 p-3 font-display text-[15px] outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
+                    <span id="co-note-safety" className="mt-1 block text-xs text-muted-foreground">{CUSTOMER_CREDENTIAL_WARNING}</span>
                   </label>
                 </Panel>
               )}

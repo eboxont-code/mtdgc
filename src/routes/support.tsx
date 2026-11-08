@@ -9,6 +9,7 @@ import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { SITE_URL, whatsappLink } from "@/lib/format";
+import { CUSTOMER_CREDENTIAL_WARNING } from "@/lib/supplier-safety";
 import { breadcrumbLd, pageLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/support")({
@@ -186,10 +187,11 @@ function SupportPage() {
             </label>
             <label htmlFor="support-description" className="block">
               <span className="font-display text-xs text-muted-foreground">What happened</span>
+              <span id="support-description-safety" role="note" className="mt-1 block text-xs text-muted-foreground">{CUSTOMER_CREDENTIAL_WARNING}</span>
               <textarea
                 id="support-description"
                 aria-invalid={status === "error"}
-                aria-describedby={status === "error" ? "support-description-error" : undefined}
+                aria-describedby={status === "error" ? "support-description-safety support-description-error" : "support-description-safety"}
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
                 rows={4}
