@@ -326,7 +326,7 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** Customers can discover the right digital item, understand restrictions and complete an order without confusion.
 
 - [ ] **MT-0181 · P0 · TODO** — Test the full purchase journey on common Android phones and narrow mobile screens.
-- [x] **MT-0182 · P0 · DONE AND LIVE** — Verified on production 8 November 2026: the full catalog shows 36 listings, 5 available now, 30 coming soon and 1 unavailable; category counts reconcile exactly, and coming-soon/unavailable product pages show disabled non-purchase actions. Evidence: section 36.
+- [x] **MT-0182 · P0 · DONE AND LIVE** — Verified on production 8 November 2026: the full catalog shows 36 listings, 5 available now, 30 coming soon and 1 unavailable; category counts reconcile exactly, and coming-soon/unavailable product pages show disabled non-purchase actions. Evidence: section 36 and documentation PR [#29](https://github.com/eboxont-code/mtdgc/pull/29).
 - [x] **MT-0183 · P0 · DONE AND LIVE** — Ensure the product card, product page and checkout show matching prices and variants; PR #17 merged at `9f944ec36ec3f87e3e603ff308b20979a1013183` and production deployment `dpl_cfXAs4hrfTSgdurWL1Veb5prUA5v` is READY on that exact SHA.
 - [ ] **MT-0184 · P0 · REVIEW** — Production purchase summaries were checked on five orderable pages on 8 November. Mobile Legends user-ID guidance is inaccurate in production; correction and regression coverage are in draft PR #19. See section 28; production and visual/mobile verification remain pending.
 - [ ] **MT-0185 · P1 · TODO** — Improve catalog search for brand, product, game, denomination and common abbreviations.
@@ -1347,7 +1347,7 @@ No production application code, database/schema, order/payment/customer record, 
 
 ## 36. Production availability labels and purchase-action verification — 8 November 2026
 
-**Task:** MT-0182 · P0 · DONE AND LIVE. The current production website was checked read-only on 8 November 2026. Production deployment [`dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE`](https://vercel.com/boxont/mtdgc/dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE) is READY on commit `3de811c7cfce91eb262cf79523d8053995bfb777`, the merge commit for PR [#19](https://github.com/eboxont-code/mtdgc/pull/19).
+**Task:** MT-0182 · P0 · DONE AND LIVE. The current production website was checked read-only on 8 November 2026; the canonical plan record is in draft documentation [PR #29](https://github.com/eboxont-code/mtdgc/pull/29), initially created at head `ccca6c740bfb7f5c7b23da97dde3db5aa2cf9282`. Production deployment [`dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE`](https://vercel.com/boxont/mtdgc/dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE) is READY on commit `3de811c7cfce91eb262cf79523d8053995bfb777`, the merge commit for PR [#19](https://github.com/eboxont-code/mtdgc/pull/19).
 
 ### Live catalogue counts
 
