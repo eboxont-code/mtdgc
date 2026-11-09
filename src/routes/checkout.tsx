@@ -187,6 +187,7 @@ function CheckoutPage() {
             variantName: line.variantName,
             priceMinor: line.priceMinor,
             image: line.image,
+            region: line.region,
             categorySlug: line.categorySlug,
           });
         }
