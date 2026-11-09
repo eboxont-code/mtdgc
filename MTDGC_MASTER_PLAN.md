@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.2 · 8 November 2026
+**Version:** 2.5 · 10 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -464,7 +464,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0292 · P0 · TODO** — Map every personal-data field captured in checkout, accounts, tracking, support, analytics and payment proof; record which supplier or processor receives it, the purpose and the country of access/storage.
 - [ ] **MT-0293 · P1 · TODO** — Define retention periods or defensible retention criteria for orders, support records, payment evidence and account data, with a process for access, correction and deletion requests.
 - [ ] **MT-0294 · P0 · TODO** — Keep payment screenshots and delivered codes in private, access-controlled storage; validate file type/size, minimise visible bank details, restrict staff access and define deletion timing.
-- [~] **MT-0295 · P0 · IN PROGRESS** — Harden the existing order-enumeration limiter: public lookup and contact fallback now fail closed when the attempt count is missing/invalid, the count query errors, or recording an attempt fails. Five focused tests cover allow/limit/failure decisions. Remaining rapid-repeat-order, payment/market mismatch, stolen-card, account-takeover, code-reselling and chargeback controls require source-backed provider/supplier signals and approved policy; an atomic concurrent cap requires the Supabase migration/cutover gate. See section 31.
+- [~] **MT-0295 · P0 · IN PROGRESS** — The existing 10-attempt/10-minute per-IP limiter now fails closed across all three contact-fallback entry points: public `lookupOrder`, `getOrderForViewer`, and `submitPaymentProof`. Missing/invalid counts, count-query errors and attempt-insert errors block access. Six focused tests cover the decision helper and all three handler integrations. Remaining rapid-repeat, payment/market mismatch, stolen-card, account-takeover, code-reselling and chargeback controls require verified signals and approved policy; an atomic concurrent cap remains behind the Supabase migration/cutover gate. See sections 31–32.
 - [ ] **MT-0296 · P1 · TODO** — Audit sensitive changes to price, region, recipient, payment state, refund, code reveal and supplier fulfilment, including actor, timestamp and reason.
 - [ ] **MT-0297 · P1 · TODO** — Keep one durable support case record linked to the order, payment, supplier action and customer conversation; WhatsApp must not be the only record of a refund or promise.
 - [ ] **MT-0298 · P1 · TODO** — Localise currency, dates, number formats, receipts, phone fields and customer instructions for Nepal and Australia; decide Nepali-language coverage from customer evidence and maintain equivalent policy meaning.
@@ -530,7 +530,7 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-MT-0295 is **IN PROGRESS** for one evidence-backed order-enumeration control; this does not complete the wider fraud-control task. Earlier P0 candidates remain blocked by their recorded owner, supplier, exact-head quality or migration dependencies. Task statuses in the 308-task register remain authoritative.
+MT-0295 is **IN PROGRESS** for fail-closed handling across public tracking, order viewing and payment-proof submission contact fallback; this does not complete the wider fraud-control task. Exact-head full quality and release checks remain pending. Remaining P0 tasks retain their recorded owner, supplier, CI or migration dependencies. Task statuses in the 308-task register remain authoritative.
 
 | Order | Task | Status |
 |---:|---|---|
@@ -546,7 +546,7 @@ MT-0295 is **IN PROGRESS** for one evidence-backed order-enumeration control; th
 | 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | NEXT P0; can be documented from the current payment-review code and existing operational evidence without production writes |
 | 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
-| 13 | MT-0295 — fail closed when order-lookup attempt counting or recording is unavailable | IN PROGRESS; five focused decision tests; broader fraud signals and atomic concurrency enforcement remain evidence/migration-gated |
+| 13 | MT-0295 — fail closed when order-lookup attempt counting or recording is unavailable | IN PROGRESS; six focused checks cover all three contact-fallback entry points; broader fraud signals and atomic concurrency enforcement remain evidence/migration-gated |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -1366,3 +1366,29 @@ No production application code, database/schema, order/payment/customer record, 
 - The current count/insert pair is not atomic, so concurrent requests can exceed the nominal limit. A concurrency-safe cap requires an approved database function/constraint and Supabase migration gate. No migration is attempted.
 
 No production order/customer/payment data was read or changed. No supplier/customer was contacted, no test order/payment was created, no deployment was triggered and no additional spend occurred. Additional spend: **$0**.
+
+
+## 32. MT-0295 payment-proof contact-fallback rate-limit coverage — 10 November 2026
+
+**Task:** MT-0295 · P0 · IN PROGRESS. This is a bounded extension of the existing fail-closed order-enumeration control; it does not complete the broader fraud-control task.
+
+### Implementation
+
+- The same 10-attempt/10-minute per-IP decision helper is now applied to all three contact-fallback entry points: public `lookupOrder`, `getOrderForViewer`, and `submitPaymentProof`.
+- Each path blocks when the count query returns an error, the count is missing/invalid/negative/non-integer, the configured limit is reached, or the attempt insert fails.
+- Payment-proof submission now returns a temporary-unavailable message when the limiter cannot be trusted, distinct from the normal rate-limited message. It does not proceed to payment-proof upload or order mutation in that case.
+- Existing order-specific access-token and authenticated-owner paths remain separate; this change only hardens the contact-fallback throttle.
+- No database schema, table, index, RLS, grant, credential, order, customer or payment record change is included.
+
+### Regression coverage
+
+- Six focused checks cover below-limit allowance, at/above-limit blocking, count-query errors, missing/invalid counts, insert errors, and source-contract verification that all three handlers use the shared fail-closed decision helper.
+- The Node 22.16.0 scratch harness is run separately; the full repository Bun quality workflow remains required for release.
+
+### Remaining limitations
+
+- Count and insert remain separate requests, so concurrent requests can race and exceed the nominal limit. An atomic cap requires the approved Supabase migration/cutover gate; no migration is attempted.
+- The IP key still relies on trusted hosting proxy headers.
+- Broader rapid-repeat, payment/market mismatch, stolen-card, account-takeover, code-reselling and chargeback controls require owner-approved thresholds and verified processor/supplier signals that are not available in the current project evidence.
+
+No production order/customer/payment data was read or changed. No test order/payment was created, no supplier/customer was contacted, no production deployment was triggered and no additional spend occurred. Additional spend: **$0**.

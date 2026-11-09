@@ -352,9 +352,22 @@ export const submitPaymentProof = createServerFn({ method: "POST" })
       const { getRequestHeader } = await import("@tanstack/react-start/server");
       const ip = getRequestHeader("cf-connecting-ip") ?? getRequestHeader("x-forwarded-for")?.split(",")[0] ?? "unknown";
       const ipHash = await sha256(`lookup:${ip.trim()}`);
-      const { count } = await supabaseAdmin.from("order_lookup_attempts").select("id", { count: "exact", head: true }).eq("ip_hash", ipHash).gte("created_at", new Date(Date.now() - 600000).toISOString());
-      if ((count ?? 0) >= 10) return { ok: false as const, error: "Too many attempts. Please wait 10 minutes and try again." };
-      await supabaseAdmin.from("order_lookup_attempts").insert({ ip_hash: ipHash });
+      const { count, error: countError } = await supabaseAdmin
+        .from("order_lookup_attempts")
+        .select("id", { count: "exact", head: true })
+        .eq("ip_hash", ipHash)
+        .gte("created_at", new Date(Date.now() - 600000).toISOString());
+      const rateLimit = evaluateOrderLookupRateLimit(count, countError);
+      if (rateLimit === "limited") {
+        return { ok: false as const, error: "Too many attempts. Please wait 10 minutes and try again." };
+      }
+      if (rateLimit === "unavailable") {
+        return { ok: false as const, error: "Order verification is temporarily unavailable. Please try again shortly." };
+      }
+      const { error: attemptError } = await supabaseAdmin.from("order_lookup_attempts").insert({ ip_hash: ipHash });
+      if (evaluateOrderLookupRateLimit(count, null, attemptError) !== "allowed") {
+        return { ok: false as const, error: "Order verification is temporarily unavailable. Please try again shortly." };
+      }
       allowed = await hasOrderContactAccess(order, orderNumber, data.contact);
     }
     if (!order || !allowed) return { ok: false as const, error: "We could not open this order." };

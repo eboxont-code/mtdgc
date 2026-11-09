@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, test } from "node:test";
 import { strict as assert } from "node:assert";
 
@@ -29,4 +30,20 @@ describe("MT-0295 order lookup rate-limit decisions", () => {
   test("fails closed when recording the attempt fails", () => {
     assert.equal(evaluateOrderLookupRateLimit(0, null, new Error("insert failed")), "unavailable");
   });
+});
+
+
+test("all three contact-fallback entry points fail closed", () => {
+  const source = readFileSync(new URL("./orders.functions.ts", import.meta.url), "utf8");
+  const handlers = [
+    source.slice(source.indexOf("export const lookupOrder"), source.indexOf("export const listMyOrders")),
+    source.slice(source.indexOf("export const getOrderForViewer"), source.indexOf("export const getPaymentSettings")),
+    source.slice(source.indexOf("export const submitPaymentProof")),
+  ];
+
+  for (const handler of handlers) {
+    assert.match(handler, /evaluateOrderLookupRateLimit\(count, countError\)/);
+    assert.match(handler, /evaluateOrderLookupRateLimit\(count, null, attemptError\)/);
+    assert.doesNotMatch(handler, /\(count \?\? 0\)/);
+  }
 });
