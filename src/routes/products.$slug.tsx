@@ -160,12 +160,13 @@ function ProductPage() {
   const regionText = product.region?.trim() ?? "";
   const needsRegionConfirm = isRegionSensitiveCategory(product.category?.slug);
   const regionReady = !needsRegionConfirm || regionText.length > 0;
-  const orderable = regionReady && !!variant && isPurchasableVariant(product, variant);
-  const selectedAvailability = !regionReady
-    ? "Region not listed"
-    : variant
-      ? availabilityLabel({ ...product, variants: [variant] })
-      : availabilityLabel(product);
+  const baseOrderable = !!variant && isPurchasableVariant(product, variant);
+  const orderable = regionReady && baseOrderable;
+  const selectedAvailability = variant
+    ? baseOrderable && !regionReady
+      ? "Region not listed"
+      : availabilityLabel({ ...product, variants: [variant] })
+    : availabilityLabel(product);
   const regionWarning = needsRegionConfirm ? getRegionCompatibilityWarning(regionText) : null;
   const regionConfirmationKey = `${product.id}:${regionText}`;
   const [regionConfirmedFor, setRegionConfirmedFor] = useState<string | null>(null);
