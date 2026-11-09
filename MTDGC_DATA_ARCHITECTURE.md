@@ -176,3 +176,17 @@ This is a source and metadata audit of current GitHub `main` at `ca01edaafa42b5b
 - The current-main Quality workflow passed on exact commit `ca01edaafa42b5b859089ce18d5decaf6fbd4db3` in run [42437058568](https://github.com/eboxont-code/mtdgc/actions/runs/42437058568).
 - The Vercel project is linked to `eboxont-code/mtdgc`. The latest inspected production deployment is READY at [`dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE`](https://vercel.com/boxont/mtdgc/7A2mKAuhBY6nkW2d4FrZGDGQDVUE), deployed from `3de811c7cfce91eb262cf79523d8053995bfb777`. Current main is 15 commits ahead of that production commit, so this audit does not claim all current-main controls are live.
 - Inspection used source, policy, grant, bucket and advisor metadata only. No customer, order, payment, auth-user or storage-object records were read. No production writes, migrations, policy/grant changes, secrets, authentication settings, hosting, DNS or billing settings were changed.
+
+
+## 11. Current authentication and authorisation evidence — 9 November 2026
+
+The current-main audit snapshot is `de1b11f540bf1933dc78ec2487392a0024a15de2`; the Vercel production deployment is READY on the same SHA. This confirms the audited current-main application source is the deployed version at this snapshot, but it is not a penetration test.
+
+- The global server-function middleware attaches the signed-in Supabase Bearer token; CSRF middleware applies to server-function requests. Protected handlers validate claims with `getClaims` and use a user-scoped client.
+- All 14 exported admin server functions require authenticated middleware and a server-side exact-true administrator-role result.
+- Authenticated order history filters by the validated user ID. Guest/order-view and payment-proof flows use the service-role client and require explicit server-side access checks. The account-owned order contact-fallback gap remains tracked under MT-0162.
+- All 14 public application tables have RLS enabled. `order_lookup_attempts` has no client policy and is server-only. Table grants do not by themselves describe effective access; RLS policies remain controlling.
+- The `payment-proofs` and `payment-qr` buckets are private. The security advisor continues to flag `public.has_role` as SECURITY DEFINER and executable by anon/authenticated. Remediation must be coordinated with dependent policies through the approved migration/cutover process.
+- Live migration history contains `0010_catchup_storage_buckets` and `0011_harden_grants`, while the repository contains migrations `0000`–`0009`. Do not run or reconcile migrations against the existing project outside the approved cutover.
+
+Read-only evidence was collected on 9 November 2026. No customer/order/payment/auth-user records or storage objects were read; no production writes, migrations, RLS/grant changes or configuration changes were made. See Master Plan section 34 for the detailed policy, grant, bucket, advisor, CI and release evidence.
