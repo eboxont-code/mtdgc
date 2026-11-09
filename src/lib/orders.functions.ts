@@ -138,7 +138,6 @@ export const placeOrder = createServerFn({ method: "POST" })
         },
       };
     });
-    assertRegionCompatibilityConfirmed(resolvedLines.map((line) => line.regionProduct), data.regionConfirmed);
     const items = resolvedLines.map((line) => line.orderItem);
     const checkoutLines = resolvedLines.map((line) => line.checkoutLine);
     const subtotal = items.reduce((s, i) => s + i.line_total_minor, 0);
@@ -146,6 +145,7 @@ export const placeOrder = createServerFn({ method: "POST" })
     if (hasCheckoutPriceSnapshotChanges(data.lines, checkoutLines)) {
       return { status: "cart_changed" as const, totalMinor: subtotal, lines: checkoutLines };
     }
+    assertRegionCompatibilityConfirmed(resolvedLines.map((line) => line.regionProduct), data.regionConfirmed);
     const email = data.email || null;
     const contactKey = normaliseContact(data.phone || data.email || "");
     const tokenBytes = crypto.getRandomValues(new Uint8Array(32));
