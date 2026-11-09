@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.2 · 8 November 2026
+**Version:** 2.3 · 10 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -278,7 +278,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0141 · P0 · TODO** — Review the current Terms, Privacy, Delivery and Refund policies for consistency across Nepal and Australia.
 - [ ] **MT-0142 · P0 · TODO** — Resolve any conflict between the advertised markets and the markets covered by legal terms.
 - [ ] **MT-0143 · P0 · TODO** — Ensure refund rules distinguish undelivered, supplier-failed, incorrect-item and successfully redeemed digital goods.
-- [ ] **MT-0144 · P0 · TODO** — Make region-lock warnings prominent before payment for every region-restricted code.
+- [~] **MT-0144 · P0 · IN PROGRESS** — Make region-lock warnings prominent before payment for game top-ups and gift-card codes; use catalogue region labels only as warnings, never as issuer compatibility evidence.
 - [ ] **MT-0145 · P0 · TODO** — Make wrong-player-ID warnings visible before confirming an irreversible top-up.
 - [ ] **MT-0146 · P1 · TODO** — Publish support response hours only after they are operationally staffed.
 - [ ] **MT-0147 · P1 · TODO** — Create ticket categories for payment, delayed delivery, invalid code, wrong item, refund and account access.
@@ -543,7 +543,8 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 7 | MT-0086 — require independent payment settlement matching before fulfilment | BLOCKED; no bank-statement feed, provider callback or owner-approved manual settlement evidence is available |
 | 8 | MT-0087 — prevent duplicate transaction references/screenshots across orders | BLOCKED; concurrency-safe uniqueness requires the approved Supabase cutover/migration gate |
 | 9 | MT-0101 — map current order statuses and observed transition paths | DONE; 13-value enum, application writers, UI mappings, production aggregate counts and lack of transition enforcement are documented in section 30 and Data Architecture section 4 |
-| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | NEXT P0; can be documented from the current payment-review code and existing operational evidence without production writes |
+| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | BLOCKED; PR #22 exact head `0ad13fd` quality run [42554218686](https://github.com/eboxont-code/mtdgc/actions/runs/42554218686) failed before any workflow step started; no full tests, lint, typecheck or production build ran. Keep the PR in draft until a free runner executes the exact head |
+| 10a | MT-0144 — make region compatibility warnings prominent before payment for game top-ups and gift-card codes | IN PROGRESS; current-main implementation and regression coverage are being prepared on a clean branch; production remains unchanged |
 | 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 
@@ -1334,3 +1335,56 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 No production application code, database/schema, order/payment/customer record, storage object, RLS/grant, credential, environment, DNS, hosting or billing setting changed. No test order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
 
 **Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
+
+
+## 32. MT-0144 region compatibility warnings before payment — 10 November 2026
+
+**Task:** MT-0144 · P0 · IN PROGRESS on a clean branch based directly on current `main` commit `de1b11f540bf1933dc78ec2487392a0024a15de2`.
+
+### Why this work is needed
+
+- Current `main` only asks for a region confirmation on gift-card listings and states that a code for another region will not redeem. That wording overstates what the catalogue label proves.
+- Game top-ups are also region/account-sensitive, but the current product page does not show the same warning before adding them to the cart.
+- Checkout currently shows the listed region in the product data but does not repeat an issuer-compatibility warning or require a final region acknowledgement.
+- The server currently re-resolves SKU, category, availability and price, but does not compare the cart's saved region with the current product region before creating an order.
+
+### Current production catalogue evidence — read-only, 10 November 2026
+
+A read-only query of product/category/variant metadata in Supabase project `eaomkkswslqtfunkceuc` returned:
+
+| Category | Catalogue region | Product status | Published products | Orderable variants |
+|---|---|---|---:|---:|
+| game-top-ups | Global | available | 4 | 13 |
+| game-top-ups | Global | coming_soon | 2 | 0 |
+| gift-cards | Global | available | 1 | 2 |
+| gift-cards | Global | coming_soon | 1 | 0 |
+| gift-cards | Australia | coming_soon | 10 | 0 |
+
+- All five currently orderable listings in these categories are labelled Global. The Australia-labelled gift-card listings are coming-soon and have no orderable variants.
+- The Supplier Register contains no verified supplier/product-scope records. Catalogue region values are not independent issuer or supplier compatibility evidence.
+- This task therefore adds clear warnings and a customer accuracy acknowledgement only. It does not claim that any code is compatible with a country, store or account, and it does not claim supplier-specific reversal or irreversibility.
+
+### Implementation prepared on the current main branch
+
+- Add a browser-safe region policy for game-top-ups and gift-cards, with conservative prompting for legacy cart lines that retain region or delivery fields but no category.
+- Replace the unsupported “this code is for [region] accounts only” claim with wording that explicitly identifies the value as a catalogue label and tells customers to check the issuer's current redemption rules.
+- Show the warning beside desktop purchase actions, in the product-page region panel and in the mobile sticky purchase bar. Missing region metadata disables ordering.
+- Repeat the warning on each applicable checkout line and require a separate acknowledgement in the final review step.
+- Re-resolve category and region from the selected SKU on the server. Compare the current server region with the cart's saved region, reject missing or changed region data, and require the acknowledgement before the first order insert.
+- Keep the acknowledgement scoped to customer accuracy; it is not evidence of issuer verification, payment settlement or guaranteed compatibility.
+- Add eight focused tests for category scope, legacy carts, Global/specific/missing-region wording, stale-region rejection, required acknowledgement and Unicode/whitespace normalisation.
+- No schema migration is required. Existing `products.region`, category and SKU data are used read-only.
+
+### Branch and verification status
+
+- The new branch starts directly from current main. It does not inherit the old stacked PR #9 history (which is 38 commits ahead and 66 commits behind current main and includes unrelated MT-0123/MT-0126 work).
+- Application files changed so far: `src/lib/region-compatibility.ts`, `src/lib/region-compatibility.test.ts`, `src/routes/products.$slug.tsx`, `src/routes/checkout.tsx` and `src/lib/orders.functions.ts`.
+- The focused test file is included, but the full repository quality workflow has not yet run for this new branch. Do not mark the task complete until the exact final PR head passes the full workflow.
+- Vercel production is READY at deployment `dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay`, deployed commit `de1b11f540bf1933dc78ec2487392a0024a15de2`. This is the existing main deployment, not this branch. No preview or production deployment for this branch is claimed.
+- Existing Vercel Hobby/free deployment limits and earlier pre-step GitHub runner failures remain constraints; no paid retry or bypass is permitted.
+
+### Safety and next task
+
+- No production database writes, migrations, catalogue edits, customer/order/payment changes, storage changes, authentication changes, secrets, environment settings, DNS, hosting or billing changes.
+- No supplier/customer contact, test purchase, order or payment was made. Additional spend: **$0**.
+- **Next P0 task after MT-0144:** MT-0145 — make wrong-player-ID warnings visible before confirming a top-up. Do not claim supplier-specific irreversibility or reversal behaviour without verified supplier evidence.
