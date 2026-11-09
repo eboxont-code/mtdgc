@@ -15,7 +15,7 @@ const UNSAFE_CUSTOMER_REQUIREMENT_PATTERNS = [
   /\b(?:log\s+in|sign\s+in)\s+to\s+(?:your\s+)?(?:account|game|subscription|email|device)\b/i,
   /\b(?:game|subscription|email|google|apple|account)\s+(?:account\s+)?(?:login|credentials|password|passcode)\b/i,
   /\baccount\s+(?:credentials|access|password|login|control|handover|takeover|unlock\s+code)\b/i,
-  /\b(?:session\s+(?:cookie|token)|auth(?:entication)?\s+cookie|access\s+token|bearer\s+token|refresh\s+token|oauth\s+(?:access\s+|refresh\s+)?token|secret\s+key|private\s+key|api\s+(?:key|secret)|client\s+secret)\b/i,
+  /\b(?:session\s+(?:cookie|token)|auth(?:entication)?\s+cookie|access\s+token|bearer\s+token|refresh\s+token|oauth\s+(?:access\s+|refresh\s+)?token|secret\s+key|private\s+key|(?:api|client|developer)\s+(?:key|token|secret))\b/i,
   /\bremote\s+(?:access|control|desktop)\b/i,
   /\b(?:cvv|cvc|card\s+security\s+code)\b/i,
   /\b(?:credit|debit|payment)\s+card\s+(?:number|details)\b/i,
@@ -26,10 +26,10 @@ const UNSAFE_CUSTOMER_REQUIREMENT_PATTERNS = [
 ] as const;
 
 export const UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE =
-  "Do not request passwords, passcodes/passkeys, OTP/2FA/MFA codes, PINs, recovery/backup secrets, security answers, card/bank credentials, session/access tokens, API/private keys or remote account access. Request only necessary product identifiers and delivery contact details.";
+  "Do not request passwords, passcodes/passkeys, OTP/2FA/MFA codes, PINs, recovery/backup secrets, security answers, card/bank credentials, session/access tokens, API/client/developer keys or tokens, private keys or remote account access. Request only necessary product identifiers and delivery contact details.";
 
 export const CUSTOMER_CREDENTIAL_WARNING =
-  "Never share passwords, passcodes, passkeys, OTP/2FA/MFA codes, PINs, recovery/backup codes, security answers, card security codes, API/private keys, session tokens or account-access credentials with MTDGC or a supplier.";
+  "Never share passwords, passcodes, passkeys, OTP/2FA/MFA codes, PINs, recovery/backup codes, security answers, card security codes, API/client/developer keys or tokens, private keys, session tokens or account-access credentials with MTDGC or a supplier.";
 
 function normaliseRequirementLabel(requirement: string): string {
   return requirement

@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.3 · 8 November 2026
+**Version:** 2.4 · 10 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -255,7 +255,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0123 · P0 · TODO** — Require a second confirmation for irreversible top-ups and code releases.
 - [ ] **MT-0124 · P0 · TODO** — Record the supplier transaction or redemption reference for each completed order.
 - [ ] **MT-0125 · P0 · TODO** — Capture delivery evidence and attach it to the correct order.
-- [~] **MT-0126 · P0 · IN PROGRESS** — Expanded deny-list, fail-closed product display/server order validation, and consistent product/checkout/support warnings are being reconciled to current main in draft PR #24. Application/test commit `a8f95a5bf491eda7e62c8e39c6fc894c8c9a888f`; exact-head quality, merge, production deployment and live smoke verification remain pending; do not mark DONE until all are evidenced.
+- [~] **MT-0126 · P0 · IN PROGRESS** — Expanded credential deny-list, fail-closed product display/server order validation, and consistent product/checkout/support warnings remain in draft PR #24. The branch has been refreshed to current main `de1b11f540bf1933dc78ec2487392a0024a15de2` without rewriting published history. Six focused tests and the strict helper type check pass locally; exact-head full quality, merge, production deployment and live smoke verification remain pending.
 - [ ] **MT-0127 · P1 · TODO** — Define realistic delivery-time ranges per product based on measured fulfilment history.
 - [ ] **MT-0128 · P1 · TODO** — Pause new orders when a supplier is unavailable or a product cannot be delivered.
 - [ ] **MT-0129 · P1 · TODO** — Create a queue sorted by paid status, promised delivery window and risk.
@@ -530,7 +530,7 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-MT-0126 is **IN PROGRESS** in a clean main-based branch/PR #24. MT-0102 and MT-0105 are **BLOCKED** after repeated GitHub Actions runner-startup failures with zero workflow steps; unchanged runner failures will not be retried repeatedly. Task statuses in the 308-task register remain authoritative.
+MT-0126 is **IN PROGRESS** in PR #24, refreshed to current main `de1b11f540bf1933dc78ec2487392a0024a15de2` using a history-preserving merge. Six focused tests and the strict helper type check pass locally; exact-head full quality and release verification remain pending. MT-0102 and MT-0105 remain **BLOCKED** by repeated runner-startup failures; do not retry unchanged. Task statuses in the 308-task register remain authoritative.
 
 | Order | Task | Status |
 |---:|---|---|
@@ -552,7 +552,7 @@ MT-0126 is **IN PROGRESS** in a clean main-based branch/PR #24. MT-0102 and MT-0
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
-**Release note:** The latest observed production deployment is READY at `dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE`, commit `3de811c7cfce91eb262cf79523d8053995bfb777`, 15 commits behind current main `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`. Recheck after any merge; a READY preview is not production. The backend PR remains on HOLD until the Supabase cutover.
+**Release note:** The latest observed production deployment is READY at `dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay`, deployed commit `de1b11f540bf1933dc78ec2487392a0024a15de2`, which is also the current main commit. Merging an eligible PR to main triggers the existing Vercel production workflow; a READY preview is not production. The backend PR remains on HOLD until the Supabase cutover.
 
 
 ## 11. Sources and verification
@@ -1339,13 +1339,13 @@ No production application code, database/schema, order/payment/customer record, 
 **Next eligible P0 after MT-0126:** MT-0161 — refresh the authentication/authorisation audit against current main and production metadata. MT-0102/MT-0105 remain blocked by GitHub Actions runner startup; MT-0141–MT-0145 require owner/legal/supplier evidence. Do not bypass those dependencies.
 
 
-## 32. Customer credential collection safeguards — 8 November 2026
+## 32. Customer credential collection safeguards — refreshed 10 November 2026
 
-**Task:** MT-0126 · P0 · IN PROGRESS in [draft PR #24](https://github.com/eboxont-code/mtdgc/pull/24), branch `automation/mt-0126-credential-safety-main-20261108`, based directly on current main `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`. The application/test commit is `a8f95a5bf491eda7e62c8e39c6fc894c8c9a888f`; follow-up hardening commit `ddf0dc4e0306186fb1adf2e37b40b488dca198a6` rejects null/malformed server requirements and disables variant selection while a listing is blocked. The older [PR #8](https://github.com/eboxont-code/mtdgc/pull/8) is stacked on unmerged MT-0123/PR #7 and is not safe to merge as-is; only its MT-0126 scope was re-applied to a clean main-based branch. The old PR #8 patch contained a double-escaped requirement-field ID regex; the clean reapplication retained current main's correct `\\W+` field-ID normalisation rather than importing that bug.
+**Task:** MT-0126 · P0 · IN PROGRESS in [draft PR #24](https://github.com/eboxont-code/mtdgc/pull/24), branch `automation/mt-0126-credential-safety-main-20261108`, refreshed to current main `de1b11f540bf1933dc78ec2487392a0024a15de2` with a history-preserving merge; published history was not rewritten. The application/test commit is `a8f95a5bf491eda7e62c8e39c6fc894c8c9a888f`; follow-up hardening commit `ddf0dc4e0306186fb1adf2e37b40b488dca198a6` rejects null/malformed server requirements and disables variant selection while a listing is blocked. The older [PR #8](https://github.com/eboxont-code/mtdgc/pull/8) is stacked on unmerged MT-0123/PR #7 and is not safe to merge as-is; only its MT-0126 scope was re-applied to a clean main-based branch. The old PR #8 patch contained a double-escaped requirement-field ID regex; the clean reapplication retained current main's correct `\\W+` field-ID normalisation rather than importing that bug.
 
 ### Enforcement being added
 
-- `src/lib/supplier-safety.ts` normalises Unicode (NFKC), case-insensitive matching and separators before rejecting password/passcode/passphrase/passkey, OTP/2FA/MFA/authenticator codes, PINs, recovery/backup/seed secrets, security answers, account/login/access credentials, session/access/bearer/refresh/OAuth tokens, API/private/client secrets, remote access and payment-card credentials.
+- `src/lib/supplier-safety.ts` normalises Unicode (NFKC), case-insensitive matching and separators before rejecting password/passcode/passphrase/passkey, OTP/2FA/MFA/authenticator codes, PINs, recovery/backup/seed secrets, security answers, account/login/access credentials, session/access/bearer/refresh/OAuth tokens, API/client/developer keys and tokens, remote access and payment-card credentials.
 - The administrator product form uses the shared warning and `saveProduct` continues to enforce the same policy in its server-side Zod schema. The client form is guidance, not the security boundary.
 - Product detail projects only safe customer requirements. If a saved requirement list is null, malformed or contains an unsafe label, all customer fields are suppressed, no saved field values are autofilled, variant selection and purchase actions are disabled, and the listing is shown as unavailable pending review.
 - `placeOrder` now re-reads the selected product's current requirements from the server-resolved SKU and rejects malformed/unsafe requirements before an order row can be created. The existing line-schema guard still rejects unsafe client-supplied field keys, including stale carts.
@@ -1354,17 +1354,17 @@ No production application code, database/schema, order/payment/customer record, 
 
 ### Production evidence — read-only, 8 November 2026
 
-- Supabase project `eaomkkswslqtfunkceuc` (`mtdgc`) is ACTIVE_HEALTHY on PostgreSQL 17.11.0.003. The public `products.requirements` column is JSONB; the current public schema listing contains no supplier table.
-- A read-only query selected only `name` and `requirements` from published products: 36 published products were returned and all current requirement labels were product identifiers, player/zone IDs, nicknames, regions or delivery email addresses. No password, OTP, PIN or account-access requirement was present. No customer, order, support-ticket, payment, auth-user or secret values were queried.
-- The current READY production deployment is [`dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE`](https://vercel.com/boxont/mtdgc/7A2mKAuhBY6nkW2d4FrZGDGQDVUE), commit `3de811c7cfce91eb262cf79523d8053995bfb777`, with production aliases `mtdgc.com` and `www.mtdgc.com`. It is 15 commits behind current main `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`.
+- Supabase project `eaomkkswslqtfunkceuc` (`mtdgc`) is ACTIVE_HEALTHY in `ap-southeast-1` on PostgreSQL 17.11.0.003. The public `products` table has RLS enabled, and `products.requirements` is JSONB. No supplier table is present in the inspected public schema.
+- A read-only query on 10 November selected only `name` and `requirements` from published products: 36 rows were returned. Every current requirement is a product/player identifier, region, nickname or delivery email; none matched the expanded credential deny-list. No customer, order, support-ticket, payment, auth-user or secret values were queried.
+- The current READY production deployment is [`dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay`](https://vercel.com/boxont/mtdgc/dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay), deployed commit `de1b11f540bf1933dc78ec2487392a0024a15de2`, with `mtdgc.com` and `www.mtdgc.com` aliases. Production and current main are on the same commit; no production backlog remains.
 - At that deployed commit, `src/lib/supplier-safety.ts`, `src/lib/orders.functions.ts`, `src/routes/checkout.tsx`, `src/routes/products.$slug.tsx` and `src/routes/support.tsx` do not yet contain the expanded MT-0126 controls. The deployed `admin.functions.ts` does retain the earlier basic unsafe-requirement guard in `saveProduct`. Therefore the new fail-closed page and server-resolved requirement revalidation are NOT LIVE yet.
 - Non-destructive public GET checks of the homepage and the five currently orderable product pages found the footer statement “MTDGC will never ask for your password, OTP or payment PIN.” Product forms request player IDs/nicknames, user ID/Zone ID, Supercell ID email/player tag or delivery email; none asks for a password, OTP or PIN. Netflix is temporarily unavailable and its page asks only for a delivery email, with a disabled purchase control. No form was submitted.
 - The public live-page check is a content smoke check, not proof that customers cannot voluntarily type secrets into free-text notes/support. The application warning does not scan those free-text fields.
 
 ### Regression tests and verification boundary
 
-- Expanded `src/lib/supplier-safety.test.ts` with six focused tests for explicit game/subscription/email passwords, OTP/2FA/MFA, PINs, recovery/backup secrets, token/key/security-answer patterns, Unicode/separator normalisation, safe identifiers/delivery contacts, fail-closed field suppression and malformed server requirement arrays.
-- The current main Quality run [42437058568](https://github.com/eboxont-code/mtdgc/actions/runs/42437058568) passed on `ca01edaafa42b5b859089ce18d5decaf6fbd4db3` before this change. The exact PR #24 head must still pass the full Quality workflow (Bun setup, frozen install, ESLint, full unit tests, TypeScript typecheck and production build) before promotion.
+- Expanded `src/lib/supplier-safety.test.ts` with six focused tests for explicit game/subscription/email passwords, OTP/2FA/MFA, PINs, recovery/backup secrets, API/client/developer tokens and keys, security answers, Unicode/separator normalisation, safe identifiers/delivery contacts, fail-closed field suppression and malformed server requirement arrays. On 10 November, all six tests passed under Node.js 22.16.0 with type stripping; strict TypeScript 5.8.3 checking of `supplier-safety.ts` also passed.
+- Earlier baseline Quality run [42437058568](https://github.com/eboxont-code/mtdgc/actions/runs/42437058568) passed on `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`. The current-main Quality run [42545337294](https://github.com/eboxont-code/mtdgc/actions/runs/42545337294) and the prior PR #24 exact-head run [42450087288](https://github.com/eboxont-code/mtdgc/actions/runs/42450087288) both failed before any workflow step started; their only jobs have zero steps and no runner logs. No Bun suite, ESLint, project-wide typecheck or production build ran in those jobs. The refreshed PR #24 head requires its own successful full Quality run before promotion.
 - No production application code, database/schema, product requirement, customer/order/payment record, storage object, RLS/grant, auth setting, credential, environment variable, DNS, hosting or billing setting was changed. No supplier/customer was contacted and no purchase/order/payment was made. Additional spend: $0.
 
 ### Merge, deployment and live verification

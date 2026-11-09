@@ -130,7 +130,7 @@ The customer progress helper groups `payment_submitted`/`paid`, `verified`, `pro
 
 ## 9. Customer credential collection safeguards
 
-- The supplier register's mandatory rejection policy is backed by a shared application deny-list in `src/lib/supplier-safety.ts`. Requirement labels are Unicode-normalised and separator-normalised before checking for passwords/passcodes/passkeys, OTP/2FA/MFA/authenticator codes, PINs, recovery/backup/seed secrets, security answers, account access, session/access tokens, API/private/client secrets, remote access and payment-card credentials.
+- The supplier register's mandatory rejection policy is backed by a shared application deny-list in `src/lib/supplier-safety.ts`. Requirement labels are Unicode-normalised and separator-normalised before checking for passwords/passcodes/passkeys, OTP/2FA/MFA/authenticator codes, PINs, recovery/backup/seed secrets, security answers, account access, session/access tokens, API/client/developer keys and tokens, remote access and payment-card credentials.
 - The administrator product form uses the shared message for guidance; the `saveProduct` server schema independently rejects unsafe requirement labels. Client-side form validation is not the security boundary.
 - Product detail uses a fail-closed projection: null, malformed or unsafe saved requirements yield no customer fields, no field autofill, a review-required unavailable state and disabled variant/purchase actions. Safe identifiers and delivery contacts remain available.
 - `placeOrder` re-reads the current requirements from the product joined to the server-resolved SKU and rejects malformed/unsafe requirements before constructing an order row. It also rejects unsafe client-supplied field keys, including stale carts.
