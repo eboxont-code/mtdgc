@@ -5,6 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { hasCheckoutPriceSnapshotChanges } from "@/lib/checkout-price-snapshot";
 import { findUnsafeCustomerRequirement, UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE } from "@/lib/supplier-safety";
 import { generateOrderReference } from "@/lib/order-reference";
+import { evaluateOrderLookupRateLimit } from "@/lib/order-lookup-rate-limit";
 import {
   buildPaymentProofAssociation,
   hasOrderAccessToken,
@@ -183,15 +184,22 @@ export const lookupOrder = createServerFn({ method: "POST" })
     const ipHash = await sha256(`lookup:${ip.trim()}`);
     const now = Date.now();
     await supabaseAdmin.from("order_lookup_attempts").delete().lt("created_at", new Date(now - 86400000).toISOString());
-    const { count } = await supabaseAdmin
+    const { count, error: countError } = await supabaseAdmin
       .from("order_lookup_attempts")
       .select("id", { count: "exact", head: true })
       .eq("ip_hash", ipHash)
       .gte("created_at", new Date(now - 10 * 60 * 1000).toISOString());
-    if ((count ?? 0) >= 10) {
+    const rateLimit = evaluateOrderLookupRateLimit(count, countError);
+    if (rateLimit === "limited") {
       return { status: "rate_limited" as const, message: "Too many attempts. Please wait a few minutes and try again." };
     }
-    await supabaseAdmin.from("order_lookup_attempts").insert({ ip_hash: ipHash });
+    if (rateLimit === "unavailable") {
+      return { status: "rate_limited" as const, message: "Order tracking is temporarily unavailable. Please try again shortly." };
+    }
+    const { error: attemptError } = await supabaseAdmin.from("order_lookup_attempts").insert({ ip_hash: ipHash });
+    if (evaluateOrderLookupRateLimit(count, null, attemptError) !== "allowed") {
+      return { status: "rate_limited" as const, message: "Order tracking is temporarily unavailable. Please try again shortly." };
+    }
 
     const orderNumber = data.orderNumber.toUpperCase();
     const { data: order } = await supabaseAdmin
@@ -265,13 +273,18 @@ export const getOrderForViewer = createServerFn({ method: "POST" })
       const { getRequestHeader } = await import("@tanstack/react-start/server");
       const ip = getRequestHeader("cf-connecting-ip") ?? getRequestHeader("x-forwarded-for")?.split(",")[0] ?? "unknown";
       const ipHash = await sha256(`lookup:${ip.trim()}`);
-      const { count } = await supabaseAdmin
+      const { count, error: countError } = await supabaseAdmin
         .from("order_lookup_attempts")
         .select("id", { count: "exact", head: true })
         .eq("ip_hash", ipHash)
-        .gte("created_at", new Date(Date.now() - 600000).toISOString());
-      if ((count ?? 0) >= 10) return { status: "rate_limited" as const };
-      await supabaseAdmin.from("order_lookup_attempts").insert({ ip_hash: ipHash });
+        .gte("created_at", new Date(Date.now() - 10 * 60 * 1000).toISOString());
+      if (evaluateOrderLookupRateLimit(count, countError) !== "allowed") {
+        return { status: "rate_limited" as const };
+      }
+      const { error: attemptError } = await supabaseAdmin.from("order_lookup_attempts").insert({ ip_hash: ipHash });
+      if (evaluateOrderLookupRateLimit(count, null, attemptError) !== "allowed") {
+        return { status: "rate_limited" as const };
+      }
       if (order) allowed = await hasOrderContactAccess(order, orderNumber, data.contact);
     }
     if (!order || !allowed) return { status: "locked" as const };
