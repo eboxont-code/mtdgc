@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.3 · 8 November 2026
+**Version:** 2.4 · 10 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -303,7 +303,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [!] **MT-0161 · P0 · BLOCKED** — The current-main audit is in draft PR #26. Exact-head Quality run [42453509323](https://github.com/eboxont-code/mtdgc/actions/runs/42453509323) failed before runner startup; full repository checks remain unverified.
 - [!] **MT-0162 · P0 · BLOCKED** — The current-main order-isolation fix is in draft PR #27. Exact-head Quality run [42454086289](https://github.com/eboxont-code/mtdgc/actions/runs/42454086289) failed before runner startup; do not merge until the exact head passes the full quality workflow.
 - [!] **MT-0163 · P0 · BLOCKED** — Payment-proof and QR buckets are private, but the current schema/bucket inventory does not evidence a dedicated delivered-code table or bucket. An approved private storage/retention design and the Supabase cutover are still missing.
-- [!] **MT-0164 · P0 · BLOCKED** — A clean current-main regression contract is in draft PR #31. It covers all 14 exported admin server functions and the extracted exact-true role helper; full exact-head quality verification is still required before completion or merge.
+- [!] **MT-0164 · P0 · BLOCKED** — Draft PR #31 has been refreshed to current `main` at `de1b11f540bf1933dc78ec2487392a0024a15de2` using a history-preserving merge commit. The 14-endpoint authorization contract remains unchanged; the new exact-head Quality workflow must pass before this task can be completed or merged. See section 33.
 - [!] **MT-0165 · P0 · BLOCKED** — The current-main audit is in draft PR #28. Exact-head Quality run [42454303736](https://github.com/eboxont-code/mtdgc/actions/runs/42454303736) failed before runner startup; do not repeat unchanged retries or alter secrets/settings.
 - [ ] **MT-0166 · P1 · TODO** — Enable strong admin authentication and remove unused staff accounts.
 - [ ] **MT-0167 · P1 · TODO** — Apply least-privilege roles for payment review, fulfilment, support and catalogue editing.
@@ -549,7 +549,7 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 13 | MT-0161 — refresh authentication/authorisation audit | BLOCKED; draft PR #26 exact-head Quality run 42453509323 failed before runner startup |
 | 14 | MT-0162 — isolate account-owned orders from guest contact lookup | BLOCKED; draft PR #27 exact-head Quality run 42454086289 failed before runner startup |
 | 15 | MT-0163 — verify private delivery-code storage | BLOCKED; no approved delivery-code storage/retention design or Supabase cutover |
-| 16 | MT-0164 — enforce server-side administrator authorization with regression coverage | BLOCKED pending full exact-head Quality run; clean current-main PR #31 is open in draft |
+| 16 | MT-0164 — enforce server-side administrator authorization with regression coverage | BLOCKED; PR #31 refreshed to current main; exact-head Quality check pending |
 | 17 | MT-0165 — review secrets and payment configuration | BLOCKED; draft PR #28 exact-head Quality run 42454303736 failed before runner startup |
 | 18 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 19 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
@@ -1349,7 +1349,7 @@ No production application code, database/schema, order/payment/customer record, 
 
 ### Current-main source audit
 
-- Canonical base: `main` at `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`.
+- Canonical base: `main` at `de1b11f540bf1933dc78ec2487392a0024a15de2` (10 November 2026 refresh).
 - The current `src/lib/admin.functions.ts` exports exactly 14 administrator server functions: `updateOrderStatus`, `addOrderNote`, `approveReview`, `saveProduct`, `archiveProduct`, `saveVariant`, `archiveVariant`, `saveCategory`, `getAdminPaymentSettings`, `savePaymentSettings`, `uploadPaymentQr`, `listPaymentsToVerify`, `getPaymentProofUrl` and `reviewPayment`.
 - A current-main source audit confirms every export uses `requireSupabaseAuth` middleware and awaits `assertAdmin(context)` as the first handler statement, before any read, write, storage action or signed URL creation.
 - `assertAdmin` calls `has_role` for the validated `context.userId` and role `admin`, then delegates to `isAdminRoleConfirmed(data, error)`. The shared helper returns true only when the RPC has no error and its data is the exact boolean `true`.
@@ -1371,13 +1371,40 @@ No production application code, database/schema, order/payment/customer record, 
 - The current production RLS policy inventory includes administrator policies for orders, order-status events, categories, products, variants, payment settings and review moderation, plus separate owner/published-read policies.
 - The production `public.has_role(uuid, app_role)` function remains SECURITY DEFINER and executable by `anon` and `authenticated`. This role-membership disclosure finding is separate from the per-request server guard and remains cutover-gated because its function privileges and dependent RLS policies must be changed together. No function, policy, grant or role was changed.
 - GitHub `main` is currently unprotected and reports no required status checks. This does not waive the repository quality workflow or this task's exact-head verification requirement.
-- Vercel project `mtdgc` is Git-linked to this repository. Its latest observed production deployment is READY at `dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE`, deployed commit `3de811c7cfce91eb262cf79523d8053995bfb777`. Current main is 15 commits ahead of production; merging any PR to main triggers a deployment attempt for that full backlog. Do not merge this PR until the exact-head checks pass and the complete production backlog/release gates are reviewed.
+- Vercel project `mtdgc` is Git-linked to this repository. The latest observed production deployment is READY at `dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay`, deployed from exact `main` commit `de1b11f540bf1933dc78ec2487392a0024a15de2`. Main and production are aligned at this snapshot. Merging to `main` triggers the existing Vercel production workflow; no deployment is triggered by a PR preview.
 
 ### Verification and safety
 
 - The prior PR #14 quality run [42410620615](https://github.com/eboxont-code/mtdgc/actions/runs/42410620615) passed all six workflow stages on its historical test commit. It is not current-main evidence because its branch predates the extracted `admin-access.ts` helper.
 - Current-main source inspection confirms 14/14 exported endpoints have authenticated middleware and the administrator guard as the first handler statement. The helper source confirms exact-true, error-free role validation.
-- New exact-head GitHub Actions verification is required on PR #31. The task remains BLOCKED until the full repository workflow passes.
+- The previous exact-head Quality run [42461648403](https://github.com/eboxont-code/mtdgc/actions/runs/42461648403) failed before runner startup (runner ID 0, zero steps, no logs); it did not execute lint, tests, typecheck or build. The current-main refresh triggers a new exact-head run; MT-0164 remains BLOCKED until that full workflow passes.
 - No production deployment, database write, migration, order/payment/customer read or mutation, role/RLS/grant change, secret/environment/DNS/hosting/billing change, supplier/customer contact or purchase occurred. Additional spend: $0.
 
 **Next P0 after MT-0164:** MT-0165 — the current-main secrets/payment audit in draft PR #28. Its exact-head quality run is also blocked before runner startup; if that remains unchanged, continue to the next independent task rather than waiting.
+
+
+## 33. MT-0164 current-main refresh — 10 November 2026
+
+**Task:** MT-0164 · P0 · BLOCKED pending full exact-head quality verification. Draft [PR #31](https://github.com/eboxont-code/mtdgc/pull/31) was refreshed against current `main` at `de1b11f540bf1933dc78ec2487392a0024a15de2`. The previous PR head `1728b1c3aeb955a746973f6f053036a68c78d882` is preserved as the first parent of the branch refresh merge commit; current `main` is the second parent. The merged tree retains the PR's three focused files and includes all current-main files, including the identity-sweep updates.
+
+### Current source and regression evidence
+
+- Current `src/lib/admin.functions.ts` still exports exactly 14 administrator server functions.
+- All 14 use `requireSupabaseAuth` middleware and await `assertAdmin(context)` as the first handler statement before any endpoint read, write, storage operation or signed URL creation.
+- `assertAdmin` checks `has_role` for the validated `context.userId` and delegates to `isAdminRoleConfirmed(data, error)`; the helper permits access only when there is no RPC error and the result is the exact boolean `true`.
+- The PR's AST regression contract pins the 14-function inventory, authentication middleware, first-statement guard, current-user/admin-role lookup and exact-true helper. Existing `admin-access.test.ts` covers true, false, missing, ambiguous and error-bearing results.
+
+### Current production and database evidence
+
+- Supabase project `eaomkkswslqtfunkceuc` is ACTIVE_HEALTHY on PostgreSQL 17.11.0.003. All 14 public application tables have RLS enabled. No customer, order, payment, auth-user or storage-object rows were read.
+- Supabase's security advisor still flags `public.has_role(uuid, app_role)` as SECURITY DEFINER and executable by anon/authenticated. This is a separate role-membership disclosure finding; changing its execution grants without the dependent RLS policies would be unsafe and remains gated by the approved Supabase cutover. No policy, grant, function or role was changed.
+- Vercel production deployment [`dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay`](https://vercel.com/boxont/mtdgc/dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay) is READY on exact main commit `de1b11f540bf1933dc78ec2487392a0024a15de2`. The PR has not been merged; no production deployment was triggered by this run.
+- GitHub reports `main` as unprotected with required status checks disabled. The repository's Quality workflow remains a project gate and must pass on the exact PR head. PR #31 has no submitted reviews or unresolved review threads; its only issue comment is the Vercel deployment bot.
+
+### Verification and safety
+
+- The previous exact-head Quality run [42461648403](https://github.com/eboxont-code/mtdgc/actions/runs/42461648403) failed before runner startup with runner ID 0 and zero steps. No lint, Bun tests, typecheck or build ran.
+- The current-main branch refresh is a material revision and triggers a new exact-head Quality run. Its result will be recorded separately; no prior run is being represented as a pass.
+- No production code, database/schema, RLS/grants, customer/order/payment records, auth settings, secrets, environment variables, DNS, hosting or billing settings changed. No order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
+
+**Next P0 after MT-0164:** MT-0165 — read-only secrets and payment-configuration audit in draft PR #28. If its existing exact-head runner-startup failure remains unchanged, skip it and continue to the next independent task.
