@@ -1367,7 +1367,7 @@ No schema migration or new database object is required.
 - Local Node 22.16 test run: **6/6 PASS**.
 - Strict TypeScript check of the new helper: **PASS**.
 - Source-level checks confirmed the current checkout price-snapshot guard remains present, the server writes the snapshot from product metadata, the admin view reads the snapshot, and the public guest summary does not return the fields JSONB.
-- The current-main GitHub Quality run [42545337294](https://github.com/eboxont-code/mtdgc/actions/runs/42545337294) failed before the runner started (zero steps). The new PR's exact-head Quality result must be checked after this plan update; no full repository lint, Bun test suite, application typecheck or production build is claimed yet.
+- The current-main GitHub Quality run [42545337294](https://github.com/eboxont-code/mtdgc/actions/runs/42545337294) failed before the runner started (zero steps). The exact-head PR #52 Quality run [42599262758](https://github.com/eboxont-code/mtdgc/actions/runs/42599262758) also failed before the runner started (zero steps); no full repository lint, Bun test suite, application typecheck or production build executed. The Vercel preview for that exact PR head is READY at [deployment `dpl_2PNB8n1YwMTfW9EZX4z3n83mE7bt`](https://vercel.com/boxont/mtdgc/dpl_2PNB8n1YwMTfW9EZX4z3n83mE7bt), target Preview only; it is not production.
 - PR #52 implementation commit before this plan update: `b7304599c266da99e85ece68be3d735f60a06408`. PR remains OPEN and DRAFT; no merge commit exists.
 
 ### Release and safety boundary
