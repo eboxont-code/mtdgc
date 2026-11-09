@@ -1372,10 +1372,10 @@ No production application code, database/schema, order/payment/customer record, 
 ### Verification and release state
 
 - Manual document validation: PASS — required data domains, purpose/processor/location columns, source references and explicit UNKNOWN markers are present.
-- The previous exact-head GitHub Quality run [42474182140](https://github.com/eboxont-code/mtdgc/actions/runs/42474182140) on the pre-refresh PR head failed before any workflow step started; no lint, tests, typecheck or build executed. The refreshed head must be checked once its automatic run is available; do not retry an unchanged failed run.
-- PR #34 remains OPEN/DRAFT until the refreshed exact-head checks pass. No required review or unresolved review conversation was observed. The main branch is not protected, but project quality requirements still apply.
+- The refreshed exact-head GitHub Quality run [42653048775](https://github.com/eboxont-code/mtdgc/actions/runs/42653048775) on head `fe3451da4256ab003de03fc4441a565b5cba0113` failed before any workflow step started. The job has no steps and no log URL; lint, tests, typecheck and build did not execute. The previous pre-refresh run [42474182140](https://github.com/eboxont-code/mtdgc/actions/runs/42474182140) failed the same way. Do not retry without new runner evidence.
+- PR #34 remains OPEN/DRAFT. Its refreshed head `fe3451da4256ab003de03fc4441a565b5cba0113` is six commits ahead of current main and zero commits behind; no required review or unresolved review conversation was observed. The main branch is not protected, but project quality requirements still apply.
 - The old statement that main was 75 commits ahead of production is superseded: current production is READY on the same commit as current main. Merging this documentation PR would trigger the existing production Git workflow, but it would not release that old application backlog.
-- No merge commit exists and no production deployment was triggered by this task. The current production deployment remains the existing READY deployment above. This documentation update is not live.
+- No PR merge commit exists and no production deployment was triggered by this task. The previous preview [dpl_FCESLHbhWbKhRQUEEYdyLWXp7PEX](https://vercel.com/boxont/mtdgc/FCESLHbhWbKhRQUEEYdyLWXp7PEX) is READY only for older head `bc40094e8ee7f8bd8330ca957544cddaa29b4450`; no preview deployment record is available for refreshed head `fe3451da4256ab003de03fc4441a565b5cba0113`. The current production deployment remains the existing READY deployment above. This documentation update is not live.
 
 ### Next queue scan
 
