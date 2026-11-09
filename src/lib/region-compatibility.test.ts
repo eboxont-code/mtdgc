@@ -25,6 +25,7 @@ describe("MT-0144 region compatibility warnings before payment", () => {
     assert.equal(requiresRegionCompatibilityConfirmation([{ region: "Global" }]), true);
     assert.equal(requiresRegionCompatibilityConfirmation([{ fields: { "Player ID": "12345" } }]), true);
     assert.equal(requiresRegionCompatibilityConfirmation([{ fields: {} }]), false);
+    assert.equal(requiresRegionCompatibilityConfirmation([{ region: 123 }]), false);
   });
 
   test("warns that Global is a catalogue label, not issuer compatibility evidence", () => {
