@@ -226,7 +226,7 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** The order state is consistent from checkout to delivery, with a complete audit trail and useful customer visibility.
 
 - [x] **MT-0101 · P0 · DONE** — Map all 13 live order-status enum values, current application writers, generic administrator targets, legacy display aliases and observed transitions; confirm that neither application nor database enforces a complete transition graph. Evidence: section 30 and Data Architecture section 4; current-main source inspection plus read-only production enum, aggregate status-count, column-type, proof-status constraint and order-trigger queries on 8 November 2026.
-- [ ] **MT-0102 · P0 · TODO** — Ensure Payment received, Verified, Processing and Delivered have precise operational definitions.
+- [!] **MT-0102 · P0 · BLOCKED** — Ensure Payment received, Verified, Processing and Delivered have precise operational definitions. PR #22 exact head `0ad13fd` has no successful full Quality result; run [42554218686](https://github.com/eboxont-code/mtdgc/actions/runs/42554218686) failed before any job step, so install, lint, tests, typecheck and build were not executed. Keep the PR in draft and revisit only when a free runner can execute the exact head.
 - [ ] **MT-0103 · P0 · TODO** — Add explicit Cancelled, Failed, Refunded and Action required states where applicable.
 - [ ] **MT-0104 · P0 · TODO** — Prevent invalid status jumps, such as Pending directly to Delivered without payment verification.
 - [ ] **MT-0105 · P0 · TODO** — Verify guest order tracking requires the order number plus the matching email or phone.
@@ -530,7 +530,7 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-task register are authoritative.
+MT-0144 is the one active P0 task in this workstream. Task statuses in the 308-task register remain authoritative.
 
 | Order | Task | Status |
 |---:|---|---|
@@ -1339,7 +1339,7 @@ No production application code, database/schema, order/payment/customer record, 
 
 ## 32. MT-0144 region compatibility warnings before payment — 10 November 2026
 
-**Task:** MT-0144 · P0 · IN PROGRESS. Draft [PR #54](https://github.com/eboxont-code/mtdgc/pull/54) was opened from a clean branch based directly on current `main` commit `de1b11f540bf1933dc78ec2487392a0024a15de2`. The code-bearing head at PR creation was `5cc7398cd1a6980372dd9c48272ed535b5023e51`; the plan update below will advance the PR head, so the PR page is authoritative for its latest SHA.
+**Task:** MT-0144 · P0 · IN PROGRESS. Draft [PR #54](https://github.com/eboxont-code/mtdgc/pull/54) was opened from a clean branch based directly on current `main` commit `de1b11f540bf1933dc78ec2487392a0024a15de2`. The code-bearing head at PR creation was `5cc7398cd1a6980372dd9c48272ed535b5023e51`; the exact latest PR head is shown on the PR page and must be rechecked before any release decision.
 
 ### Why this work is needed
 
