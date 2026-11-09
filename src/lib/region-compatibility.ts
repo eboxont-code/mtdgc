@@ -51,7 +51,7 @@ export function getRegionCompatibilityWarning(region: unknown): string {
 
 function normaliseRegion(value: unknown): string {
   return typeof value === "string"
-    ? value.normalize("NFKC").trim().replace(/\\s+/g, " ").toLowerCase()
+    ? value.normalize("NFKC").trim().replace(/\s+/g, " ").toLowerCase()
     : "";
 }
 
