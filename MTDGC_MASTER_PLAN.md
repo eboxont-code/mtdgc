@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.2 · 8 November 2026
+**Version:** 2.3 · 9 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -204,7 +204,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [x] **MT-0082 · P0 · DONE** — Generate new order references with 128 bits of cryptographic randomness, retain the database UNIQUE constraint as the collision guard, and keep legacy tracking formats working. Evidence: section 25; CI run `42241329123` passed lint, tests, typecheck and production build; Vercel deployment for code commit `d81e1fc51ed2e1203defb63ec6a71dbcd21e889b` reached READY.
 - [x] **MT-0083 · P0 · DONE** — Bind payment-proof authorization and storage/database association to the server-resolved order. Shared order-access helpers now cover access-token, authenticated-owner and rate-limited contact checks; proof storage path, order ID, transaction reference and amount are derived from the resolved order, not client-supplied identifiers. Four focused tests and the full quality workflow passed. Evidence and the separate production deployment blocker are recorded in section 26.
 - [!] **MT-0084 · P0 · MERGED BUT NOT LIVE** — Validate uploaded proof file type, size and content handling. PR #18 merged as `53e518d589d49b5f751bcae3a4c99b276a586b8e`; production deployment is blocked by Vercel's `api-deployments-free-per-day` limit.
-- [!] **MT-0085 · P0 · MERGED BUT NOT LIVE** — Restrict direct payment-proof row/object reads to the related order owner or authorised staff; require authenticated administrator authorization before proof-review reads and signed URL creation. PR #20 merged as `a793dff15370f6bcd90673e4309e144cb597655d`; exact-head and merge-commit quality workflows passed. Vercel's free deployment-rate limit prevented a production deployment; evidence is in section 29.
+- [x] **MT-0085 · P0 · DONE** — Restrict direct payment-proof row/object reads to the related order owner or authorised staff; require authenticated administrator authorization before proof-review reads and signed URL creation. PR #20 merged as `a793dff15370f6bcd90673e4309e144cb597655d` and is included in the verified production deployment on 9 November 2026; current production policy/grant evidence and the remaining separate `has_role` disclosure warning are recorded in section 29.
 - [ ] **MT-0086 · P0 · TODO** — Prevent fulfilment until payment is independently matched to the correct amount and order.
 - [ ] **MT-0087 · P0 · TODO** — Prevent the same transaction reference or screenshot from being accepted for multiple orders.
 - [ ] **MT-0088 · P1 · TODO** — Show exact payment amount, account details, expiry window and reference instructions on the order page.
@@ -539,7 +539,7 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 3 | MT-0061–MT-0063 — build landed cost and order-level gross margin from source costs | BLOCKED; supplier costs, dated FX, payment/settlement fees, refunds and variable fulfilment/support costs are absent |
 | 4 | MT-0064 — approve minimum contribution-margin floor | BLOCKED; business-owner decision required |
 | 5 | MT-0065 — enforce a current-price/margin gate at checkout | BLOCKED; depends on the approved floor and trusted cost/price-expiry data; schema changes remain behind the Supabase cutover |
-| 6 | MT-0085 — restrict payment-proof access to the order owner and authorised staff | MERGED BUT NOT LIVE; PR #20 merged as `a793dff`; Vercel free daily deployment limit blocked production release; see section 29 |
+| 6 | MT-0085 — restrict payment-proof access to the order owner and authorised staff | DONE AND LIVE; PR #20 merge `a793dff` is an ancestor of production commit `de1b11f`; production RLS/grants and private bucket reverified on 9 November; see section 29 |
 | 7 | MT-0086 — require independent payment settlement matching before fulfilment | BLOCKED; no bank-statement feed, provider callback or owner-approved manual settlement evidence is available |
 | 8 | MT-0087 — prevent duplicate transaction references/screenshots across orders | BLOCKED; concurrency-safe uniqueness requires the approved Supabase cutover/migration gate |
 | 9 | MT-0101 — map current order statuses and observed transition paths | DONE; 13-value enum, application writers, UI mappings, production aggregate counts and lack of transition enforcement are documented in section 30 and Data Architecture section 4 |
@@ -1193,7 +1193,7 @@ No product records, supplier assignments, prices, variants, order records, datab
 
 ## 29. Payment-proof owner/admin access verification — 8 November 2026
 
-**Task:** MT-0085 · P0 · MERGED BUT NOT LIVE. [PR #20](https://github.com/eboxont-code/mtdgc/pull/20) merged to `main` at 2026-11-08T01:19:24Z. PR head: `d669fd1414917cd6fd6de4d55313d720a437f3bd`; merge commit: `a793dff15370f6bcd90673e4309e144cb597655d`. This task covers direct proof-row/object reads and administrator proof-review endpoints. Guest/account order lookup isolation remains separately tracked under MT-0162.
+**Task:** MT-0085 · P0 · DONE AND LIVE. [PR #20](https://github.com/eboxont-code/mtdgc/pull/20) merged to `main` at 2026-11-08T01:19:24Z. PR head: `d669fd1414917cd6fd6de4d55313d720a437f3bd`; merge commit: `a793dff15370f6bcd90673e4309e144cb597655d`. This task covers direct proof-row/object reads and administrator proof-review endpoints. Guest/account order lookup isolation remains separately tracked under MT-0162.
 
 ### Application access controls
 
@@ -1234,9 +1234,21 @@ No product records, supplier assignments, prices, variants, order records, datab
 
 No production database write, migration, grant/policy/bucket change, customer/order/payment read or mutation, storage-object access, auth-setting change, secret/environment change, DNS/hosting/billing change, supplier/customer contact, purchase or additional spend occurred. Additional spend: $0.
 
-**Next P0 after MT-0085:** MT-0101 — map the current order statuses and allowed transitions. MT-0086 remains blocked by missing independent settlement evidence; MT-0087 remains blocked by the approved Supabase cutover/migration gate.
+**Next P0 after MT-0085:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered; MT-0101 is now complete in section 30. MT-0086 remains blocked by missing independent settlement evidence; MT-0087 remains blocked by the approved Supabase cutover/migration gate.
 
 
+
+
+### Production release verification — 9 November 2026
+
+- The current Vercel project is the Git-linked `mtdgc` project for `eboxont-code/mtdgc`. The latest production deployment is READY: [deployment `dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay`](https://vercel.com/boxont/mtdgc/4njU9xzd9RmCkGuYeQBDTLZV9Nay), with production aliases including `mtdgc.com`. Its exact deployed Git commit is `de1b11f540bf1933dc78ec2487392a0024a15de2`.
+- GitHub's commit comparison confirms the MT-0085 merge commit `a793dff15370f6bcd90673e4309e144cb597655d` is an ancestor of the deployed commit: the comparison is 9 commits ahead, 0 behind, with the merge commit as the merge base. The only files changed between the merge and deployed commits are the master plan, data architecture, site web manifest and roadmap; no application source changed after the MT-0085 merge. Therefore the deployed production build contains the exact MT-0085 application implementation.
+- Current production source confirms that `listPaymentsToVerify` and `getPaymentProofUrl` both require a validated Supabase session and run the administrator check as the first handler statement. The shared administrator check grants access only for an error-free exact boolean `true`. Signed proof URLs expire after 300 seconds.
+- Read-only production metadata on 9 November confirms `public.payment_proofs` has RLS enabled, anonymous SELECT is false, authenticated SELECT is true, and the only SELECT policy is restricted to the related order owner or administrator. The private `payment-proofs` bucket has a 5 MiB cap; its storage-object policy is authenticated-only, bucket-scoped and limited to the related order owner or administrator. No policy, grant or bucket setting was changed.
+- The exact PR-head Quality run [42433657907](https://github.com/eboxont-code/mtdgc/actions/runs/42433657907) and merge-commit Quality run [42433747219](https://github.com/eboxont-code/mtdgc/actions/runs/42433747219) both completed successfully: locked install, lint, 64 tests across 15 files, TypeScript typecheck and production build. The merge run is on the exact merge commit.
+- Supabase's security advisor still reports `public.has_role(uuid, app_role)` as a SECURITY DEFINER function executable by anon and authenticated. This is a separate role-membership disclosure risk; it does not grant anonymous proof-row access. Do not revoke it independently because existing RLS policies depend on it. A coordinated function/policy change remains behind the approved database cutover gate.
+- No customer/order/payment rows, payment-proof objects or signed proof URLs were accessed. No dedicated test customer/order fixture was available, so no authenticated end-to-end object-access attempt was made. The production release is verified by the exact deployed commit plus current live policy/grant metadata; this limitation is explicit and is not represented as a real-customer test.
+- No merge or deployment was triggered by this verification update. Production remains READY on `de1b11f540bf1933dc78ec2487392a0024a15de2`. Additional spend: $0.
 
 ## 30. Current order-status map and observed transition audit — 8 November 2026
 
