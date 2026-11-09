@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.2 · 8 November 2026
+**Version:** 2.3 · 9 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -226,7 +226,7 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** The order state is consistent from checkout to delivery, with a complete audit trail and useful customer visibility.
 
 - [x] **MT-0101 · P0 · DONE** — Map all 13 live order-status enum values, current application writers, generic administrator targets, legacy display aliases and observed transitions; confirm that neither application nor database enforces a complete transition graph. Evidence: section 30 and Data Architecture section 4; current-main source inspection plus read-only production enum, aggregate status-count, column-type, proof-status constraint and order-trigger queries on 8 November 2026.
-- [ ] **MT-0102 · P0 · TODO** — Ensure Payment received, Verified, Processing and Delivered have precise operational definitions.
+- [!] **MT-0102 · P0 · BLOCKED** — The shared customer-facing status labels and milestone wording are prepared in draft PR #22, but the exact current PR head 0ad13fd38cbe020fc4efe21d4058fabac76193ae has no successful full quality run: run 42554218686 failed before runner startup with zero executed steps. The READY preview belongs to earlier code-bearing commit 6f2b14a9a8fe7d1309256956cc0d1fe8fb0ac84c and is preview-only. Revisit when a free GitHub runner executes the full workflow; do not retry the unchanged failure or merge.
 - [ ] **MT-0103 · P0 · TODO** — Add explicit Cancelled, Failed, Refunded and Action required states where applicable.
 - [ ] **MT-0104 · P0 · TODO** — Prevent invalid status jumps, such as Pending directly to Delivered without payment verification.
 - [ ] **MT-0105 · P0 · TODO** — Verify guest order tracking requires the order number plus the matching email or phone.
@@ -326,7 +326,7 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** Customers can discover the right digital item, understand restrictions and complete an order without confusion.
 
 - [ ] **MT-0181 · P0 · TODO** — Test the full purchase journey on common Android phones and narrow mobile screens.
-- [ ] **MT-0182 · P0 · REVIEW** — Availability labels, purchasable counts and disabled coming-soon actions were implemented and rule-tested in the 5 November pack; confirm the current production page before marking complete because the roadmap pack recorded the change as not yet published.
+- [x] **MT-0182 · P0 · DONE AND LIVE** — The shared availability rules are present in current main and the READY production deployment dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay is sourced from commit de1b11f540bf1933dc78ec2487392a0024a15de2. Live GET checks on 9 November 2026 confirmed /catalog shows 36 listed / 5 available now / 30 coming soon / 1 unavailable; category counts are Game Top-Ups 4, Gift Cards 1, Subscriptions 0 and Software 0. Steam Wallet Code shows a disabled Coming soon action, Netflix Subscription shows a disabled Temporarily unavailable action, and Roblox Gift Card shows Buy now. Read-only Supabase aggregate counts match 36 published products (5 available, 30 coming soon, 1 temporarily unavailable) and the same category counts. Six availability regression tests passed in Quality run 42437058568 on ca01edaafa42b5b859089ce18d5decaf6fbd4db3; all six relevant availability source/test/route files have identical blob SHAs on current main. Current-main Quality run 42545337294 failed before runner startup (zero steps), so no new full-suite result exists for the latest HEAD. No catalogue, order, payment or customer data was changed.
 - [x] **MT-0183 · P0 · DONE AND LIVE** — Ensure the product card, product page and checkout show matching prices and variants; PR #17 merged at `9f944ec36ec3f87e3e603ff308b20979a1013183` and production deployment `dpl_cfXAs4hrfTSgdurWL1Veb5prUA5v` is READY on that exact SHA.
 - [ ] **MT-0184 · P0 · REVIEW** — Production purchase summaries were checked on five orderable pages on 8 November. Mobile Legends user-ID guidance is inaccurate in production; correction and regression coverage are in draft PR #19. See section 28; production and visual/mobile verification remain pending.
 - [ ] **MT-0185 · P1 · TODO** — Improve catalog search for brand, product, game, denomination and common abbreviations.
@@ -543,13 +543,14 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 7 | MT-0086 — require independent payment settlement matching before fulfilment | BLOCKED; no bank-statement feed, provider callback or owner-approved manual settlement evidence is available |
 | 8 | MT-0087 — prevent duplicate transaction references/screenshots across orders | BLOCKED; concurrency-safe uniqueness requires the approved Supabase cutover/migration gate |
 | 9 | MT-0101 — map current order statuses and observed transition paths | DONE; 13-value enum, application writers, UI mappings, production aggregate counts and lack of transition enforcement are documented in section 30 and Data Architecture section 4 |
-| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | NEXT P0; can be documented from the current payment-review code and existing operational evidence without production writes |
+| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | BLOCKED; draft PR #22 exact head 0ad13fd38cbe020fc4efe21d4058fabac76193ae Quality run 42554218686 failed before runner startup (zero steps); its READY preview is for an earlier code-bearing commit only. Resume when a free runner completes the exact-head workflow. |
 | 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
+| 13 | MT-0184 — verify customer purchase summaries and Mobile Legends user-ID guidance | NEXT INDEPENDENT P0 REVIEW after the blocked tasks above; PR #19 is merged and its correction is included in current production. Recheck the live product page and record fresh evidence before marking complete. Keep physical Android viewport testing separate under MT-0181. |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
-**Release note:** The latest verified production build before the documentation/security cleanup was READY at `087f0ed5e9f94016dd14476b0c05218adce6e135` on `mtdgc.com`. Recheck the latest deployment after the current documentation commits. The backend PR remains on HOLD until the Supabase cutover.
+**Release note — 9 November 2026:** Current production is READY at deployment dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay, sourced from current main commit de1b11f540bf1933dc78ec2487392a0024a15de2, with mtdgc.com and www.mtdgc.com aliases and no alias error. This replaces the older deployment snapshot above. The backend PR remains on HOLD until the Boxont-controlled Supabase cutover.
 
 
 ## 11. Sources and verification
@@ -1334,3 +1335,39 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 No production application code, database/schema, order/payment/customer record, storage object, RLS/grant, credential, environment, DNS, hosting or billing setting changed. No test order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
 
 **Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
+
+## 32. MT-0182 production availability verification — 9 November 2026
+
+**Task:** MT-0182 · P0 · DONE AND LIVE. This closes the earlier 5 November pack's "not published" limitation using current production evidence; it does not verify supplier stock or resale authority.
+
+### Current production and live smoke checks
+
+- Current main HEAD: de1b11f540bf1933dc78ec2487392a0024a15de2.
+- Vercel production deployment: dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay, state READY, target production, source SHA identical to current main; aliases include mtdgc.com and www.mtdgc.com with no alias error.
+- Non-destructive live GET of /catalog returned HTTP 200 and showed 36 listed / 5 available now / 30 coming soon / 1 unavailable. The category counts showed Game Top-Ups 4, Gift Cards 1, Subscriptions 0 and Software 0.
+- Steam Wallet Code returned HTTP 200 and showed "Coming soon" with no purchasable price and a disabled action.
+- Netflix Subscription returned HTTP 200 and showed "Temporarily unavailable" with a disabled action.
+- Roblox Gift Card returned HTTP 200 and showed "Available now" with a visible Buy now action.
+- No form was submitted, no order was created and no customer/order/payment records were accessed.
+
+### Read-only database reconciliation
+
+- Supabase project eaomkkswslqtfunkceuc was queried using aggregate-only SELECT statements over published product/category/variant metadata.
+- The query returned 36 published products: 5 available, 30 coming_soon and 1 temporarily_unavailable.
+- Category available-now counts matched the live catalog: game-top-ups 4, gift-cards 1, subscriptions 0 and software 0.
+- No customer, order, payment, support, authentication or storage-object data was queried. No production data or settings were changed.
+
+### Source and quality evidence
+
+- The current availability helper excludes hidden/sample listings, requires an orderable product and an orderable positive-price NPR variant, and is shared by catalog counts, product cards and product pages. The six focused tests cover coming-soon exclusion, orderable/positive-price requirements, hidden samples, unavailable states, consistent lowest-option selection and unsupported currencies.
+- Quality run 42437058568 passed all stages on ca01edaafa42b5b859089ce18d5decaf6fbd4db3. The six availability helper/test/card/catalog/product/category files have identical blob SHAs on that passing commit and current main.
+- Current-main Quality run 42545337294 failed before runner startup; its job has zero executed steps. It did not run lint, tests, typecheck or build. This is an infrastructure failure, not an observed application test failure.
+- The older draft PR #44 is based on an outdated main and is superseded by this current-main documentation update. It remains unmerged; its earlier READY preview is not production evidence.
+
+### Remaining boundaries and next eligible task
+
+- This verifies the site's current labels and purchase-button behaviour only. It does not prove supplier stock, resale authority, issuer redemption compatibility or delivery capacity; those remain under the existing supplier and launch gates.
+- MT-0181 remains blocked pending a physical Android device and an approved isolated test-order window.
+- The next independent P0 review is MT-0184 — verify the current live product purchase summaries and Mobile Legends user-ID guidance. MT-0102 remains blocked by its exact-head GitHub runner-startup failure (see the task register and PR #22); do not retry unchanged infrastructure failures.
+
+**Production boundary:** no production writes, migrations, catalogue changes, orders, payments, customer records, storage, authentication, credentials, environment, DNS, hosting or billing changes. No supplier/customer contact or purchases. Additional spend: $0.
