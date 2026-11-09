@@ -465,7 +465,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0293 · P1 · TODO** — Define retention periods or defensible retention criteria for orders, support records, payment evidence and account data, with a process for access, correction and deletion requests.
 - [ ] **MT-0294 · P0 · TODO** — Keep payment screenshots and delivered codes in private, access-controlled storage; validate file type/size, minimise visible bank details, restrict staff access and define deletion timing.
 - [ ] **MT-0295 · P0 · TODO** — Add proportionate fraud controls for rapid repeat orders, payment/market mismatch, stolen-card signals, order enumeration, account takeover, code reselling abuse and chargebacks.
-- [ ] **MT-0296 · P1 · TODO** — Audit sensitive changes to price, region, recipient, payment state, refund, code reveal and supplier fulfilment, including actor, timestamp and reason.
+- [x] **MT-0296 · P1 · DONE (audit only)** — Audit sensitive changes to price, region, recipient, payment state, refund, code reveal and supplier fulfilment, including actor, timestamp and reason. Findings and remaining implementation gaps are recorded in section 33 and `MTDGC_ADMIN_CHANGE_AUDIT.md`; no application or production database changes were made.
 - [ ] **MT-0297 · P1 · TODO** — Keep one durable support case record linked to the order, payment, supplier action and customer conversation; WhatsApp must not be the only record of a refund or promise.
 - [ ] **MT-0298 · P1 · TODO** — Localise currency, dates, number formats, receipts, phone fields and customer instructions for Nepal and Australia; decide Nepali-language coverage from customer evidence and maintain equivalent policy meaning.
 - [ ] **MT-0299 · P1 · TODO** — If market-specific URLs are introduced, implement distinct useful content, correct canonical and hreflang rules, and accurate availability/indexing; do not create thin pages by merely swapping currency labels.
@@ -1334,3 +1334,28 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 No production application code, database/schema, order/payment/customer record, storage object, RLS/grant, credential, environment, DNS, hosting or billing setting changed. No test order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
 
 **Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
+
+
+## 33. Sensitive administrative change audit — 9 November 2026
+
+**Task:** MT-0296 · P1 · DONE (audit only). The detailed audit is in [MTDGC_ADMIN_CHANGE_AUDIT.md](./MTDGC_ADMIN_CHANGE_AUDIT.md).
+
+### Findings
+
+- Product-region edits set `products.updated_at`, but do not record the administrator or reason. Product archive actions do not update that timestamp. Variant price/status edits have no actor, timestamp or reason fields.
+- Recipient details are stored at order creation. No recipient-edit action was found in the reviewed admin action module or order-detail panel.
+- Generic order-status changes can create an event with `created_by`, default `created_at` and an optional note. The event insert result is not checked, so the business-state write and audit event are not atomic.
+- Payment-proof review has `reviewed_by`, `reviewed_at`, `review_note` and a stored transaction reference. Rejection requires a note; verification does not. The proof update and event inserts do not check errors or run atomically with the order update.
+- Payment settings record `updated_by` and `updated_at`, but have no reason or immutable history.
+- Refund is only an order status value; no refund transaction record/provider action was found. No dedicated delivered-code or supplier-fulfilment action/table/bucket was found. The supplier identity register remains empty.
+- Read-only production metadata found no audit/refund/supplier-order/delivery/code table, no audit-named public routine, and no triggers on the reviewed business tables. Existing RLS policies restrict administrator writes but do not provide an immutable audit trail.
+
+### Verification and safety
+
+- Inspected current main source at `de1b11f540bf1933dc78ec2487392a0024a15de2` and the matching production deployment `dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay` (READY).
+- Read-only Supabase metadata queries covered table/column names, relevant RLS policies, triggers, routines and storage bucket metadata. No customer/order/payment rows or storage objects were read.
+- No code, schema, production records, credentials, authentication, hosting, DNS or billing settings changed. Additional spend: $0.
+
+**Implementation boundary:** This completes the audit, not audit logging. MT-0168 and MT-0072 remain implementation tasks; any new audit table or transactional write path remains blocked by the approved Supabase cutover/migration gate (MT-0303/MT-0304).
+
+**Next eligible task:** MT-0285 — test existing name, email and phone validation with Nepal and Australia examples, including Unicode names and international phone formats, using the current validation rules before considering any new dependency or schema change.
