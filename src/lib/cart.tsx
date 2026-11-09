@@ -116,7 +116,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setLines((current) => current.map((item) => (item.sku === sku ? { ...item, fields } : item)));
   }, []);
 
-  const updateSnapshot = useCallback((sku: string, snapshot: Pick<CartLine, "productName" | "variantName" | "priceMinor" | "image" | "categorySlug">) => {
+  const updateSnapshot = useCallback((sku: string, snapshot: Pick<CartLine, "productName" | "variantName" | "priceMinor" | "image" | "region" | "categorySlug">) => {
     setLines((current) => current.map((item) => item.sku === sku ? { ...item, ...snapshot } : item));
   }, []);
 
