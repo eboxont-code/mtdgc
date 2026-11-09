@@ -200,10 +200,10 @@ export const lookupOrder = createServerFn({ method: "POST" })
       .eq("order_number", orderNumber)
       .maybeSingle();
     if (!order) return { status: "not_found" as const };
-    const contact = normaliseContact(data.contact);
-    const hashMatch = (await sha256(orderNumber + contact)) === order.verification_hash;
-    const emailMatch = contact.includes("@") && order.guest_email?.toLowerCase() === contact;
-    if (!hashMatch && !emailMatch) return { status: "not_found" as const };
+    // Keep guest tracking on the same order-scoped contact check used by order viewing and proof submission.
+    if (!(await hasOrderContactAccess(order, orderNumber, data.contact))) {
+      return { status: "not_found" as const };
+    }
     return {
       status: "found" as const,
       order: {
