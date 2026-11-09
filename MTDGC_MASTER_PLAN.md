@@ -554,8 +554,7 @@ MT-0182 and MT-0184 are **DONE AND LIVE** on the current production deployment. 
 | 18 | MT-0181 — test the full purchase journey on common Android phones and narrow mobile screens | BLOCKED; requires a physical Android device and an owner-authorised real test order/payment |
 | 19 | MT-0182 — verify availability labels, purchasable counts and disabled coming-soon actions on production | DONE AND LIVE; production page and disabled purchase behaviour verified on 8 November 2026 |
 | 20 | MT-0184 — verify corrected Mobile Legends user-ID guidance on production | DONE AND LIVE; PR #19 merge 3de811c7cfce91eb262cf79523d8053995bfb777 is included in production commit de1b11f540bf1933dc78ec2487392a0024a15de2; live page and exact PR quality run verified in section 28 |
-| 21 | MT-0085 — verify payment-proof owner/admin access restrictions on the current production release | NEXT P0; read-only RLS/storage-policy and application checks are required; do not read customer proof objects or change production settings |
-| 22 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
+| 21 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 22 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
@@ -1380,4 +1379,4 @@ The full catalogue shows 36 listings: 5 available now, 30 coming soon and 1 temp
 
 ### Next P0 task
 
-MT-0184 — verify the corrected Mobile Legends user-ID guidance on production. The correction is included in the deployed PR #19 commit; the remaining work is read-only live confirmation of the page instructions.
+MT-0085 — verify the merged payment-proof owner/admin access controls against the current production deployment using read-only RLS, storage-policy and application checks. Do not read customer proof objects or change production settings.
