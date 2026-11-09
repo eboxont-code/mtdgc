@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.3 · 8 November 2026
+**Version:** 2.4 · 10 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -229,7 +229,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [!] **MT-0102 · P0 · BLOCKED** — Customer-facing milestone definitions and shared labels are implemented in draft PR #22, but its exact current head `5caac222b49cb2e2d5ac9dfd60c7bca092bbed98` has no successful full quality run. GitHub Actions run `42441639306` failed before any job step started (zero steps); Vercel also reports the free build-rate limit. Keep the PR draft; unblock only when the exact head passes the full free quality workflow and the production release path is available.
 - [ ] **MT-0103 · P0 · TODO** — Add explicit Cancelled, Failed, Refunded and Action required states where applicable.
 - [ ] **MT-0104 · P0 · TODO** — Prevent invalid status jumps, such as Pending directly to Delivered without payment verification.
-- [!] **MT-0105 · P0 · BLOCKED** — The focused implementation and six-assertion regression test are in clean main-based draft PR #32, but exact PR head `faa1542073505b1cdd5a1ef212019dba05d10e53` has not passed full quality verification. GitHub Actions run `42465516160` failed before any job step started (zero steps); Vercel reports the free build-rate limit and has no READY deployment for this exact head. Keep the PR draft; unblock when a free runner completes the full quality workflow and the final head can be verified.
+- [!] **MT-0105 · P0 · BLOCKED** — The guest-tracking contact check and six-assertion regression coverage are refreshed in draft PR #32 on current main. Code-bearing PR head `6dbb0abc04b9ddc17ae4872df63f4b5ef51498b1` includes current main `de1b11f540bf1933dc78ec2487392a0024a15de2` as its first parent and preserves prior branch head `707c1a7f40f70c5c8f79c4cf1007a3d31bbaea37` as its second parent. Exact-head Quality run [42631566491](https://github.com/eboxont-code/mtdgc/actions/runs/42631566491) failed before any job step started (zero steps); no full Bun tests, lint, repository typecheck or production build ran. The exact code-bearing Vercel preview reached READY at [deployment `dpl_HN2c3spdufSSsMi4Xvc3rUJDMMUd`](https://vercel.com/boxont/mtdgc/HN2c3spdufSSsMi4Xvc3rUJDMMUd), target `null` (preview only). Local focused tests and strict helper type-check passed, but do not substitute for the required full workflow. Keep the PR draft; unblock when a free GitHub runner completes the full quality workflow for the final PR head.
 - [ ] **MT-0106 · P0 · TODO** — Ensure account order history and guest tracking show the same canonical status.
 - [ ] **MT-0107 · P1 · TODO** — Record a timestamp and actor for every status transition.
 - [ ] **MT-0108 · P1 · TODO** — Show customers what happens next at each stage and whether they need to act.
@@ -530,7 +530,7 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-MT-0105 is implemented in clean main-based draft PR #32 but **BLOCKED** on exact-head quality verification. MT-0102 is also **BLOCKED** on its own exact-head quality run. Task statuses in the 308-task register are authoritative.
+MT-0105 is implemented in draft PR #32 and has been refreshed onto current main without rewriting published history. Its exact code-bearing quality run failed before the runner started; a READY preview exists but is not production. MT-0102 remains blocked on its own exact-head quality run. Continue with the next independent P0 candidate only in a later run. Task statuses in the 308-task register are authoritative.
 
 | Order | Task | Status |
 |---:|---|---|
@@ -543,7 +543,7 @@ MT-0105 is implemented in clean main-based draft PR #32 but **BLOCKED** on exact
 | 7 | MT-0086 — require independent payment settlement matching before fulfilment | BLOCKED; no bank-statement feed, provider callback or owner-approved manual settlement evidence is available |
 | 8 | MT-0087 — prevent duplicate transaction references/screenshots across orders | BLOCKED; concurrency-safe uniqueness requires the approved Supabase cutover/migration gate |
 | 9 | MT-0101 — map current order statuses and observed transition paths | DONE; 13-value enum, application writers, UI mappings, production aggregate counts and lack of transition enforcement are documented in section 30 and Data Architecture section 4 |
-| 10 | MT-0105 — verify guest order tracking requires the order number plus matching saved email or phone | BLOCKED; exact-head Quality run 42465516160 failed before runner startup (zero steps), and Vercel's free build-rate limit prevented a final-head preview |
+| 10 | MT-0105 — verify guest order tracking requires the order number plus matching saved email or phone | BLOCKED; exact code-bearing head `6dbb0abc04b9ddc17ae4872df63f4b5ef51498b1` Quality run 42631566491 failed before runner startup (zero steps); exact-head preview is READY but preview-only |
 | 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 
@@ -1348,32 +1348,38 @@ No production application code, database/schema, order/payment/customer record, 
 
 **Unblock condition:** a free GitHub runner must complete the full quality workflow for the exact PR head. Keep the PR draft until that evidence exists; do not treat the Vercel preview or an unrelated main-branch run as a substitute.
 
-## 33. MT-0105 guest order tracking contact verification — 8 November 2026
+## 33. MT-0105 guest order tracking contact verification — 10 November 2026
 
-**Task:** MT-0105 · P0 · BLOCKED pending full exact-head verification. [PR #32](https://github.com/eboxont-code/mtdgc/pull/32) is a clean, draft PR based directly on current `main` commit `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`. The exact head checked was `faa1542073505b1cdd5a1ef212019dba05d10e53`. The earlier [PR #5](https://github.com/eboxont-code/mtdgc/pull/5) is stale: it is 9 commits ahead and 63 behind current main, remains draft, and is not mergeable. Its old passing CI result does not verify this new main-based head; only the focused source/test change was reapplied.
+**Task:** MT-0105 · P0 · BLOCKED pending full exact-head quality verification. [PR #32](https://github.com/eboxont-code/mtdgc/pull/32) remains open and draft, targeting `main`. Its branch was refreshed to current main `de1b11f540bf1933dc78ec2487392a0024a15de2` using merge commit `6dbb0abc04b9ddc17ae4872df63f4b5ef51498b1`. That commit has current main as its first parent and the prior PR head `707c1a7f40f70c5c8f79c4cf1007a3d31bbaea37` as its second parent. No force-push, rebase, amend or history rewrite was used. The focused PR diff remains four files: this plan, the data-architecture note, the shared access regression test and the guest lookup function.
 
 ### Current access contract
 
 - The public `/track-order` form requires both an order number and the email or phone used on that order. The server input validator independently requires both.
-- The server normalises the order number, resolves that exact order, then checks the order-scoped contact verification hash or the saved guest email through `hasOrderContactAccess`.
-- The shared helper normalises phone numbers to digits and email addresses to lowercase. A phone hash is bound to the order number; the saved email comparison is case-insensitive.
+- The server uppercases the supplied order number, resolves only that exact order, and then checks the order-scoped contact proof through `hasOrderContactAccess`.
+- The shared helper normalises phone numbers to digits and email addresses to lowercase. A phone hash is bound to the order number; the saved-email comparison is case-insensitive.
 - Missing, blank or mismatched contact returns the same generic `not_found` response. The order number alone is not an access credential.
-- The guest browser does not query `public.orders` directly. Production RLS is enabled; read-only policy inspection on 8 November showed the SELECT policy is restricted to authenticated order owners/admins, and table grants include no `anon` SELECT privilege. The guest lookup remains a server-side operation.
-- The existing lookup-attempt counter has a separate error-handling limitation: count-query errors can fall back to a zero count, and insert/cleanup errors are not surfaced. This PR does not claim to fix that rate-limiter issue.
+- The guest browser does not query `public.orders` directly. Production `orders` RLS is enabled; only authenticated roles have table access, and the SELECT policy limits rows to the account owner or an administrator. No `anon` SELECT grant exists.
+- Production `order_lookup_attempts` has RLS enabled, no client policies and table grants only for `service_role`; the guest lookup counter is accessed through the server-side service client.
+- The current lookup-attempt counter has a separate error-handling limitation: count-query errors can fall back to a zero count, and insert/cleanup errors are not surfaced. This PR does not claim to fix that separate rate-limiter issue.
+- A live, non-submitting GET of [`/track-order`](https://mtdgc.com/track-order) returned HTTP 200 and showed both required fields plus the instruction that both details are needed. Its old payment-milestone wording is tracked separately under MT-0102.
+- No production order, contact, token, payment or customer values were read.
 
 ### Implementation and regression coverage
 
 - Updated `lookupOrder` to call the same order-scoped helper already used by order viewing and payment-proof submission, removing its duplicate inline hash/email comparison.
-- Added one focused regression test with six assertions: matching saved phone, case-insensitive saved email, wrong order number, wrong contact, missing contact and whitespace-only contact.
+- Added six focused assertions: matching saved phone, case-insensitive saved email, wrong order number, wrong contact, missing contact and whitespace-only contact.
 - No schema, RLS, grants, authentication, payment or order lifecycle behaviour was changed.
 
 ### Verification and release boundary
 
-- Strict TypeScript compilation of the shared order-access helper passed in an isolated Node 22.16 workspace.
-- A focused Node 22.16 harness executed all six guest-contact assertions successfully.
-- The exact-head GitHub Actions Quality run [42465516160](https://github.com/eboxont-code/mtdgc/actions/runs/42465516160) failed before any job step started; the job returned zero steps. No full Bun tests, ESLint, project typecheck or production build ran. This is a runner-startup failure, not an observed application-test failure. The final-head Vercel status failed with the free build-rate limit; READY previews exist only for earlier branch commits, not this exact head.
-- The production deployment remains READY at [`dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE`](https://vercel.com/boxont/mtdgc/7A2mKAuhBY6nkW2d4FrZGDGQDVUE), deployed commit `3de811c7cfce91eb262cf79523d8053995bfb777`. No merge-triggered deployment occurred, and the new guest-tracking change is not live.
-- The repository main branch is reported unprotected with no required status checks. That does not waive the project's quality requirement; PR #32 remains draft until its exact-head checks pass. No review submissions or unresolved review threads were found.
-- No merge or production deployment was attempted. No production order/contact values were read or changed; no test order or payment was created. Additional spend: $0.
+- A Node 22.16 scratch test harness executed all six guest-contact assertions successfully (1 suite, 1 test, 6 assertions).
+- Strict TypeScript 5.8.3 compilation of the shared helper passed with `--noEmit --strict`.
+- Exact code-bearing PR-head GitHub Actions Quality run [42631566491](https://github.com/eboxont-code/mtdgc/actions/runs/42631566491) failed before the runner executed any steps; the job has zero steps. No full Bun tests, ESLint, repository-wide typecheck or CI production build ran. The latest main Quality run [42545337294](https://github.com/eboxont-code/mtdgc/actions/runs/42545337294) failed at the same pre-step stage, indicating an observed runner-startup issue rather than an application test failure.
+- The exact code-bearing Vercel preview reached READY at deployment [`dpl_HN2c3spdufSSsMi4Xvc3rUJDMMUd`](https://vercel.com/boxont/mtdgc/HN2c3spdufSSsMi4Xvc3rUJDMMUd), URL [mtdgc-hkajkvj5u-boxont.vercel.app](https://mtdgc-hkajkvj5u-boxont.vercel.app), target `null` (preview only). The build completed in 18 seconds. The preview URL was not accessible through the available browser check, so no preview-page smoke result is claimed.
+- Production remains READY at [deployment `dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay`](https://vercel.com/boxont/mtdgc/4njU9xzd9RmCkGuYeQBDTLZV9Nay), deployed commit `de1b11f540bf1933dc78ec2487392a0024a15de2`. PR #32 has not been merged; no production deployment was triggered by this task.
+- PR #32 has no submitted reviews or unresolved review threads. The main branch reports `protected: false`, but the project quality gate still requires a successful exact-head workflow. Keep the PR draft while that check is unavailable.
+- No production database writes/migrations, order/payment/customer mutations, storage changes, credentials, authentication settings, hosting, DNS or billing changes occurred. No test order or payment was created. Additional spend: $0.
 
-**Next candidate to assess:** MT-0221 — the single order dashboard. First inspect its current admin route, permissions and status grouping to confirm it can be completed without owner, supplier or settlement evidence. MT-0106 remains dependent on the blocked MT-0102 status-label work. Do not repeat the stale PR #5 investigation or unchanged runner/hosting failures.
+**Unblock condition:** a free GitHub Actions runner must execute the full quality workflow successfully for the final PR head. Then recheck the final diff, exact-head CI, review state, Vercel preview and production release trigger before considering a merge.
+
+**Next candidate to assess:** MT-0221 — the single order dashboard. First inspect its current admin route, permissions and status grouping to confirm it can proceed without owner, supplier or settlement evidence. MT-0106 remains dependent on MT-0102. Do not repeat unchanged runner-startup or preview-network failures.
