@@ -67,6 +67,16 @@ These are observed code paths, not an approved business state machine.
 | `updateOrderStatus` | Any current state | `paid`, `verified`, `rejected`, `processing`, `delivered`, `cancelled`, `refunded` | Admin-only but has no previous-state, proof-review or payment prerequisite; can jump directly to fulfilment. |
 | `addOrderNote` | Any | No order-state change | Writes a free-text event label only. |
 
+### 4.2 Order-time pre-fulfilment snapshot
+
+- New order items store a versioned `__mtdgc_snapshot` object inside the existing `order_items.fields` JSONB. It contains the product's server-read `region` and exact `requirements` labels at order creation.
+- Customer-provided values remain top-level string fields. The server resolves the selected SKU's product and reads region/requirements from that product row; the browser cannot supply or overwrite the reserved snapshot key.
+- `order_items.variant_name` already records the selected option/denomination, so no extra column or migration is required.
+- The admin order-detail panel builds a per-item checklist from the saved snapshot: selected option, order-time region, each required field and recorded/missing state. Other saved customer fields remain visible.
+- The checklist never joins the current product row to reconstruct historical requirements or region. Legacy items without a valid snapshot are explicitly marked as not captured/unrecognised; missing historical requirements are not guessed.
+- The checklist is shown only in the administrator order-detail view. Existing order-item access controls remain unchanged. The public guest order summary does not select or return the `fields` JSONB.
+- This is a review aid, not a supplier runbook or proof of fulfilment readiness. Supplier-specific instructions remain blocked until independently verified evidence exists.
+
 ### 4.3 Separate payment-proof state
 
 `payment_proofs.status` is a separate text field constrained to `submitted`, `verified` and `rejected`. The `resubmit_requested` boolean is not an order status. The proof amount is copied from the order total and is not independent evidence of funds received.
