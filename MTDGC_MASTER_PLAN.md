@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.3 · 8 November 2026
+**Version:** 2.4 · 9 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -226,10 +226,10 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** The order state is consistent from checkout to delivery, with a complete audit trail and useful customer visibility.
 
 - [x] **MT-0101 · P0 · DONE** — Map all 13 live order-status enum values, current application writers, generic administrator targets, legacy display aliases and observed transitions; confirm that neither application nor database enforces a complete transition graph. Evidence: section 30 and Data Architecture section 4; current-main source inspection plus read-only production enum, aggregate status-count, column-type, proof-status constraint and order-trigger queries on 8 November 2026.
-- [!] **MT-0102 · P0 · BLOCKED** — Customer-facing definitions and shared labels are implemented in draft PR #22 with five focused tests. Exact-head GitHub Actions Quality runs `42441262247` and `42441579039` both failed before a runner started (runner ID 0, no steps; logs unavailable); one retry of the first run also failed before startup. Unblock when a free GitHub Actions runner executes the full quality workflow successfully; do not merge or claim CI completion before then.
+- [!] **MT-0102 · P0 · BLOCKED** — Customer-facing milestone definitions and shared labels are implemented in draft PR #22. The branch was fast-forwarded with a merge commit to include current main `de1b11f540bf1933dc78ec2487392a0024a15de2`; exact current PR head is `6f2b14a9a8fe7d1309256956cc0d1fe8fb0ac84c`. Exact-head Quality run [42553963551](https://github.com/eboxont-code/mtdgc/actions/runs/42553963551) failed before runner startup (zero steps and no logs); full lint, tests, typecheck and build did not run. Exact-head Vercel preview `dpl_jXCRvhGN5VJsiuNCT9MRv5wCwdk9` reached READY but is preview-only. Unblock when a free GitHub runner executes the full quality workflow; do not merge or claim production release.
 - [!] **MT-0103 · P0 · BLOCKED** — Existing `cancelled`, `failed` and `refunded` enum values are present; deciding whether a distinct `action_required` state is needed is an owner workflow/product decision. A new enum value also requires the approved Supabase cutover/migration gate. Unblock with owner-approved action-required use cases and migration approval; do not add a status by assumption.
 - [!] **MT-0104 · P0 · BLOCKED** — The generic admin updater currently accepts seven target statuses from any existing state. Safe enforcement requires an owner-approved transition matrix covering cancellation, refunds, overrides and fulfilment, plus independent payment-settlement evidence under MT-0086. Unblock with the approved transition policy and settlement evidence; do not invent restrictions that could block legitimate operations.
-- [~] **MT-0105 · P0 · IN PROGRESS** — Existing implementation and regression coverage are in draft PR #5; the next action is to reconcile its branch against current `main` and verify its exact head/CI before promotion. Do not repeat the implementation.
+- [!] **MT-0105 · P0 · BLOCKED** — Guest contact matching is implemented in draft PR #32, but exact-head Quality run [42465628668](https://github.com/eboxont-code/mtdgc/actions/runs/42465628668) failed before runner startup (zero steps); full repository checks remain unavailable. Revisit when a free runner executes the workflow; do not repeat unchanged retries.
 - [ ] **MT-0106 · P0 · TODO** — Ensure account order history and guest tracking show the same canonical status.
 - [ ] **MT-0107 · P1 · TODO** — Record a timestamp and actor for every status transition.
 - [ ] **MT-0108 · P1 · TODO** — Show customers what happens next at each stage and whether they need to act.
@@ -251,7 +251,7 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** Orders are delivered accurately and on time, while manual checks are gradually replaced only by safe, tested automation.
 
 - [ ] **MT-0121 · P0 · TODO** — Document the current manual fulfilment steps for each active product family.
-- [ ] **MT-0122 · P0 · TODO** — Create a pre-fulfilment checklist for player ID, zone, server, region, denomination and email.
+- [!] **MT-0122 · P0 · BLOCKED** — The order-time checklist is prepared in draft PR #25 with six focused tests and a strict helper type check, but exact-head Quality run [42450532929](https://github.com/eboxont-code/mtdgc/actions/runs/42450532929) failed before runner startup (zero steps); full repository checks remain unavailable. Revisit when a free runner executes the workflow; no production records or schema were changed.
 - [ ] **MT-0123 · P0 · TODO** — Require a second confirmation for irreversible top-ups and code releases.
 - [ ] **MT-0124 · P0 · TODO** — Record the supplier transaction or redemption reference for each completed order.
 - [ ] **MT-0125 · P0 · TODO** — Capture delivery evidence and attach it to the correct order.
@@ -530,7 +530,7 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-MT-0105 is **IN PROGRESS** in draft PR #5. MT-0102 has a clean main-based implementation in draft PR #22 but is blocked pending a successful full GitHub Actions quality run. Task statuses in the 308-task register are authoritative.
+MT-0102 remains BLOCKED after its branch was refreshed to current main; the exact-head quality job again failed before starting. MT-0105 and MT-0122 also have complete draft implementations but their exact-head quality jobs failed before runner startup. Do not retry unchanged failures; continue to the next independent task when a free runner or new evidence becomes available. Task statuses in the 308-task register are authoritative.
 
 | Order | Task | Status |
 |---:|---|---|
@@ -1381,3 +1381,27 @@ The production `public.order_status` enum was queried read-only on 8 November 20
 - MT-0104 is BLOCKED on the owner-approved transition matrix and independent settlement evidence under MT-0086.
 - MT-0105 is next P0 and already has draft PR #5; reconcile that branch against current main rather than repeating its existing implementation.
 
+
+
+## 33. MT-0102 current-main refresh and verification — 9 November 2026
+
+**Task:** MT-0102 · P0 · BLOCKED pending full quality verification and release. PR [#22](https://github.com/eboxont-code/mtdgc/pull/22) remains OPEN/DRAFT and targets `main`. The existing branch was advanced without rewriting published history: a merge commit `6f2b14a9a8fe7d1309256956cc0d1fe8fb0ac84c` has the previous PR head `5caac222b49cb2e2d5ac9dfd60c7bca092bbed98` as first parent and current main `de1b11f540bf1933dc78ec2487392a0024a15de2` as second parent. The branch now includes all current main changes; the PR base SHA is `de1b11f540bf1933dc78ec2487392a0024a15de2`.
+
+### Exact-head verification
+
+- Exact PR head: `6f2b14a9a8fe7d1309256956cc0d1fe8fb0ac84c`.
+- GitHub Actions Quality run [42553963551](https://github.com/eboxont-code/mtdgc/actions/runs/42553963551) completed as failure before the job started. The job has no steps and no downloadable logs; lint, the full Bun suite, project typecheck and production build did not execute. This is not an observed application test failure. No unchanged retry was made.
+- Vercel preview [deployment `dpl_jXCRvhGN5VJsiuNCT9MRv5wCwdk9`](https://vercel.com/boxont/mtdgc/jXCRvhGN5VJsiuNCT9MRv5wCwdk9) reached READY for this exact head, target `null`; preview URL: https://mtdgc-aqglr6h6k-boxont.vercel.app. A live HTTP smoke test of the preview was unavailable from the current network environment, so READY is reported only as a build/deployment status.
+- No submitted reviews or unresolved review threads were present. The repository main branch is unprotected and has no required status checks, but the project's quality gate is not bypassed.
+
+### Production boundary
+
+- Current production deployment [`dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay`](https://vercel.com/boxont/mtdgc/4njU9xzd9RmCkGuYeQBDTLZV9Nay) is READY on exact main commit `de1b11f540bf1933dc78ec2487392a0024a15de2`.
+- PR #22 is not merged. No production deployment was triggered; the milestone wording is not live.
+- No production database, order, payment, customer, storage, RLS, credentials, environment, DNS, hosting or billing changes occurred. No order lookup or form submission was made. Additional spend: $0.
+
+### Next P0 candidates
+
+- MT-0105 remains blocked by exact-head Quality run [42465628668](https://github.com/eboxont-code/mtdgc/actions/runs/42465628668), which failed before runner startup.
+- MT-0122 remains blocked by exact-head Quality run [42450532929](https://github.com/eboxont-code/mtdgc/actions/runs/42450532929), which failed before runner startup.
+- Resume the next eligible P0 task only when a free runner can execute the full quality workflow or new independent evidence/access changes a blocker.
