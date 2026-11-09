@@ -21,7 +21,7 @@ type CartContextValue = {
   setQuantity: (sku: string, quantity: number) => void;
   remove: (sku: string) => void;
   updateFields: (sku: string, fields: Record<string, string>) => void;
-  updateSnapshot: (sku: string, snapshot: Pick<CartLine, "productName" | "variantName" | "priceMinor" | "image" | "categorySlug">) => void;
+  updateSnapshot: (sku: string, snapshot: Pick<CartLine, "productName" | "variantName" | "priceMinor" | "image" | "region" | "categorySlug">) => void;
   clear: () => void;
   drawerOpen: boolean;
   setDrawerOpen: (open: boolean) => void;
