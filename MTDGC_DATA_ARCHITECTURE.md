@@ -126,3 +126,37 @@ The customer progress helper groups `payment_submitted`/`paid`, `verified`, `pro
 - The administrator payment-review queue and signed proof-URL function require a validated Supabase session and an exact successful administrator-role result before any proof lookup or signed URL creation. Signed URLs expire after 300 seconds.
 - `has_role` remains a SECURITY DEFINER function that Supabase's advisor reports as executable by anon/authenticated. Treat its role-membership disclosure as a separate issue; change function execution and dependent policies only through the approved coordinated Supabase migration gate.
 - Guest order access is mediated by server-side order access checks and is not a direct proof-row/object RLS grant. Cross-customer order lookup/contact-fallback isolation remains tracked separately under MT-0162.
+
+## 9. Current authentication and authorisation audit — 10 November 2026
+
+This section records current-main source inspection and read-only production policy/grant evidence. It is not a remediation or permission-change record.
+
+### Session, route and client boundaries
+
+- src/start.ts registers attachSupabaseAuth globally for server functions and installs CSRF middleware for server-function requests.
+- The client middleware attaches the active session's Bearer token. requireSupabaseAuth validates it with Supabase Auth getClaims, rejects missing/malformed tokens and missing subjects, and passes the validated user ID plus a user-scoped client to the handler.
+- The authenticated route calls supabase.auth.getUser() and redirects signed-out visitors. Route protection is a user-experience gate; database RLS and server-function authorization remain the data boundary.
+- The browser client uses only Supabase URL and publishable-key configuration. The service-role client lives in client.server.ts, bypasses RLS, and is dynamically imported only inside trusted server handlers.
+- Account/profile/order/wishlist pages use the authenticated browser client and rely on production RLS. The support form requires a signed-in user and sets support_tickets.user_id from the current session; RLS independently enforces the owner predicate.
+- The admin page's browser-side role check controls visible UI only. All 14 exported admin server functions require authenticated middleware and call assertAdmin(context) before any handler operation. The server guard accepts only a successful exact boolean true from the role RPC.
+
+### Production RLS and grants
+
+Production Supabase project eaomkkswslqtfunkceuc (mtdgc) reported ACTIVE_HEALTHY in ap-southeast-1, PostgreSQL 17.11.0.003. All 14 public application tables have RLS enabled.
+
+- Profiles: owner-only INSERT/SELECT/UPDATE.
+- Orders: owner SELECT; administrator ALL. Authenticated UPDATE grant is still constrained by the administrator-only write policy.
+- Order items: owner/admin SELECT; authenticated SELECT only, with service-role writes.
+- Support tickets: owner INSERT/SELECT and administrator ALL.
+- User roles: owner SELECT; service-role writes only.
+- Wishlist items: owner ALL.
+- Reviews: approved/own/admin SELECT; owner INSERT only when unapproved and not verified-purchase; administrator UPDATE.
+- Order status events: administrator ALL, even though authenticated has INSERT/SELECT grants.
+- Payment proofs: owner/admin SELECT; service-role writes only.
+- Order lookup attempts: RLS enabled with no client policies and grants only to service_role, which matches the current server-only access path.
+
+### Known security finding
+
+Supabase's security advisor reports WARN for public.has_role(uuid, app_role): it is SECURITY DEFINER and executable by anon/authenticated. Because the function accepts an arbitrary user ID, it can disclose whether that ID has a role. No role-write privilege or privilege escalation was demonstrated. Multiple RLS policies depend on this function; changing it requires a coordinated function/policy migration after the approved Supabase cutover. No production grant, function or policy was changed in this audit.
+
+Cross-customer contact fallback remains a separate task (MT-0162). This audit does not claim to resolve it.
