@@ -108,7 +108,7 @@
 
 ## Current launch pack
 - [ ] Force Lovable project display name to MTDGC and verify
-- [ ] Complete MTDGC identity sweep, favicon, manifest, inner-route metadata
+- [x] Complete MTDGC identity sweep: manifest name/short_name now MTDGC; existing brand icons preserved and verified HTTP 200/sizes; 24 public pages verified with unique titles/descriptions and self canonicals; 390px About page has no overflow; not published.
 - [ ] Ship catalog, product detail, persistent cart, honest checkout, account/admin surfaces
 - [ ] Add sitemap.xml and verify HTTP 200
 - [ ] Final mobile, accessibility, asset, metadata, navigation, and brand smoke test
