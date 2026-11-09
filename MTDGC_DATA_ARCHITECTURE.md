@@ -89,6 +89,16 @@ The customer progress helper groups `payment_submitted`/`paid`, `verified`, `pro
 - The server derives the `.webp` storage extension and `image/webp` content type from the normalized result; the browser cannot choose the stored MIME or extension.
 - The production `payment-proofs` bucket remains private and unchanged. Its existing storage-level 5 MiB cap is retained; application-side server validation remains the MIME/content gate because the bucket's `allowed_mime_types` setting is NULL. Only the trusted server upload path writes proof objects.
 
+
+### 4.7 Region compatibility review before order creation
+
+- `game-top-ups` and `gift-cards` are region-sensitive categories. The product page shows a warning beside purchase actions, and checkout repeats it for each applicable cart line before order creation.
+- A product's `region` value is catalogue metadata only. In particular, `Global` is not proof that an issuer permits redemption in every country or account/store region. Customer wording directs the buyer to the issuer's current redemption rules and tells them not to pay if compatibility cannot be confirmed.
+- Missing region metadata disables ordering for these categories. The final checkout review requires a separate acknowledgement; older cart lines with region or delivery fields but no saved category are prompted conservatively.
+- The server resolves category and region from the selected SKU. The client-saved region is comparison-only: it must match the current server value, and a missing or changed value is rejected before the first order insert.
+- The acknowledgement is an accuracy control, not issuer verification, payment-settlement evidence, supplier authorisation or a guarantee of compatibility. No supplier-specific reversal or irreversibility claim is made while the Supplier Register lacks verified product-scope evidence.
+- This control uses existing product/category/variant data and requires no schema migration.
+
 ## 5. Guest Checkout Architecture
 - **No Account Required**: Orders are created with `user_id = NULL`.
 - **Identity**: `guest_email` and `guest_whatsapp` are captured.

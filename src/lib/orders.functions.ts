@@ -5,6 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { hasCheckoutPriceSnapshotChanges } from "@/lib/checkout-price-snapshot";
 import { findUnsafeCustomerRequirement, UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE } from "@/lib/supplier-safety";
 import { generateOrderReference } from "@/lib/order-reference";
+import { assertRegionCompatibilityConfirmed } from "@/lib/region-compatibility";
 import {
   buildPaymentProofAssociation,
   hasOrderAccessToken,
@@ -20,6 +21,7 @@ const lineSchema = z.object({
   sku: z.string().min(1).max(80),
   quantity: z.number().int().min(1).max(10),
   fields: z.record(z.string().max(80), z.string().max(200)).default({}),
+  region: z.string().max(80).optional(),
   expectedProductName: z.string().trim().min(1).max(120).optional(),
   expectedVariantName: z.string().trim().min(1).max(120).optional(),
   expectedPriceMinor: z.number().int().positive().optional(),
@@ -49,6 +51,7 @@ const orderSchema = z
     email: z.string().trim().max(120).email().optional().or(z.literal("")),
     note: z.string().trim().max(500).optional(),
     bearer: z.string().max(4000).optional(),
+    regionConfirmed: z.boolean().optional().default(false),
     lines: z.array(lineSchema).min(1).max(20),
   })
   .refine((d) => Boolean(d.phone) || Boolean(d.email), "Add a mobile number or an email");
@@ -87,7 +90,7 @@ export const placeOrder = createServerFn({ method: "POST" })
     const skus = data.lines.map((l) => l.sku);
     const { data: variants, error } = await supabaseAdmin
       .from("product_variants")
-      .select("id, sku, name, price_minor, currency, status, product_id, products(id, name, image_url, currency, is_published, status, categories(slug))")
+      .select("id, sku, name, price_minor, currency, status, product_id, products(id, name, image_url, currency, is_published, status, region, categories(slug))")
       .in("sku", skus);
     if (error) throw new Error("Could not load products");
 
@@ -100,6 +103,7 @@ export const placeOrder = createServerFn({ method: "POST" })
         currency: string;
         is_published: boolean;
         status: string;
+        region: string | null;
         categories: { slug: string } | null;
       } | null | undefined;
       const ok = v && p?.is_published && ["available", "low_stock"].includes(v.status) && ["available", "low_stock"].includes(p.status) && Number.isSafeInteger(v.price_minor) && v.price_minor > 0;
@@ -117,6 +121,11 @@ export const placeOrder = createServerFn({ method: "POST" })
           line_total_minor: v.price_minor * line.quantity,
           fields: line.fields,
         },
+        regionProduct: {
+          categorySlug: p.categories?.slug,
+          region: p.region,
+          expectedRegion: line.region,
+        },
         checkoutLine: {
           sku: v.sku,
           productName: p.name,
@@ -124,6 +133,7 @@ export const placeOrder = createServerFn({ method: "POST" })
           priceMinor: v.price_minor,
           quantity: line.quantity,
           image: p.image_url,
+          region: p.region,
           categorySlug: p.categories?.slug,
         },
       };
@@ -135,6 +145,7 @@ export const placeOrder = createServerFn({ method: "POST" })
     if (hasCheckoutPriceSnapshotChanges(data.lines, checkoutLines)) {
       return { status: "cart_changed" as const, totalMinor: subtotal, lines: checkoutLines };
     }
+    assertRegionCompatibilityConfirmed(resolvedLines.map((line) => line.regionProduct), data.regionConfirmed);
     const email = data.email || null;
     const contactKey = normaliseContact(data.phone || data.email || "");
     const tokenBytes = crypto.getRandomValues(new Uint8Array(32));

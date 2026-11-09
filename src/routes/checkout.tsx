@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { useCart, type CartLine } from "@/lib/cart";
 import { formatNpr, SITE_URL } from "@/lib/format";
 import { enabledProviders } from "@/lib/payments";
+import { getRegionCompatibilityWarning, REGION_CHANGED_MESSAGE, REGION_COMPATIBILITY_CONFIRMATION_REQUIRED_MESSAGE, REGION_NOT_LISTED_MESSAGE, requiresRegionCompatibilityConfirmation } from "@/lib/region-compatibility";
 import { Check, ChevronDown, Lock, QrCode, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/checkout")({
@@ -42,7 +43,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const inputCls = "mt-1 h-11 w-full rounded-lg border bg-background/60 px-3 font-display text-[15px] outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20";
 
 type Errors = Record<string, string>;
-type CheckoutLine = Pick<CartLine, "sku" | "productName" | "variantName" | "priceMinor" | "image" | "categorySlug" | "quantity">;
+type CheckoutLine = Pick<CartLine, "sku" | "productName" | "variantName" | "priceMinor" | "image" | "region" | "categorySlug" | "quantity">;
 
 const CONTACT_KEY = "mtdgc-checkout-contact";
 
@@ -59,6 +60,13 @@ function CheckoutPage() {
   const [sending, setSending] = useState(false);
   const [placeError, setPlaceError] = useState<string | null>(null);
   const [placed, setPlaced] = useState<{ orderNumber: string; totalMinor: number; lines: CheckoutLine[] } | null>(null);
+  const [regionConfirmedFor, setRegionConfirmedFor] = useState<string | null>(null);
+  const regionConfirmationLines = lines.filter((line) => requiresRegionCompatibilityConfirmation([line]));
+  const regionConfirmationKey = regionConfirmationLines
+    .map((line) => `${line.sku}:${typeof line.region === "string" ? line.region.trim() : ""}`)
+    .sort()
+    .join("|");
+  const regionConfirmed = regionConfirmationLines.length === 0 || regionConfirmedFor === regionConfirmationKey;
   const formRef = useRef<HTMLDivElement>(null);
   const restored = useRef(false);
   const placeOrderFn = useServerFn(placeOrder);
@@ -139,6 +147,11 @@ function CheckoutPage() {
 
   const submitOrder = async () => {
     if (sending) return;
+    if (regionConfirmationLines.length > 0 && !regionConfirmed) {
+      setPlaceError(REGION_COMPATIBILITY_CONFIRMATION_REQUIRED_MESSAGE);
+      setStep(2);
+      return;
+    }
     const e = { ...validateContact(), ...validateDelivery() };
     if (Object.keys(e).length) {
       setErrors(e);
@@ -163,7 +176,9 @@ function CheckoutPage() {
             expectedProductName: l.productName,
             expectedVariantName: l.variantName,
             expectedPriceMinor: l.priceMinor,
+            region: typeof l.region === "string" ? l.region : "",
           })),
+          regionConfirmed,
         },
       });
       if (result.status === "cart_changed") {
@@ -173,6 +188,7 @@ function CheckoutPage() {
             variantName: line.variantName,
             priceMinor: line.priceMinor,
             image: line.image,
+            region: line.region,
             categorySlug: line.categorySlug,
           });
         }
@@ -186,8 +202,10 @@ function CheckoutPage() {
       clear();
       setStep(3);
       window.scrollTo({ top: 0 });
-    } catch {
-      setPlaceError("We could not save your order. Please check your connection and try again.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "";
+      const regionMessages = [REGION_COMPATIBILITY_CONFIRMATION_REQUIRED_MESSAGE, REGION_NOT_LISTED_MESSAGE, REGION_CHANGED_MESSAGE];
+      setPlaceError(regionMessages.includes(message) ? message : "We could not save your order. Please check your connection and try again.");
     } finally {
       setSending(false);
     }
@@ -242,6 +260,8 @@ function CheckoutPage() {
             <span className="block truncate font-display font-medium">{line.productName}</span>
             <span className="block text-xs text-muted-foreground">{isGiftCardCategory(line.categorySlug) ? "Face value: " + line.variantName : line.variantName} · Qty {line.quantity}</span>
             <span className="block text-xs text-muted-foreground">{isGiftCardCategory(line.categorySlug) ? "MTDGC selling price" : "Price"}: {formatNpr(line.priceMinor)} each</span>
+            {typeof line.region === "string" && line.region.trim() && <span className="block text-xs text-muted-foreground">Listed region: {line.region}</span>}
+            {requiresRegionCompatibilityConfirmation([line]) && <span role="note" className="mt-2 block rounded-lg border border-warn/40 bg-warn/5 p-2 text-xs leading-relaxed">{getRegionCompatibilityWarning(line.region)}</span>}
           </span>
           <span className="shrink-0 text-right font-mono text-sm font-bold text-price">{formatNpr(line.priceMinor * line.quantity)}<span className="block text-[10px] font-normal text-muted-foreground">Line total</span></span>
         </li>
@@ -270,7 +290,7 @@ function CheckoutPage() {
   const primaryAction =
     step === 0 ? { label: "Continue to payment", onClick: next, disabled: false }
     : step === 1 ? { label: "Review order", onClick: next, disabled: false }
-    : step === 2 ? { label: sending ? "Placing your order" : placeError ? "Try again" : "Place order", onClick: submitOrder, disabled: sending }
+    : step === 2 ? { label: sending ? "Placing your order" : placeError ? "Try again" : "Place order", onClick: submitOrder, disabled: sending || (regionConfirmationLines.length > 0 && !regionConfirmed) }
     : null;
 
   const contactText = (
@@ -430,9 +450,22 @@ function CheckoutPage() {
                   <Panel n={3} title="Review and place order" id="h-summary">
                     {summaryLines}
                     {totals}
+                    {regionConfirmationLines.length > 0 && (
+                      <div className="mt-4 rounded-xl border border-warn/50 bg-warn/5 p-3">
+                        <label className="flex min-h-11 cursor-pointer items-start gap-3 text-sm">
+                          <input
+                            type="checkbox"
+                            checked={regionConfirmed}
+                            onChange={(event) => setRegionConfirmedFor(event.target.checked ? regionConfirmationKey : null)}
+                            className="mt-0.5 size-5 shrink-0 accent-primary"
+                          />
+                          <span>I have checked the issuer's current redemption rules for each intended account. I will not pay unless those rules confirm that every listed code can be redeemed there.</span>
+                        </label>
+                      </div>
+                    )}
                     {note.trim() && <p className="mt-3 text-xs text-muted-foreground">Note: {note}</p>}
                     {placeError && <p role="alert" className="mt-3 text-sm text-destructive">{placeError}</p>}
-                    <Button size="lg" className="mt-4 hidden w-full md:flex" disabled={sending} onClick={submitOrder}>
+                    <Button size="lg" className="mt-4 hidden w-full md:flex" disabled={sending || (regionConfirmationLines.length > 0 && !regionConfirmed)} onClick={submitOrder}>
                       {sending ? "Placing your order" : placeError ? "Try again" : "Place order"}
                     </Button>
                     <p className="mt-3 text-xs text-muted-foreground">By placing the order you agree to our <Link to="/policies/terms" className="text-primary underline-offset-2 hover:underline">terms</Link> and <Link to="/policies/refunds" className="text-primary underline-offset-2 hover:underline">refund policy</Link>. No card payments are taken on this site.</p>

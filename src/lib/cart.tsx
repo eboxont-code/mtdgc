@@ -21,7 +21,7 @@ type CartContextValue = {
   setQuantity: (sku: string, quantity: number) => void;
   remove: (sku: string) => void;
   updateFields: (sku: string, fields: Record<string, string>) => void;
-  updateSnapshot: (sku: string, snapshot: Pick<CartLine, "productName" | "variantName" | "priceMinor" | "image" | "categorySlug">) => void;
+  updateSnapshot: (sku: string, snapshot: Pick<CartLine, "productName" | "variantName" | "priceMinor" | "image" | "region" | "categorySlug">) => void;
   clear: () => void;
   drawerOpen: boolean;
   setDrawerOpen: (open: boolean) => void;
@@ -116,7 +116,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setLines((current) => current.map((item) => (item.sku === sku ? { ...item, fields } : item)));
   }, []);
 
-  const updateSnapshot = useCallback((sku: string, snapshot: Pick<CartLine, "productName" | "variantName" | "priceMinor" | "image" | "categorySlug">) => {
+  const updateSnapshot = useCallback((sku: string, snapshot: Pick<CartLine, "productName" | "variantName" | "priceMinor" | "image" | "region" | "categorySlug">) => {
     setLines((current) => current.map((item) => item.sku === sku ? { ...item, ...snapshot } : item));
   }, []);
 

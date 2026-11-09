@@ -19,6 +19,7 @@ import { categoryTypeFromSlug, formatNpr, isOrderable, SITE_URL, SUPPORT_MESSAGE
 import { enabledProviders } from "@/lib/payments";
 import { compareAt } from "@/lib/pricing";
 import { GIFT_CARD_PRICE_DISCLOSURE, isGiftCardCategory } from "@/lib/gift-card-pricing";
+import { getRegionCompatibilityWarning, isRegionSensitiveCategory, REGION_COMPATIBILITY_CONFIRMATION_REQUIRED_MESSAGE, REGION_NOT_LISTED_MESSAGE } from "@/lib/region-compatibility";
 import { productFaqs, requirementHelp } from "@/lib/product-help";
 import { AccordionList } from "@/components/sections/accordion-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -156,21 +157,31 @@ function ProductPage() {
 
   const variant = selectedVariant;
   const hidePrices = pricesHidden(product);
-  const orderable = !!variant && isPurchasableVariant(product, variant);
-  const selectedAvailability = variant
-    ? availabilityLabel({ ...product, variants: [variant] })
-    : availabilityLabel(product);
-
   const regionText = product.region?.trim() ?? "";
-  const needsRegionConfirm = categoryTypeFromSlug(product.category?.slug ?? "") === "gift_card" && regionText.length > 0;
-  const [regionConfirmed, setRegionConfirmed] = useState(false);
+  const needsRegionConfirm = isRegionSensitiveCategory(product.category?.slug);
+  const regionReady = !needsRegionConfirm || regionText.length > 0;
+  const baseOrderable = !!variant && isPurchasableVariant(product, variant);
+  const orderable = regionReady && baseOrderable;
+  const selectedAvailability = variant
+    ? baseOrderable && !regionReady
+      ? "Region not listed"
+      : availabilityLabel({ ...product, variants: [variant] })
+    : availabilityLabel(product);
+  const regionWarning = needsRegionConfirm ? getRegionCompatibilityWarning(regionText) : null;
+  const regionConfirmationKey = `${product.id}:${regionText}`;
+  const [regionConfirmedFor, setRegionConfirmedFor] = useState<string | null>(null);
+  const regionConfirmed = regionConfirmedFor === regionConfirmationKey;
   const regionRef = useRef<HTMLInputElement>(null);
 
   const navigate = useNavigate();
   const addToCart = (buyNow = false) => {
     if (!variant || !orderable) return;
+    if (needsRegionConfirm && !regionText) {
+      setError(REGION_NOT_LISTED_MESSAGE);
+      return;
+    }
     if (needsRegionConfirm && !regionConfirmed) {
-      setError(`Please confirm this code works in your ${regionText} account before continuing.`);
+      setError(REGION_COMPATIBILITY_CONFIRMATION_REQUIRED_MESSAGE);
       regionRef.current?.focus();
       return;
     }
@@ -302,6 +313,7 @@ function ProductPage() {
                 </div>
               </div>
               {deliveryTime && <p className="mt-1 text-xs text-muted-foreground">{deliveryTime}</p>}
+              {needsRegionConfirm && regionWarning && <p role="note" className="mt-3 rounded-xl border border-warn/40 bg-warn/5 p-3 text-xs leading-relaxed">{regionWarning}</p>}
               {purchaseDetailsBlock && <div className="mt-3">{purchaseDetailsBlock}</div>}
               <div className="mt-4">{actions}</div>
               <div className="mt-4 border-t border-border pt-4">{trust}</div>
@@ -411,20 +423,22 @@ function ProductPage() {
               </ol>
             </section>
 
-            {orderable && needsRegionConfirm && (
-              <section aria-label="Region confirmation" className="mt-4 rounded-2xl border border-primary/40 bg-primary/5 p-4">
-                <p className="flex gap-2 text-sm"><Globe className="mt-0.5 size-4 shrink-0 text-primary" /><span>This code is for <strong>{regionText}</strong> accounts only. A code for another region will not redeem on your account.</span></p>
-                <label className="mt-3 flex min-h-11 cursor-pointer items-center gap-3 text-sm">
-                  <input
-                    ref={regionRef}
-                    type="checkbox"
-                    required
-                    checked={regionConfirmed}
-                    onChange={(e) => { setRegionConfirmed(e.target.checked); if (e.target.checked) setError(null); }}
-                    className="size-5 shrink-0 accent-primary"
-                  />
-                  <span>I confirm my account region is {regionText}.</span>
-                </label>
+            {needsRegionConfirm && (
+              <section aria-label="Region compatibility check" className="mt-4 rounded-2xl border border-warn/50 bg-warn/5 p-4">
+                <p className="flex gap-2 text-sm"><Globe className="mt-0.5 size-4 shrink-0 text-warn" /><span>{regionWarning}</span></p>
+                {regionText && orderable && (
+                  <label className="mt-3 flex min-h-11 cursor-pointer items-center gap-3 text-sm">
+                    <input
+                      ref={regionRef}
+                      type="checkbox"
+                      required
+                      checked={regionConfirmed}
+                      onChange={(event) => { setRegionConfirmedFor(event.target.checked ? regionConfirmationKey : null); if (event.target.checked) setError(null); }}
+                      className="size-5 shrink-0 accent-primary"
+                    />
+                    <span>I have checked the issuer's current redemption rules for the account that will receive this code. I will not pay if those rules do not confirm compatibility.</span>
+                  </label>
+                )}
               </section>
             )}
 
@@ -489,6 +503,7 @@ function ProductPage() {
 
       {/* Sticky buy bar on phones */}
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-3 pb-[calc(0.6rem+env(safe-area-inset-bottom))] pt-2.5 backdrop-blur-xl md:hidden">
+        {needsRegionConfirm && regionWarning && <p role="note" className="mb-2 line-clamp-2 rounded-lg border border-warn/40 bg-warn/5 p-2 text-[11px] leading-relaxed">{regionWarning}</p>}
         {purchaseDetailsBlock && <div className="mb-3 max-h-[25vh] overflow-y-auto">{purchaseDetailsBlock}</div>}
         <div className="flex items-center gap-2.5">
           <div className="min-w-0 flex-1">
