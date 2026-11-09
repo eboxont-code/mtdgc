@@ -6,6 +6,7 @@ import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/
 import { supabase } from "@/integrations/supabase/client";
 import { addOrderNote, getPaymentProofUrl, updateOrderStatus } from "@/lib/admin.functions";
 import { formatNpr } from "@/lib/format";
+import { getPreFulfilmentChecklist } from "@/lib/pre-fulfilment";
 
 export const ADMIN_ORDER_STATUSES = ["paid", "verified", "rejected", "processing", "delivered", "cancelled", "refunded"] as const;
 type OrderStatus = typeof ADMIN_ORDER_STATUSES[number];
@@ -49,7 +50,110 @@ export function OrderDetailPanel({ orderId, onClose, onUpdated }: { orderId: str
       <SheetDescription>Contact, delivery details and payment history.</SheetDescription>
       {loading ? <div aria-label="Loading order" className="mt-6 space-y-4"><Skeleton className="h-24 w-full" /><Skeleton className="h-48 w-full" /><Skeleton className="h-32 w-full" /></div> : error ? <div className="mt-6"><p role="alert" className="text-destructive">{error}</p><Button className="mt-3 min-h-11" onClick={() => void load()}>Retry</Button></div> : !order ? <p className="mt-6">This order is not available.</p> : <div className="mt-6 space-y-6 text-sm">
         <section><h2 className="font-display font-medium">Contact</h2><dl className="mt-2 space-y-2">{entries(order.customer_details).filter(([k]) => ["name", "email", "phone"].includes(k)).map(([k, v]) => <div key={k}><dt className="capitalize text-muted-foreground">{k}</dt><dd className="break-words">{v}</dd></div>)}</dl></section>
-        <section><h2 className="font-display font-medium">Order items</h2>{order.order_items.length ? <ul className="divide-y divide-border">{order.order_items.map((line) => <li key={line.id} className="py-3"><p className="font-medium">{line.product_name}</p><p>{line.quantity} × {line.variant_name}</p><p className="tabular-nums">{formatNpr(line.line_total_minor)}</p><dl className="mt-2 space-y-1">{entries(line.fields).map(([k, v]) => <div key={k}><dt className="text-muted-foreground">{k}</dt><dd className="break-words">{v}</dd></div>)}</dl></li>)}</ul> : <p className="mt-2 text-muted-foreground">No item details are recorded.</p>}<p className="mt-2 font-medium tabular-nums">Total: {formatNpr(order.total_minor)}</p></section>
+        <section><h2 className="font-display font-medium">Order items</h2>{order.order_items.length ? (
+          <ul className="divide-y divide-border">
+            {order.order_items.map((line) => {
+              const checklist = getPreFulfilmentChecklist(line.fields, line.variant_name);
+              const requiredLabels = new Set(checklist.requiredFields.map((field) => field.label));
+              const additionalFields = checklist.capturedFields.filter(([label]) => !requiredLabels.has(label));
+              const missingCount = checklist.missingRequiredCount ?? 0;
+              return (
+                <li key={line.id} className="py-3">
+                  <p className="font-medium">{line.product_name}</p>
+                  <p>{line.quantity} × {line.variant_name}</p>
+                  <p className="tabular-nums">{formatNpr(line.line_total_minor)}</p>
+                  <div className="mt-3 rounded-md border border-border p-3">
+                    <h3 className="font-display font-medium">Pre-fulfilment checklist</h3>
+                    <p className="mt-1 text-xs text-muted-foreground">This is an order-time snapshot, not supplier acceptance or proof that an identifier is correct. Verify the saved details and product region before fulfilment.</p>
+                    <dl className="mt-2 grid gap-2 sm:grid-cols-2">
+                      <div>
+                        <dt className="text-muted-foreground">Selected option / denomination</dt>
+                        <dd className="break-words">{checklist.selectedOption ?? "Not recorded"}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-muted-foreground">Product region at order time</dt>
+                        <dd className="break-words">
+                          {checklist.snapshotStatus === "captured"
+                            ? checklist.region ?? "Not specified at order time"
+                            : checklist.snapshotStatus === "not_captured"
+                              ? "Not captured for this order"
+                              : "Snapshot could not be read"}
+                        </dd>
+                      </div>
+                    </dl>
+                    {checklist.snapshotStatus === "captured" ? (
+                      <>
+                        {checklist.requiredFields.length ? (
+                          <>
+                            <p className="mt-3 text-xs text-muted-foreground">
+                              {missingCount === 0
+                                ? "All configured customer details were recorded at checkout."
+                                : `${missingCount} required detail(s) missing — confirm with the customer before fulfilment.`}
+                            </p>
+                            <ul className="mt-2 space-y-2">
+                              {checklist.requiredFields.map((field) => (
+                                <li key={field.label} className="flex items-start justify-between gap-3 border-t border-border pt-2">
+                                  <div className="min-w-0">
+                                    <p className="font-medium">{field.label}</p>
+                                    <p className="break-words text-muted-foreground">
+                                      {field.missing ? "Missing — confirm with the customer before fulfilment" : field.value}
+                                    </p>
+                                  </div>
+                                  <span className={field.missing ? "shrink-0 text-destructive" : "shrink-0 text-success"}>
+                                    {field.missing ? "Missing" : "Recorded"}
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          </>
+                        ) : (
+                          <p className="mt-3 text-xs text-muted-foreground">
+                            No product-specific customer fields were configured at order time.
+                          </p>
+                        )}
+                        {additionalFields.length > 0 && (
+                          <details className="mt-2">
+                            <summary className="min-h-11 cursor-pointer font-display text-xs">Other saved customer details</summary>
+                            <dl className="space-y-1">
+                              {additionalFields.map(([label, value]) => (
+                                <div key={label}>
+                                  <dt className="text-muted-foreground">{label}</dt>
+                                  <dd className="break-words">{value.trim() ? value : "No value recorded"}</dd>
+                                </div>
+                              ))}
+                            </dl>
+                          </details>
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <p className="mt-3 text-xs text-muted-foreground">
+                          {checklist.snapshotStatus === "not_captured"
+                            ? "No order-time checklist snapshot is stored. Product region and required fields were not captured for this item, so missing requirements cannot be determined."
+                            : "The saved checklist snapshot is not recognised. Verify the saved details manually; do not infer the order-time region or required fields."}
+                        </p>
+                        {checklist.capturedFields.length ? (
+                          <dl className="mt-2 space-y-1">
+                            {checklist.capturedFields.map(([label, value]) => (
+                              <div key={label}>
+                                <dt className="text-muted-foreground">{label}</dt>
+                                <dd className="break-words">{value.trim() ? value : "No value recorded"}</dd>
+                              </div>
+                            ))}
+                          </dl>
+                        ) : (
+                          <p className="mt-2 text-xs text-muted-foreground">No customer-provided item details are recorded.</p>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <p className="mt-2 text-muted-foreground">No item details are recorded.</p>
+        )}<p className="mt-2 font-medium tabular-nums">Total: {formatNpr(order.total_minor)}</p></section>
         <section><h2 className="font-display font-medium">Payment screenshot</h2>{proofUrl ? <a href={proofUrl} target="_blank" rel="noopener noreferrer" className="mt-2 block"><img src={proofUrl} alt="Customer payment screenshot" width={480} height={480} className="max-h-96 w-full object-contain" /><span className="inline-flex min-h-11 items-center text-primary">Open screenshot</span></a> : <p className="mt-2 text-muted-foreground">No payment screenshot has been submitted.</p>}</section>
         <section><label htmlFor="admin-order-status" className="font-display font-medium">Order status</label><select id="admin-order-status" value={order.status} disabled={busy} className="mt-2 min-h-11 w-full rounded-md border border-input bg-card px-3 text-base" onChange={async (event) => {
           const status = ADMIN_ORDER_STATUSES.find((s) => s === event.target.value);
