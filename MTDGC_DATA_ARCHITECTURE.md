@@ -129,6 +129,8 @@ The customer progress helper groups `payment_submitted`/`paid`, `verified`, `pro
 
 ## 9. Guest order access and account-order isolation
 
+> **Release status — 10 November 2026:** The guest-only contact fallback and exact authenticated-owner checks described below are implemented in draft PR #27, refreshed to current main. They are not live in production until the exact-head quality checks and repository release requirements pass and the change is merged and deployed.
+
 ### 9.1 Account-owned order isolation
 
 - Contact-based access is guest-only. The shared `hasOrderContactAccess` helper denies every order with a non-null `user_id`, even when the supplied phone/email matches the saved contact and verification hash.

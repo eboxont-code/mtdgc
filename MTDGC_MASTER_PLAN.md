@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.3 · 8 November 2026
+**Version:** 2.4 · 10 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -301,7 +301,7 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** Customer information, payment evidence, order records and staff tools are protected with least-privilege access.
 
 - [!] **MT-0161 · P0 · BLOCKED** — Refreshed current-main audit is in draft PR [#26](https://github.com/eboxont-code/mtdgc/pull/26); exact-head Quality run [42453509323](https://github.com/eboxont-code/mtdgc/actions/runs/42453509323) failed before runner startup (runner ID 0, no steps/logs).
-- [!] **MT-0162 · P0 · BLOCKED** — The clean current-main fix and regression tests are in draft [PR #27](https://github.com/eboxont-code/mtdgc/pull/27). Exact-head Quality run [42453860327](https://github.com/eboxont-code/mtdgc/actions/runs/42453860327) failed before runner startup (runner ID 0, no steps); Vercel rejected the preview because the free daily deployment limit was exceeded. Six focused helper assertions and standalone strict TypeScript passed locally, but full quality and release verification remain blocked.
+- [!] **MT-0162 · P0 · BLOCKED pending full quality and release verification** — Draft [PR #27](https://github.com/eboxont-code/mtdgc/pull/27) has been refreshed to current main `de1b11f540bf1933dc78ec2487392a0024a15de2` with history-preserving merge commit `ca4573be9eb633270611eeea7bbedff1324861f0` (12 commits ahead, 0 behind). Exact-head Quality run [42680153599](https://github.com/eboxont-code/mtdgc/actions/runs/42680153599) failed before runner startup (job has no steps or logs); full repository checks did not execute. The exact-head Vercel preview reached READY at [deployment `dpl_Bv3A315yMtZGcoKX5nrK17b7gXqV`](https://vercel.com/boxont/mtdgc/Bv3A315yMtZGcoKX5nrK17b7gXqV), but the preview page could not be fetched for a browser smoke test. A Node 22.16.0 scratch harness passed all six focused order-access tests; this does not replace the Bun quality workflow. Production remains READY on main `de1b11f540bf1933dc78ec2487392a0024a15de2`; no production deployment was triggered. Branch-protection/ruleset settings remain unverified because the connected GitHub integration returns 403. Do not merge or claim the fix is live.
 - [ ] **MT-0163 · P0 · TODO** — Verify payment uploads and delivered codes are stored privately, not in public buckets.
 - [ ] **MT-0164 · P0 · TODO** — Ensure admin-only actions are enforced server-side, not only hidden in the interface.
 - [ ] **MT-0165 · P0 · TODO** — Review secrets, supplier credentials and payment configuration for accidental exposure.
@@ -530,7 +530,7 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-MT-0162 is **IN PROGRESS** on a clean branch based on current main. MT-0102, MT-0105 and MT-0161 remain blocked on exact-head GitHub Actions runner startup; MT-0106 depends on MT-0102. Task statuses in the 308-task register remain authoritative.
+MT-0162 is **BLOCKED pending full quality and release verification**. Its existing branch has been refreshed to current main without rewriting history; six focused Node assertions pass, but the exact-head GitHub Quality job failed before runner startup and the READY preview could not be browser-smoke-tested. Do not repeat the unchanged runner failure. MT-0102, MT-0105 and MT-0161 remain blocked on their exact-head runner failures; MT-0106 depends on MT-0102. MT-0165 is the next independent P0 candidate after this blocker is revisited only when new runner or release-gate evidence exists.
 
 | Order | Task | Status |
 |---:|---|---|
@@ -547,10 +547,10 @@ MT-0162 is **IN PROGRESS** on a clean branch based on current main. MT-0102, MT-
 | 11 | MT-0105 — require order number plus matching saved email or phone for public guest tracking | BLOCKED; draft PR #23 exact-head Quality failed before runner startup |
 | 12 | MT-0106 — align authenticated order history and guest tracking status labels | BLOCKED; depends on verified MT-0102 milestone definitions |
 | 13 | MT-0161 — audit authentication and authorisation for customer accounts, support requests and admin routes | BLOCKED; refreshed audit in draft PR #26, exact-head Quality failed before runner startup |
-| 14 | MT-0162 — prevent cross-customer order access by changing an ID or URL | BLOCKED; draft [PR #27](https://github.com/eboxont-code/mtdgc/pull/27) exact-head Quality failed before runner startup and Vercel preview was rejected by the free daily deployment limit |
+| 14 | MT-0162 — prevent cross-customer order access by changing an ID or URL | BLOCKED; PR #27 refreshed to current main; exact-head Quality run [42680153599](https://github.com/eboxont-code/mtdgc/actions/runs/42680153599) failed before runner startup; exact-head preview reached READY but browser smoke was unavailable; branch-protection settings cannot be verified |
 | 15 | MT-0163 — verify payment uploads and delivered codes are stored privately | BLOCKED; no delivered-code storage location or approved storage design is evidenced |
 | 16 | MT-0164 — enforce admin-only actions server-side | BLOCKED pending MT-0162 reconciliation; existing PR #14 is stacked on the old MT-0162 branch |
-| 17 | MT-0165 — review secrets and payment configuration for accidental exposure | Existing draft PR #15; recheck its evidence against current main before promotion |
+| 17 | MT-0165 — review secrets and payment configuration for accidental exposure | NEXT INDEPENDENT P0 after MT-0162 remains blocked; existing draft PR #15 must be refreshed and its evidence rechecked against current main without decrypting or changing environment values |
 | 18 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 19 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 
@@ -1373,3 +1373,36 @@ The order functions use the server-only Supabase service-role client, which bypa
 ### Next task
 
 MT-0163 remains blocked because the production storage inventory contains only the private payment-proof and payment-QR buckets; the actual delivered-code storage location and approved design are not evidenced. MT-0164 remains blocked on MT-0162 and its old stacked draft. MT-0165 is the next independent P0 candidate: refresh the existing secrets/payment audit from its 63-commits-behind branch onto current main, without decrypting or changing any Vercel environment values.
+
+
+## 35. MT-0162 current-main refresh and verification — 10 November 2026
+
+**Task:** MT-0162 · P0 · BLOCKED pending full quality and release verification. Draft [PR #27](https://github.com/eboxont-code/mtdgc/pull/27) now targets current `main` commit `de1b11f540bf1933dc78ec2487392a0024a15de2`. The branch was refreshed without rewriting history: merge commit `ca4573be9eb633270611eeea7bbedff1324861f0` has the previous PR head as first parent and current main as second parent. GitHub compare confirms 12 commits ahead and 0 behind.
+
+### Access-control behaviour
+
+- The shared contact fallback denies orders with a non-null `user_id`; matching phone/email and the guest verification hash cannot open an account-owned order.
+- Guest orders retain the order-number-plus-saved-contact path.
+- Account-owned order lookup requires either the order-specific access token or a Supabase-validated Bearer token whose user ID exactly matches the order owner.
+- The tracking page forwards the current session token when available. The order-detail route and payment-proof form already forward the session token; the server validates it before allowing account-owner access.
+- All three server access paths load the server-resolved `user_id`. No owner ID or access decision is accepted from the browser.
+- Production RLS metadata confirms authenticated order reads are owner/admin scoped and there is no anonymous order SELECT policy. The application uses a service-role client for these server functions, which bypasses RLS; explicit application checks are therefore necessary.
+
+### Focused verification
+
+- A Node 22.16.0 scratch harness executed the six existing order-access tests from the PR branch: 6 passed, 0 failed. The harness adapted the test import to Node's TypeScript stripping; it is not the repository's Bun test command.
+- Bun is not installed in this runtime. The repository Quality workflow is configured to run lint, the full Bun test suite, TypeScript typecheck and production build.
+- Exact-head GitHub Quality run [42680153599](https://github.com/eboxont-code/mtdgc/actions/runs/42680153599) failed before the job started; GitHub returned no steps or downloadable logs. None of lint, Bun tests, typecheck or build ran. This is a runner-startup failure, not an observed application test failure.
+
+### Preview and production boundary
+
+- Vercel preview deployment [`dpl_Bv3A315yMtZGcoKX5nrK17b7gXqV`](https://vercel.com/boxont/mtdgc/Bv3A315yMtZGcoKX5nrK17b7gXqV) reached READY for the branch refresh commit `ca4573be9eb633270611eeea7bbedff1324861f0`, target `null` (preview only). The preview URL is `https://mtdgc-m99rngty2-boxont.vercel.app`; a read-only browser GET was unavailable from the current network tool, so no preview smoke result is claimed.
+- Production deployment [`dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay`](https://vercel.com/boxont/mtdgc/dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay) remains READY on exact main commit `de1b11f540bf1933dc78ec2487392a0024a15de2`. The PR branch deployment had target `null`; it did not trigger production publishing.
+- The Supabase project remains ACTIVE_HEALTHY in `ap-southeast-1`. Read-only policy/grant queries inspected metadata only; no customer, order, payment or auth-user rows were read. No production schema, RLS, grants, records, credentials, authentication settings, environment variables, DNS, hosting or billing were changed.
+- GitHub branch-protection and ruleset endpoints return 403 to the connected integration. Required review/status-check settings therefore remain unverified; do not merge or bypass them.
+
+### Next task
+
+MT-0165 is the next independent P0 candidate after MT-0162 is left blocked on the exact-head quality workflow and unavailable branch-protection evidence. Refresh its existing draft PR against current main without decrypting or changing any Vercel environment values.
+
+No production release occurred. Additional spend: $0.
