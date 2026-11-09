@@ -165,3 +165,23 @@ This refresh uses current GitHub `main` at `ca01edaafa42b5b859089ce18d5decaf6fbd
 - Current-main Quality run [42437058568](https://github.com/eboxont-code/mtdgc/actions/runs/42437058568) passed on the base commit. The previous MT-0165 draft's full Quality run [42415852547](https://github.com/eboxont-code/mtdgc/actions/runs/42415852547) passed on its old base `9c745dda3951bc8af616ea09061cb828e16f89d6`, but that branch is 63 commits behind current main and is not current-head verification.
 - The current Vercel production deployment remains READY on older commit `3de811c7cfce91eb262cf79523d8053995bfb777`. The Preview service-role risk is not remediated by this audit.
 - No environment values were decrypted, printed, copied or changed. No production database/schema, RLS, storage, authentication, credentials, DNS, hosting or billing settings were modified. No supplier/customer contact, purchase or additional spend occurred. Additional spend: $0.
+
+
+## 12. MT-0165 current environment and payment metadata recheck — 9 November 2026
+
+This recheck used Vercel environment-variable metadata with decryption disabled and read-only Supabase schema/storage metadata. It does not inspect or disclose secret values.
+
+### Vercel Preview and Production scope
+
+- `SUPABASE_URL` and `SUPABASE_PROJECT_ID` each appear as one variable entry targeting both `preview` and `production`; publishable-key entries also target both. These shared entries apply the same configured value to both environments.
+- `SUPABASE_SERVICE_ROLE_KEY` appears as two sensitive entries, separately targeted to Production and Preview. Neither value was decrypted, so the audit cannot establish whether they are identical or separately scoped to different projects.
+- The current metadata therefore does not demonstrate an isolated Preview Supabase project: Preview and Production share the same URL/project-ID entries. Owner confirmation and, if required, an approved non-production project/configuration are needed before claiming isolation. Do not decrypt or change environment variables as part of this audit.
+
+### Payment settings and storage metadata
+
+- Production `public.payment_settings` has RLS enabled, zero rows and only nine customer-facing/audit columns: `id`, QR path, bank name, account name/number, instructions, Fonepay flag, updated timestamp and updated user. No gateway, merchant or supplier credential columns exist.
+- `payment-proofs` and `payment-qr` storage buckets are private, with 5 MiB and 2 MiB limits respectively. Their `allowed_mime_types` metadata is NULL, so application-side file validation remains necessary.
+- The payment QR bucket has authenticated administrator insert/read/update/delete policies. The payment-proof bucket has an authenticated related-order-owner/admin read policy. No storage objects, bank details, payment values or customer records were read.
+- The supplier identity and product-scope registers remain empty/NOT ASSESSED; the supplier register explicitly prohibits storing passwords, API keys, bank credentials, access tokens or customer secrets.
+
+No environment values, database rows, storage objects, credentials or production settings were changed. Additional spend: $0.

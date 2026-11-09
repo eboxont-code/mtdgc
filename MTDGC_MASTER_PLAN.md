@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.3 · 8 November 2026
+**Version:** 2.4 · 9 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -304,7 +304,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [!] **MT-0162 · P0 · BLOCKED** — Clean current-main fix is in draft PR [#27](https://github.com/eboxont-code/mtdgc/pull/27). Code-bearing head `4673e249ba680d248fc205915169e0ec9df203b7` failed Quality run [42453860327](https://github.com/eboxont-code/mtdgc/actions/runs/42453860327) before runner startup; the later documentation-only head `23cde910f6a8ba96409d62d1d76eefa9e84af8b8` has no new workflow run. Vercel rejected the PR preview because the free daily deployment limit was exceeded.
 - [ ] **MT-0163 · P0 · TODO** — Verify payment uploads and delivered codes are stored privately, not in public buckets.
 - [ ] **MT-0164 · P0 · TODO** — Ensure admin-only actions are enforced server-side, not only hidden in the interface.
-- [~] **MT-0165 · P0 · IN PROGRESS** — The old audit PR #15 is 63 commits behind current main. The refreshed audit and regression guardrails are in clean current-main draft [PR #28](https://github.com/eboxont-code/mtdgc/pull/28); initial code/test head `48ddda203ca48f2e1078c1bc6fddc3628f2cbdba`. The Preview service-role variable remains an owner-only configuration risk and will not be changed or decrypted.
+- [!] **MT-0165 · P0 · BLOCKED** — The current-main secrets/payment audit and seven regression guardrails are in draft PR #28. Its branch now includes current main `de1b11f540bf1933dc78ec2487392a0024a15de2` through the history-preserving refresh commit `3ac53cf21a5833d15df9c8b7ec3e9dde099bba47`. Nine targeted source-contract checks passed, but the full repository quality workflow has not executed on the refreshed head; prior run [42454284607](https://github.com/eboxont-code/mtdgc/actions/runs/42454284607) failed before runner startup (runner ID 0, zero steps). Vercel has no preview deployment record for the refreshed branch; the earlier attempt was rejected by the free daily limit. Read-only Vercel metadata shows shared `SUPABASE_URL` and `SUPABASE_PROJECT_ID` entries targeting both Production and Preview; separate service-role entries remain encrypted. Owner must decide whether Preview requires an isolated non-production Supabase project; no environment values were decrypted or changed.
 - [ ] **MT-0166 · P1 · TODO** — Enable strong admin authentication and remove unused staff accounts.
 - [ ] **MT-0167 · P1 · TODO** — Apply least-privilege roles for payment review, fulfilment, support and catalogue editing.
 - [ ] **MT-0168 · P1 · TODO** — Log sensitive admin actions such as refunds, code reveal, payment verification and status overrides.
@@ -530,7 +530,7 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-MT-0165 is **IN PROGRESS** on a clean branch based on current main. MT-0102, MT-0105, MT-0161 and MT-0162 are blocked by exact-head runner failures; MT-0106 depends on MT-0102. Task statuses in the 308-task register remain authoritative.
+MT-0165 is **BLOCKED** pending an exact-head full quality run and an owner decision on Preview/Production Supabase isolation. Its branch was refreshed to current main by merge commit `3ac53cf21a5833d15df9c8b7ec3e9dde099bba47`; the prior code/test workflow failed before runner startup. MT-0182 is the next independent P0 task and can proceed with read-only production-page checks while these blockers remain. Task statuses in the 308-task register remain authoritative.
 
 | Order | Task | Status |
 |---:|---|---|
@@ -550,9 +550,9 @@ MT-0165 is **IN PROGRESS** on a clean branch based on current main. MT-0102, MT-
 | 14 | MT-0162 — prevent cross-customer order access by changing an ID or URL | BLOCKED; draft PR #27 exact-head runner failed and Vercel preview was rejected by the free daily deployment limit |
 | 15 | MT-0163 — verify payment uploads and delivered codes are stored privately | BLOCKED; no delivered-code storage location or approved storage design is evidenced |
 | 16 | MT-0164 — enforce admin-only actions server-side | BLOCKED pending MT-0162; existing PR #14 is stacked on the old MT-0162 branch |
-| 17 | MT-0165 — review secrets and payment configuration for accidental exposure | IN PROGRESS; clean current-main audit and regression guardrails are in draft [PR #28](https://github.com/eboxont-code/mtdgc/pull/28), with no environment values decrypted or changed |
+| 17 | MT-0165 — review secrets and payment configuration for accidental exposure | BLOCKED; PR #28 refreshed to main, but exact-head full quality checks have not executed; Preview and Production share Supabase URL/project-ID entries, and the owner must decide Preview isolation |
 | 18 | MT-0181 — test the full purchase journey on common Android phones and narrow mobile screens | BLOCKED; requires a physical Android device and an owner-authorised real test order/payment |
-| 19 | MT-0182 — verify availability labels, purchasable counts and disabled coming-soon actions on production | NEXT P0 after MT-0165; read-only production-page review can proceed once the current security audit is settled |
+| 19 | MT-0182 — verify availability labels, purchasable counts and disabled coming-soon actions on production | NEXT ELIGIBLE P0; read-only production-page review is independent of MT-0165's CI and Preview-isolation blockers |
 | 20 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 21 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 
@@ -1381,3 +1381,36 @@ No production application code, database/schema, order/payment/customer record, 
 No environment values were decrypted, printed, copied or changed. No production database/schema, RLS, storage, authentication, credentials, DNS, hosting or billing settings were modified. No supplier/customer contact, purchase or additional spend occurred. Additional spend: $0.
 
 MT-0165 remains IN PROGRESS until its clean current-main audit and regression tests pass the exact-head quality workflow and are merged. The Preview service-role isolation finding remains owner-only. MT-0181 is blocked on a physical Android device and an authorised real test order/payment; MT-0182 is the next independent P0 review task after this audit.
+
+## 36. MT-0165 current-main revalidation and Preview environment scope — 9 November 2026
+
+**Task:** MT-0165 · P0 · BLOCKED pending exact-head repository quality verification and an owner decision on Preview isolation. [PR #28](https://github.com/eboxont-code/mtdgc/pull/28) remains OPEN/DRAFT and targets `main`. The branch was refreshed without rewriting published history: merge commit `3ac53cf21a5833d15df9c8b7ec3e9dde099bba47` has the previous PR head `85fafedb2733c63755c2bb8d0ca68f04c011894e` as first parent and current main `de1b11f540bf1933dc78ec2487392a0024a15de2` as second parent. The refresh preserves the PR's three changed files on top of current main; no main-branch file was changed.
+
+### Current-main source checks
+
+- Nine focused source-contract checks passed against current main: root `.env` absent; `.gitignore` ignores `.env` and `.env.*` while allowing `.env.example`; all seven environment-template assignments are blank; browser client uses publishable settings only; service-role access is confined to the server-only client; CI uses a placeholder; public payment settings use an explicit customer-facing field allowlist and 3,600-second signed QR URL; all three payment-setting admin handlers authorize before database/storage access; and the payment-settings TypeScript shape has no gateway/supplier credential fields.
+- These were targeted static source checks through the connected repository, not execution of the repository's seven-test `security-config.test.ts` suite. The full Bun tests, ESLint, project typecheck and production build remain unverified. The prior code/test workflow [42454284607](https://github.com/eboxont-code/mtdgc/actions/runs/42454284607) failed before runner startup (runner ID 0, zero steps). No exact-head workflow run was returned for the refreshed merge commit at this inspection; the GitHub integration did not expose a workflow dispatch action.
+- The scanner is intentionally limited to current text files and skips generated/dependency directories, binary files and files over 5 MiB. It does not inspect every historical Git object or external secret store; no private values are reported.
+
+### Fresh Vercel environment metadata — read with decryption disabled
+
+- Project `mtdgc` remains linked to `eboxont-code/mtdgc` on the Boxont Hobby team.
+- One `SUPABASE_URL` entry and one `SUPABASE_PROJECT_ID` entry each target both `preview` and `production`. The same is true for the publishable-key entries. This is shared environment-variable scope, not evidence of a separate Preview Supabase project.
+- `SUPABASE_SERVICE_ROLE_KEY` has separate sensitive entries for Production and Preview. Neither value was decrypted, so it is unknown whether the keys differ or whether the Preview key is scoped to another project.
+- **Owner-only decision:** Preview and Production currently share the Supabase URL/project-ID variable entries. The owner must confirm the intended Preview isolation and provide an approved non-production project/configuration if one is required. Do not decrypt, rotate, remove or change any environment variable in this audit.
+- Vercel's read-only deployment list returned no preview deployment for the refreshed branch. The previous preview attempt was rejected by the Hobby free daily deployment limit. The latest production deployment remains READY at `dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay`, deployed from exact main commit `de1b11f540bf1933dc78ec2487392a0024a15de2`. No production deployment was triggered by this PR refresh.
+
+### Fresh Supabase payment/storage metadata — read-only
+
+- Production `public.payment_settings` has RLS enabled, zero rows, and nine columns: `id`, `qr_image_path`, `bank_name`, `account_name`, `account_number`, `instructions`, `fonepay_enabled`, `updated_at` and `updated_by`. No gateway API key, merchant secret, password or supplier credential column exists.
+- `payment-proofs` is private with a 5 MiB limit; `payment-qr` is private with a 2 MiB limit. Both have no storage-level MIME allowlist (`allowed_mime_types = NULL`); application-side upload validation remains important.
+- Storage policies observed: payment QR insert/read/update/delete are authenticated administrator policies; payment-proof object SELECT is limited to the related order owner or administrator. No storage objects or payment values were read.
+- The supplier identity and product-scope registers remain empty/NOT ASSESSED. The register explicitly prohibits storing private credentials; no supplier credentials were found in the register.
+
+### Release and safety
+
+- PR #28 has no submitted reviews or unresolved review threads. It remains draft because exact-head full quality checks have not executed and the Preview-isolation decision is owner-only.
+- No merge or production deployment occurred. Production remains READY on `de1b11f540bf1933dc78ec2487392a0024a15de2`; the audit changes are not live.
+- No environment values were decrypted, printed, copied or changed. No production database writes/migrations, customer/order/payment reads or mutations, storage-object access, authentication, DNS, hosting or billing changes occurred. No supplier/customer contact or purchase. Additional spend: $0.
+
+**Next eligible P0 task:** MT-0182 — verify current production availability labels, purchasable counts and disabled coming-soon actions using read-only page checks. Do not wait for the owner-only Preview decision to perform this independent review.
