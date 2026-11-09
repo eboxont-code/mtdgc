@@ -73,7 +73,7 @@ describe("MT-0144 region compatibility warnings before payment", () => {
 
   test("normalises Unicode and whitespace before comparing saved and current regions", () => {
     assert.doesNotThrow(() =>
-      assertRegionCompatibilityConfirmed([{ categorySlug: "game-top-ups", region: "Global", expectedRegion: "  GLOBAL  " }], true),
+      assertRegionCompatibilityConfirmed([{ categorySlug: "game-top-ups", region: "Global", expectedRegion: "  ＧＬＯＢＡＬ  " }], true),
     );
   });
 });
