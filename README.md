@@ -19,7 +19,7 @@ A product must not become orderable until its supplier, resale rights, region, v
 - [Supplier Register](./SUPPLIER_REGISTER.md) — internal supplier identity, source, authorisation, product-scope and fulfilment due diligence register.
 - [Roadmap history](./roadmap.md) — dated implementation notes and verification records; the Master Plan is authoritative for current task status.
 - [Data architecture](./MTDGC_DATA_ARCHITECTURE.md) — current order, payment, identity and access-control design.
-- [Personal data map](./MTDGC_DATA_MAP.md) — source-backed inventory of captured personal-data fields, known processors, evidenced locations and unresolved data-flow questions.
+- [Personal data map](./MTDGC_DATA_MAP.md) — source-backed inventory of personal-data fields, known processors, evidenced locations and unresolved data-flow questions.
 - [Repository working rules](./AGENTS.md) — Lovable sync and code-boundary guidance.
 
 Read the Master Plan before starting work. Update it with evidence when a task changes status. Do not maintain a competing TODO list.

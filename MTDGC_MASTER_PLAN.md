@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.2 · 8 November 2026
+**Version:** 2.3 · 10 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -461,7 +461,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0289 · P1 · TODO** — Record supplier order references, delivery evidence, status timestamps and failure reasons; use idempotency and duplicate checks where supplier systems support them.
 - [ ] **MT-0290 · P1 · TODO** — Define supplier-outage fallback rules and automatically or manually disable new sales when stock, authenticity or delivery cannot be confirmed.
 - [ ] **MT-0291 · P1 · TODO** — Alert staff before or when a delivery SLA is breached and send the customer a truthful next-update time before they need to chase support.
-- [!] **MT-0292 · P0 · BLOCKED** — Source-backed personal-data map prepared in [PR #34](https://github.com/eboxont-code/mtdgc/pull/34), but not merged into canonical main. The exact-head Quality run failed before any workflow step started, and merging to main would release a 75-commit production backlog. Provider/recipient and retention gaps are explicitly listed as UNKNOWN in [MTDGC_DATA_MAP.md](./MTDGC_DATA_MAP.md).
+- [!] **MT-0292 · P0 · BLOCKED** — Source-backed technical inventory is prepared in [PR #34](https://github.com/eboxont-code/mtdgc/pull/34) and refreshed against current main/production on 10 November 2026. Supplier/provider recipients, processing locations, Preview project isolation and retention remain UNKNOWN pending owner/provider evidence; exact-head quality verification is also blocked by GitHub runner startup failure.
 - [ ] **MT-0293 · P1 · TODO** — Define retention periods or defensible retention criteria for orders, support records, payment evidence and account data, with a process for access, correction and deletion requests.
 - [ ] **MT-0294 · P0 · TODO** — Keep payment screenshots and delivered codes in private, access-controlled storage; validate file type/size, minimise visible bank details, restrict staff access and define deletion timing.
 - [ ] **MT-0295 · P0 · TODO** — Add proportionate fraud controls for rapid repeat orders, payment/market mismatch, stolen-card signals, order enumeration, account takeover, code reselling abuse and chargebacks.
@@ -1335,46 +1335,50 @@ No production application code, database/schema, order/payment/customer record, 
 
 **Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
 
+## 32. MT-0292 personal-data map — 10 November 2026
 
-## 32. MT-0292 personal-data map — 8 November 2026
+**Task:** MT-0292 · P0 · BLOCKED. The source-backed technical inventory is prepared in [PR #34](https://github.com/eboxont-code/mtdgc/pull/34). It is documentation-only and is not merged into canonical `main`.
 
-**Task:** MT-0292 · P0 · BLOCKED pending verification and safe release. The source-backed inventory is prepared in [PR #34](https://github.com/eboxont-code/mtdgc/pull/34); it is not in canonical `main` or production.
+### Scope completed
 
-### Scope completed in the PR
+- Added [MTDGC_DATA_MAP.md](./MTDGC_DATA_MAP.md), covering account/authentication, profiles, checkout, dynamic product fields, orders, tracking, abuse-prevention metadata, payment proof, support, reviews, wishlists, operational notes, diagnostics and manual hand-offs.
+- Linked the map from the README and data architecture.
+- Recorded the purpose, storage location, known processor/recipient and evidenced region for each identified field group.
+- Marked suppliers, email delivery, OAuth, WhatsApp, telemetry, logs, backups, support access and retention as UNKNOWN where no authoritative evidence exists.
+- Refreshed the audit against current main and current production rather than relying on the stale 8 November baseline.
 
-- Added [MTDGC_DATA_MAP.md](./MTDGC_DATA_MAP.md) covering account/authentication, profiles, checkout, dynamic product fields, order records, tracking, IP-derived rate-limit data, payment proofs, support, reviews, wishlists, operational notes, diagnostics and manual supplier/payment hand-offs.
-- Linked the map from [README.md](./README.md) and [MTDGC_DATA_ARCHITECTURE.md](./MTDGC_DATA_ARCHITECTURE.md).
-- Recorded each field group’s purpose, storage location, known processor/recipient, evidenced country/region and confidence.
-- Explicitly marked unsupported supplier, email, OAuth, WhatsApp, telemetry, log, backup, retention and provider-access details as UNKNOWN rather than inferring them.
+### Read-only evidence — 10 November 2026
 
-### Read-only evidence — 8 November 2026
+- Current GitHub `main`: `de1b11f540bf1933dc78ec2487392a0024a15de2`.
+- Current Vercel production deployment: [`dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay`](https://vercel.com/boxont/mtdgc/4njU9xzd9RmCkGuYeQBDTLZV9Nay), READY, target Production, deployed from the same `main` commit, region `iad1` (US East), aliases include `mtdgc.com` and `www.mtdgc.com`.
+- Supabase project status ACTIVE_HEALTHY, region `ap-southeast-1` (Singapore), Postgres 17.11.0.003.
+- Supabase inspection was limited to `information_schema` column metadata, `pg_policies`, table/function privilege metadata, security-advisor findings and Storage bucket metadata. No customer, order, payment, auth-user or Storage-object values were read.
+- Both `payment-proofs` and `payment-qr` buckets are private. The payment-proof bucket limit is 5 MiB; the QR bucket limit is 2 MiB. Both have no Storage-level MIME allowlist. The application payment-proof upload path performs image decoding and normalization; do not treat that as a bucket-wide MIME restriction.
+- `public.payment_proofs` has RLS enabled, no anonymous SELECT privilege, and an authenticated SELECT grant subject to the owner-or-admin policy. `storage.objects` has RLS enabled; its table-level anonymous SELECT grant exists, but there is no anonymous policy for the private payment buckets. The payment-proof object policy is authenticated owner-or-admin; payment-QR object operations are administrator-only.
+- The administrator payment-review list and proof-URL functions require a validated Supabase session and an exact successful administrator-role result before looking up proof data or creating a signed URL. Payment-proof signed URLs expire after 300 seconds.
+- Supabase metadata shows `public.has_role` is SECURITY DEFINER and executable by both anon and authenticated roles; the security advisor flags this. It is a separate role-membership disclosure issue and does not itself grant payment-proof row/object access. Do not change it outside the approved coordinated migration gate.
+- Vercel environment names/targets were inspected with decryption disabled. Separate sensitive `SUPABASE_SERVICE_ROLE_KEY` entries exist for Production and Preview. The same `SUPABASE_URL`, `SUPABASE_PROJECT_ID`, publishable-key and browser-prefixed Supabase URL/project-ID entries are scoped to both Preview and Production; values were not decrypted, so the actual endpoint identity was not confirmed. Treat Preview as potentially production-connected until the owner verifies isolation.
+- The supplier register still contains no verified supplier identity or product-scope evidence. No supplier API, automated bank-settlement integration, transactional delivery-email sender or active product-analytics event call was found in the inspected application source. Google OAuth is mediated by the Lovable auth wrapper; WhatsApp links are user-initiated. The Sentry package and public DSN configuration exist, but no Sentry initialisation/direct capture call was found; active Sentry collection is not confirmed. Lovable error hooks may receive error, route/context, message and stack data; their downstream destination, region and retention are UNKNOWN.
 
-- Repository baseline: `main` at `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`.
-- Supabase project metadata reports ACTIVE_HEALTHY in `ap-southeast-1` (Singapore).
-- Supabase inspection was limited to `information_schema` column metadata, `pg_policies`, function metadata and Storage bucket metadata. Both observed buckets, `payment-proofs` and `payment-qr`, are private. No customer/order/payment/auth-user values or Storage objects were read.
-- Vercel production deployment metadata reports READY at [deployment dpl_4nELrLJ21wEGvAAtVbs2g6UPsNhC](https://vercel.com/boxont/mtdgc/4nELrLJ21wEGvAAtVbs2g6UPsNhC), commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`, region `iad1` (US East), with the production aliases. This fresh observation supersedes the older production SHA recorded in section 31.
-- GitHub compare confirms current main is 75 commits ahead of that production commit. A merge to main triggers the connected Vercel production workflow; it would release that backlog, not just this documentation change.
-- Vercel environment variable names and targets were inspected with decryption disabled. No environment values or secrets were decrypted.
+### Exact unresolved dependencies
+
+1. Supplier legal identities, product-specific recipients, manual hand-off channel, access countries and retention.
+2. Supabase Auth email/SMTP provider and sub-processors; Google/Lovable OAuth claims and processing locations; WhatsApp/Meta processing and retention.
+3. Whether Sentry is initialised outside the inspected source, its actual payload and retention; Lovable preview telemetry destination and region.
+4. Vercel request/log retention and support-access countries; Supabase backup/replica locations and provider support-access countries.
+5. Owner-approved retention/deletion criteria for accounts, orders, support notes and payment evidence. The privacy page describes deletion requests through support, but no complete deletion workflow or schedule was evidenced.
+6. Owner confirmation that Preview uses a separate non-production Supabase project and matching non-production service-role credential. No environment value was decrypted.
 
 ### Verification and release state
 
-- Manual document validation: PASS — all required data domains, processor/location columns, source links and UNKNOWN markers are present.
-- Exact PR-head GitHub Quality run [42473979607](https://github.com/eboxont-code/mtdgc/actions/runs/42473979607) on head `d372e17e96e8628cd9865acef4126f9f6b0af967`: FAILED before any workflow step started; the job has no steps or log URL. No lint, unit tests, typecheck or build ran.
-- PR #34 has no submitted reviews or unresolved review threads. The PR is draft and open. The repository reports main as unprotected with no required status checks, but that does not waive the project's quality/release requirements.
-- Vercel preview [dpl_Ef1VBM8vsFHzPpaZxRWGfYHHwGBw](https://vercel.com/boxont/mtdgc/Ef1VBM8vsFHzPpaZxRWGfYHHwGBw) was BUILDING when inspected, target `null` (preview only). Earlier documentation commits produced preview builds; none is production.
-- No merge commit exists. No production deployment was triggered by this PR. No production smoke test is applicable because this is documentation-only and is not live.
+- Manual document validation: PASS — required data domains, purpose/processor/location columns, source references and explicit UNKNOWN markers are present.
+- The previous exact-head GitHub Quality run [42474182140](https://github.com/eboxont-code/mtdgc/actions/runs/42474182140) on the pre-refresh PR head failed before any workflow step started; no lint, tests, typecheck or build executed. The refreshed head must be checked once its automatic run is available; do not retry an unchanged failed run.
+- PR #34 remains OPEN/DRAFT until the refreshed exact-head checks pass. No required review or unresolved review conversation was observed. The main branch is not protected, but project quality requirements still apply.
+- The old statement that main was 75 commits ahead of production is superseded: current production is READY on the same commit as current main. Merging this documentation PR would trigger the existing production Git workflow, but it would not release that old application backlog.
+- No merge commit exists and no production deployment was triggered by this task. The current production deployment remains the existing READY deployment above. This documentation update is not live.
 
-### Exact unresolved evidence
+### Next queue scan
 
-1. Supplier identities, product-specific data recipients, manual hand-off channel, access countries and supplier retention.
-2. Supabase Auth email/SMTP provider, Google/Lovable OAuth processing locations and claims, and WhatsApp/Meta processing/retention.
-3. Whether Sentry is initialised and what error payload/retention applies; the configured US ingest endpoint alone does not prove active collection.
-4. Lovable preview telemetry destination and region; Vercel request-log and support-access locations; Supabase backup/replica and support-access locations.
-5. Owner-approved retention/deletion schedule; no complete schedule or automated account-deletion flow was evidenced.
-6. Preview service-role isolation from Production remains the existing MT-0165 owner-only blocker. No secret was decrypted.
+MT-0102 remains earlier in the P0 register but its exact-head runner-startup failure is unchanged; do not retry it without new runner evidence. MT-0103 requires an owner/business decision, MT-0104 depends on approved transition/payment rules, MT-0105 and MT-0122 have the same runner-verification blocker, and MT-0106 depends on MT-0102. Supplier-dependent tasks remain blocked by the empty supplier register. The next P0 candidate to assess is MT-0294: verify the already-private payment storage and access controls, then record the exact owner-only deletion-timing decision; if that decision prevents completion, skip it and continue to independent MT-0295 fraud-control work.
 
-### Production and cost boundary
-
-No application code, production schema, RLS, Storage objects, customer/order/payment records, credentials, environment values, authentication settings, hosting, DNS or billing were changed. No supplier/customer was contacted; no test order or payment was made. Additional spend: **$0**.
-
-**Next queue scan:** MT-0102 remains first in the register, but its draft [PR #22](https://github.com/eboxont-code/mtdgc/pull/22) is blocked by an exact-head runner-startup failure; do not retry unchanged. MT-0103 requires an owner/business decision on legacy cancelled/failed/refunded states and whether `action_required` is needed. MT-0104 depends on approved transition/payment rules. MT-0105 has a blocked implementation PR, and MT-0106 depends on MT-0102. The next independent dashboard candidate MT-0221 is not ready for full completion until an owner-approved delivery SLA/overdue definition exists: current product `delivery_time` is free text, and the order schema has no normalized due-at field. The existing admin page only counts awaiting-payment, processing and delivered orders among the latest loaded orders. Continue scanning subsequent independent P0 tasks rather than inventing these rules.
+**Production and cost boundary:** No application code, production schema, RLS, Storage objects, customer/order/payment records, credentials, environment values, authentication, hosting, DNS or billing settings were changed. No supplier/customer was contacted; no test order or payment was made. Additional spend: **$0**.

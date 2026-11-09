@@ -1,7 +1,7 @@
 # MTDGC Personal Data Map
 
-**Audit date:** 8 November 2026  
-**Repository baseline:** `main` at `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`  
+**Audit date:** 10 November 2026  
+**Repository baseline:** `main` at `de1b11f540bf1933dc78ec2487392a0024a15de2`  
 **Purpose:** Record personal-data fields visible in the application and production schema, their purpose, known processors/recipients, and evidenced access or storage locations.
 
 > This is a technical data-flow inventory, not legal advice or a declaration of privacy-law compliance. Unknown processors, locations, access arrangements and retention periods are deliberately labelled **UNKNOWN**. No customer, order, payment, authentication-user or storage-object values were read for this audit.
@@ -9,7 +9,7 @@
 ## 1. Data-flow overview
 
 1. A customer enters account, checkout, tracking, support or payment-proof information in the browser.
-2. The application is hosted by Vercel. The inspected production deployment runs in region `iad1` (US East).
+2. The application is hosted by Vercel. The inspected production deployment is READY at `dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay`, on current `main` commit `de1b11f540bf1933dc78ec2487392a0024a15de2`, in region `iad1` (US East).
 3. Application data is sent to the connected Supabase project. Its observed project region is `ap-southeast-1` (Singapore); this is the evidenced region for the project's Postgres database, Auth and Storage services.
 4. Google OAuth is offered through the Lovable Cloud Auth wrapper. The precise OAuth claims, provider configuration and processing locations are not available in repository source.
 5. Some external contact routes are user-initiated links (WhatsApp). There is no verified supplier API or automated bank/payment gateway integration in the current application source.
@@ -66,9 +66,9 @@ The tracking-attempt table stores a hash rather than the raw IP. The function at
 | Order link, amount, proof status, resubmission flag, creation/review timestamps, reviewer ID and review note | `public.payment_proofs` | Associate proof with the correct order and record staff review | Supabase Postgres | Singapore |
 | MTDGC bank name, account name, account number, payment instructions and QR-image path | `public.payment_settings` and private `payment-qr` Storage bucket | Display the merchant's manual payment instructions to customers | Supabase Postgres/Storage; selected customer-facing fields are returned by the public payment-settings function | Singapore. These are merchant/recipient details, not customer-submitted payment data |
 
-The screenshot processor fully decodes accepted JPEG/PNG/WebP uploads and stores a metadata-free WebP re-encoding. The inspected helper applies orientation and uses Sharp's default metadata-stripping behaviour. The source image's actual content was not read during this audit. Depending on what the customer includes, a screenshot may reveal a payer name, account details, transaction reference, amount or transaction time.
+The screenshot processor fully decodes accepted JPEG/PNG/WebP uploads, checks the detected format against the declared MIME, rejects empty/damaged/mismatched/animated files and images above 20 megapixels, and stores a metadata-free lossless WebP re-encoding. The upload limit is 5 MiB. The source image's actual content was not read during this audit. Depending on what the customer includes, a screenshot may reveal a payer name, account details, transaction reference, amount or transaction time.
 
-Both observed storage buckets, `payment-proofs` and `payment-qr`, are private. The production policies inspected restrict proof reads to the related authenticated order owner or an administrator; payment QR object access is administrator-only, while the customer-facing function returns a time-limited signed QR URL.
+Both observed storage buckets, `payment-proofs` and `payment-qr`, are private. The current bucket limits are 5 MiB and 2 MiB respectively; neither has a Storage-level MIME allowlist. Production policies restrict payment-proof object reads to the related authenticated order owner or an administrator; payment QR object operations are administrator-only, while the customer-facing function returns a time-limited signed QR URL. The administrator proof-review function creates a 300-second signed proof URL.
 
 The current application describes manual QR/bank payment and staff verification. No active payment-gateway API or automated bank-settlement integration was found in the inspected source. The actual bank, payment network, settlement processor and their countries are **UNKNOWN**.
 
@@ -111,7 +111,7 @@ No advertising pixel or active product analytics provider was identified in the 
 - The production `payment-proofs` and `payment-qr` buckets are private.
 - Production RLS metadata shows owner/admin-scoped access for profiles, orders, order items, support tickets, payment proofs, wishlist items, reviews and user-role records. No anonymous direct SELECT policy was observed for orders or payment proofs.
 - The server-only Supabase client uses the service-role key and bypasses RLS. It is used by trusted server handlers; its key must never enter browser code.
-- Vercel environment metadata shows separate Production and Preview entries for `SUPABASE_SERVICE_ROLE_KEY`. Values were not decrypted. Whether Preview uses a separate non-production Supabase project and credential remains **UNKNOWN**. Until the owner verifies that isolation, Preview must be treated as potentially able to access production data. This is the existing MT-0165 owner-only blocker; this audit did not change or decrypt any variable.
+- Vercel environment metadata shows separate sensitive `SUPABASE_SERVICE_ROLE_KEY` entries for Production and Preview. The same `SUPABASE_URL`, `SUPABASE_PROJECT_ID`, publishable-key and browser-prefixed Supabase URL/project-ID entries are scoped to both Preview and Production. No values were decrypted, so the actual endpoint identity was not confirmed. Until the owner verifies that Preview uses a separate non-production project and credential, Preview must be treated as potentially production-connected. This remains the MT-0165 owner-only blocker; this audit did not change or decrypt any variable.
 - No customer, order, payment, auth-user or storage-object values were read. Schema, policy, bucket and project-location metadata only were inspected.
 
 ## 10. Retention and unresolved evidence
@@ -124,7 +124,7 @@ The following remain **UNKNOWN / OWNER OR PROVIDER EVIDENCE REQUIRED**:
 2. Supabase Auth SMTP/email provider, sub-processors, region and message-retention details.
 3. Google OAuth/Lovable Cloud Auth data fields, processing locations and retention.
 4. WhatsApp/Meta account recipient, data-transfer locations and retention.
-5. Whether Sentry is initialised at runtime, what payload is sent and what retention applies.
+5. Whether Sentry is initialised outside the inspected source, what payload is sent and what retention applies; the public DSN environment entry alone does not prove active collection.
 6. Lovable preview/editor telemetry destination, fields, region and retention.
 7. Vercel request/log retention, backup location and support-access countries.
 8. Supabase backup/replica locations and provider support-access countries.
@@ -149,17 +149,60 @@ Repository sources inspected on current `main` include:
 - [Payment screenshot normalization](./src/lib/payment-proof-image.ts)
 - [Support form and draft storage](./src/routes/support.tsx)
 - [Administrator payment-proof and payment-settings operations](./src/lib/admin.functions.ts)
+- [Administrator role confirmation](./src/lib/admin-access.ts)
+- [Supabase authentication middleware](./src/integrations/supabase/auth-middleware.ts)
+- [Lovable error-reporting hooks](./src/lib/lovable-error-reporting.ts)
+- [In-memory server error capture](./src/lib/error-capture.ts)
 - [Privacy policy](./src/routes/policies/privacy.tsx)
 - [Supplier due-diligence register](./SUPPLIER_REGISTER.md)
 - [Data architecture](./MTDGC_DATA_ARCHITECTURE.md)
 
-Read-only production evidence on 8 November 2026:
+Read-only production evidence refreshed on 10 November 2026:
 
 - Supabase project metadata: project region `ap-southeast-1`, status ACTIVE_HEALTHY.
 - Supabase `information_schema`: public and auth table column names/types only; no row values.
 - Supabase `pg_policies`: policy definitions only.
 - Supabase Storage metadata: both observed MTDGC buckets are private; no objects were listed or opened.
-- Vercel project/deployment metadata: production deployment READY on commit `779d2da9f42fd55acb66e1015b7c1ecfe29ee1d7`, region `iad1`; environment variable names/targets inspected with decryption disabled.
-- GitHub current main: `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`.
+- Vercel production deployment metadata: READY at [`dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay`](https://vercel.com/boxont/mtdgc/4njU9xzd9RmCkGuYeQBDTLZV9Nay), commit `de1b11f540bf1933dc78ec2487392a0024a15de2`, region `iad1`; environment variable names/targets inspected with decryption disabled.
+- GitHub current main: `de1b11f540bf1933dc78ec2487392a0024a15de2`; current production is deployed from the same commit.
 
 **Safety:** No production records, files, secrets or environment values were read or changed. No database migration, schema, RLS, storage, authentication, hosting, DNS or billing setting was changed. No supplier/customer was contacted. No purchase or test order was made. Additional spend: **$0**.
+
+## 12. Current production schema and access metadata — 10 November 2026
+
+This refresh used metadata-only queries. No row values were selected from customer, order, payment, authentication or Storage-object tables.
+
+### Personal-data columns confirmed
+
+- `public.profiles`: `display_name`, `phone`, `delivery_email`, `preferences`, account ID and timestamps.
+- `public.orders`: `user_id`, `guest_email`, `guest_phone`, `customer_details` JSONB, `verification_hash`, `access_token_hash`, status, totals and timestamps. The checkout source writes name, phone, email and an optional free-text note into `customer_details`.
+- `public.order_items`: `fields` JSONB stores product-required identifiers or delivery details alongside product/variant snapshots.
+- `public.payment_proofs`: order ID, storage path, transaction reference, amount, status, resubmission flag, review note, reviewer ID and review timestamps.
+- `public.support_tickets`: optional account ID, order number, issue type, free-text description, optional screenshot path and status. The inspected support form writes the description but no current screenshot upload path was found.
+- `public.order_status_events`: free-text note and staff actor ID. `public.order_lookup_attempts`: IP-derived hash and timestamp only.
+- `public.reviews`: account/product IDs, rating, free-text body and moderation flags. `public.wishlist_items`: account/product IDs. `public.user_roles`: account ID and role.
+- `public.payment_settings`: merchant bank name, account name/number, instructions and QR-image path; these are merchant/recipient details, not customer-submitted payment data.
+- Supabase Auth metadata includes email, phone, encrypted password, confirmation/recovery/email-change token columns, provider metadata, identity data, session IP/user-agent and refresh-token fields. Only column names/types were inspected; no auth-user, identity, session or token values were read.
+
+### Current access-policy observations
+
+- `public.payment_proofs` has RLS enabled, no anonymous SELECT privilege, and an authenticated SELECT grant subject to the owner-or-admin policy joining the proof to its order.
+- `storage.objects` has RLS enabled; its role-level SELECT grant includes anon, but there is no anonymous policy for the private payment buckets. The payment-proof SELECT policy is authenticated-only and requires either the matching order owner or an administrator. The payment-QR policies allow authenticated administrators to read/insert/update/delete objects.
+- `public.order_lookup_attempts` has RLS enabled and no client policies; the application accesses it through the server-only service-role client.
+- The public `has_role` function is SECURITY DEFINER and executable by anon and authenticated roles. Supabase's security advisor flags this. It can disclose role-membership results and should be handled under the separate coordinated migration/security task; no function or grant was changed here.
+
+### Current Storage and upload observations
+
+- `payment-proofs`: private, 5 MiB bucket limit, `allowed_mime_types` is NULL.
+- `payment-qr`: private, 2 MiB bucket limit, `allowed_mime_types` is NULL.
+- Payment-proof uploads are decoded and normalized server-side with Sharp to metadata-free WebP, with a 5 MiB and 20-megapixel limit. The absence of a Storage MIME allowlist means the application-side validator remains an important control. The administrator QR upload path is a separate flow and was not changed or tested in this data-map task.
+
+### Current provider and location evidence
+
+- Supabase project: ACTIVE_HEALTHY, `ap-southeast-1` (Singapore), Postgres 17.11.0.003.
+- Vercel production: READY, `iad1` (US East), deployment `dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay`, deployed commit `de1b11f540bf1933dc78ec2487392a0024a15de2`.
+- `VITE_SENTRY_DSN` is configured for Preview and Production, but no `Sentry.init` or direct Sentry capture call was found in the inspected source. Active Sentry collection is not confirmed.
+- The optional Lovable error hooks can receive an error object, route/context, message, stack and filename. The downstream processor, access location and retention remain UNKNOWN.
+- No active product analytics event call, transactional email sender, supplier API, automated WhatsApp API or bank-settlement gateway was found in the inspected application source. This does not rule out provider-side infrastructure logs or processing outside the repository.
+
+**Scope and safety:** This is a technical data-flow inventory, not legal advice or a compliance declaration. No customer/order/payment/auth-user values or Storage objects were read; no environment values were decrypted; no production schema, RLS, bucket, secret, hosting or billing setting was changed.

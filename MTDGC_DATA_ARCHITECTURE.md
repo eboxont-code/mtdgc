@@ -129,14 +129,16 @@ The customer progress helper groups `payment_submitted`/`paid`, `verified`, `pro
 
 ## 9. Personal-data processing map
 
-The source-backed inventory of current personal-data fields, purposes, processors, storage/access locations and unresolved evidence is maintained in [MTDGC_DATA_MAP.md](./MTDGC_DATA_MAP.md).
+The source-backed inventory of personal-data fields, purposes, processors, storage/access locations and unresolved evidence is maintained in [MTDGC_DATA_MAP.md](./MTDGC_DATA_MAP.md).
 
-The current read-only location evidence is:
-- Supabase project (Postgres, Auth and Storage): `ap-southeast-1` (Singapore).
-- Inspected Vercel production application runtime: `iad1` (US East).
+Current read-only location evidence, refreshed 10 November 2026:
+- Supabase Postgres, Auth and Storage project: `ap-southeast-1` (Singapore), ACTIVE_HEALTHY.
+- Current Vercel production application deployment: READY in `iad1` (US East), deployment `dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay`, deployed commit `de1b11f540bf1933dc78ec2487392a0024a15de2`.
 
-These are different boundaries: the Vercel region is an application-processing location, while the Supabase region is the observed project storage/service region. Neither proves the location of every provider backup, log, support session or subprocessor.
+The payment-proof table and Storage objects have RLS enabled. Payment-proof rows are readable only under the authenticated owner-or-admin policy; proof objects are readable only by the matching authenticated order owner or an administrator. The payment QR bucket is administrator-only. Both buckets are private, but neither has a Storage-level MIME allowlist. The application-side proof-image validator is therefore still an important control.
 
-The map explicitly leaves the country, retention and access arrangements of Google/Lovable OAuth, WhatsApp, Supabase Auth email delivery, Sentry/Lovable error telemetry, suppliers, banks/payment networks and provider support access as **UNKNOWN** where no authoritative evidence was available. It also records the Preview service-role isolation question without decrypting or changing environment values.
+The map records the exact personal-data columns and the known browser, Vercel and Supabase flows. It also keeps supplier identity, manual hand-off, email delivery, OAuth/WhatsApp provider locations, telemetry, logs, backups, support access and retention as UNKNOWN where no authoritative evidence exists. No legal-compliance claim is made.
 
-No retention schedule, supplier disclosure route, email-delivery provider or automated bank-settlement processor is inferred from a database column or customer-facing policy statement. Resolve those items only from owner/provider evidence and the relevant project release gates.
+Vercel environment metadata shows separate Preview and Production service-role entries, while Supabase URL/project-ID and publishable-key entries are scoped to both environments. Values were not decrypted. Preview must be treated as potentially production-connected until the owner confirms separate non-production project and credentials. The existing `has_role` SECURITY DEFINER execute warning remains a separate coordinated migration issue.
+
+No customer, order, payment, auth-user or Storage-object values were read. No schema, RLS, bucket, environment, secret, hosting, DNS or billing settings were changed.
