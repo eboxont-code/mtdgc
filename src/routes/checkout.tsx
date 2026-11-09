@@ -63,7 +63,7 @@ function CheckoutPage() {
   const [regionConfirmedFor, setRegionConfirmedFor] = useState<string | null>(null);
   const regionConfirmationLines = lines.filter((line) => requiresRegionCompatibilityConfirmation([line]));
   const regionConfirmationKey = regionConfirmationLines
-    .map((line) => `${line.sku}:${line.region?.trim() ?? ""}`)
+    .map((line) => `${line.sku}:${typeof line.region === "string" ? line.region.trim() : ""}`)
     .sort()
     .join("|");
   const regionConfirmed = regionConfirmationLines.length === 0 || regionConfirmedFor === regionConfirmationKey;
@@ -176,7 +176,7 @@ function CheckoutPage() {
             expectedProductName: l.productName,
             expectedVariantName: l.variantName,
             expectedPriceMinor: l.priceMinor,
-            region: l.region ?? "",
+            region: typeof l.region === "string" ? l.region : "",
           })),
           regionConfirmed,
         },
@@ -260,7 +260,7 @@ function CheckoutPage() {
             <span className="block truncate font-display font-medium">{line.productName}</span>
             <span className="block text-xs text-muted-foreground">{isGiftCardCategory(line.categorySlug) ? "Face value: " + line.variantName : line.variantName} · Qty {line.quantity}</span>
             <span className="block text-xs text-muted-foreground">{isGiftCardCategory(line.categorySlug) ? "MTDGC selling price" : "Price"}: {formatNpr(line.priceMinor)} each</span>
-            {line.region?.trim() && <span className="block text-xs text-muted-foreground">Listed region: {line.region}</span>}
+            {typeof line.region === "string" && line.region.trim() && <span className="block text-xs text-muted-foreground">Listed region: {line.region}</span>}
             {requiresRegionCompatibilityConfirmation([line]) && <span role="note" className="mt-2 block rounded-lg border border-warn/40 bg-warn/5 p-2 text-xs leading-relaxed">{getRegionCompatibilityWarning(line.region)}</span>}
           </span>
           <span className="shrink-0 text-right font-mono text-sm font-bold text-price">{formatNpr(line.priceMinor * line.quantity)}<span className="block text-[10px] font-normal text-muted-foreground">Line total</span></span>
