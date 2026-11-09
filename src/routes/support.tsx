@@ -160,7 +160,7 @@ function SupportPage() {
               <select
                 id="support-issue"
                 value={issueType}
-                onChange={(event) => setIssueType(event.target.value)}
+                onChange={(event) => setIssueType(restoreSupportIssueType(event.target.value))}
                 className="mt-1 min-h-11 w-full rounded-md border border-border bg-card px-2 font-display text-sm"
               >
                 {SUPPORT_ISSUE_TYPES.map((type) => (
