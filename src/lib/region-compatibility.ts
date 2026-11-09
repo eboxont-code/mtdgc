@@ -7,8 +7,8 @@ export const REGION_CHANGED_MESSAGE =
 
 export type RegionConfirmationLine = {
   categorySlug?: string | null | undefined;
-  region?: string | null | undefined;
-  fields?: Record<string, string> | undefined;
+  region?: unknown;
+  fields?: unknown;
 };
 
 export type RegionConfirmationProduct = {
@@ -30,7 +30,9 @@ export function requiresRegionCompatibilityConfirmation(lines: readonly RegionCo
   return lines.some(
     (line) =>
       isRegionSensitiveCategory(line.categorySlug) ||
-      (!line.categorySlug && (Boolean(line.region?.trim()) || Object.keys(line.fields ?? {}).length > 0)),
+      (!line.categorySlug &&
+        ((typeof line.region === "string" && Boolean(line.region.trim())) ||
+          (line.fields !== null && typeof line.fields === "object" && Object.keys(line.fields).length > 0))),
   );
 }
 
