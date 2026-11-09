@@ -226,11 +226,11 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** The order state is consistent from checkout to delivery, with a complete audit trail and useful customer visibility.
 
 - [x] **MT-0101 · P0 · DONE** — Map all 13 live order-status enum values, current application writers, generic administrator targets, legacy display aliases and observed transitions; confirm that neither application nor database enforces a complete transition graph. Evidence: section 30 and Data Architecture section 4; current-main source inspection plus read-only production enum, aggregate status-count, column-type, proof-status constraint and order-trigger queries on 8 November 2026.
-- [ ] **MT-0102 · P0 · TODO** — Ensure Payment received, Verified, Processing and Delivered have precise operational definitions.
+- [!] **MT-0102 · P0 · BLOCKED** — Ensure Payment received, Verified, Processing and Delivered have precise operational definitions. Existing draft PR #22 exact head `0ad13fd38cbe020fc4efe21d4058fabac76193ae` has Quality run [42554218686](https://github.com/eboxont-code/mtdgc/actions/runs/42554218686) failing before the runner started (zero steps); the current-main run [42545337294](https://github.com/eboxont-code/mtdgc/actions/runs/42545337294) has the same startup failure. Do not retry unchanged; resume when a free runner can start.
 - [ ] **MT-0103 · P0 · TODO** — Add explicit Cancelled, Failed, Refunded and Action required states where applicable.
 - [ ] **MT-0104 · P0 · TODO** — Prevent invalid status jumps, such as Pending directly to Delivered without payment verification.
-- [ ] **MT-0105 · P0 · TODO** — Verify guest order tracking requires the order number plus the matching email or phone.
-- [ ] **MT-0106 · P0 · TODO** — Ensure account order history and guest tracking show the same canonical status.
+- [!] **MT-0105 · P0 · BLOCKED** — Verify guest order tracking requires the order number plus the matching email or phone. Draft PR #32 exact head `707c1a7f40f70c5c8f79c4cf1007a3d31bbaea37` has Quality run [42465628668](https://github.com/eboxont-code/mtdgc/actions/runs/42465628668) failing before the runner started (zero steps); no full checks ran. Do not retry unchanged.
+- [!] **MT-0106 · P0 · BLOCKED** — Ensure account order history and guest tracking show the same canonical status. It depends on the canonical milestone definitions in MT-0102; do not duplicate or diverge from that mapping.
 - [ ] **MT-0107 · P1 · TODO** — Record a timestamp and actor for every status transition.
 - [ ] **MT-0108 · P1 · TODO** — Show customers what happens next at each stage and whether they need to act.
 - [ ] **MT-0109 · P1 · TODO** — Allow staff to add internal notes without exposing them to customers.
@@ -250,9 +250,9 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Orders are delivered accurately and on time, while manual checks are gradually replaced only by safe, tested automation.
 
-- [ ] **MT-0121 · P0 · TODO** — Document the current manual fulfilment steps for each active product family.
-- [ ] **MT-0122 · P0 · TODO** — Create a pre-fulfilment checklist for player ID, zone, server, region, denomination and email.
-- [ ] **MT-0123 · P0 · TODO** — Require a second confirmation for irreversible top-ups and code releases.
+- [!] **MT-0121 · P0 · BLOCKED** — Document the current manual fulfilment steps for each active product family. The supplier register has no verified supplier/product/region scope, authorised delivery route, supplier-specific instructions, delivery window or escalation contact. Catalogue requirement labels do not prove how an authorised supplier fulfils a SKU. Unblock only with owner-provided or independently verifiable supplier evidence; do not invent steps or contact suppliers.
+- [~] **MT-0122 · P0 · IN PROGRESS** — Snapshot server-resolved product region and required customer-field labels at order time, retain the selected variant/denomination, and show an administrator checklist. Current-main implementation is in draft [PR #52](https://github.com/eboxont-code/mtdgc/pull/52); six focused tests and strict helper type-check pass locally. Full exact-head repository quality checks remain pending.
+- [!] **MT-0123 · P0 · BLOCKED** — Require a second confirmation for irreversible top-ups and code releases. Existing draft PR #7 is stacked on the superseded MT-0122 branch; retarget/reconcile it only after PR #52 is verified and the current-main MT-0122 change is merged.
 - [ ] **MT-0124 · P0 · TODO** — Record the supplier transaction or redemption reference for each completed order.
 - [ ] **MT-0125 · P0 · TODO** — Capture delivery evidence and attach it to the correct order.
 - [ ] **MT-0126 · P0 · TODO** — Never request a customer's game password, subscription password, OTP or payment PIN.
@@ -530,7 +530,7 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-task register are authoritative.
+MT-0122 is the one active P0 task. Earlier items remain blocked by the exact dependencies recorded in the 308-task register.
 
 | Order | Task | Status |
 |---:|---|---|
@@ -543,9 +543,10 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 7 | MT-0086 — require independent payment settlement matching before fulfilment | BLOCKED; no bank-statement feed, provider callback or owner-approved manual settlement evidence is available |
 | 8 | MT-0087 — prevent duplicate transaction references/screenshots across orders | BLOCKED; concurrency-safe uniqueness requires the approved Supabase cutover/migration gate |
 | 9 | MT-0101 — map current order statuses and observed transition paths | DONE; 13-value enum, application writers, UI mappings, production aggregate counts and lack of transition enforcement are documented in section 30 and Data Architecture section 4 |
-| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | NEXT P0; can be documented from the current payment-review code and existing operational evidence without production writes |
+| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | BLOCKED; exact-head Quality run 42554218686 and current-main run 42545337294 both failed before any runner steps; wait for new runner availability |
 | 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
+| 13 | MT-0122 — current-main pre-fulfilment snapshot and administrator checklist | IN PROGRESS in draft PR #52; focused tests pass, exact-head repository quality checks pending |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -1334,3 +1335,47 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 No production application code, database/schema, order/payment/customer record, storage object, RLS/grant, credential, environment, DNS, hosting or billing setting changed. No test order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
 
 **Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
+
+
+## 32. Order-time pre-fulfilment checklist — 9 November 2026
+
+**Task:** MT-0122 · P0 · IN PROGRESS — current-main implementation is in draft [PR #52](https://github.com/eboxont-code/mtdgc/pull/52). The old PR #6 branch was based on an earlier main commit and is not mergeable against the current main; this replacement branch starts directly from current main without rewriting the old branch history.
+
+### Implementation and data boundary
+
+- Added a versioned `__mtdgc_snapshot` object inside the existing `order_items.fields` JSONB. It contains the server-resolved product `region` and exact `requirements` labels at order creation; customer-entered values remain top-level strings.
+- The order-line validator rejects the reserved key if a browser attempts to supply it. The server reads region and requirements only after resolving the selected SKU and product.
+- The existing `order_items.variant_name` records the selected option/denomination. Existing checkout price-snapshot validation, server-side price resolution and order-item values are preserved.
+- The administrator order-detail view shows the selected option, order-time region, each configured required field and whether its value was recorded or is missing.
+- Legacy order items without a valid versioned snapshot are marked as not captured or unrecognised. The checklist does not use today's product row to infer historical region or requirements.
+- The public guest order summary continues to omit the `fields` JSONB. Existing order-item access controls remain unchanged.
+- This is an internal fulfilment review aid, not a supplier runbook, region-compatibility guarantee, payment-settlement check or proof of delivery. MT-0121 remains blocked until supplier-specific evidence is available.
+
+### Production schema evidence
+
+Read-only inspection of the linked production database confirmed:
+- `order_items.fields` is existing JSONB.
+- `products.region` is text.
+- `products.requirements` is JSONB.
+- All five currently published/orderable products have a non-null region and an array of string requirement labels (zero invalid rows).
+
+No schema migration or new database object is required.
+
+### Regression coverage and current verification
+
+- Added six focused tests covering server-sourced snapshots, reserved-key rejection, malformed metadata, missing player/zone/server/email values, empty requirement lists, legacy orders and unknown snapshot versions.
+- Local Node 22.16 test run: **6/6 PASS**.
+- Strict TypeScript check of the new helper: **PASS**.
+- Source-level checks confirmed the current checkout price-snapshot guard remains present, the server writes the snapshot from product metadata, the admin view reads the snapshot, and the public guest summary does not return the fields JSONB.
+- The current-main GitHub Quality run [42545337294](https://github.com/eboxont-code/mtdgc/actions/runs/42545337294) failed before the runner started (zero steps). The new PR's exact-head Quality result must be checked after this plan update; no full repository lint, Bun test suite, application typecheck or production build is claimed yet.
+- PR #52 implementation commit before this plan update: `b7304599c266da99e85ece68be3d735f60a06408`. PR remains OPEN and DRAFT; no merge commit exists.
+
+### Release and safety boundary
+
+- Current main at task start: `de1b11f540bf1933dc78ec2487392a0024a15de2`.
+- Current production deployment remains READY at [`dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay`](https://vercel.com/boxont/mtdgc/dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay), deployed commit `de1b11f540bf1933dc78ec2487392a0024a15de2`. No merge occurred and no production deployment was triggered by this task.
+- The exact PR-head quality workflow and branch-protection requirement must pass/be verified before merge. Branch-protection inspection currently returns HTTP 403 through the connected GitHub access, so do not assume the branch is unprotected.
+- No production database writes, migrations, customer/order/payment reads or mutations, storage changes, credentials, environment, hosting, DNS or billing changes. No test order, payment, supplier/customer contact or purchase. Additional spend: $0.
+
+**Next P0 task:** MT-0123 — require a second confirmation for applicable top-ups and code releases. Its existing draft remains stacked on the old MT-0122 branch; reconcile it only after PR #52 has passed its exact-head checks and is merged. Do not infer supplier-side irreversibility.
+
