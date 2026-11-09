@@ -62,9 +62,10 @@ function CheckoutPage() {
   const [placed, setPlaced] = useState<{ orderNumber: string; totalMinor: number; lines: CheckoutLine[] } | null>(null);
   const [regionConfirmedFor, setRegionConfirmedFor] = useState<string | null>(null);
   const regionConfirmationLines = lines.filter((line) => requiresRegionCompatibilityConfirmation([line]));
-  const regionConfirmationKey = JSON.stringify(
-    regionConfirmationLines.map((line) => [line.sku, line.region?.trim() ?? ""]).sort(([a], [b]) => String(a).localeCompare(String(b))),
-  );
+  const regionConfirmationKey = regionConfirmationLines
+    .map((line) => `${line.sku}:${line.region?.trim() ?? ""}`)
+    .sort()
+    .join("|");
   const regionConfirmed = regionConfirmationLines.length === 0 || regionConfirmedFor === regionConfirmationKey;
   const formRef = useRef<HTMLDivElement>(null);
   const restored = useRef(false);
