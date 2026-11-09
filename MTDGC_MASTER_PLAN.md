@@ -278,7 +278,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0141 · P0 · TODO** — Review the current Terms, Privacy, Delivery and Refund policies for consistency across Nepal and Australia.
 - [ ] **MT-0142 · P0 · TODO** — Resolve any conflict between the advertised markets and the markets covered by legal terms.
 - [ ] **MT-0143 · P0 · TODO** — Ensure refund rules distinguish undelivered, supplier-failed, incorrect-item and successfully redeemed digital goods.
-- [~] **MT-0144 · P0 · IN PROGRESS** — Make region-lock warnings prominent before payment for game top-ups and gift-card codes; use catalogue region labels only as warnings, never as issuer compatibility evidence.
+- [~] **MT-0144 · P0 · IN PROGRESS** — Make region-lock warnings prominent before payment for game top-ups and gift-card codes; use catalogue region labels only as warnings, never as issuer compatibility evidence. Implementation: [PR #54](https://github.com/eboxont-code/mtdgc/pull/54), draft and awaiting exact-head Quality run.
 - [ ] **MT-0145 · P0 · TODO** — Make wrong-player-ID warnings visible before confirming an irreversible top-up.
 - [ ] **MT-0146 · P1 · TODO** — Publish support response hours only after they are operationally staffed.
 - [ ] **MT-0147 · P1 · TODO** — Create ticket categories for payment, delayed delivery, invalid code, wrong item, refund and account access.
@@ -544,7 +544,7 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 8 | MT-0087 — prevent duplicate transaction references/screenshots across orders | BLOCKED; concurrency-safe uniqueness requires the approved Supabase cutover/migration gate |
 | 9 | MT-0101 — map current order statuses and observed transition paths | DONE; 13-value enum, application writers, UI mappings, production aggregate counts and lack of transition enforcement are documented in section 30 and Data Architecture section 4 |
 | 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | BLOCKED; PR #22 exact head `0ad13fd` quality run [42554218686](https://github.com/eboxont-code/mtdgc/actions/runs/42554218686) failed before any workflow step started; no full tests, lint, typecheck or production build ran. Keep the PR in draft until a free runner executes the exact head |
-| 10a | MT-0144 — make region compatibility warnings prominent before payment for game top-ups and gift-card codes | IN PROGRESS; current-main implementation and regression coverage are being prepared on a clean branch; production remains unchanged |
+| 10a | MT-0144 — make region compatibility warnings prominent before payment for game top-ups and gift-card codes | IN PROGRESS; clean current-main implementation and regression coverage are in [PR #54](https://github.com/eboxont-code/mtdgc/pull/54); production remains unchanged |
 | 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 
@@ -1339,7 +1339,7 @@ No production application code, database/schema, order/payment/customer record, 
 
 ## 32. MT-0144 region compatibility warnings before payment — 10 November 2026
 
-**Task:** MT-0144 · P0 · IN PROGRESS on a clean branch based directly on current `main` commit `de1b11f540bf1933dc78ec2487392a0024a15de2`.
+**Task:** MT-0144 · P0 · IN PROGRESS. Draft [PR #54](https://github.com/eboxont-code/mtdgc/pull/54) was opened from a clean branch based directly on current `main` commit `de1b11f540bf1933dc78ec2487392a0024a15de2`. The code-bearing head at PR creation was `5cc7398cd1a6980372dd9c48272ed535b5023e51`; the plan update below will advance the PR head, so the PR page is authoritative for its latest SHA.
 
 ### Why this work is needed
 
@@ -1378,10 +1378,10 @@ A read-only query of product/category/variant metadata in Supabase project `eaom
 ### Branch and verification status
 
 - The new branch starts directly from current main. It does not inherit the old stacked PR #9 history (which is 38 commits ahead and 66 commits behind current main and includes unrelated MT-0123/MT-0126 work).
-- Application files changed so far: `src/lib/region-compatibility.ts`, `src/lib/region-compatibility.test.ts`, `src/routes/products.$slug.tsx`, `src/routes/checkout.tsx` and `src/lib/orders.functions.ts`.
-- The focused test file is included, but the full repository quality workflow has not yet run for this new branch. Do not mark the task complete until the exact final PR head passes the full workflow.
-- Vercel production is READY at deployment `dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay`, deployed commit `de1b11f540bf1933dc78ec2487392a0024a15de2`. This is the existing main deployment, not this branch. No preview or production deployment for this branch is claimed.
-- Existing Vercel Hobby/free deployment limits and earlier pre-step GitHub runner failures remain constraints; no paid retry or bypass is permitted.
+- Application files changed: `src/lib/region-compatibility.ts`, `src/lib/region-compatibility.test.ts`, `src/lib/cart.tsx`, `src/routes/products.$slug.tsx`, `src/routes/checkout.tsx` and `src/lib/orders.functions.ts`.
+- Focused verification on 10 November: 8/8 region-policy assertions passed in a Node 22.16 harness; TypeScript 5.8.3 strict no-emit check of the pure helper passed. No GitHub Quality run is currently visible for the exact PR #54 head. Full repository Bun tests, lint, project-wide typecheck and production build therefore remain unverified. Do not mark the task complete until the exact final PR head passes the full workflow.
+- Vercel production is READY at deployment [`dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay`](https://vercel.com/boxont/mtdgc/4njU9xzd9RmCkGuYeQBDTLZV9Nay), deployed commit `de1b11f540bf1933dc78ec2487392a0024a15de2`. This is the existing main deployment, not this branch. The PR #54 combined status reports the Hobby/free build-rate limit and a filtered deployment lookup returned no preview for the exact code-bearing head. No preview or production deployment for this branch is claimed.
+- The old stacked [PR #9](https://github.com/eboxont-code/mtdgc/pull/9) remains open but is 66 commits behind current main and includes unrelated MT-0123/MT-0126 changes; it is not a safe merge candidate. The new PR #54 has no submitted reviews or unresolved review threads. No exact-head GitHub Quality run is visible yet; the Vercel status is a free build-rate-limit failure. No paid retry or bypass is permitted.
 
 ### Safety and next task
 
