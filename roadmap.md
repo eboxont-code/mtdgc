@@ -4,6 +4,10 @@
 >
 > This file is preserved as a dated implementation and verification history. Checkboxes below record the status claimed by each historical pack when it was written; they are not a second live TODO register. When an old pack conflicts with the Master Plan, use the Master Plan and refresh the implementation evidence before changing task status.
 
+## 9 Nov 2026 live verification — MT-0182
+- [x] MT-0182: current production catalog and representative product pages were checked read-only. Catalog shows 36 listed / 5 available now / 30 coming soon / 1 unavailable; category available-now counts are Game Top-Ups 4, Gift Cards 1, Subscriptions 0 and Software 0. Steam Wallet Code and Netflix Subscription display disabled coming-soon/unavailable actions; Roblox Gift Card remains available with Buy now. Aggregate-only Supabase counts match. Current production deployment is READY on main commit de1b11f540bf1933dc78ec2487392a0024a15de2. This supersedes the 5 Nov pack's "not published" limitation; it does not verify supplier stock or resale authority.
+- [ ] Next independent P0 review: MT-0184. Physical Android viewport testing remains separate under MT-0181.
+
 ## 5 Nov ordered pack
 - [ ] MT-0188: existing plan URL remains the selection source; back-navigation and reload verification pending; not published.
 - [ ] MT-0189: product forms already render listing requirements only; restored and submitted fields now exclude unrelated keys; protected checkout contact fields and legacy cart-line cleanup skipped; verification pending; not published.
