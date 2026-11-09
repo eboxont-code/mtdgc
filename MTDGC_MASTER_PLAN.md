@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.3 · 9 November 2026
+**Version:** 2.4 · 10 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -1371,3 +1371,32 @@ No production application code, database/schema, order/payment/customer record, 
 - The next independent P0 review is MT-0184 — verify the current live product purchase summaries and Mobile Legends user-ID guidance. MT-0102 remains blocked by its exact-head GitHub runner-startup failure (see the task register and PR #22); do not retry unchanged infrastructure failures.
 
 **Production boundary:** no production writes, migrations, catalogue changes, orders, payments, customer records, storage, authentication, credentials, environment, DNS, hosting or billing changes. No supplier/customer contact or purchases. Additional spend: $0.
+
+
+## 33. MT-0182 live availability re-verification — 10 November 2026
+
+**Task:** MT-0182 remains P0 · DONE AND LIVE. This is a fresh read-only verification of the existing production behavior, not a catalogue, price or availability change.
+
+### Current production evidence
+
+- Current `main` and production source commit remain `de1b11f540bf1933dc78ec2487392a0024a15de2`; Vercel deployment `dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay` remains READY with production aliases.
+- The live homepage and `/catalog` returned HTTP 200. The catalogue showed 36 listed / 5 available now / 30 coming soon / 1 unavailable; category counts were Game Top-Ups 4, Gift Cards 1, Subscriptions 0 and Software 0.
+- Steam Wallet Code showed Coming soon with no purchasable price and a disabled action; Netflix Subscription showed Temporarily unavailable with a disabled action; Roblox Gift Card showed Available now and Buy now.
+- The current availability helper requires an orderable product status, NPR product currency, an orderable variant, positive variant price and NPR variant currency. A product-level temporarily-unavailable status therefore prevents purchasing even if variant rows exist.
+
+### Read-only database reconciliation
+
+- Aggregate-only Supabase queries again returned 36 published products: 5 `available`, 30 `coming_soon` and 1 `temporarily_unavailable`; category available-now counts matched the live catalogue.
+- Variant metadata showed 18 available variants across 6 products and 36 coming-soon variants across 20 products. These are variant counts, not purchasable-product counts; the product-level status and shared helper determine the 5 product count shown publicly.
+- No customer, order, payment, support, authentication or storage-object data was queried. No form was submitted and no order was created.
+
+### Quality and release status
+
+- Existing focused availability regression tests passed in Quality run [42437058568](https://github.com/eboxont-code/mtdgc/actions/runs/42437058568) on `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`; the six relevant source/test/route files have identical blob SHAs on that passing commit and current main.
+- Current-main Quality run [42545337294](https://github.com/eboxont-code/mtdgc/actions/runs/42545337294) and exact PR #53 run [42615222613](https://github.com/eboxont-code/mtdgc/actions/runs/42615222613) failed before runner startup (runner ID 0, zero steps); no full lint, tests, typecheck or build ran for those revisions.
+- PR [#53](https://github.com/eboxont-code/mtdgc/pull/53) remains OPEN/DRAFT and documentation-only. Its exact head is `8d67c8537a1573ac762618747db4b322ede68220`, 2 commits ahead and 0 behind current main. No merge commit exists.
+- The earlier preview `dpl_3eyWCUHSVdLBcnMBN7e5xCJZb55u` reached READY for an older documentation revision only. The final PR-head preview was rejected by Vercel's free daily deployment limit; no paid workaround was used.
+- Production remains READY at `dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay` on exact commit `de1b11f540bf1933dc78ec2487392a0024a15de2`. No merge occurred and no production deployment was triggered.
+- No catalogue, product, variant, price, availability, order, payment, customer, schema, credential, environment, DNS, hosting or billing changes were made. Additional spend: $0.
+
+**Next independent P0 review:** MT-0184 — verify the live purchase summaries and Mobile Legends User ID / Zone ID guidance. Keep physical Android viewport testing separate under MT-0181.
