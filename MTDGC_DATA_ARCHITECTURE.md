@@ -87,7 +87,7 @@ The customer progress helper groups `payment_submitted`/`paid`, `verified`, `pro
 - Decode with strict warning handling, a 20-megapixel input ceiling and a four-channel ceiling. Empty, malformed, truncated, mismatched, multi-page and over-limit inputs are rejected.
 - Apply EXIF orientation and store a lossless WebP re-encoding. Default Sharp output strips source metadata. The normalized output must remain within the existing 5 MiB storage limit.
 - The server derives the `.webp` storage extension and `image/webp` content type from the normalized result; the browser cannot choose the stored MIME or extension.
-- The production `payment-proofs` bucket remains private and unchanged. Its existing storage-level 5 MiB cap is retained; application-side server validation remains the MIME/content gate because the bucket's `allowed_mime_types` setting is NULL. Only the trusted server upload path writes proof objects.
+- The production `payment-proofs` bucket remains private and unchanged, with its 5 MiB cap. Its `allowed_mime_types` setting is NULL, so the server-side decoder/normalizer is the MIME/content gate. As of 9 November 2026, the current READY production deployment `dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay` on commit `de1b11f540bf1933dc78ec2487392a0024a15de2` includes the tested MT-0084 upload normalizer; no live test upload was submitted. See master-plan section 34.
 
 ## 5. Guest Checkout Architecture
 - **No Account Required**: Orders are created with `user_id = NULL`.
