@@ -229,7 +229,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0102 · P0 · TODO** — Ensure Payment received, Verified, Processing and Delivered have precise operational definitions.
 - [ ] **MT-0103 · P0 · TODO** — Add explicit Cancelled, Failed, Refunded and Action required states where applicable.
 - [ ] **MT-0104 · P0 · TODO** — Prevent invalid status jumps, such as Pending directly to Delivered without payment verification.
-- [ ] **MT-0105 · P0 · TODO** — Verify guest order tracking requires the order number plus the matching email or phone.
+- [x] **MT-0105 · P0 · DONE AND LIVE** — Public guest tracking requires the exact order number plus the matching saved email or phone. The live form shows both required fields; the client and server independently require both, resolve the exact order number, and compare the order-scoped contact hash or saved guest email. Current main and production contain identical tracking UI, lookup handler, access helper and regression-test files. Evidence: section 36. Account-owned contact-fallback isolation remains separate under MT-0162 and is not claimed fixed here.
 - [ ] **MT-0106 · P0 · TODO** — Ensure account order history and guest tracking show the same canonical status.
 - [ ] **MT-0107 · P1 · TODO** — Record a timestamp and actor for every status transition.
 - [ ] **MT-0108 · P1 · TODO** — Show customers what happens next at each stage and whether they need to act.
@@ -530,7 +530,7 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-task register are authoritative.
+No numbered task is currently marked **IN PROGRESS** on canonical main. MT-0105 is DONE AND LIVE; MT-0102 remains blocked on its exact-head quality run. Task statuses in the 308-task register are authoritative.
 
 | Order | Task | Status |
 |---:|---|---|
@@ -543,7 +543,7 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 7 | MT-0086 — require independent payment settlement matching before fulfilment | BLOCKED; no bank-statement feed, provider callback or owner-approved manual settlement evidence is available |
 | 8 | MT-0087 — prevent duplicate transaction references/screenshots across orders | BLOCKED; concurrency-safe uniqueness requires the approved Supabase cutover/migration gate |
 | 9 | MT-0101 — map current order statuses and observed transition paths | DONE; 13-value enum, application writers, UI mappings, production aggregate counts and lack of transition enforcement are documented in section 30 and Data Architecture section 4 |
-| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | NEXT P0; can be documented from the current payment-review code and existing operational evidence without production writes |
+| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | BLOCKED; draft PR #22 exact-head Quality run 42441639306 failed before any workflow step started; full repository checks remain unverified |
 | 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 
@@ -1334,3 +1334,33 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 No production application code, database/schema, order/payment/customer record, storage object, RLS/grant, credential, environment, DNS, hosting or billing setting changed. No test order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
 
 **Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
+
+
+## 36. MT-0105 guest order tracking contact verification — 9 November 2026
+
+**Task:** MT-0105 · P0 · DONE AND LIVE. This is a verification-only completion; no application code change was required.
+
+### Customer journey and server checks
+
+- A read-only GET of the live [order-tracking page](https://mtdgc.com/track-order) on 9 November 2026 returned HTTP 200. It displays separate **Order number** and **Email or phone number used on the order** fields and explicitly says both are required. No order number or contact was entered and no form was submitted.
+- The browser rejects blank values before calling the server and validates the order-reference/contact formats.
+- The server input validator independently requires an order number (4–40 characters) and contact (3–120 characters). It uppercases the order number, resolves that exact order, then compares the SHA-256 of the order number plus normalised contact or an exact case-insensitive match to the saved guest email. A mismatch returns the generic `not_found` response.
+- Existing `src/lib/order-access.test.ts` coverage checks matching email/phone, wrong order number and mismatched contact. The current-main Quality run [42437058568](https://github.com/eboxont-code/mtdgc/actions/runs/42437058568) passed the full workflow on main commit `ca01edaafa42b5b859089ce18d5decaf6fbd4db3` (dependency install, lint, unit tests, typecheck and production build).
+
+### Exact production evidence
+
+- Vercel production deployment [`dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE`](https://vercel.com/boxont/mtdgc/dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE) is READY on deployed commit `3de811c7cfce91eb262cf79523d8053995bfb777`.
+- Git blob SHAs for `src/routes/track-order.tsx`, `src/lib/orders.functions.ts`, `src/lib/order-access.ts` and `src/lib/order-access.test.ts` are identical between canonical main and that production commit. The live page's rendered form matches the source.
+- This verifies the order-number-plus-contact requirement is already live. No test order, payment or customer record was created or accessed.
+
+### Security boundary and related drafts
+
+- Canonical main's public lookup still applies the contact fallback to an order without first restricting it to guest orders. The separate account-owned order isolation issue remains under MT-0162; it is not part of this task's completion. Clean current-main draft PR #27 contains a proposed fix, but its exact-head Quality run [42453860327](https://github.com/eboxont-code/mtdgc/actions/runs/42453860327) failed before runner startup. Do not claim that fix is live.
+- Draft PRs #23 and #32 propose consolidating the lookup's inline comparison through the shared helper. They are not required for the existing customer-visible requirement verified here and remain unmerged; no code from those PRs is included in production.
+- MT-0102 remains blocked in draft PR #22 pending a successful exact-head full quality workflow. Do not repeat unchanged runner failures.
+
+### Production and cost boundary
+
+No production database, schema, order, payment, customer, authentication, hosting, DNS or billing setting changed. No personal data values were read. No supplier/customer contact or purchase occurred. Additional spend: **$0**.
+
+**Next task-selection pass:** continue through the remaining P0 register. MT-0102, MT-0162, MT-0165 and MT-0292 have exact-head quality blockers; supplier, settlement, owner-decision and Supabase-cutover tasks remain blocked by their recorded dependencies. Do not retry unchanged infrastructure failures or treat a preview as production.
