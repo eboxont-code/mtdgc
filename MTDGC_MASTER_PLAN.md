@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.2 · 8 November 2026
+**Version:** 2.3 · 9 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -281,7 +281,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0144 · P0 · TODO** — Make region-lock warnings prominent before payment for every region-restricted code.
 - [ ] **MT-0145 · P0 · TODO** — Make wrong-player-ID warnings visible before confirming an irreversible top-up.
 - [ ] **MT-0146 · P1 · TODO** — Publish support response hours only after they are operationally staffed.
-- [ ] **MT-0147 · P1 · TODO** — Create ticket categories for payment, delayed delivery, invalid code, wrong item, refund and account access.
+- [!] **MT-0147 · P1 · BLOCKED** — Added the required support ticket categories in [PR #49](https://github.com/eboxont-code/mtdgc/pull/49), retaining the existing player-ID/general options and mapping saved “Order not delivered” drafts to “Delayed delivery”. Five focused tests passed locally. Production support_tickets.issue_type is text with no category check constraint, so no migration is needed. Exact code-head Quality run [42571306820](https://github.com/eboxont-code/mtdgc/actions/runs/42571306820) failed before the runner started (zero steps; logs unavailable); the exact-head Preview deployment dpl_AGzh6szQiyFbKTEBfCTssdyuHWwh was still BUILDING at the last check. Production /support still shows the old categories. No merge or production deployment. Blocked pending successful full quality checks and a verifiable exact-head preview smoke check.
 - [ ] **MT-0148 · P1 · TODO** — Require an order number for order-specific support while allowing pre-purchase questions.
 - [ ] **MT-0149 · P1 · TODO** — Create escalation rules for overdue orders and supplier disputes.
 - [ ] **MT-0150 · P1 · TODO** — Add a clear complaint path and expected next update without inventing resolution times.
@@ -546,6 +546,8 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | NEXT P0; can be documented from the current payment-review code and existing operational evidence without production writes |
 | 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
+
+**P1 continuation:** MT-0147 is the next independent support-workflow task after the currently blocked P0 queue. It is prepared in draft PR #49 and is not live. MT-0148 depends on the new category set being released; do not start its order-number requirement until MT-0147 is merged and live. The next independent candidate after this release gate is MT-0285 (Nepal/Australia customer-contact validation), subject to a fresh priority scan.
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -1334,3 +1336,34 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 No production application code, database/schema, order/payment/customer record, storage object, RLS/grant, credential, environment, DNS, hosting or billing setting changed. No test order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
 
 **Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
+
+## 32. Support ticket categories (MT-0147) — 9 November 2026
+
+**Status:** BLOCKED — implementation and focused tests are prepared; the change is not merged or live.
+
+### Implementation
+
+- Added the required categories for payment questions, delayed delivery, invalid codes, wrong items, refunds and account access.
+- Kept the existing “Wrong player ID or UID” and “Something else” choices.
+- Centralised the category list so the support form and its saved-draft restoration use the same values.
+- Mapped the previous saved “Order not delivered” choice to “Delayed delivery”; existing support-ticket rows are not rewritten.
+- The administrator support list already displays the stored free-text issue type, so it requires no separate UI or schema change.
+
+### Production evidence and access boundary
+
+- Read-only schema inspection on the production Supabase project confirmed support_tickets.issue_type is text NOT NULL and has no category check constraint. The existing support_tickets RLS policies allow authenticated users to insert their own tickets, read their own tickets, and administrators to manage tickets. No migration is required for these new text values.
+- No support-ticket rows, customer data, order records, payment records or storage objects were read or changed.
+
+### Verification and release
+
+- Five focused tests passed in a local Node 22.16 test harness: required categories, retained categories, unique options, current saved choices, legacy draft mapping and safe fallback.
+- The full repository Quality workflow was not executed: exact code-head run [42571306820](https://github.com/eboxont-code/mtdgc/actions/runs/42571306820) failed before runner startup. The job exposed zero steps and no logs. This is an infrastructure failure, not an observed test failure.
+- Vercel preview for exact code head 64bd291f683552ffa67d70875b78bf9f34f3a448 is deployment [dpl_AGzh6szQiyFbKTEBfCTssdyuHWwh](https://vercel.com/boxont/mtdgc/AGzh6szQiyFbKTEBfCTssdyuHWwh), URL mtdgc-qkdtwqvmo-boxont.vercel.app; it was BUILDING at the last check. Earlier code-bearing revision 14fd52ebe53a0d5e3b809d66028fb8d52d54fd27 reached READY, but the browser smoke check could not access the protected preview URL.
+- A read-only live GET of [/support](https://mtdgc.com/support) succeeded. Production still shows the previous five issue types, confirming MT-0147 is not live.
+- PR [#49](https://github.com/eboxont-code/mtdgc/pull/49) targets main and remains draft. No merge commit exists; no production deployment was triggered. Production remains at READY deployment dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay on commit de1b11f540bf1933dc78ec2487392a0024a15de2.
+
+### Safety and next task
+
+No production database/schema, support/customer/order/payment data, credentials, authentication, environment variables, hosting, DNS or billing settings were changed. No customer or supplier was contacted. Additional spend: $0.
+
+**Next independent candidate after this release gate:** MT-0285 — test Nepal and Australia name, email and phone formats. MT-0148 remains dependent on MT-0147 being released so its order-number rules can distinguish order-specific requests from pre-purchase questions.
