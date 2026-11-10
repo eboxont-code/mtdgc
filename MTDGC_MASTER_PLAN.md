@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.3 · 10 November 2026
+**Version:** 2.4 · 10 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -1400,5 +1400,5 @@ No production data, catalogue record, order, payment, schema, storage, authentic
 ### Remaining verification boundary
 
 - MT-0184 is DONE AND LIVE for the production purchase-summary and Mobile Legends guidance criteria. Responsive viewport, keyboard and physical Android interaction checks remain unverified and are tracked separately under MT-0181; this task does not claim them complete.
-- The documentation-only PR #30 remains OPEN/DRAFT. Its previous exact-head Quality run [42623210782](https://github.com/eboxont-code/mtdgc/actions/runs/42623210782) failed before any workflow step started. The refreshed documentation head requires its own exact-head Quality result; do not merge while that project gate is unverified.
+- The documentation-only PR #30 remains OPEN/DRAFT at exact head `a7d0ecd3e3a178c83026c67c26ededc14b982c9d`. Its exact-head Quality run [42766539475](https://github.com/eboxont-code/mtdgc/actions/runs/42766539475) failed before the job started; GitHub returned no steps or logs, so lint, tests, typecheck and build did not execute. The matching Vercel preview deployment [`dpl_FDRA2dvje6zcf234M5QpYigabcto`](https://vercel.com/boxont/mtdgc/FDRA2dvje6zcf234M5QpYigabcto) reached READY with target preview only; it is not production. Do not merge until a new exact-head Quality run completes successfully and applicable repository rules are confirmed.
 - This documentation update does not merge or trigger a production deployment. Production remains READY at the deployment and source commit listed above. Additional spend: $0.
