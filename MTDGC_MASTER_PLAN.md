@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.2 · 8 November 2026
+**Version:** 2.3 · 10 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -328,7 +328,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0181 · P0 · TODO** — Test the full purchase journey on common Android phones and narrow mobile screens.
 - [ ] **MT-0182 · P0 · REVIEW** — Availability labels, purchasable counts and disabled coming-soon actions were implemented and rule-tested in the 5 November pack; confirm the current production page before marking complete because the roadmap pack recorded the change as not yet published.
 - [x] **MT-0183 · P0 · DONE AND LIVE** — Ensure the product card, product page and checkout show matching prices and variants; PR #17 merged at `9f944ec36ec3f87e3e603ff308b20979a1013183` and production deployment `dpl_cfXAs4hrfTSgdurWL1Veb5prUA5v` is READY on that exact SHA.
-- [x] **MT-0184 · P0 · DONE AND LIVE** — Correct guidance is merged in PR #19 (merge commit `3de811c7cfce91eb262cf79523d8053995bfb777`) and confirmed in current READY production deployment `dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay` on `de1b11f540bf1933dc78ec2487392a0024a15de2`; the merge is an ancestor of the deployed commit. See section 33. Responsive/mobile interaction testing remains separately tracked under MT-0181.
+- [x] **MT-0184 · P0 · DONE AND LIVE** — PR #19 merged as `3de811c7cfce91eb262cf79523d8053995bfb777`; its exact-head Quality run `42430253311` passed lint, unit tests, TypeScript checks and production build. The live Mobile Legends page and four other orderable product pages were rechecked on 10 November; the correct User ID/Zone ID guidance and product-specific required details are present. Production deployment `dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay` is READY on `de1b11f540bf1933dc78ec2487392a0024a15de2`, which contains the merge. See section 34. Responsive/mobile viewport testing remains separate under MT-0181.
 - [ ] **MT-0185 · P1 · TODO** — Improve catalog search for brand, product, game, denomination and common abbreviations.
 - [ ] **MT-0186 · P1 · TODO** — Add clear sorting by relevance, price and availability.
 - [ ] **MT-0187 · P1 · TODO** — Make filters usable on mobile without hiding the product list behind oversized controls.
@@ -1376,3 +1376,29 @@ No production application code, database/schema, order/payment/customer record, 
 No production data, catalogue record, order, payment, schema, storage, authentication, environment, DNS, hosting or billing setting was changed. No test order or payment was created; no supplier/customer was contacted. Additional spend: $0.
 
 **Next P0 after this task:** MT-0102. Its current PR #22 is blocked because the exact-head GitHub quality job failed before starting a runner; do not repeat the unchanged failure. MT-0105 PR #23 and MT-0162 PR #27 show the same runner-startup blocker. After runner recovery, continue with the next independent P0 work rather than waiting on supplier, legal or owner-only blockers.
+
+
+## 34. MT-0184 current production re-verification — 10 November 2026
+
+**Task:** MT-0184 · P0 · DONE AND LIVE. This read-only recheck confirms that the merged Mobile Legends guidance correction is present on the live production product page. It does not complete responsive viewport or physical Android interaction testing; those remain under MT-0181.
+
+### Source, merge and quality evidence
+
+- PR [#19](https://github.com/eboxont-code/mtdgc/pull/19) is CLOSED/MERGED. Exact PR head: `21102f8816158e3cf31d0ef450c7298cb22869e5`; merge commit: `3de811c7cfce91eb262cf79523d8053995bfb777`.
+- Exact-head Quality run [42430253311](https://github.com/eboxont-code/mtdgc/actions/runs/42430253311) completed successfully: dependency installation, lint, unit tests, TypeScript typecheck and production build all passed.
+- The shared `src/lib/product-help.ts` blob is `defaa321fc21d7832bcfc1c8b17853126eab1b93` and the focused test blob is `06e8e4a2470f88dba0525a3234bd7012efbe0f5d`. Both blobs are identical at the PR #19 merge commit, the production source commit and current main.
+- The helper checks game identifiers (`player id`, `user id`, `uid`) before the generic phone/mobile matcher. The regression tests confirm that “Mobile Legends user ID” receives game-account instructions while a genuine “Mobile number” field retains phone-contact guidance.
+
+### Production deployment and live page checks
+
+- Vercel production deployment [`dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay`](https://vercel.com/boxont/mtdgc/dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay) is READY, target production, and sourced from commit `de1b11f540bf1933dc78ec2487392a0024a15de2`. Git ancestry confirms the PR #19 merge commit is an ancestor of that deployed commit.
+- Current main is `8a0a8a7de8bd3f8da87784c761d3472f05b06e0d`, three commits ahead of the production source. The relevant product-help implementation and regression-test blobs are unchanged between current main and production; the live page checks below verify the actual production behaviour.
+- A non-destructive public GET of [Mobile Legends Diamonds](https://mtdgc.com/products/mobile-legends-diamonds) shows “Mobile Legends user ID” and “Zone ID” in the order summary and required fields. The User ID helper says to open the game, tap the profile picture and copy the number under the name; the Zone ID helper says it appears next to the Player ID, usually in brackets. The incorrect phone-contact instruction is absent.
+- [PUBG Mobile UC](https://mtdgc.com/products/pubg-mobile-uc) shows Player ID and in-game nickname; [Free Fire Diamonds](https://mtdgc.com/products/free-fire-diamonds) shows player ID and nickname; [Clash of Clans Passes](https://mtdgc.com/products/clash-of-clans-passes) shows Supercell ID email and Player tag; [Roblox Gift Card](https://mtdgc.com/products/roblox-gift-card) shows the delivery email address.
+- No form was submitted, no customer/order/payment record was accessed, and no test order or payment was created.
+
+### Remaining verification boundary
+
+- MT-0184 is DONE AND LIVE for the production purchase-summary and Mobile Legends guidance criteria. Responsive viewport, keyboard and physical Android interaction checks remain unverified and are tracked separately under MT-0181; this task does not claim them complete.
+- The documentation-only PR #30 remains OPEN/DRAFT. Its previous exact-head Quality run [42623210782](https://github.com/eboxont-code/mtdgc/actions/runs/42623210782) failed before any workflow step started. The refreshed documentation head requires its own exact-head Quality result; do not merge while that project gate is unverified.
+- This documentation update does not merge or trigger a production deployment. Production remains READY at the deployment and source commit listed above. Additional spend: $0.

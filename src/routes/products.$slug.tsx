@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { ProductArt } from "@/components/product-art";
+import { ProductRegionNotice } from "@/components/product-region-notice";
 import { ProductRail, SectionHeader } from "@/components/home/rails";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -14,6 +15,7 @@ import { getProductBySlug } from "@/lib/catalog.functions";
 import { PRICE_COMING_SOON, pricesHidden } from "@/lib/price-visibility";
 import { availabilityLabel, isPurchasableVariant, lowestPurchasableVariant, purchasableVariants, selectProductVariant } from "@/lib/product-availability";
 import { requiredProductFields } from "@/lib/product-fields";
+import { listingRegion } from "@/lib/product-region";
 import { useCart } from "@/lib/cart";
 import { categoryTypeFromSlug, formatNpr, isOrderable, SITE_URL, SUPPORT_MESSAGE, whatsappLink } from "@/lib/format";
 import { enabledProviders } from "@/lib/payments";
@@ -161,9 +163,11 @@ function ProductPage() {
     ? availabilityLabel({ ...product, variants: [variant] })
     : availabilityLabel(product);
 
-  const regionText = product.region?.trim() ?? "";
+  const regionText = listingRegion(product.region) ?? "";
   const needsRegionConfirm = categoryTypeFromSlug(product.category?.slug ?? "") === "gift_card" && regionText.length > 0;
-  const [regionConfirmed, setRegionConfirmed] = useState(false);
+  const regionConfirmationKey = `${product.id}:${regionText}`;
+  const [confirmedRegionKey, setConfirmedRegionKey] = useState<string | null>(null);
+  const regionConfirmed = confirmedRegionKey === regionConfirmationKey;
   const regionRef = useRef<HTMLInputElement>(null);
 
   const navigate = useNavigate();
@@ -303,6 +307,7 @@ function ProductPage() {
               </div>
               {deliveryTime && <p className="mt-1 text-xs text-muted-foreground">{deliveryTime}</p>}
               {purchaseDetailsBlock && <div className="mt-3">{purchaseDetailsBlock}</div>}
+              {regionText && <div className="mt-3"><ProductRegionNotice region={regionText} /></div>}
               <div className="mt-4">{actions}</div>
               <div className="mt-4 border-t border-border pt-4">{trust}</div>
             </div>
@@ -323,6 +328,7 @@ function ProductPage() {
               {!isPlan && deliveryTime && <li className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-[11px]"><Clock className="size-3.5 text-primary" />{deliveryTime}</li>}
               {!isPlan && product.platform && <li className="rounded-full border border-border bg-card px-2.5 py-1 text-[11px]">{product.platform}</li>}
             </ul>
+            {regionText && <div className="mt-4"><ProductRegionNotice region={regionText} /></div>}
             {isPlan && (deliveryMethod || deliveryTime) && (
               <dl className="mt-4 space-y-2 text-sm">
                 {deliveryMethod && <div className="grid grid-cols-1 gap-1 sm:grid-cols-2"><dt className="text-muted-foreground">You receive</dt><dd>{deliveryMethod}</dd></div>}
@@ -420,7 +426,7 @@ function ProductPage() {
                     type="checkbox"
                     required
                     checked={regionConfirmed}
-                    onChange={(e) => { setRegionConfirmed(e.target.checked); if (e.target.checked) setError(null); }}
+                    onChange={(e) => { setConfirmedRegionKey(e.target.checked ? regionConfirmationKey : null); if (e.target.checked) setError(null); }}
                     className="size-5 shrink-0 accent-primary"
                   />
                   <span>I confirm my account region is {regionText}.</span>
@@ -489,7 +495,10 @@ function ProductPage() {
 
       {/* Sticky buy bar on phones */}
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-3 pb-[calc(0.6rem+env(safe-area-inset-bottom))] pt-2.5 backdrop-blur-xl md:hidden">
-        {purchaseDetailsBlock && <div className="mb-3 max-h-[25vh] overflow-y-auto">{purchaseDetailsBlock}</div>}
+        {(purchaseDetailsBlock || regionText) && <div className="mb-3 max-h-[25vh] space-y-2 overflow-y-auto">
+          {purchaseDetailsBlock}
+          <ProductRegionNotice region={regionText} />
+        </div>}
         <div className="flex items-center gap-2.5">
           <div className="min-w-0 flex-1">
             <p className="truncate text-[10px] text-muted-foreground">{isGiftCard ? "Face value: " + (variant?.name ?? "Choose a denomination") : variant?.name ?? "Choose an option"}</p>

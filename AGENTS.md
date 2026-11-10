@@ -25,3 +25,4 @@
 - Product purchase summaries reuse existing listing fields above desktop and mobile actions, omitting empty values without changing purchase eligibility or listing data.
 - Catalog search and sorting use browser-safe pure helpers with query-only aliases and the existing display-price callback; URL state and mobile filter sheets never mutate listing records or hidden-price rules.
 - Product delivery fields are projected from the current listing requirements on restoration and before adding a line; this prevents unrelated fields leaking between products without changing protected cart or checkout logic.
+- Product region notices share a listing-only presentation above desktop/mobile actions; gift-card confirmation is scoped to the current product and saved region so navigation cannot reuse a different confirmation.
