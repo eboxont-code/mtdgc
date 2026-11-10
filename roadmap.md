@@ -223,3 +223,12 @@ Body/input text and outline badges use foreground; muted text and inactive navig
 - [x] F30 partial: empty/whitespace SEO title falls back to the product name plus price in Nepal, consistently across title and social titles. Existing product image and price hiding untouched. Category image fallback skipped because sharing tags must match the image actually shown, not a different category cover. Automatic build OK, revision 4ef799f; existing Free Fire title preserved consistently in rendered title/OG/Twitter. Empty-title branch not exercised against a real listing; no catalog records changed.
 - [x] F29: added product-type delivery/refund sections in store priority order and matching WebPage descriptions. Only listing-specific replacement periods referenced, no durations invented. Existing cancellation/full-refund terms preserved. Automatic build OK, revision 2d03bc0; both pages return 200 and have ordered headings at 390px and desktop without overflow.
 - [x] F28 partial: What we sell now lists software, subscriptions, deals, gift cards and game top-ups in order, using existing destinations. Deals remains unlinked until D2 creates its route; software uses the catalog filter because the public category is unavailable. No customer counts or business credentials invented. Automatic build OK, revision 0f54009; list and Software link checked at 390px and desktop without overflow.
+
+
+## 10 November 2026 — MT-0285 Nepal and Australia contact validation
+
+- Prepared shared checkout contact checks and direct tests for the existing server-side fields. Coverage includes Nepali Unicode names, Nepal and Australian local/international phone formats, email-only and phone-only contact, missing contact, malformed values and current length limits.
+- Local Node 22.16 helper tests passed 6/6; strict TypeScript 5.8.3 helper check passed.
+- PR #55 is open as a draft. Its exact code-bearing revision failed the GitHub Quality job before any step started; full application tests, lint, typecheck and production build did not execute.
+- Vercel rejected the preview because the free daily deployment limit was reached. The new checkout validation is not live.
+- No production data, orders, payments, customer records, database/schema, credentials, hosting or billing settings changed. Additional spend: $0.
