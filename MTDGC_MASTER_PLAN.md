@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.2 · 8 November 2026
+**Version:** 2.3 · 10 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -251,7 +251,7 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** Orders are delivered accurately and on time, while manual checks are gradually replaced only by safe, tested automation.
 
 - [!] **MT-0121 · P0 · BLOCKED** — Document the current manual fulfilment steps for each active product family. The supplier register has no verified supplier/product/region scope, authorised delivery route, supplier-specific instructions, delivery window or escalation contact. Catalogue requirement labels do not prove how an authorised supplier fulfils a SKU. Unblock only with owner-provided or independently verifiable supplier evidence; do not invent steps or contact suppliers.
-- [~] **MT-0122 · P0 · IN PROGRESS** — Snapshot server-resolved product region and required customer-field labels at order time, retain the selected variant/denomination, and show an administrator checklist. Current-main implementation is in draft [PR #52](https://github.com/eboxont-code/mtdgc/pull/52); six focused tests and strict helper type-check pass locally. Full exact-head repository quality checks remain pending.
+- [!] **MT-0122 · P0 · BLOCKED** — The server-resolved order-time region/requirements snapshot and administrator checklist are implemented in draft [PR #52](https://github.com/eboxont-code/mtdgc/pull/52). Six focused tests pass locally and the helper passes strict TypeScript checking. The branch was refreshed to current main 8a0a8a7de8bd3f8da87784c761d3472f05b06e0d by history-preserving merge commit ee1d5ace8d4d8208d619743d21f6a316fb6ec182 (parents: prior PR head fb7968e42b17a9836faa679e342f0f8f1de70597 and current main). Exact-head Quality run 42804082339 failed before any job step/runner started; no full Bun tests, lint, repository typecheck or build ran. Keep draft until a free runner completes the full workflow on the final PR head.
 - [!] **MT-0123 · P0 · BLOCKED** — Require a second confirmation for irreversible top-ups and code releases. Existing draft PR #7 is stacked on the superseded MT-0122 branch; retarget/reconcile it only after PR #52 is verified and the current-main MT-0122 change is merged.
 - [ ] **MT-0124 · P0 · TODO** — Record the supplier transaction or redemption reference for each completed order.
 - [ ] **MT-0125 · P0 · TODO** — Capture delivery evidence and attach it to the correct order.
@@ -546,7 +546,7 @@ MT-0122 is the one active P0 task. Earlier items remain blocked by the exact dep
 | 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | BLOCKED; exact-head Quality run 42554218686 and current-main run 42545337294 both failed before any runner steps; wait for new runner availability |
 | 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
-| 13 | MT-0122 — current-main pre-fulfilment snapshot and administrator checklist | IN PROGRESS in draft PR #52; focused tests pass, exact-head repository quality checks pending |
+| 13 | MT-0122 — current-main pre-fulfilment snapshot and administrator checklist | BLOCKED in draft PR #52; branch refreshed to main 8a0a8a7; exact-head Quality run 42804082339 failed before runner startup; six focused tests and strict helper typecheck pass locally |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -1379,3 +1379,32 @@ No schema migration or new database object is required.
 
 **Next P0 task:** MT-0123 — require a second confirmation for applicable top-ups and code releases. Its existing draft remains stacked on the old MT-0122 branch; reconcile it only after PR #52 has passed its exact-head checks and is merged. Do not infer supplier-side irreversibility.
 
+## 33. MT-0122 current-main refresh and release verification — 10 November 2026
+
+**Task:** MT-0122 · P0 · BLOCKED pending the required full quality workflow. Existing [PR #52](https://github.com/eboxont-code/mtdgc/pull/52) was refreshed without rewriting history. Branch-refresh commit [ee1d5ace8d4d8208d619743d21f6a316fb6ec182](https://github.com/eboxont-code/mtdgc/commit/ee1d5ace8d4d8208d619743d21f6a316fb6ec182) has the prior PR head fb7968e42b17a9836faa679e342f0f8f1de70597 and current main 8a0a8a7de8bd3f8da87784c761d3472f05b06e0d as parents. The branch is now eight commits ahead and zero behind main; the six-file task diff is unchanged.
+
+### Implementation and regression verification
+
+- The server resolves the selected SKU and product, then stores the product region and exact required customer-field labels in a versioned object inside the existing order_items.fields JSONB. The browser-supplied reserved metadata key is rejected. The selected option/denomination remains the server-resolved variant_name.
+- The administrator order-detail sheet reads the saved order-time snapshot and shows recorded/missing required fields. Old items without a recognised snapshot are labelled as not captured/unrecognised; the current catalogue is never used to invent historical requirements.
+- The public guest lookup, signed-in order list and guest order-detail summary queries do not select or return the fields JSONB. The existing order-item SELECT policy is limited to authenticated owners or administrators; the anon role has no SELECT grant. No policy or grant was changed.
+- The six focused tests were rerun from the exact PR helper/test source with Node.js 22.16: 6/6 PASS. A strict TypeScript 5.8.3 no-emit check of the helper also PASS. These are focused checks only; the full repository suite was not run locally because Bun and project dependencies are not installed in the available environment.
+
+### Production schema evidence (read-only)
+
+- Production Supabase project eaomkkswslqtfunkceuc is ACTIVE_HEALTHY. order_items.fields is JSONB, products.region is text, and products.requirements is JSONB; no migration or new database object is required.
+- A read-only metadata aggregate found 36 published products, zero missing/blank regions, zero non-array requirement values, five orderable products and zero orderable products with invalid region/requirements metadata.
+- The existing order_items SELECT policy permits authenticated order owners or administrators; only authenticated users and service_role have grants, with no anon SELECT grant. No order/customer/payment rows or proof contents were queried.
+
+### Exact-head quality and preview status
+
+- Exact refreshed-head Quality run [42804082339](https://github.com/eboxont-code/mtdgc/actions/runs/42804082339) failed within seconds before runner startup. The job had no executed steps and returned no runner/log output. Full Bun tests, ESLint, repository-wide TypeScript checking and production build did not run. The current-main run [42735643135](https://github.com/eboxont-code/mtdgc/actions/runs/42735643135) and the fresh PR #22 run [42803122668](https://github.com/eboxont-code/mtdgc/actions/runs/42803122668) failed at the same pre-step stage, indicating a GitHub runner/service blocker rather than an observed test failure. Do not repeatedly retry without new runner evidence.
+- The earlier READY preview [deployment dpl_2PNB8n1wYwMTfWoPw5wi2aorVqMW](https://vercel.com/boxont/mtdgc/2PNB8n1wYwMTfWoPw5wi2aorVqMW) belongs to code-bearing commit c981800ad209b1af7153722d4c481dd69313cfc4, not the refreshed PR head. No Vercel deployment exists for refreshed head ee1d5ace8d4d8208d619743d21f6a316fb6ec182. Preview SSO protection is enabled, and no authenticated administrator browser session is available; the admin checklist has not been browser-smoke-tested.
+- Production remains READY at [deployment dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay](https://vercel.com/boxont/mtdgc/dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay), deployed commit de1b11f540bf1933dc78ec2487392a0024a15de2. Current main 8a0a8a7de8bd3f8da87784c761d3472f05b06e0d is three commits ahead of production. PR #52 remains OPEN/DRAFT; no merge commit into main exists and no production deployment was triggered.
+- PR #52 has no submitted reviews or unresolved review threads. Repository metadata reports main.protected=false; the branch-protection detail endpoint returned 403, so full ruleset details remain unavailable. The project quality gate still applies regardless.
+
+### Safety and next priority
+
+No production schema, RLS/grant, customer/order/payment record, storage object, credential, environment variable, DNS, hosting or billing setting changed. No order or payment was created; no supplier/customer was contacted. Additional spend: $0.
+
+MT-0123 remains blocked until MT-0122 is verified and merged; MT-0121 and MT-0124–MT-0125 remain blocked by missing supplier evidence. The next independent P0 candidate is MT-0126 in existing draft [PR #24](https://github.com/eboxont-code/mtdgc/pull/24), but its recorded exact-head quality run [42671490749](https://github.com/eboxont-code/mtdgc/actions/runs/42671490749) also failed before runner startup. Do not create duplicate implementation; resume the existing PR when a free runner can execute the full quality workflow.
