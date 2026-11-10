@@ -5,6 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { hasCheckoutPriceSnapshotChanges } from "@/lib/checkout-price-snapshot";
 import { findUnsafeCustomerRequirement, UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE } from "@/lib/supplier-safety";
 import { generateOrderReference } from "@/lib/order-reference";
+import { customerContactFields, hasCustomerContact } from "@/lib/customer-contact-schema";
 import {
   buildPaymentProofAssociation,
   hasOrderAccessToken,
@@ -32,26 +33,13 @@ const lineSchema = z.object({
   return supplied === 0 || supplied === snapshotValues.length;
 }, { message: "Checkout price snapshot must be complete." });
 
-const orderSchema = z
-  .object({
-    name: z.string().trim().min(1).max(80),
-    phone: z
-      .string()
-      .trim()
-      .max(24)
-      .refine((v) => {
-        if (!v) return true;
-        const d = v.replace(/\D/g, "");
-        return d.length >= 7 && d.length <= 15;
-      }, "Phone must have 7 to 15 digits")
-      .optional()
-      .default(""),
-    email: z.string().trim().max(120).email().optional().or(z.literal("")),
+const orderSchema = customerContactFields
+  .extend({
     note: z.string().trim().max(500).optional(),
     bearer: z.string().max(4000).optional(),
     lines: z.array(lineSchema).min(1).max(20),
   })
-  .refine((d) => Boolean(d.phone) || Boolean(d.email), "Add a mobile number or an email");
+  .refine(hasCustomerContact, "Add a mobile number or an email");
 
 type OrderItemSummarySource = {
   product_name: string;
