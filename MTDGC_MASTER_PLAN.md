@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.2 · 8 November 2026
+**Version:** 2.3 · 10 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -226,10 +226,10 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** The order state is consistent from checkout to delivery, with a complete audit trail and useful customer visibility.
 
 - [x] **MT-0101 · P0 · DONE** — Map all 13 live order-status enum values, current application writers, generic administrator targets, legacy display aliases and observed transitions; confirm that neither application nor database enforces a complete transition graph. Evidence: section 30 and Data Architecture section 4; current-main source inspection plus read-only production enum, aggregate status-count, column-type, proof-status constraint and order-trigger queries on 8 November 2026.
-- [ ] **MT-0102 · P0 · TODO** — Ensure Payment received, Verified, Processing and Delivered have precise operational definitions.
+- [!] **MT-0102 · P0 · BLOCKED** — Ensure Payment received, Verified, Processing and Delivered have precise operational definitions. Draft PR #22 current head `cd55da01ffacf924ce2a9e9dd293f04232a83f29` has exact-head Quality run [42753669986](https://github.com/eboxont-code/mtdgc/actions/runs/42753669986) failed before runner startup with zero steps/logs; the full test, lint, typecheck and build stages did not execute. Resume only after a successful full Quality run on a current-main head; do not retry the unchanged runner failure.
 - [ ] **MT-0103 · P0 · TODO** — Add explicit Cancelled, Failed, Refunded and Action required states where applicable.
 - [ ] **MT-0104 · P0 · TODO** — Prevent invalid status jumps, such as Pending directly to Delivered without payment verification.
-- [ ] **MT-0105 · P0 · TODO** — Verify guest order tracking requires the order number plus the matching email or phone.
+- [!] **MT-0105 · P0 · BLOCKED** — Verify guest order tracking requires the order number plus the matching email or phone. Draft PR #46 head `16e6869ab61011e68b535be3c21f7f301972fb6f` has Quality run [42660927912](https://github.com/eboxont-code/mtdgc/actions/runs/42660927912) failed before runner startup; its base is older than current main and requires a safe refresh plus successful exact-head quality verification.
 - [ ] **MT-0106 · P0 · TODO** — Ensure account order history and guest tracking show the same canonical status.
 - [ ] **MT-0107 · P1 · TODO** — Record a timestamp and actor for every status transition.
 - [ ] **MT-0108 · P1 · TODO** — Show customers what happens next at each stage and whether they need to act.
@@ -251,7 +251,7 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** Orders are delivered accurately and on time, while manual checks are gradually replaced only by safe, tested automation.
 
 - [ ] **MT-0121 · P0 · TODO** — Document the current manual fulfilment steps for each active product family.
-- [ ] **MT-0122 · P0 · TODO** — Create a pre-fulfilment checklist for player ID, zone, server, region, denomination and email.
+- [!] **MT-0122 · P0 · BLOCKED** — Create a pre-fulfilment checklist for player ID, zone, server, region, denomination and email. Draft PR #52 head `fb7968e42b17a9836faa679e342f0f8f1de70597` has Quality run [42602353294](https://github.com/eboxont-code/mtdgc/actions/runs/42602353294) failed before runner startup; the branch also needs refreshing from current main before release.
 - [ ] **MT-0123 · P0 · TODO** — Require a second confirmation for irreversible top-ups and code releases.
 - [ ] **MT-0124 · P0 · TODO** — Record the supplier transaction or redemption reference for each completed order.
 - [ ] **MT-0125 · P0 · TODO** — Capture delivery evidence and attach it to the correct order.
@@ -301,8 +301,8 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** Customer information, payment evidence, order records and staff tools are protected with least-privilege access.
 
 - [ ] **MT-0161 · P0 · TODO** — Audit authentication and authorisation for customer accounts, support requests and admin routes.
-- [ ] **MT-0162 · P0 · TODO** — Verify one customer cannot access another customer's orders by changing an ID or URL.
-- [ ] **MT-0163 · P0 · TODO** — Verify payment uploads and delivered codes are stored privately, not in public buckets.
+- [!] **MT-0162 · P0 · BLOCKED** — Verify one customer cannot access another customer's orders by changing an ID or URL. Draft PR #27 head `6764d92a4e2ed458bcdc3694e19c4bf2f40e0635` has Quality run [42680666840](https://github.com/eboxont-code/mtdgc/actions/runs/42680666840) failed before runner startup. Branch-protection/ruleset inspection is unavailable to the connected GitHub access, and its order-access file overlaps the separate MT-0295 PR #47; reconcile both changes before either can be released.
+- [!] **MT-0163 · P0 · BLOCKED** — Verify payment uploads and delivered codes are stored privately, not in public buckets. Production has private `payment-proofs` and `payment-qr` buckets, but no delivered-code bucket, dedicated table/path or delivered-code access policy. A separate private storage design and approved Supabase migration/cutover are required; no production change is permitted in this audit.
 - [ ] **MT-0164 · P0 · TODO** — Ensure admin-only actions are enforced server-side, not only hidden in the interface.
 - [ ] **MT-0165 · P0 · TODO** — Review secrets, supplier credentials and payment configuration for accidental exposure.
 - [ ] **MT-0166 · P1 · TODO** — Enable strong admin authentication and remove unused staff accounts.
@@ -463,8 +463,8 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0291 · P1 · TODO** — Alert staff before or when a delivery SLA is breached and send the customer a truthful next-update time before they need to chase support.
 - [ ] **MT-0292 · P0 · TODO** — Map every personal-data field captured in checkout, accounts, tracking, support, analytics and payment proof; record which supplier or processor receives it, the purpose and the country of access/storage.
 - [ ] **MT-0293 · P1 · TODO** — Define retention periods or defensible retention criteria for orders, support records, payment evidence and account data, with a process for access, correction and deletion requests.
-- [ ] **MT-0294 · P0 · TODO** — Keep payment screenshots and delivered codes in private, access-controlled storage; validate file type/size, minimise visible bank details, restrict staff access and define deletion timing.
-- [ ] **MT-0295 · P0 · TODO** — Add proportionate fraud controls for rapid repeat orders, payment/market mismatch, stolen-card signals, order enumeration, account takeover, code reselling abuse and chargebacks.
+- [!] **MT-0294 · P0 · BLOCKED** — Keep payment screenshots and delivered codes in private, access-controlled storage; validate file type/size, minimise visible bank details, restrict staff access and define deletion timing. Payment-proof privacy and server-side image validation are present, but delivered-code storage is absent, no retention/deletion timing is approved, and the image pipeline does not redact visible pixels. Owner approval is required for the retention/deletion criteria, delivered-code access model and any bank-detail redaction policy; schema work remains behind the Supabase cutover.
+- [~] **MT-0295 · P0 · IN PROGRESS** — A bounded fail-closed 10-attempt/10-minute order-lookup limiter is prepared in draft PR #47 across public tracking, order viewing and payment-proof contact fallback. Five decision tests and a three-handler source-contract check passed in the PR's Node scratch harness, but exact-head Quality run [42681667188](https://github.com/eboxont-code/mtdgc/actions/runs/42681667188) failed before runner startup. PR #47 shares `orders.functions.ts` with MT-0162 PR #27 and must be reconciled before release. Atomic concurrency protection remains behind the Supabase cutover; the broader payment/market, stolen-card, account-takeover, reselling and chargeback controls need verified signals and approved policy.
 - [ ] **MT-0296 · P1 · TODO** — Audit sensitive changes to price, region, recipient, payment state, refund, code reveal and supplier fulfilment, including actor, timestamp and reason.
 - [ ] **MT-0297 · P1 · TODO** — Keep one durable support case record linked to the order, payment, supplier action and customer conversation; WhatsApp must not be the only record of a refund or promise.
 - [ ] **MT-0298 · P1 · TODO** — Localise currency, dates, number formats, receipts, phone fields and customer instructions for Nepal and Australia; decide Nepali-language coverage from customer evidence and maintain equivalent policy meaning.
@@ -530,7 +530,7 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-task register are authoritative.
+The task register is authoritative. As of 10 November 2026, MT-0295 has a bounded fail-closed implementation in a draft PR; exact-head quality and release verification remain pending.
 
 | Order | Task | Status |
 |---:|---|---|
@@ -543,9 +543,11 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 7 | MT-0086 — require independent payment settlement matching before fulfilment | BLOCKED; no bank-statement feed, provider callback or owner-approved manual settlement evidence is available |
 | 8 | MT-0087 — prevent duplicate transaction references/screenshots across orders | BLOCKED; concurrency-safe uniqueness requires the approved Supabase cutover/migration gate |
 | 9 | MT-0101 — map current order statuses and observed transition paths | DONE; 13-value enum, application writers, UI mappings, production aggregate counts and lack of transition enforcement are documented in section 30 and Data Architecture section 4 |
-| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | NEXT P0; can be documented from the current payment-review code and existing operational evidence without production writes |
+| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | BLOCKED; PR #22 exact-head Quality run failed before runner startup; no full checks executed |
 | 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
+
+**10 November 2026 queue refresh:** MT-0102, MT-0105 and MT-0122 are blocked by exact-head Quality runs that failed before runner startup; do not repeat unchanged retries. MT-0162 and MT-0295 are also blocked from release by the same runner issue and their overlapping order-access changes. MT-0163 and MT-0294 are blocked by the missing delivered-code storage design, owner-approved retention/deletion criteria and the held Supabase cutover. No production migration, storage change or deployment is authorised by this status update.
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -1334,3 +1336,36 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 No production application code, database/schema, order/payment/customer record, storage object, RLS/grant, credential, environment, DNS, hosting or billing setting changed. No test order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
 
 **Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
+
+
+## 32. Payment-proof and delivered-code storage audit — 10 November 2026
+
+**Task:** MT-0294 · P0 · BLOCKED. Payment-proof privacy and server-side file validation are present in the current application/production metadata. Delivered-code storage, a retention/deletion policy and a bank-detail redaction rule are not implemented or approved. This was a read-only source/schema audit; no customer, order, payment, auth-user or storage-object rows were read.
+
+### Current production storage evidence
+
+- Supabase project `eaomkkswslqtfunkceuc` is ACTIVE_HEALTHY on PostgreSQL 17.11.0.003.
+- The production storage inventory contains exactly two buckets: `payment-proofs` (private, 5 MiB limit) and `payment-qr` (private, 2 MiB limit). Both have a NULL storage-level MIME allowlist, so the payment-proof application's server-side validation remains the content gate.
+- `payment-proofs` has an authenticated SELECT policy limited to the related order owner or an administrator. No browser INSERT, UPDATE or DELETE policy was found; uploads use the server-side service-role client. `payment-qr` has authenticated administrator read/insert/update/delete policies.
+- No delivered-code bucket exists. The inspected public schema has no dedicated delivered-code table, and current application source contains no delivered-code storage path, private-code signed-URL handler or delivered-code access policy. The generic `order_items.fields` input JSON is not an approved private delivered-code store.
+
+### Existing payment-proof handling
+
+- `submitPaymentProof` rejects empty files and files above 5 MiB, calls the server-only image normalizer, derives the storage path from the server-resolved order, and uploads to the private `payment-proofs` bucket as WebP.
+- `normalizePaymentProofImage` accepts JPEG, PNG and WebP only when the decoder-detected format matches the declared MIME; it fully decodes the image, caps decoded pixels/channels, applies orientation and writes lossless WebP. Default re-encoding strips source metadata, but it does **not** redact visible bank/account details in the image pixels.
+- The administrator proof-URL action checks authenticated administrator access before reading the proof path and creates a 300-second signed URL. The customer-facing payment QR URL is signed for 3,600 seconds.
+- The only payment-proof object deletion found in the inspected upload flow is compensating cleanup when the order status update fails. The 24-hour cleanup in `orders.functions.ts` applies to order-lookup attempt records, not payment proofs. No application-level payment-proof or delivered-code retention/deletion schedule or job was found in the inspected source and relevant database functions.
+
+### Migration and operational blockers
+
+- Production migration history contains versions 0000–0011, including `0010_catchup_storage_buckets` and `0011_harden_grants`. The corresponding 0010/0011 migration files are not present at the expected paths on current `main`; reconcile this history before any future schema change. The existing Boxont-controlled Supabase cutover/backup/restore gate remains unresolved.
+- The supplier register still has no verified supplier/product-scope records. No supplier or customer was contacted and no delivery code was obtained or tested.
+- **Owner-only decisions required:** (1) approve the delivered-code storage/access model (who may upload, reveal, download and revoke); (2) approve retention/deletion criteria for payment screenshots and delivered codes; (3) define which visible bank/account details may be masked while preserving evidence needed for payment review; and (4) approve the target Supabase project and migration/cutover sequence before adding storage objects, policies or retention jobs.
+
+### Verification and safety
+
+- Read-only storage bucket and policy metadata queries returned the inventory above. The public database schema and current-main application source were inspected; no storage objects or customer/order/payment rows were queried.
+- No production database write/migration, storage-object access, customer/order/payment mutation, authentication/role/grant change, credential/environment/DNS/hosting/billing change, supplier/customer contact, purchase or test order occurred. Additional spend: **$0**.
+- MT-0294 and MT-0163 remain BLOCKED. Do not create a delivered-code bucket or choose a retention period until the owner decisions and Supabase cutover gate are resolved.
+
+**Next candidate to inspect after the current P0 blockers:** MT-0109 — verify that staff-only order notes remain absent from customer-facing order payloads; the current public order reads select status/timestamp but omit note content. Confirm how note status labels render before changing code.
