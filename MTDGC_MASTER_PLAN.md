@@ -1437,3 +1437,14 @@ The production `public.order_status` enum was queried read-only on 8 November 20
 ### Next P0 task
 
 MT-0105 remains next in the P0 queue. Its existing live guest-tracking behaviour is already verified in the production deployment noted above; the remaining canonical documentation update is in PR #46, while PR #32 is an optional helper consolidation. Both exact-head quality runs failed before startup. Do not repeat implementation or merge either draft until a free runner successfully executes the required full quality workflow. MT-0122 is the next independent implementation candidate after that, but its exact-head run is also blocked as recorded above.
+
+
+
+## 32. MT-0102 immediate run — 10 November 2026
+
+- Rechecked the exact current PR #22 head `cd55da01ffacf924ce2a9e9dd293f04232a83f29`. The five focused regression cases and current `src/lib/format.ts` were fetched from that same head.
+- Five source-level checks passed: payment-proof wording is distinct from money received; legacy `paid` is excluded from the proof-review steps; verification is explicitly staff-marked without independent settlement confirmation; processing is a manual update rather than a supplier signal; and delivered is staff-marked without promising an email.
+- These are direct source assertions only. The five Node test cases are present, but this run did not execute the repository test runner.
+- Exact-head GitHub Actions Quality run [42753669986](https://github.com/eboxont-code/mtdgc/actions/runs/42753669986) failed before producing job steps or logs. Its only job, “Lint, test, typecheck and build”, has no step list. Therefore lint, the test suite, typecheck and production build did not execute. This does not establish an application-code failure.
+- The current Vercel status remains blocked by the free daily deployment allowance. No new production deployment exists for this head. The PR remains open/draft and unmerged pending a successful exact-head quality run and eligible preview/release evidence.
+- No production database, customer, order, payment, credentials, hosting or billing settings were changed. No test order was created. Additional spend: **$0**.
