@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 
 import { contactKind } from "@/lib/product-help";
+import { validateCheckoutContact } from "@/lib/customer-contact";
 import { GIFT_CARD_PRICE_DISCLOSURE, isGiftCardCategory } from "@/lib/gift-card-pricing";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -38,7 +39,6 @@ export const Route = createFileRoute("/checkout")({
 });
 
 const STEPS = ["Your details", "Payment", "Review"] as const;
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const inputCls = "mt-1 h-11 w-full rounded-lg border bg-background/60 px-3 font-display text-[15px] outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20";
 
 type Errors = Record<string, string>;
@@ -104,13 +104,12 @@ function CheckoutPage() {
   };
 
   const validateContact = (): Errors => {
-    const e: Errors = {};
-    if (!name.trim()) e["co-name"] = "Please add your full name.";
-    const digits = phone.replace(/\D/g, "");
-    if (!phone.trim() && !email.trim()) e["co-phone"] = "Add a mobile number or an email so we can reach you.";
-    if (phone.trim() && (digits.length < 7 || digits.length > 15)) e["co-phone"] = "Mobile number must have 7 to 15 digits.";
-    if (email.trim() && !EMAIL_RE.test(email.trim())) e["co-email"] = "That email address does not look right.";
-    return e;
+    const contactErrors = validateCheckoutContact({ name, phone, email });
+    return {
+      ...(contactErrors.name ? { "co-name": contactErrors.name } : {}),
+      ...(contactErrors.phone ? { "co-phone": contactErrors.phone } : {}),
+      ...(contactErrors.email ? { "co-email": contactErrors.email } : {}),
+    };
   };
 
   const fieldId = (sku: string, key: string) => `co-f-${sku}-${key}`.replace(/\W+/g, "-");
@@ -340,18 +339,18 @@ function CheckoutPage() {
                   <div className="mt-3 space-y-3">
                     <label htmlFor="co-name" className="block">
                       <span className="font-display text-xs text-muted-foreground">Full name</span>
-                      <input {...aria("co-name")} value={name} autoComplete="name" onChange={(e) => setName(e.target.value)} />
+                      <input {...aria("co-name")} value={name} maxLength={80} autoComplete="name" onChange={(e) => setName(e.target.value)} />
                       {err("co-name")}
                     </label>
                     <div className="grid gap-3 sm:grid-cols-2">
                       <label htmlFor="co-phone" className="block">
                         <span className="font-display text-xs text-muted-foreground">Mobile number</span>
-                        <input {...aria("co-phone")} value={phone} autoComplete="tel" inputMode="tel" placeholder="98XXXXXXXX" onChange={(e) => setPhone(e.target.value)} />
+                        <input {...aria("co-phone")} value={phone} maxLength={24} autoComplete="tel" inputMode="tel" placeholder="98XXXXXXXX" onChange={(e) => setPhone(e.target.value)} />
                         {err("co-phone")}
                       </label>
                       <label htmlFor="co-email" className="block">
                         <span className="font-display text-xs text-muted-foreground">Email</span>
-                        <input {...aria("co-email")} value={email} type="email" autoComplete="email" placeholder="you@example.com" onChange={(e) => setEmail(e.target.value)} />
+                        <input {...aria("co-email")} value={email} type="email" maxLength={120} autoComplete="email" placeholder="you@example.com" onChange={(e) => setEmail(e.target.value)} />
                         {err("co-email")}
                       </label>
                     </div>
