@@ -126,3 +126,13 @@ The customer progress helper groups `payment_submitted`/`paid`, `verified`, `pro
 - The administrator payment-review queue and signed proof-URL function require a validated Supabase session and an exact successful administrator-role result before any proof lookup or signed URL creation. Signed URLs expire after 300 seconds.
 - `has_role` remains a SECURITY DEFINER function that Supabase's advisor reports as executable by anon/authenticated. Treat its role-membership disclosure as a separate issue; change function execution and dependent policies only through the approved coordinated Supabase migration gate.
 - Guest order access is mediated by server-side order access checks and is not a direct proof-row/object RLS grant. Cross-customer order lookup/contact-fallback isolation remains tracked separately under MT-0162.
+
+
+## 9. Delivered-code storage and retention — not implemented
+
+- Production has two private buckets: `payment-proofs` (5 MiB) and `payment-qr` (2 MiB). No delivered-code bucket or dedicated delivered-code storage path is present.
+- Payment-proof objects are readable through an authenticated owner/admin policy. The upload path is server-only and stores a server-derived order association; proof URLs issued by the administrator action expire after 300 seconds.
+- The payment-proof image normalizer validates JPEG/PNG/WebP by decoding the file, limits size and decoded pixels, strips source metadata through re-encoding, and stores lossless WebP. It does not redact visible text or bank/account details in the image pixels. The bucket MIME allowlist is NULL, so application-side validation remains essential.
+- No dedicated delivered-code table, bucket, object path, access policy, signed reveal action or application retention/deletion job was found in the inspected production metadata/current-main source. The only proof-object deletion in the upload flow is compensating cleanup after a failed order-status update; it is not a retention policy.
+- **Not approved:** delivered-code upload/reveal permissions, customer/admin access model, retention/deletion timing, and any visible bank-detail masking rule. Do not invent these rules or implement a storage migration before the owner approves them and the Boxont-controlled Supabase cutover/backup/restore gate is complete.
+- Production migration history includes 0010 and 0011, while their corresponding files were not found at the expected paths on current `main`; reconcile migration history before schema work. No production migration or storage configuration was changed during this audit.
