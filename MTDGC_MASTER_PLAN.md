@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.3 · 9 November 2026
+**Version:** 2.4 · 10 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -281,7 +281,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0144 · P0 · TODO** — Make region-lock warnings prominent before payment for every region-restricted code.
 - [ ] **MT-0145 · P0 · TODO** — Make wrong-player-ID warnings visible before confirming an irreversible top-up.
 - [ ] **MT-0146 · P1 · TODO** — Publish support response hours only after they are operationally staffed.
-- [!] **MT-0147 · P1 · BLOCKED** — Added the required support ticket categories in [PR #49](https://github.com/eboxont-code/mtdgc/pull/49), retaining the existing player-ID/general options and mapping saved “Order not delivered” drafts to “Delayed delivery”. Five focused tests passed locally. Production support_tickets.issue_type is text with no category check constraint, so no migration is needed. Code-bearing head 64bd291f683552ffa67d70875b78bf9f34f3a448 passed the Vercel preview build (deployment dpl_AGzh6szQiyFbKTEBfCTssdyuHWwh), but its browser smoke check is unavailable because the preview URL is protected. The later plan-only head dfec171f04e8084941b7282064671fe811a2d907 had Quality run [42571430386](https://github.com/eboxont-code/mtdgc/actions/runs/42571430386) fail before runner startup (zero steps; logs unavailable) and its Vercel preview fail at the free daily deployment limit. Production /support still shows the old categories. No merge or production deployment. Blocked pending successful full quality checks and an accessible exact-head preview smoke check.
+- [!] **MT-0147 · P1 · BLOCKED** — Required support categories, legacy saved-draft mapping and five focused tests are prepared in [PR #49](https://github.com/eboxont-code/mtdgc/pull/49). Read-only production schema confirms `support_tickets.issue_type` is text with no category check constraint. Vercel-authenticated GET of the READY code-bearing preview `/support` returned HTTP 200 and rendered all eight category choices; no form was submitted. The preview belongs to code commit `64bd291f683552ffa67d70875b78bf9f34f3a448`, not the later documentation head. Exact Quality runs [42571306820](https://github.com/eboxont-code/mtdgc/actions/runs/42571306820) and [42571520639](https://github.com/eboxont-code/mtdgc/actions/runs/42571520639) failed before runner startup (zero steps/no logs); no successful full quality run exists. Production `/support` still shows the previous categories. PR branch is based on `de1b11f540bf1933dc78ec2487392a0024a15de2` and is three commits behind current main `8a0a8a7de8bd3f8da87784c761d3472f05b06e0d`; refresh before release. No merge or production deployment. Remains blocked pending exact-head full Quality and current-main refresh.
 - [ ] **MT-0148 · P1 · TODO** — Require an order number for order-specific support while allowing pre-purchase questions.
 - [ ] **MT-0149 · P1 · TODO** — Create escalation rules for overdue orders and supplier disputes.
 - [ ] **MT-0150 · P1 · TODO** — Add a clear complaint path and expected next update without inventing resolution times.
@@ -1358,7 +1358,7 @@ No production application code, database/schema, order/payment/customer record, 
 
 - Five focused tests passed in a local Node 22.16 test harness: required categories, retained categories, unique options, current saved choices, legacy draft mapping and safe fallback.
 - The focused test harness passed 5/5 tests locally under Node 22.16. The full repository Quality workflow was not executed: code-head run [42571306820](https://github.com/eboxont-code/mtdgc/actions/runs/42571306820) and later plan-only-head run [42571430386](https://github.com/eboxont-code/mtdgc/actions/runs/42571430386) both failed before runner startup. Each job exposed zero steps and no logs. This is an infrastructure failure, not an observed test failure.
-- Vercel preview for code-bearing head 64bd291f683552ffa67d70875b78bf9f34f3a448 reached READY at [dpl_AGzh6szQiyFbKTEBfCTssdyuHWwh](https://vercel.com/boxont/mtdgc/AGzh6szQiyFbKTEBfCTssdyuHWwh), URL mtdgc-qkdtwqvmo-boxont.vercel.app. The browser could not access the protected preview URL, so no preview UI smoke check was completed. The later plan-only head dfec171f04e8084941b7282064671fe811a2d907 could not receive its own preview because Vercel reported the free daily deployment limit (more than 100 deployments; try again in 24 hours).
+- Vercel preview for code-bearing head 64bd291f683552ffa67d70875b78bf9f34f3a448 reached READY at [dpl_AGzh6szQiyFbKTEBfCTssdyuHWwh](https://vercel.com/boxont/mtdgc/AGzh6szQiyFbKTEBfCTssdyuHWwh), URL mtdgc-qkdtwqvmo-boxont.vercel.app. A Vercel-authenticated read-only GET of the protected preview `/support` page returned HTTP 200 and server-rendered all eight category options. No form was submitted; saved-draft restoration remains covered by the focused regression tests. The later plan-only head dfec171f04e8084941b7282064671fe811a2d907 could not receive its own preview because Vercel reported the free daily deployment limit (more than 100 deployments; try again in 24 hours).
 - A read-only live GET of [/support](https://mtdgc.com/support) succeeded. Production still shows the previous five issue types, confirming MT-0147 is not live.
 - PR [#49](https://github.com/eboxont-code/mtdgc/pull/49) targets main and remains draft. No merge commit exists; no production deployment was triggered. Production remains at READY deployment dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay on commit de1b11f540bf1933dc78ec2487392a0024a15de2.
 
@@ -1367,3 +1367,32 @@ No production application code, database/schema, order/payment/customer record, 
 No production database/schema, support/customer/order/payment data, credentials, authentication, environment variables, hosting, DNS or billing settings were changed. No customer or supplier was contacted. Additional spend: $0.
 
 **Next independent candidate after this release gate:** MT-0285 — test Nepal and Australia name, email and phone formats. MT-0148 remains dependent on MT-0147 being released so its order-number rules can distinguish order-specific requests from pre-purchase questions.
+
+
+## 33. MT-0147 authenticated preview verification — 10 November 2026
+
+**Status:** BLOCKED — implementation and focused verification are prepared; the new categories are not live in production.
+
+### Preview smoke check
+
+- Vercel deployment [dpl_AGzh6szQiyFbKTEBfCTssdyuHWwh](https://vercel.com/boxont/mtdgc/AGzh6szQiyFbKTEBfCTssdyuHWwh) is READY, target `null` (preview only), for code-bearing commit `64bd291f683552ffa67d70875b78bf9f34f3a448`.
+- Using the connected Vercel-authenticated read-only fetch, `GET /support` returned HTTP 200. The server-rendered issue selector contained all eight expected choices: Wrong player ID or UID, Delayed delivery, Invalid code, Wrong item, Refund request, Payment question, Account access and Something else.
+- No support form was submitted. The legacy saved-draft mapping is covered by the focused regression test, not claimed as an interactive browser test.
+- Production [`/support`](https://mtdgc.com/support) also returned HTTP 200 but still shows the previous support categories. This confirms the change is preview-only and not live.
+
+### Current-main and release boundary
+
+- Current main is `8a0a8a7de8bd3f8da87784c761d3472f05b06e0d`. It is three commits ahead of the PR's base `de1b11f540bf1933dc78ec2487392a0024a15de2`. Those main commits change the project instructions and product-region presentation; their changed paths do not overlap PR #49's four changed files. The PR branch still needs a history-preserving refresh before release.
+- Current-main Quality run [42735643135](https://github.com/eboxont-code/mtdgc/actions/runs/42735643135) failed before the job started; GitHub returned no steps or logs. This is an infrastructure failure, not an application test result.
+- PR #49's code-bearing and plan-only Quality runs [42571306820](https://github.com/eboxont-code/mtdgc/actions/runs/42571306820) and [42571520639](https://github.com/eboxont-code/mtdgc/actions/runs/42571520639) likewise failed before runner startup (zero steps/no logs). The later exact PR head must still receive a successful full Quality run.
+- The later documentation-only preview was rejected by the Vercel Hobby daily deployment limit. No paid retry or upgrade was attempted.
+- Production remains READY at [deployment dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay](https://vercel.com/boxont/mtdgc/dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay) on deployed commit `de1b11f540bf1933dc78ec2487392a0024a15de2`. No production deployment exists for current main `8a0a8a7de8bd3f8da87784c761d3472f05b06e0d`; no merge or production deployment was triggered by this task.
+
+### Verification and safety
+
+- Focused support-category tests: 5/5 PASS under Node 22.16.0.
+- Strict TypeScript check of `support-issues.ts`: PASS under TypeScript 5.8.3.
+- Full repository lint, Bun suite, project typecheck and production build: NOT VERIFIED because the Quality runner did not start.
+- Production schema inspection was read-only. No support-ticket rows, customer/order/payment records, database schema, RLS, authentication, credentials, environment, hosting, DNS or billing settings were changed. No customer or supplier was contacted. Additional spend: $0.
+
+**Next independent candidate after MT-0147's release gate:** MT-0285 — test Nepal/Australia name, email and phone formats. MT-0148 remains dependent on MT-0147 being merged and live.
