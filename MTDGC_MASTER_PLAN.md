@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.2 · 8 November 2026
+**Version:** 2.3 · 10 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -454,7 +454,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [!] **MT-0282 · P0 · BLOCKED** — Confirm the exact Netflix fulfilment method, supplier authority, account ownership, country and customer control. The current listing does not document these points and has been set to `temporarily_unavailable` in production on 6 November 2026; reopen only after written supplier/issuer evidence and a successful end-to-end test prove an authorised, region-compatible offer.
 - [ ] **MT-0283 · P1 · TODO** — For every subscription, state plan duration, billing model, renewal behaviour, account owner, household/seat restrictions, region, what the customer receives and what happens at expiry.
 - [ ] **MT-0284 · P1 · TODO** — Maintain a dated evidence record for each “Global” or region-specific claim, including issuer/supplier source, tested account or server region and known exclusions.
-- [ ] **MT-0285 · P1 · TODO** — Test name, email and phone validation for Nepal and Australia formats, including Nepali names and valid international phone numbers, without rejecting legitimate customers.
+- [!] **MT-0285 · P1 · BLOCKED** — Nepal/Australia contact-validation coverage is prepared in [PR #55](https://github.com/eboxont-code/mtdgc/pull/55). Local Node 22.16 helper tests pass 6/6 and the helper passes strict TypeScript 5.8.3 checking. The exact code-bearing PR head's Quality run [42747631809](https://github.com/eboxont-code/mtdgc/actions/runs/42747631809) failed before any workflow step started (zero steps and no log file); the Zod schema tests, full application tests, lint, full typecheck and production build did not execute. Vercel rejected the preview at the free daily deployment limit. Keep the PR in draft until exact-head quality and a preview or equivalent authorised checkout smoke verification are available.
 - [ ] **MT-0286 · P0 · TODO** — Set a delivery and support SLA for each SKU and market using actual supplier times, manual staff capacity, payment confirmation, weekends and support hours; show it before payment.
 - [ ] **MT-0287 · P1 · TODO** — Measure manual staff minutes and exception workload per SKU so delivery promises and growth targets do not exceed real fulfilment capacity.
 - [ ] **MT-0288 · P0 · TODO** — Separate order states for creation, payment pending, payment verified, supplier processing, delivered, failed, refunded and chargeback; perform critical transitions server-side.
@@ -1333,4 +1333,36 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 
 No production application code, database/schema, order/payment/customer record, storage object, RLS/grant, credential, environment, DNS, hosting or billing setting changed. No test order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
 
-**Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
+**Next P0 candidate to assess:** MT-0294 — verify the existing private payment-proof storage and access controls, then record the exact owner-only deletion-timing decision. The delivered-code storage location/design is not yet evidenced; if either dependency prevents completion, record it as BLOCKED and continue to independent MT-0295 fraud-control work.
+
+MT-0102 remains earlier in the P0 queue but is blocked: its exact-head Quality run [42554218686](https://github.com/eboxont-code/mtdgc/actions/runs/42554218686) failed before any workflow step started, and PR #22 is behind current main. Do not retry that unchanged runner failure without new evidence.
+
+
+## 34. Nepal and Australia checkout contact validation — 10 November 2026
+
+**Task:** MT-0285 · P1 · BLOCKED. The implementation and focused tests are in [PR #55](https://github.com/eboxont-code/mtdgc/pull/55), based directly on current main `8a0a8a7de8bd3f8da87784c761d3472f05b06e0d`.
+
+### Scope prepared
+
+- Extracted the existing browser-side contact checks into a pure helper and reused the same digit-count helper in the existing server-side Zod phone rule.
+- Separated the existing server contact fields so their actual Zod validation can be tested directly; the limits and semantics remain unchanged: name trimmed, 1–80 characters; phone trimmed, at most 24 characters and 7–15 digits after non-digits are removed; email trimmed, at most 120 characters and validated by the existing Zod email rule; at least one phone or email is required by the order schema.
+- Aligned checkout input length limits with the existing server limits. No new dependency, database/schema change or country-specific number rewrite was introduced.
+- Added tests for Nepali Unicode names, Nepal local and international numbers, Australian local and international numbers, email-only/phone-only contact, missing contact, malformed values and length boundaries.
+
+### Verification
+
+- Local Node 22.16 focused helper tests: **PASS, 6/6**.
+- Local TypeScript 5.8.3 strict check of the pure helper: **PASS**.
+- The Zod server-schema tests are included in the PR but were not run locally because Bun and the repository dependencies are not installed in this execution environment.
+- Exact code-bearing PR head: `fd83922a58d40bf335d8233d5747b0be85264ef3`, 6 commits ahead of current main and 0 behind.
+- Exact-head GitHub Quality run [42747631809](https://github.com/eboxont-code/mtdgc/actions/runs/42747631809) failed before the job began: zero steps, no runner logs. Full lint, complete tests, full typecheck and production build are **NOT VERIFIED**.
+- Vercel rejected the preview because the free daily deployment allowance had been exceeded. No preview for this PR head is available.
+- No reviews or unresolved review conversations were present. PR #55 remains OPEN/DRAFT; no merge commit exists.
+
+### Safety and release boundary
+
+- Production application, database/schema, customer/order/payment records, credentials, authentication, environment, hosting, DNS and billing were not changed.
+- No test order or payment was created and no customer was contacted. Additional spend: **$0**.
+- The new validation is not live. Do not merge until the exact final PR head passes the applicable quality checks and the checkout change can be safely smoke-tested.
+
+**Next P0 candidate:** MT-0294 as described in the queue note above; deletion timing and delivered-code storage remain explicit owner/design dependencies.
