@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.4 · 10 November 2026
+**Version:** 2.5 · 10 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -1387,7 +1387,7 @@ No production application code, database/schema, order/payment/customer record, 
 ### Read-only database reconciliation
 
 - Aggregate-only Supabase queries again returned 36 published products: 5 `available`, 30 `coming_soon` and 1 `temporarily_unavailable`; category available-now counts matched the live catalogue.
-- Variant metadata showed 18 available variants across 6 products and 36 coming-soon variants across 20 products. These are variant counts, not purchasable-product counts; the product-level status and shared helper determine the 5 product count shown publicly.
+- Variant metadata grouped by parent product status returned 15 available-status variants under the five available products, 36 coming-soon variants under the 30 coming-soon products, and 3 available-status variants under the single temporarily-unavailable product. Those three variants are not purchasable because their parent product is temporarily unavailable; the shared helper requires both the product and variant to be orderable.
 - No customer, order, payment, support, authentication or storage-object data was queried. No form was submitted and no order was created.
 
 ### Quality and release status
