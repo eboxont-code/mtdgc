@@ -1430,7 +1430,7 @@ The production `public.order_status` enum was queried read-only on 8 November 20
 
 - Vercel project `mtdgc` is Git-linked to `eboxont-code/mtdgc` under the Hobby plan. Merging to main uses the existing production deployment integration.
 - Latest production deployment is READY at [`dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay`](https://vercel.com/boxont/mtdgc/dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay), deployed commit `de1b11f540bf1933dc78ec2487392a0024a15de2`. Current main `8a0a8a7de8bd3f8da87784c761d3472f05b06e0d` is three commits ahead; no production deployment for that main commit is recorded.
-- PR #22 has not been merged. This branch refresh did not merge to main or trigger a production deployment. The new milestone wording is not live. No production browser test of the new wording is claimed.
+- PR #22 has not been merged. This branch refresh did not merge to main or trigger a production deployment. The new milestone wording is not live. A non-destructive GET of [`/track-order`](https://mtdgc.com/track-order) on 10 November returned HTTP 200 and still displayed the old “Payment received” / screenshot wording, confirming the production UI has not changed. Both order-number and matching email/phone fields are visible and required. No order number or contact was entered and no form was submitted.
 - No production database write/migration, order/customer/payment access or mutation, credential, authentication, environment, DNS, hosting or billing change occurred. No supplier/customer contact or purchase occurred. Additional spend: **$0**.
 
 ### Next P0 task
