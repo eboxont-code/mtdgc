@@ -12,6 +12,7 @@ import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { WishlistButton } from "@/components/wishlist-button";
 import { getProductBySlug } from "@/lib/catalog.functions";
+import { productListingSeo } from "@/lib/listing-seo";
 import { PRICE_COMING_SOON, pricesHidden } from "@/lib/price-visibility";
 import { availabilityLabel, isPurchasableVariant, lowestPurchasableVariant, purchasableVariants, selectProductVariant } from "@/lib/product-availability";
 import { requiredProductFields } from "@/lib/product-fields";
@@ -39,19 +40,18 @@ export const Route = createFileRoute("/products/$slug")({
       return { meta: [{ title: "Product not found | MTDGC" }, { name: "robots", content: "noindex" }] };
     }
     const product = loaderData.product;
-    const url = `${SITE_URL}/products/${product.slug}`;
-    const title = product.seo_title?.trim() || `${product.name} price in Nepal | MTDGC`;
+    const { url, title, description } = productListingSeo(product);
     const image = product.image_url ? (product.image_url.startsWith("http") ? product.image_url : `${SITE_URL}${product.image_url}`) : undefined;
     const orderableVariants = purchasableVariants(product);
     const lowestPrice = lowestPurchasableVariant(product)?.price_minor ?? 0;
     return {
       meta: [
         { title },
-        { name: "description", content: product.seo_description },
+        { name: "description", content: description },
         { property: "og:title", content: title },
-        { property: "og:description", content: product.seo_description },
+        { property: "og:description", content: description },
       { name: "twitter:title", content: title },
-      { name: "twitter:description", content: product.seo_description  },
+      { name: "twitter:description", content: description },
         { property: "og:url", content: url },
         { property: "og:type", content: "product" },
         ...(image ? [
