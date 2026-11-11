@@ -1346,3 +1346,28 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 No production application code, database/schema, order/payment/customer record, storage object, RLS/grant, credential, environment, DNS, hosting or billing setting changed. No test order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
 
 **Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
+
+## 29.1. MT-0085 current production deployment follow-up — 11 November 2026
+
+**Task status:** MT-0085 · P0 · DONE AND LIVE. This follow-up refreshes the 9 November evidence in section 29 to the current production deployment; it does not change application code or production settings.
+
+### Current production source and deployment
+
+- Current main HEAD and Vercel production both point to bd87f8109727c9d6ad5ff08493a3929eadecf374. Deployment [dpl_ExLsbjk4dcToDg25tUFevUE6ACEh](https://vercel.com/boxont/mtdgc/ExLsbjk4dcToDg25tUFevUE6ACEh) is READY, target production, and has the mtdgc.com and www.mtdgc.com aliases.
+- The MT-0085 implementation PR [#20](https://github.com/eboxont-code/mtdgc/pull/20) was merged with PR head d669fd1414917cd6fd6de4d55313d720a437f3bd and merge commit a793dff15370f6bcd90673e4309e144cb597655d. GitHub's commit comparison confirms the merge commit is an ancestor of the current deployed commit (16 commits ahead, 0 behind). The intervening commits do not modify the MT-0085 admin proof functions or access-policy tests.
+- The original exact PR-head Quality run [42433657907](https://github.com/eboxont-code/mtdgc/actions/runs/42433657907) and exact merge-commit Quality run [42433747219](https://github.com/eboxont-code/mtdgc/actions/runs/42433747219) both passed. The merge run completed install, lint, unit tests, TypeScript checking and production build.
+
+### Current read-only Supabase checks
+
+- Project eaomkkswslqtfunkceuc is ACTIVE_HEALTHY. public.payment_proofs has RLS enabled; anon has no SELECT privilege and authenticated does. Its only SELECT policy is limited to the related order owner or an administrator.
+- The storage.objects SELECT policy for payment-proofs is bucket-scoped and limited to the related order owner or an administrator. The bucket remains private, with a 5 MiB file-size limit; allowed_mime_types is NULL, so the server-side image decoder remains the content-validation gate.
+- The deployed listPaymentsToVerify and getPaymentProofUrl functions both require a validated session and pass the administrator check before reading proof data. Signed proof URLs expire after 300 seconds.
+- Supabase's current security advisor still warns that public.has_role(uuid, app_role) is a SECURITY DEFINER function executable by anon and authenticated. Do not revoke it independently because existing RLS policies depend on it; resolve it only through the coordinated, cutover-gated function/policy change. The advisor also reports an informational RLS-enabled/no-policy finding for public.order_lookup_attempts; no change was made.
+
+### Live-check boundary and release record
+
+- A read-only GET of the public /admin route returned HTTP 200 but only the generic site shell; it did not exercise an authenticated payment-review session. No dedicated admin test account/order fixture is available, so no proof row, storage object or signed URL was requested. No customer/order/payment rows were read.
+- No production row, schema, RLS/grant, bucket, credential, authentication, environment, DNS, hosting or billing setting changed. No test order, payment, upload, supplier/customer contact or purchase occurred. Additional spend: $0.
+- Documentation PR [#51](https://github.com/eboxont-code/mtdgc/pull/51) remains open/draft. Its prior exact head e9eae63e303a95d05e600e6318544bba5e2ad9d3 failed Quality run [42584565602](https://github.com/eboxont-code/mtdgc/actions/runs/42584565602) before runner assignment (runner ID 0, zero steps). Current-main run [42938711528](https://github.com/eboxont-code/mtdgc/actions/runs/42938711528) failed at the same pre-runner stage. The plan update is not merged to main; refresh the documentation branch to current main and merge only after the exact latest Quality run passes.
+
+**Next P0 task:** MT-0102 — finish the customer-facing order milestone definitions in draft PR [#22](https://github.com/eboxont-code/mtdgc/pull/22). Its current recorded head a092803a17dbc00a07b213a0afd249ac98c33735 is 18 commits behind current main, and exact-head Quality run [42812983516](https://github.com/eboxont-code/mtdgc/actions/runs/42812983516) failed before runner assignment. Refresh it without rewriting history, then run the full quality workflow when a free runner is available; do not merge or claim the wording is live until the release is verified.
