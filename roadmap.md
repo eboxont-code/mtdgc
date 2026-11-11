@@ -5,6 +5,7 @@
 > This file is preserved as a dated implementation and verification history. Checkboxes below record the status claimed by each historical pack when it was written; they are not a second live TODO register. When an old pack conflicts with the Master Plan, use the Master Plan and refresh the implementation evidence before changing task status.
 
 ## 5 Nov ordered pack
+- [x] MT-0144: prominent saved-region warnings above desktop and mobile purchase actions plus gift-card region confirm; listing region data only, no invented markets; tests and 390px check passed, no overflow; not published.
 - [ ] MT-0188: existing plan URL remains the selection source; back-navigation and reload verification pending; not published.
 - [ ] MT-0189: product forms already render listing requirements only; restored and submitted fields now exclude unrelated keys; protected checkout contact fields and legacy cart-line cleanup skipped; verification pending; not published.
 - [x] MT-0185: client-side brand/name/game/denomination search and FF/PUBG/ML/MLBB/NFX aliases; URL state retained; rule tests and real FF search passed; not published.
