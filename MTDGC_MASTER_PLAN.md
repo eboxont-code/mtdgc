@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.2 · 8 November 2026
+**Version:** 2.6 · 10 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -226,10 +226,10 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** The order state is consistent from checkout to delivery, with a complete audit trail and useful customer visibility.
 
 - [x] **MT-0101 · P0 · DONE** — Map all 13 live order-status enum values, current application writers, generic administrator targets, legacy display aliases and observed transitions; confirm that neither application nor database enforces a complete transition graph. Evidence: section 30 and Data Architecture section 4; current-main source inspection plus read-only production enum, aggregate status-count, column-type, proof-status constraint and order-trigger queries on 8 November 2026.
-- [ ] **MT-0102 · P0 · TODO** — Ensure Payment received, Verified, Processing and Delivered have precise operational definitions.
-- [ ] **MT-0103 · P0 · TODO** — Add explicit Cancelled, Failed, Refunded and Action required states where applicable.
-- [ ] **MT-0104 · P0 · TODO** — Prevent invalid status jumps, such as Pending directly to Delivered without payment verification.
-- [ ] **MT-0105 · P0 · TODO** — Verify guest order tracking requires the order number plus the matching email or phone.
+- [!] **MT-0102 · P0 · BLOCKED** — Customer-facing milestone definitions and shared labels are implemented in draft PR [#22](https://github.com/eboxont-code/mtdgc/pull/22). The code-bearing revision bed6938ee181577f5b61d0d7062356e5d8d25b74 is based on current main 8a0a8a7de8bd3f8da87784c761d3472f05b06e0d; subsequent commits on the same branch are documentation-only verification updates. The exact-head Quality run for the latest recorded documentation revision [42812778489](https://github.com/eboxont-code/mtdgc/actions/runs/42812778489) failed before runner startup (runner ID 0, zero steps/no logs). Its exact-head preview reached READY and passed a non-destructive /track-order smoke check, but production still shows the old wording. Keep PR #22 draft until the full repository quality workflow passes; see sections 35–36 and the PR's current status.
+- [!] **MT-0103 · P0 · BLOCKED** — Existing `cancelled`, `failed` and `refunded` enum values are present; deciding whether a distinct `action_required` state is needed is an owner workflow/product decision. A new enum value also requires the approved Supabase cutover/migration gate. Unblock with owner-approved action-required use cases and migration approval; do not add a status by assumption.
+- [!] **MT-0104 · P0 · BLOCKED** — The generic admin updater currently accepts seven target statuses from any existing state. Safe enforcement requires an owner-approved transition matrix covering cancellation, refunds, overrides and fulfilment, plus independent payment-settlement evidence under MT-0086. Unblock with the approved transition policy and settlement evidence; do not invent restrictions that could block legitimate operations.
+- [!] **MT-0105 · P0 · BLOCKED** — Guest contact matching is implemented in draft PR #32, but exact-head Quality run [42465628668](https://github.com/eboxont-code/mtdgc/actions/runs/42465628668) failed before runner startup (zero steps); full repository checks remain unavailable. Revisit when a free runner executes the workflow; do not repeat unchanged retries.
 - [ ] **MT-0106 · P0 · TODO** — Ensure account order history and guest tracking show the same canonical status.
 - [ ] **MT-0107 · P1 · TODO** — Record a timestamp and actor for every status transition.
 - [ ] **MT-0108 · P1 · TODO** — Show customers what happens next at each stage and whether they need to act.
@@ -251,7 +251,7 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** Orders are delivered accurately and on time, while manual checks are gradually replaced only by safe, tested automation.
 
 - [ ] **MT-0121 · P0 · TODO** — Document the current manual fulfilment steps for each active product family.
-- [ ] **MT-0122 · P0 · TODO** — Create a pre-fulfilment checklist for player ID, zone, server, region, denomination and email.
+- [!] **MT-0122 · P0 · BLOCKED** — The order-time checklist is prepared in draft PR #25 with six focused tests and a strict helper type check, but exact-head Quality run [42450532929](https://github.com/eboxont-code/mtdgc/actions/runs/42450532929) failed before runner startup (zero steps); full repository checks remain unavailable. Revisit when a free runner executes the workflow; no production records or schema were changed.
 - [ ] **MT-0123 · P0 · TODO** — Require a second confirmation for irreversible top-ups and code releases.
 - [ ] **MT-0124 · P0 · TODO** — Record the supplier transaction or redemption reference for each completed order.
 - [ ] **MT-0125 · P0 · TODO** — Capture delivery evidence and attach it to the correct order.
@@ -530,7 +530,7 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-task register are authoritative.
+MT-0102 remains BLOCKED. PR #22 has been refreshed to current main `8a0a8a7` via merge commit `baa23372`, preserving published history. Its last exact-head Quality run `42554218686` failed before any step started; current-main Quality run `42735643135` failed at the same pre-step stage. MT-0105 is next P0: its guest-tracking behaviour is already present on production commit `de1b11f`, while documentation PR #46 and optional helper-consolidation PR #32 remain open/draft; exact-head runs `42660927912` and `42632043757` failed before startup. MT-0122 PR #52 also remains blocked by exact-head run `42602353294`, which failed before startup. Do not retry unchanged failures or bypass the quality gate. Task statuses in the 308-task register are authoritative.
 
 | Order | Task | Status |
 |---:|---|---|
@@ -543,7 +543,7 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 7 | MT-0086 — require independent payment settlement matching before fulfilment | BLOCKED; no bank-statement feed, provider callback or owner-approved manual settlement evidence is available |
 | 8 | MT-0087 — prevent duplicate transaction references/screenshots across orders | BLOCKED; concurrency-safe uniqueness requires the approved Supabase cutover/migration gate |
 | 9 | MT-0101 — map current order statuses and observed transition paths | DONE; 13-value enum, application writers, UI mappings, production aggregate counts and lack of transition enforcement are documented in section 30 and Data Architecture section 4 |
-| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | NEXT P0; can be documented from the current payment-review code and existing operational evidence without production writes |
+| 10 | MT-0105 — verify guest order tracking requires the order number plus matching saved email or phone | NEXT P0; the live `/track-order` behaviour is already verified on production commit `de1b11f` and requires both fields. Documentation PR [#46](https://github.com/eboxont-code/mtdgc/pull/46) remains open/draft and its exact-head run `42660927912` failed before startup. Optional helper-consolidation PR [#32](https://github.com/eboxont-code/mtdgc/pull/32) is 3 commits behind current main; its exact-head run `42632043757` also failed before startup. Do not repeat code work; refresh and release the documentation only after the full quality gate can run. |
 | 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 
@@ -1361,4 +1361,181 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 
 No production application code, database/schema, order/payment/customer record, storage object, RLS/grant, credential, environment, DNS, hosting or billing setting changed. No test order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
 
-**Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
+**Next eligible P0 task:** MT-0105 — reconcile the existing guest order-tracking implementation in draft PR #5 against current main. MT-0102 is blocked only on a successful free GitHub Actions quality run for its clean main-based PR #22.
+
+## 32. MT-0102 customer-facing order milestone semantics — 8 November 2026
+
+**Task:** MT-0102 · P0 · BLOCKED pending full quality verification. [PR #22](https://github.com/eboxont-code/mtdgc/pull/22) is open and draft on a clean branch based directly on current main commit `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`. The previous draft PR [#4](https://github.com/eboxont-code/mtdgc/pull/4) is based on an obsolete MT-0101/MT-0085 stack and is not suitable for direct merge; its focused changes were reapplied to a clean branch based on current main commit `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`.
+
+### Operational definitions from observed behaviour
+
+- **Payment proof received** maps only to `payment_submitted`. Uploading a screenshot/reference starts manual review and does not prove that funds reached MTDGC.
+- **Verified by staff** maps to `verified`. It is a manual administrator decision; no independent bank/provider settlement feed is connected.
+- **Processing** maps to `processing`. It is a manual staff update, not a supplier API signal.
+- **Delivered** maps to `delivered`, with legacy aliases `fulfilled` and `completed`. It is staff-marked; no delivery-evidence record or email dispatch is implied.
+- Legacy `paid` is shown separately as “Legacy payment status” and is excluded from the four-step payment-proof progress sequence.
+
+### Implementation
+
+- Added shared `ORDER_STATUS_LABEL` definitions in `src/lib/format.ts`.
+- Updated guest tracking, order detail and authenticated order history to use the same status labels.
+- Added milestone explanations to the order-detail page.
+- Added an explicit notice for legacy `paid` status.
+- Kept the work descriptive only; no enum, transition rule, payment, fulfilment or database behaviour was changed.
+
+### Regression tests
+
+Added `src/lib/order-status.test.ts` with five tests covering:
+1. Proof submission is not described as money received.
+2. Legacy `paid` is not grouped with proof submission or settlement.
+3. `verified` is explicitly staff-marked, not independent settlement.
+4. `processing` is manual, not a supplier signal.
+5. `delivered` is staff-marked and does not promise email dispatch.
+
+### Verification boundary
+
+The production `public.order_status` enum was queried read-only on 8 November 2026 and returned the 13 labels documented in section 30. No order/customer/payment rows were queried. Current main Quality run [42437058568](https://github.com/eboxont-code/mtdgc/actions/runs/42437058568) passed on `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`. A Node 22.16 scratch harness executed the five focused assertions against the branch's status definitions and passed 5/5; this is limited test evidence, not a substitute for the repository's Bun suite, ESLint, typecheck or production build. The implementation-head Quality run [42441262247](https://github.com/eboxont-code/mtdgc/actions/runs/42441262247) and the later plan-head Quality run [42441579039](https://github.com/eboxont-code/mtdgc/actions/runs/42441579039) both failed before runner startup (runner ID 0, zero steps, no downloadable logs). One retry of the first run also failed before runner startup. The current plan reconciliation commit is documentation-only; no successful full CI has been observed for the PR's latest head. No production database or customer/order/payment data was changed.
+
+### Merge, deployment and live verification
+
+- PR #22 remains OPEN/DRAFT and is not merged. The implementation head `b6890aede08473e39b29888e7061f9c1128a0bc8` was 8 commits ahead and 0 behind current main; the subsequent plan reconciliation commit changes documentation only and still requires a successful exact-head workflow. There are no submitted reviews or unresolved review threads. Main is unprotected with no required status checks, but the failed Quality workflow is not bypassed.
+- Vercel created READY preview deployments for intermediate branch commits `88bfb432f8e288db49513c0a142ad7d7f494761b` and `e895be1e554d5862a5e245c35eb42e14df60f8ea`; neither represents the final PR head. The Vercel bot reports `api-deployments-free-per-day` on PR #22.
+- Latest production deployment remains READY at [`dpl_7A2mKAuhBY6nkW2d4FrZGDGQDVUE`](https://vercel.com/boxont/mtdgc/7A2mKAuhBY6nkW2d4FrZGDGQDVUE), deployed SHA `3de811c7cfce91eb262cf79523d8053995bfb777`. No MT-0102 production deployment exists and no new behaviour is live. No production smoke test of the new labels was claimed.
+- No merge or production deployment was attempted. Additional spend: $0.
+
+### Related tasks and next action
+
+- MT-0103 is BLOCKED on the owner decision whether a distinct `action_required` status is needed; any new enum value also needs the approved migration gate.
+- MT-0104 is BLOCKED on the owner-approved transition matrix and independent settlement evidence under MT-0086.
+- MT-0105 is next P0 and already has draft PR #5; reconcile that branch against current main rather than repeating its existing implementation.
+
+
+
+## 33. MT-0102 current-main refresh and verification — 9 November 2026
+
+**Task:** MT-0102 · P0 · BLOCKED pending full quality verification and release. PR [#22](https://github.com/eboxont-code/mtdgc/pull/22) remains OPEN/DRAFT and targets `main`. The existing branch was advanced without rewriting published history: a merge commit `6f2b14a9a8fe7d1309256956cc0d1fe8fb0ac84c` has the previous PR head `5caac222b49cb2e2d5ac9dfd60c7bca092bbed98` as first parent and current main `de1b11f540bf1933dc78ec2487392a0024a15de2` as second parent. The branch now includes all current main changes; the PR base SHA is `de1b11f540bf1933dc78ec2487392a0024a15de2`.
+
+### Exact-head verification
+
+- Exact PR head: `6f2b14a9a8fe7d1309256956cc0d1fe8fb0ac84c`.
+- GitHub Actions Quality run [42553963551](https://github.com/eboxont-code/mtdgc/actions/runs/42553963551) completed as failure before the job started. The job has no steps and no downloadable logs; lint, the full Bun suite, project typecheck and production build did not execute. This is not an observed application test failure. No unchanged retry was made.
+- Vercel preview [deployment `dpl_jXCRvhGN5VJsiuNCT9MRv5wCwdk9`](https://vercel.com/boxont/mtdgc/jXCRvhGN5VJsiuNCT9MRv5wCwdk9) reached READY for this exact head, target `null`; preview URL: https://mtdgc-aqglr6h6k-boxont.vercel.app. A live HTTP smoke test of the preview was unavailable from the current network environment, so READY is reported only as a build/deployment status.
+- No submitted reviews or unresolved review threads were present. The repository main branch is unprotected and has no required status checks, but the project's quality gate is not bypassed.
+
+### Production boundary
+
+- Current production deployment [`dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay`](https://vercel.com/boxont/mtdgc/4njU9xzd9RmCkGuYeQBDTLZV9Nay) is READY on exact main commit `de1b11f540bf1933dc78ec2487392a0024a15de2`.
+- PR #22 is not merged. No production deployment was triggered; the milestone wording is not live.
+- No production database, order, payment, customer, storage, RLS, credentials, environment, DNS, hosting or billing changes occurred. No order lookup or form submission was made. Additional spend: $0.
+
+### Next P0 candidates
+
+- MT-0105 remains blocked by exact-head Quality run [42465628668](https://github.com/eboxont-code/mtdgc/actions/runs/42465628668), which failed before runner startup.
+- MT-0122 remains blocked by exact-head Quality run [42450532929](https://github.com/eboxont-code/mtdgc/actions/runs/42450532929), which failed before runner startup.
+- Resume the next eligible P0 task only when a free runner can execute the full quality workflow or new independent evidence/access changes a blocker.
+
+## 34. MT-0102 current-main refresh and release-gate reconciliation — 10 November 2026
+
+**Task:** MT-0102 · P0 · BLOCKED pending full exact-head quality verification and release. [PR #22](https://github.com/eboxont-code/mtdgc/pull/22) remains OPEN/DRAFT and targets `main`. The branch was refreshed without rewriting published history: merge commit [`baa23372e7ff68351900065b374bde1e5edce5aa`](https://github.com/eboxont-code/mtdgc/commit/baa23372e7ff68351900065b374bde1e5edce5aa) has previous PR head `0ad13fd38cbe020fc4efe21d4058fabac76193ae` as first parent and current main `8a0a8a7de8bd3f8da87784c761d3472f05b06e0d` as second parent. Main's three commits since the prior base touched `AGENTS.md`, product-region presentation/helper/test files, preview-auth storage and the product route; none overlap the seven MT-0102 files, so the refreshed tree preserves both sets of changes.
+
+### Operational definitions retained
+
+- `payment_submitted` means payment proof received for manual review; a screenshot/reference submission is not evidence that funds reached MTDGC.
+- `verified` means an administrator manually marked the proof/order verified. No independent bank-statement feed or provider settlement callback is connected.
+- `processing` is a manual staff status, not a supplier API signal.
+- `delivered` (legacy aliases `fulfilled` and `completed`) is staff-marked; the status setter does not require a delivery-evidence record or prove an email was sent.
+- Legacy `paid` remains separate from proof submission and is not independent settlement confirmation.
+- Shared labels are used across guest tracking, the order-detail page and authenticated order history. No enum, transition, payment or database behaviour was changed.
+
+### Schema and verification evidence
+
+- Read-only Supabase table metadata for project `eaomkkswslqtfunkceuc` confirms `orders.status` uses the existing 13-value `order_status` enum; `order_status_events.status` is text; and `payment_proofs.status` is constrained to `submitted`, `verified` or `rejected`. No production order, customer, payment or proof rows were queried.
+- The five focused MT-0102 assertions previously passed in the Node 22.16 scratch harness (5/5). This is limited focused evidence, not a substitute for the repository's full quality workflow.
+- Exact previous PR-head Quality run [42554218686](https://github.com/eboxont-code/mtdgc/actions/runs/42554218686) failed before the job started; the only job has zero steps and no logs. Current-main Quality run [42735643135](https://github.com/eboxont-code/mtdgc/actions/runs/42735643135) failed at the same pre-step stage. The latest runs for other PRs show the same runner-startup pattern. Full Bun tests, lint, repository-wide typecheck and production build did not execute on these revisions. No unchanged retry was made.
+- After the branch refresh and first plan reconciliation, exact PR checkpoint `91c8589cc661be8d83459b8bd434ed181a70a1da` received Quality run [42753610016](https://github.com/eboxont-code/mtdgc/actions/runs/42753610016), which also failed before the job started; its only job `129622725256` has zero steps and no logs. Vercel preview deployment [`dpl_GFyKXtyzQ9ZwPRAMoLX2V8KRrrhm`](https://vercel.com/boxont/mtdgc/GFyKXtyzQ9ZwPRAMoLX2V8KRrrhm) is still BUILDING with target `null` (preview only); it is not READY and has not been smoke-tested.
+- The repository README requires the full quality workflow (frozen install, lint, tests, typecheck and production build). Main is unprotected and has no required status checks, but that does not waive the documented project quality gate. PR #22 has no submitted reviews or unresolved review threads and remains draft.
+
+### Deployment and production boundary
+
+- Vercel project `mtdgc` is Git-linked to `eboxont-code/mtdgc` under the Hobby plan. Merging to main uses the existing production deployment integration.
+- Latest production deployment is READY at [`dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay`](https://vercel.com/boxont/mtdgc/dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay), deployed commit `de1b11f540bf1933dc78ec2487392a0024a15de2`. Current main `8a0a8a7de8bd3f8da87784c761d3472f05b06e0d` is three commits ahead; no production deployment for that main commit is recorded.
+- PR #22 has not been merged. This branch refresh did not merge to main or trigger a production deployment. The new milestone wording is not live. A non-destructive GET of [`/track-order`](https://mtdgc.com/track-order) on 10 November returned HTTP 200 and still displayed the old “Payment received” / screenshot wording, confirming the production UI has not changed. Both order-number and matching email/phone fields are visible and required. No order number or contact was entered and no form was submitted.
+- No production database write/migration, order/customer/payment access or mutation, credential, authentication, environment, DNS, hosting or billing change occurred. No supplier/customer contact or purchase occurred. Additional spend: **$0**.
+
+### Next P0 task
+
+MT-0105 remains next in the P0 queue. Its existing live guest-tracking behaviour is already verified in the production deployment noted above; the remaining canonical documentation update is in PR #46, while PR #32 is an optional helper consolidation. Both exact-head quality runs failed before startup. Do not repeat implementation or merge either draft until a free runner successfully executes the required full quality workflow. MT-0122 is the next independent implementation candidate after that, but its exact-head run is also blocked as recorded above.
+
+
+
+## 32. MT-0102 immediate run — 10 November 2026
+
+- Rechecked the exact current PR #22 head `cd55da01ffacf924ce2a9e9dd293f04232a83f29`. The five focused regression cases and current `src/lib/format.ts` were fetched from that same head.
+- Five source-level checks passed: payment-proof wording is distinct from money received; legacy `paid` is excluded from the proof-review steps; verification is explicitly staff-marked without independent settlement confirmation; processing is a manual update rather than a supplier signal; and delivered is staff-marked without promising an email.
+- These are direct source assertions only. The five Node test cases are present, but this run did not execute the repository test runner.
+- Exact-head GitHub Actions Quality run [42753669986](https://github.com/eboxont-code/mtdgc/actions/runs/42753669986) failed before producing job steps or logs. Its only job, “Lint, test, typecheck and build”, has no step list. Therefore lint, the test suite, typecheck and production build did not execute. This does not establish an application-code failure.
+- The current Vercel status remains blocked by the free daily deployment allowance. No new production deployment exists for this head. The PR remains open/draft and unmerged pending a successful exact-head quality run and eligible preview/release evidence.
+- No production database, customer, order, payment, credentials, hosting or billing settings were changed. No test order was created. Additional spend: **$0**.
+
+
+## 35. MT-0102 exact-head preview and runner verification — 10 November 2026
+
+**Task:** MT-0102 · P0 · BLOCKED pending the repository's full quality checks and production release. This is a verification/documentation update to the existing [PR #22](https://github.com/eboxont-code/mtdgc/pull/22); no duplicate implementation or new PR was created.
+
+### Current branch and review state
+
+- Canonical main is 8a0a8a7de8bd3f8da87784c761d3472f05b06e0d. PR #22 targets main, has zero commits behind main, and its exact inspected head before this documentation update was bed6938ee181577f5b61d0d7062356e5d8d25b74.
+- The seven-file PR diff contains the shared status labels, five focused regression tests, the guest tracking/order detail/account order views, and the master-plan/data-architecture evidence. The source change preserves the 13-value database enum and does not alter payment, transition or fulfilment behaviour.
+- PR #22 was OPEN and DRAFT, mergeable, with no submitted reviews and no unresolved review threads. Main reports protected=false and no required status checks, but the README's full Quality workflow remains a project release gate.
+
+### Exact-head quality and workflow investigation
+
+- Exact-head Quality run [42803122668](https://github.com/eboxont-code/mtdgc/actions/runs/42803122668) ran on bed6938ee181577f5b61d0d7062356e5d8d25b74 and failed before any workflow step. Its only job 129785421748 has runner_id=0, an empty step list and no runner log. Therefore Bun tests, lint, repository-wide typecheck and the CI production build did not execute; this is not an observed application-test failure.
+- Current-main Quality run [42735643135](https://github.com/eboxont-code/mtdgc/actions/runs/42735643135) shows the same pre-runner failure: its only job has runner ID 0 and zero steps.
+- Inspected .github/workflows/quality.yml: it has the expected Ubuntu runner, checkout, Bun setup, frozen install, lint, unit tests, typecheck and production build steps. No repository workflow misconfiguration was identified that explains a job failing before runner assignment. Do not retry unchanged until runner availability changes or new diagnostic evidence appears.
+- The five MT-0102 regression tests remain present and had previously passed in the Node 22.16 focused scratch harness. That limited result is not a substitute for the full repository Quality workflow.
+
+### Preview and live verification
+
+- Vercel project mtdgc is Git-linked to eboxont-code/mtdgc under the Hobby plan. Exact-head preview deployment [dpl_DkTMeRjUQaEW1fnimjXCGopHV1Kn](https://vercel.com/boxont/mtdgc/DkTMeRjUQaEW1fnimjXCGopHV1Kn) is READY for exact commit bed6938ee181577f5b61d0d7062356e5d8d25b74, target null (preview only), with no alias error.
+- A non-destructive GET of the preview /track-order returned HTTP 200. Its rendered page and loaded status-format bundle contain Payment proof received, Verified by staff, Processing and Delivered, and the explanation that a screenshot/reference does not confirm funds reached the account. The preview does not contain the old generic Payment received wording.
+- A non-destructive GET of production https://mtdgc.com/track-order also returned HTTP 200 but still contains the old Payment received and screenshot wording. This confirms MT-0102 is not live.
+- Latest production deployment [dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay](https://vercel.com/boxont/mtdgc/dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay) is READY on de1b11f540bf1933dc78ec2487392a0024a15de2. Main is at 8a0a8a7de8bd3f8da87784c761d3472f05b06e0d; no production deployment for current main or the MT-0102 PR exists. Merging to main triggers the existing Git-linked Vercel production workflow, so no merge is eligible until the quality gate passes.
+
+### Read-only Supabase schema confirmation
+
+- Project eaomkkswslqtfunkceuc is ACTIVE_HEALTHY on PostgreSQL 17.11.0.003.
+- A read-only query of pg_type/pg_enum reconfirmed the existing 13 order_status values: pending, processing, paid, failed, cancelled, refunded, fulfilled, completed, pending_payment, payment_submitted, verified, rejected and delivered.
+- No migration, schema, row, order, payment, customer, proof, credential, authentication, environment, DNS, hosting or billing change was made. No order lookup was submitted and no test order/payment was created.
+
+### Next P0 task and safety
+
+- MT-0105 remains next in the P0 queue. Its guest tracking behaviour is already live; the documentation-only verification is in PR [#46](https://github.com/eboxont-code/mtdgc/pull/46), while PR [#32](https://github.com/eboxont-code/mtdgc/pull/32) is an optional helper consolidation. Their recorded exact-head quality runs failed before runner startup; do not repeat the implementation or merge either draft until the quality gate can run.
+- MT-0122 PR [#52](https://github.com/eboxont-code/mtdgc/pull/52) remains the next independent checklist implementation after MT-0105 and is also blocked by the same runner-startup issue. MT-0123 remains dependent on MT-0122; supplier-evidence tasks remain blocked for the documented reasons above.
+- Additional spend: $0. No production deployment was triggered and no production data was changed.
+
+
+## 36. MT-0102 latest documentation-head preview and quality check — 10 November 2026
+
+**Task:** MT-0102 · P0 · BLOCKED pending the full repository quality workflow and production release. This is a documentation-only reconciliation of the existing PR #22; the five application-source/test files remain unchanged.
+
+### Exact revision and checks
+
+- The revision inspected immediately before this plan update was 5f70858c2f1f87c967b678f8dc361c0da32b5ec8, a documentation-only update after the code-bearing revision bed6938ee181577f5b61d0d7062356e5d8d25b74. PR #22 remains based on current main and has no commits behind it.
+- Exact-head Quality run [42812778489](https://github.com/eboxont-code/mtdgc/actions/runs/42812778489) failed before the job started. Its only job 129818136443 has runner_id=0 and zero steps; no lint, unit tests, typecheck or CI build ran. The main run 42735643135 has the same pre-runner failure.
+- The Vercel build for this exact revision completed successfully: the existing locked Bun install ran, the Vite/Nitro build completed, and Vercel began deploying the generated output. This is preview-build evidence, not a substitute for the GitHub Quality workflow.
+
+### Preview smoke check
+
+- Preview deployment [dpl_F4piSqNMQwzo2nUH68bjYgKrfgeK](https://vercel.com/boxont/mtdgc/F4piSqNMQwzo2nUH68bjYgKrfgeK) reached READY for revision 5f70858c2f1f87c967b678f8dc361c0da32b5ec8, target null (preview only), with no alias error.
+- A non-destructive GET of the preview /track-order returned HTTP 200. The page rendered the new Payment proof received, Verified by staff, Processing and Delivered copy; the old generic Payment received wording was absent.
+- Production /track-order returned HTTP 200 but still rendered the old payment-screenshot wording. Production deployment dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay remains READY on commit de1b11f540bf1933dc78ec2487392a0024a15de2; the milestone change is not live.
+
+### Release decision and safety
+
+- PR #22 is OPEN/DRAFT, mergeable, has no submitted reviews or unresolved review threads, and targets main. Main is unprotected, but the README's full Quality workflow is still a project gate. The exact-head runner failure is not an application test result and cannot be repaired in the repository workflow; no misconfiguration was found.
+- Merging to main would trigger the existing Git-linked Vercel production workflow. No merge was attempted because the full exact-head quality gate has not passed. No production deployment was triggered.
+- Supabase production enum evidence remains unchanged: 13 existing order_status values, with no schema migration required for these descriptive labels. No production row, order, payment, customer or proof data was queried or changed.
+- No production settings, authentication, credentials, environment, DNS, hosting or billing changes; no test order/payment, supplier/customer contact or purchase. Additional spend: $0.
+
+**Next P0:** MT-0105 remains the next queue item. Existing live guest-tracking behaviour is already present; documentation PR #46 and optional helper-consolidation PR #32 remain blocked by their recorded exact-head runner failures. Do not repeat their implementation. MT-0122 is the next independent candidate after MT-0105, with its own existing draft PR #52.

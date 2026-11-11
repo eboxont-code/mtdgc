@@ -79,7 +79,7 @@ These are observed code paths, not an approved business state machine.
 
 The enum restricts valid status labels only. The live database has no non-internal `public.orders` transition trigger or transition-specific constraint. The dedicated proof submission/review actions have conditional status checks, but the generic admin updater accepts its seven target values from any existing state. Do not treat this observed map as an approved allowed-transition policy; MT-0104 owns transition enforcement after the business rules and payment prerequisites are resolved.
 
-The customer progress helper groups `payment_submitted`/`paid`, `verified`, `processing`, and `delivered`/`fulfilled`/`completed` into four steps. The order page and tracking page retain individual labels for the legacy values. MT-0102/MT-0106 own the operational wording and display consistency work.
+The customer progress helper uses `payment_submitted` alone for the payment-proof step; legacy `paid` is excluded from the progress sequence and displayed separately as a legacy/manual status. The shared `ORDER_STATUS_LABEL` map is used by guest tracking, the order-detail page and authenticated order history. MT-0106 remains responsible for its separate end-to-end parity acceptance check.
 
 ### 4.6 Payment-proof image ingestion
 
@@ -88,6 +88,18 @@ The customer progress helper groups `payment_submitted`/`paid`, `verified`, `pro
 - Apply EXIF orientation and store a lossless WebP re-encoding. Default Sharp output strips source metadata. The normalized output must remain within the existing 5 MiB storage limit.
 - The server derives the `.webp` storage extension and `image/webp` content type from the normalized result; the browser cannot choose the stored MIME or extension.
 - The production `payment-proofs` bucket remains private and unchanged. Its existing storage-level 5 MiB cap is retained; application-side server validation remains the MIME/content gate because the bucket's `allowed_mime_types` setting is NULL. Only the trusted server upload path writes proof objects.
+
+### 4.7 Customer-facing order milestone definitions
+
+| Customer-facing milestone | Application status | Operational meaning | Explicit limitation |
+|---|---|---|---|
+| Payment proof received | `payment_submitted` | A customer has submitted a screenshot/reference for manual review. | Submission is not proof that funds reached the receiving account. |
+| Verified by staff | `verified` | An administrator has manually marked the proof/order verified. | No independent bank/provider settlement feed is connected; the label is not automated settlement confirmation. |
+| Processing | `processing` | Staff has manually marked fulfilment as in progress. | It is not a live supplier/API status or delivery confirmation. |
+| Delivered | `delivered` (legacy aliases `fulfilled`, `completed`) | Staff has manually marked the order delivered. | No delivery-evidence record or email dispatch is implied by the status. |
+| Legacy payment status | `paid` | A legacy/manual target of the generic administrator status updater. | It is not part of the proof-submission progress step and does not independently confirm settlement. |
+
+The UI uses a shared status-label map across guest tracking, the order-detail page and authenticated order history. Legacy `paid` remains visible with an explanatory notice rather than being presented as payment proof received or as independent settlement confirmation. These are descriptive labels only; MT-0104 owns any future transition enforcement.
 
 ## 5. Guest Checkout Architecture
 - **No Account Required**: Orders are created with `user_id = NULL`.
