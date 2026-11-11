@@ -126,3 +126,21 @@ The customer progress helper groups `payment_submitted`/`paid`, `verified`, `pro
 - The administrator payment-review queue and signed proof-URL function require a validated Supabase session and an exact successful administrator-role result before any proof lookup or signed URL creation. Signed URLs expire after 300 seconds.
 - `has_role` remains a SECURITY DEFINER function that Supabase's advisor reports as executable by anon/authenticated. Treat its role-membership disclosure as a separate issue; change function execution and dependent policies only through the approved coordinated Supabase migration gate.
 - Guest order access is mediated by server-side order access checks and is not a direct proof-row/object RLS grant. Cross-customer order lookup/contact-fallback isolation remains tracked separately under MT-0162.
+
+## 9. Customer-facing order-status labels
+
+The customer-facing status line uses one shared `orderStatusLabel` helper in authenticated order history, public guest tracking and the single-order page. It does not change the stored enum or the underlying order state.
+
+| Stored order status | Canonical customer label |
+|---|---|
+| `pending`, `pending_payment` | Waiting for payment |
+| `payment_submitted`, `paid` | The current first `ORDER_STEPS` title (currently “Payment received”) |
+| `verified` | The current second `ORDER_STEPS` title (currently “Verified”) |
+| `processing` | The current third `ORDER_STEPS` title (currently “Processing”) |
+| `delivered`, `fulfilled`, `completed` | The current fourth `ORDER_STEPS` title (currently “Delivered”) |
+| `rejected` | Rejected |
+| `failed` | Failed |
+| `cancelled` | Cancelled |
+| `refunded` | Refunded |
+
+The four progress-step groups continue to come from `ORDER_STEPS`; explanatory next-action text continues to come from `ORDER_NOTICE`. Unknown future values remain visible as their stored label. This keeps the three customer views consistent without introducing a new business state machine or implying that a manual status proves payment settlement, supplier acceptance or redemption.

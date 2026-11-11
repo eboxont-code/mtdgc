@@ -226,11 +226,11 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** The order state is consistent from checkout to delivery, with a complete audit trail and useful customer visibility.
 
 - [x] **MT-0101 · P0 · DONE** — Map all 13 live order-status enum values, current application writers, generic administrator targets, legacy display aliases and observed transitions; confirm that neither application nor database enforces a complete transition graph. Evidence: section 30 and Data Architecture section 4; current-main source inspection plus read-only production enum, aggregate status-count, column-type, proof-status constraint and order-trigger queries on 8 November 2026.
-- [ ] **MT-0102 · P0 · TODO** — Ensure Payment received, Verified, Processing and Delivered have precise operational definitions.
-- [ ] **MT-0103 · P0 · TODO** — Add explicit Cancelled, Failed, Refunded and Action required states where applicable.
-- [ ] **MT-0104 · P0 · TODO** — Prevent invalid status jumps, such as Pending directly to Delivered without payment verification.
-- [ ] **MT-0105 · P0 · TODO** — Verify guest order tracking requires the order number plus the matching email or phone.
-- [ ] **MT-0106 · P0 · TODO** — Ensure account order history and guest tracking show the same canonical status.
+- [!] **MT-0102 · P0 · BLOCKED** — Clarify Payment received, Verified, Processing and Delivered from the actual order/proof writers. Customer wording and regression tests are in draft PR [#59](https://github.com/eboxont-code/mtdgc/pull/59), but the latest exact-head Quality run [42985927618](https://github.com/eboxont-code/mtdgc/actions/runs/42985927618) on head `760f2aaf8f56c6ecf6fc8f5e7ea99e908f239f0c` failed before runner startup (runner ID 0; no steps or logs). Full lint, Bun tests, typecheck and build did not run. Its Vercel preview is READY but is not production. Branch-protection/ruleset requirements remain unreadable to the connected integration (403). Revisit only after a free runner completes the full workflow and release requirements can be verified.
+- [!] **MT-0103 · P0 · BLOCKED** — Decide the operational meaning of legacy Cancelled, Failed and Refunded states and whether Action required is needed. This is an owner business decision; any new database enum value also depends on the approved Boxont-controlled Supabase cutover. Do not invent a state or run a production migration.
+- [!] **MT-0104 · P0 · BLOCKED** — Owner-approved transition rules are not recorded, and MT-0086 still lacks independent settlement evidence (bank statement feed, provider callback or owner-approved manual match). Do not invent a transition graph or treat a screenshot as settlement proof.
+- [!] **MT-0105 · P0 · BLOCKED** — The live order-number plus saved-contact check is present on current main, but the shared-helper/regression-test refresh remains in draft PR [#32](https://github.com/eboxont-code/mtdgc/pull/32) (head `7e5a2e8df604b602d32bf9424eb61ebad3a37a9e`, based on older main); exact-head Quality run [42632043757](https://github.com/eboxont-code/mtdgc/actions/runs/42632043757) failed before any step started. The live-verification documentation is also in draft PR [#46](https://github.com/eboxont-code/mtdgc/pull/46); its exact-head Quality run [42660927912](https://github.com/eboxont-code/mtdgc/actions/runs/42660927912) failed before runner startup. Do not duplicate the live behaviour; finish the existing verification work when a free runner completes the workflow.
+- [~] **MT-0106 · P0 · IN PROGRESS** — Unify the customer-facing status label for all persisted order states across authenticated order history, guest tracking and the single-order page. Source audit and regression coverage are recorded in section 30.1; exact-head checks and production verification remain pending.
 - [ ] **MT-0107 · P1 · TODO** — Record a timestamp and actor for every status transition.
 - [ ] **MT-0108 · P1 · TODO** — Show customers what happens next at each stage and whether they need to act.
 - [ ] **MT-0109 · P1 · TODO** — Allow staff to add internal notes without exposing them to customers.
@@ -543,9 +543,13 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 7 | MT-0086 — require independent payment settlement matching before fulfilment | BLOCKED; no bank-statement feed, provider callback or owner-approved manual settlement evidence is available |
 | 8 | MT-0087 — prevent duplicate transaction references/screenshots across orders | BLOCKED; concurrency-safe uniqueness requires the approved Supabase cutover/migration gate |
 | 9 | MT-0101 — map current order statuses and observed transition paths | DONE; 13-value enum, application writers, UI mappings, production aggregate counts and lack of transition enforcement are documented in section 30 and Data Architecture section 4 |
-| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | NEXT P0; can be documented from the current payment-review code and existing operational evidence without production writes |
-| 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
-| 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
+| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | BLOCKED; PR #59 is draft and the latest exact-head Quality run failed before runner startup; preview only; branch-protection/ruleset requirements unreadable |
+| 11 | MT-0103 — decide legacy Cancelled/Failed/Refunded and whether Action required is needed | BLOCKED; owner business decision and possible Supabase cutover required |
+| 12 | MT-0104 — prevent invalid order-status jumps | BLOCKED; owner-approved transition rules and independent settlement evidence are missing |
+| 13 | MT-0105 — verify guest order tracking contact requirement | BLOCKED; existing PR #32 and documentation PR #46 are draft; exact-head Quality runs failed before steps |
+| 14 | MT-0106 — align account order history, guest tracking and single-order status labels | IN PROGRESS; shared canonical label helper and all-status regression coverage are being added |
+| 15 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
+| 16 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -1308,6 +1312,38 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 - All production database inspection was read-only. No order/customer/payment values, proof contents or storage objects were accessed. No schema, RLS, grants, roles, status values, credentials, environment variables, deployments, DNS, hosting or billing settings were changed. No supplier/customer was contacted and no purchase or test order was made. Additional spend: $0.
 
 
+
+## 30.1. MT-0106 canonical customer order status labels — 11 November 2026
+
+**Task:** MT-0106 · P0 · IN PROGRESS. The current customer pages do not show the same label for the same stored order status. This change introduces one shared label function and uses it in account order history, guest tracking and the single-order page. It does not alter order access, payment review, status transitions or database values.
+
+### Current-main source audit
+
+- Repository baseline: current `main` at `bd87f8109727c9d6ad5ff08493a3929eadecf374`.
+- The authenticated order-history page used `ORDER_NOTICE` and `ORDER_STEPS` as its label fallback.
+- The public guest-tracking page had a separate local status map. For example, `paid` appeared as “Payment confirmed”, while account history grouped it under the first shared milestone; `payment_submitted`, `verified` and some legacy delivered values fell back to raw database labels.
+- The single-order page had a third local map, including “Payment received, being checked”, “Payment verified” and “Payment failed”. These labels differed from both other customer views.
+- The live database enum contains 13 values: `pending`, `pending_payment`, `payment_submitted`, `paid`, `verified`, `processing`, `delivered`, `fulfilled`, `completed`, `rejected`, `failed`, `cancelled` and `refunded`. Read-only schema inspection confirmed the current enum; no order rows or customer data were read.
+
+### Change and acceptance criteria
+
+- Added `orderStatusLabel` as the shared label source. It uses the existing four `ORDER_STEPS` titles for their current and legacy status groups, maps both payment-pending values to “Waiting for payment”, and gives concise labels to Rejected, Failed, Cancelled and Refunded.
+- Applied the same helper to authenticated order history, guest tracking and the single-order page. The explanatory `ORDER_NOTICE` messages remain separate, so rejection/cancellation/refund guidance is not lost.
+- Added regression coverage for all 13 persisted statuses and for an unknown future value. Unknown values remain visible rather than being silently hidden.
+- No database migration, schema change, order/payment/customer mutation, access-control change or business-state decision is included.
+
+### Verification and release status
+
+- Focused Node 22 verification: pending final run.
+- Exact-head GitHub Quality workflow: pending PR creation; full lint, Bun tests, typecheck and production build must pass before merge.
+- Production: unchanged. This change is not live until merged and the exact production deployment is verified.
+
+### Next work
+
+- MT-0102 remains blocked on a successful exact-head Quality run and verifiable release requirements.
+- MT-0103 and MT-0104 remain blocked on owner-approved business rules and independent settlement evidence.
+- MT-0105's live contact check already exists, but its draft helper/documentation verification PRs remain blocked on exact-head Quality runs.
+- After MT-0106 is verified, inspect MT-0107's existing status-event writers and schema before selecting the next independent task. Do not add a production migration before the Supabase cutover gate is cleared.
 
 ## 31. MT-0101 merge and release verification — 8 November 2026
 
