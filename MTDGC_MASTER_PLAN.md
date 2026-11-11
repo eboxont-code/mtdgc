@@ -326,7 +326,7 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** Customers can discover the right digital item, understand restrictions and complete an order without confusion.
 
 - [ ] **MT-0181 · P0 · TODO** — Test the full purchase journey on common Android phones and narrow mobile screens.
-- [ ] **MT-0182 · P0 · REVIEW** — Availability labels, purchasable counts and disabled coming-soon actions were implemented and rule-tested in the 5 November pack; confirm the current production page before marking complete because the roadmap pack recorded the change as not yet published.
+- [x] **MT-0182 · P0 · DONE AND LIVE** — Current production verification on 11 November 2026 confirms the catalog/category availability labels and counts agree, coming-soon purchase actions are disabled, and the temporarily unavailable Netflix listing remains disabled. Evidence: the MT-0182 verification record in section 15; current production deployment and exact-head quality evidence are linked there.
 - [x] **MT-0183 · P0 · DONE AND LIVE** — Ensure the product card, product page and checkout show matching prices and variants; PR #17 merged at `9f944ec36ec3f87e3e603ff308b20979a1013183` and production deployment `dpl_cfXAs4hrfTSgdurWL1Veb5prUA5v` is READY on that exact SHA.
 - [ ] **MT-0184 · P0 · REVIEW** — Production purchase summaries were checked on five orderable pages on 8 November. Mobile Legends user-ID guidance is inaccurate in production; correction and regression coverage are in draft PR #19. See section 28; production and visual/mobile verification remain pending.
 - [ ] **MT-0185 · P1 · TODO** — Improve catalog search for brand, product, game, denomination and common abbreviations.
@@ -704,6 +704,33 @@ No product, variant, category, price, availability flag or database record was c
 **Evidence sources:** read-only query of the MTDGC `public.products`, `public.product_variants` and `public.categories` tables on 6 November 2026; public pages [Catalog](https://mtdgc.com/catalog), [All products](https://mtdgc.com/products), [Game Top-Ups](https://mtdgc.com/categories/game-top-ups) and [Gift Cards](https://mtdgc.com/categories/gift-cards).
 
 
+
+### MT-0182 production availability verification — 11 November 2026
+
+**Task:** MT-0182 · P0 · DONE AND LIVE. This closes the remaining review item from the 5 November storefront pack: the existing availability presentation is now confirmed on the current public production deployment.
+
+**Production deployment and live checks**
+
+- The connected Vercel project `mtdgc` is linked to this repository. Production deployment [dpl_ExLsbjk4dcToDg25tUFevUE6ACEh](https://vercel.com/boxont/mtdgc/ExLsbjk4dcToDg25tUFevUE6ACEh) is **READY**, aliases `mtdgc.com` and `www.mtdgc.com`, and is built from current `main` commit `bd87f8109727c9d6ad5ff08493a3929eadecf374`.
+- The live [catalog](https://mtdgc.com/catalog) reports **36 listed / 5 available now / 30 coming soon / 1 unavailable**.
+- The live category pages reconcile to the same totals: [Game Top-Ups](https://mtdgc.com/categories/game-top-ups) 6 / 4 / 2 / 0; [Gift Cards](https://mtdgc.com/categories/gift-cards) 12 / 1 / 11 / 0; [Subscriptions](https://mtdgc.com/categories/subscriptions) 7 / 0 / 6 / 1; [Software](https://mtdgc.com/categories/software) 11 / 0 / 11 / 0. The four categories sum to 36 / 5 / 30 / 1. This is the current snapshot; section 15's 6 November historical snapshot remains unchanged.
+- The live [Genshin Impact Genesis Crystals sample listing](https://mtdgc.com/products/sample-genshin-impact-crystals) shows `Price coming soon` and a `Coming soon` action. The current product route renders that action disabled for non-purchasable products; the catalog tile shows the availability label and no purchasable price.
+- The live [Netflix Subscription listing](https://mtdgc.com/products/netflix-subscription) shows `Temporarily unavailable` and a disabled purchase action. It is not counted as available now.
+- These were non-destructive page reads only. No form was submitted, and no order, payment or customer record was created.
+
+**Source and test evidence**
+
+- Current `main` uses the shared `src/lib/product-availability.ts` rules for purchasable variants, availability labels and counts. Catalog/category pages use the shared counts; product tiles show status instead of a price when no variant is purchasable; product-page actions are disabled when the selected product is not orderable.
+- `src/lib/product-availability.test.ts` covers coming-soon counts, product/variant eligibility, hidden sample prices, unavailable listings and consistent lowest-variant selection.
+- The helper/test source commit `233ddd3792b49e7d776b23641b8a64b3028eb846` is an ancestor of tested commit `21102f8816158e3cf31d0ef450c7298cb22869e5`; that tested commit is an ancestor of current production commit `bd87f8109727c9d6ad5ff08493a3929eadecf374`.
+- Exact-head Quality run [42430253311](https://github.com/eboxont-code/mtdgc/actions/runs/42430253311) on `21102f8816158e3cf31d0ef450c7298cb22869e5` **passed** lint, unit tests, TypeScript typecheck and production build. An earlier intermediate run [42424656734](https://github.com/eboxont-code/mtdgc/actions/runs/42424656734) failed typecheck; the later tested descendant passed all checks.
+- Read-only Supabase metadata reports the connected production project as `ACTIVE_HEALTHY`, with 36 product rows and 54 variant rows. No customer/order/payment rows were read; no schema change was required.
+
+**Scope and safeguards**
+
+This verifies the storefront's presentation and purchasability controls only. It does not prove supplier stock, supplier authorisation, region compatibility, price validity, margin or successful fulfilment. Those remain subject to their separate supplier and test-order gates. No application code, product/variant record, price, availability flag, order, payment, customer data, schema, credential, environment, DNS, hosting or billing setting was changed. Additional spend: **$0**.
+
+**Next eligible task:** MT-0184 — verify the corrected Mobile Legends player-ID help on the live product page and finish its remaining visual/mobile check. PR #19 is already merged, and its merge commit is included in the current production history; do not repeat its code change.
 
 ## 16. Historical environment-file credential review — 6 November 2026
 
