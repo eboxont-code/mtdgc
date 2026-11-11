@@ -7,6 +7,7 @@ import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { getCategoryBySlug, listCatalog } from "@/lib/catalog.functions";
 import { SITE_URL } from "@/lib/format";
+import { categoryListingSeo } from "@/lib/listing-seo";
 import { availabilityCounts } from "@/lib/product-availability";
 
 export const Route = createFileRoute("/categories/$slug")({
@@ -16,14 +17,12 @@ export const Route = createFileRoute("/categories/$slug")({
     const catalog = await listCatalog();
     return { ...result, categories: catalog.categories };
   },
-  head: ({ params, loaderData }) => {
+  head: ({ loaderData }) => {
     if (!loaderData?.category) {
       return { meta: [{ title: "Category not found | MTDGC" }, { name: "robots", content: "noindex" }] };
     }
     const category = loaderData.category;
-    const url = `${SITE_URL}/categories/${params.slug}`;
-    const title = `${category.name} for Nepal and Australia, prices in NPR | MTDGC`;
-    const description = category.description;
+    const { url, title, description } = categoryListingSeo(category);
     const shareSlug = ["game-top-ups", "gift-cards", "subscriptions"].includes(category.slug) ? category.slug : "mtdgc";
     const shareImage = `${SITE_URL}/og/${shareSlug}.png`;
     return {
