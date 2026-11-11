@@ -6,6 +6,9 @@
 
 ## 5 Nov ordered pack
 - [x] MT-0144: prominent saved-region warnings above desktop and mobile purchase actions plus gift-card region confirm; listing region data only, no invented markets; tests and 390px check passed, no overflow; not published.
+- [x] MT-0195: shared EmptyState/Skeleton loading, retry and empty presentation on catalog/category/product lists and product loading/errors; 390px failure-to-retry flow and unavailable purchase lock verified; protected home/global/cart/checkout states skipped; not published.
+- [x] MT-0196: visible option focus, unique required-field descriptions, selection/result announcements, 44px tabs and mobile filter focus restoration; keyboard checks and reduced-motion axe audit passed at 390px/desktop; existing scroll-reveal contrast flags and protected global controls left unchanged; not published.
+- [x] MT-0197: catalog eager images reduced to first two, remaining five lazy; existing 320px dimensions and async decoding verified; related art already lazy and fonts already self-hosted; script deferral skipped in protected root/router, JSON-LD retained; 20 regression tests and automatic build passed; not published.
 - [ ] MT-0188: existing plan URL remains the selection source; back-navigation and reload verification pending; not published.
 - [ ] MT-0189: product forms already render listing requirements only; restored and submitted fields now exclude unrelated keys; protected checkout contact fields and legacy cart-line cleanup skipped; verification pending; not published.
 - [x] MT-0185: client-side brand/name/game/denomination search and FF/PUBG/ML/MLBB/NFX aliases; URL state retained; rule tests and real FF search passed; not published.
