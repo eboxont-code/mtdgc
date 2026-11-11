@@ -230,7 +230,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [!] **MT-0103 · P0 · BLOCKED** — Decide the operational meaning of legacy Cancelled, Failed and Refunded states and whether Action required is needed. This is an owner business decision; any new database enum value also depends on the approved Boxont-controlled Supabase cutover. Do not invent a state or run a production migration.
 - [!] **MT-0104 · P0 · BLOCKED** — Owner-approved transition rules are not recorded, and MT-0086 still lacks independent settlement evidence (bank statement feed, provider callback or owner-approved manual match). Do not invent a transition graph or treat a screenshot as settlement proof.
 - [!] **MT-0105 · P0 · BLOCKED** — The live order-number plus saved-contact check is present on current main, but the shared-helper/regression-test refresh remains in draft PR [#32](https://github.com/eboxont-code/mtdgc/pull/32) (head `7e5a2e8df604b602d32bf9424eb61ebad3a37a9e`, based on older main); exact-head Quality run [42632043757](https://github.com/eboxont-code/mtdgc/actions/runs/42632043757) failed before any step started. The live-verification documentation is also in draft PR [#46](https://github.com/eboxont-code/mtdgc/pull/46); its exact-head Quality run [42660927912](https://github.com/eboxont-code/mtdgc/actions/runs/42660927912) failed before runner startup. Do not duplicate the live behaviour; finish the existing verification work when a free runner completes the workflow.
-- [~] **MT-0106 · P0 · IN PROGRESS** — Unify the customer-facing status label for all persisted order states across authenticated order history, guest tracking and the single-order page. Source audit and regression coverage are recorded in section 30.1; exact-head checks and production verification remain pending.
+- [!] **MT-0106 · P0 · BLOCKED** — Shared status labels and regression coverage are implemented in draft PR [#60](https://github.com/eboxont-code/mtdgc/pull/60), exact head 04963352df32c173fe02e501bfc7e8f6fbcc0608. The focused Node 22 harness passed 14 assertions, but exact-head Quality run [43001429038](https://github.com/eboxont-code/mtdgc/actions/runs/43001429038) failed before runner startup; job 130458236732 has no steps or logs, so the full repository checks did not run. The exact-head Vercel preview is READY (deployment dpl_2VhVg29rBaR1jRrpsdKvfBFgWiPy, preview only). Production remains on main commit bd87f8109727c9d6ad5ff08493a3929eadecf374; no merge or deployment occurred. Revisit when a free runner completes the full quality workflow.
 - [ ] **MT-0107 · P1 · TODO** — Record a timestamp and actor for every status transition.
 - [ ] **MT-0108 · P1 · TODO** — Show customers what happens next at each stage and whether they need to act.
 - [ ] **MT-0109 · P1 · TODO** — Allow staff to add internal notes without exposing them to customers.
@@ -250,12 +250,12 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Orders are delivered accurately and on time, while manual checks are gradually replaced only by safe, tested automation.
 
-- [ ] **MT-0121 · P0 · TODO** — Document the current manual fulfilment steps for each active product family.
-- [ ] **MT-0122 · P0 · TODO** — Create a pre-fulfilment checklist for player ID, zone, server, region, denomination and email.
-- [ ] **MT-0123 · P0 · TODO** — Require a second confirmation for irreversible top-ups and code releases.
-- [ ] **MT-0124 · P0 · TODO** — Record the supplier transaction or redemption reference for each completed order.
-- [ ] **MT-0125 · P0 · TODO** — Capture delivery evidence and attach it to the correct order.
-- [ ] **MT-0126 · P0 · TODO** — Never request a customer's game password, subscription password, OTP or payment PIN.
+- [!] **MT-0121 · P0 · BLOCKED** — The supplier register has no verified supplier or product-scope records, so current supplier-specific fulfilment steps, delivery route and escalation process cannot be documented without inventing facts. Revisit only when owner-provided or supplier-issued evidence is recorded.
+- [!] **MT-0122 · P0 · BLOCKED** — The implementation remains in draft PR [#52](https://github.com/eboxont-code/mtdgc/pull/52), head 259ded2dfa5a1c9a2c426be3931154475636b9e9, based on older main 8a0a8a7de8bd3f8da87784c761d3472f05b06e0d. Exact-head Quality run [42804886635](https://github.com/eboxont-code/mtdgc/actions/runs/42804886635) failed before runner startup; its only job has no steps or logs. Refresh to current main and rerun the full workflow only when a free runner is available.
+- [!] **MT-0123 · P0 · BLOCKED** — The implementation remains in draft PR [#43](https://github.com/eboxont-code/mtdgc/pull/43), head c7a4424a2ece6e0f8160afc678d2b09675a81741, based on older main ca01edaafa42b5b859089ce18d5decaf6fbd4db3. Exact-head Quality run [42523511238](https://github.com/eboxont-code/mtdgc/actions/runs/42523511238) failed before runner startup; its only job has no steps or logs. Refresh and rerun only after a free runner is available.
+- [!] **MT-0124 · P0 · BLOCKED** — No verified supplier identity, supplier transaction format or completed supplier fulfilment evidence exists in the supplier register. Do not fabricate a reference or record a customer/order transaction as a substitute.
+- [!] **MT-0125 · P0 · BLOCKED** — No verified delivery-evidence source or supplier fulfilment record is available. Any new persistent storage/schema path must also respect the approved Supabase cutover and private-access review; do not create production records or buckets.
+- [!] **MT-0126 · P0 · BLOCKED** — Credential-collection safeguards remain in draft PR [#24](https://github.com/eboxont-code/mtdgc/pull/24), head af28ad5cfbdc5820ebb6a5dcdb25e0d4e7901ca3, based on older main 8a0a8a7de8bd3f8da87784c761d3472f05b06e0d. Exact-head Quality run [42811206421](https://github.com/eboxont-code/mtdgc/actions/runs/42811206421) failed before runner startup; its only job has no steps or logs. Do not merge the draft until it is refreshed and the full workflow passes.
 - [ ] **MT-0127 · P1 · TODO** — Define realistic delivery-time ranges per product based on measured fulfilment history.
 - [ ] **MT-0128 · P1 · TODO** — Pause new orders when a supplier is unavailable or a product cannot be delivered.
 - [ ] **MT-0129 · P1 · TODO** — Create a queue sorted by paid status, promised delivery window and risk.
@@ -547,9 +547,14 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 11 | MT-0103 — decide legacy Cancelled/Failed/Refunded and whether Action required is needed | BLOCKED; owner business decision and possible Supabase cutover required |
 | 12 | MT-0104 — prevent invalid order-status jumps | BLOCKED; owner-approved transition rules and independent settlement evidence are missing |
 | 13 | MT-0105 — verify guest order tracking contact requirement | BLOCKED; existing PR #32 and documentation PR #46 are draft; exact-head Quality runs failed before steps |
-| 14 | MT-0106 — align account order history, guest tracking and single-order status labels | IN PROGRESS; shared canonical label helper and all-status regression coverage are being added |
-| 15 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
-| 16 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
+| 14 | MT-0106 — align account order history, guest tracking and single-order status labels | BLOCKED; PR #60 exact-head Quality failed before runner startup; preview only |
+| 15 | MT-0121 — document manual fulfilment steps | BLOCKED; no verified supplier or product-scope evidence |
+| 16 | MT-0122 — add the pre-fulfilment checklist | BLOCKED; PR #52 is based on older main and exact-head Quality did not start |
+| 17 | MT-0123 — require second confirmation for top-ups and codes | BLOCKED; PR #43 is based on older main and exact-head Quality did not start |
+| 18 | MT-0124–MT-0125 — record supplier transaction and delivery evidence | BLOCKED; no verified supplier or fulfilment evidence; storage/schema gates remain |
+| 19 | MT-0126 — prevent customer credential collection | BLOCKED; PR #24 is based on older main and exact-head Quality did not start |
+| 20 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
+| 21 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -1315,7 +1320,7 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 
 ## 30.1. MT-0106 canonical customer order status labels — 11 November 2026
 
-**Task:** MT-0106 · P0 · IN PROGRESS. The current customer pages do not show the same label for the same stored order status. This change introduces one shared label function and uses it in account order history, guest tracking and the single-order page. It does not alter order access, payment review, status transitions or database values.
+**Task:** MT-0106 · P0 · BLOCKED — implementation and focused verification are complete, but the required full repository workflow failed before runner startup. Draft PR [#60](https://github.com/eboxont-code/mtdgc/pull/60) is not merged or live. The current customer pages do not show the same label for the same stored order status. This change introduces one shared label function and uses it in account order history, guest tracking and the single-order page. It does not alter order access, payment review, status transitions or database values.
 
 ### Current-main source audit
 
@@ -1334,15 +1339,20 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 
 ### Verification and release status
 
-- Focused Node 22 verification: pending final run.
-- Exact-head GitHub Quality workflow: pending PR creation; full lint, Bun tests, typecheck and production build must pass before merge.
-- Production: unchanged. This change is not live until merged and the exact production deployment is verified.
+- Focused Node 22 verification: PASS — 14 assertions across all 13 stored statuses and the unknown-value fallback.
+- Strict TypeScript check of the isolated helper shape: PASS.
+- Exact-head GitHub Quality run [43001429038](https://github.com/eboxont-code/mtdgc/actions/runs/43001429038) on 04963352df32c173fe02e501bfc7e8f6fbcc0608: FAILED before runner startup. Its only job 130458236732 has no steps or logs; full lint, Bun tests, repository-wide typecheck and production build did not run. This is an external runner-startup failure, not an observed application-test failure.
+- PR [#60](https://github.com/eboxont-code/mtdgc/pull/60) remains open and draft, targets main, has no submitted reviews or unresolved review threads, and has not been merged.
+- Vercel preview [deployment dpl_2VhVg29rBaR1jRrpsdKvfBFgWiPy](https://vercel.com/boxont/mtdgc/2VhVg29rBaR1jRrpsdKvfBFgWiPy) is READY on this exact head at mtdgc-h1eujzww9-boxont.vercel.app, target null (preview only).
+- Production remains READY on dpl_ExLsbjk4dcToDg25tUFevUE6ACEh, deployed from current main commit bd87f8109727c9d6ad5ff08493a3929eadecf374. No merge or production deployment was triggered; no production smoke check of the proposed change is possible until it is live.
 
 ### Next work
 
 - MT-0102 remains blocked on a successful exact-head Quality run and verifiable release requirements.
 - MT-0103 and MT-0104 remain blocked on owner-approved business rules and independent settlement evidence.
 - MT-0105's live contact check already exists, but its draft helper/documentation verification PRs remain blocked on exact-head Quality runs.
+- The next attempt is to finish PR #60 when a free GitHub runner completes the full Quality workflow; do not retry the unchanged runner-startup failure.
+- The next independent P0 tasks are currently blocked as recorded above: MT-0121 and MT-0124–MT-0125 need supplier/fulfilment evidence; MT-0122, MT-0123 and MT-0126 have older draft branches and exact-head workflows that failed before starting; the Supabase cutover remains owner/project-gated.
 - After MT-0106 is verified, inspect MT-0107's existing status-event writers and schema before selecting the next independent task. Do not add a production migration before the Supabase cutover gate is cleared.
 
 ## 31. MT-0101 merge and release verification — 8 November 2026
