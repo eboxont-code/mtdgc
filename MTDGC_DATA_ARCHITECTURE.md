@@ -79,9 +79,24 @@ These are observed code paths, not an approved business state machine.
 
 The enum restricts valid status labels only. The live database has no non-internal `public.orders` transition trigger or transition-specific constraint. The dedicated proof submission/review actions have conditional status checks, but the generic admin updater accepts its seven target values from any existing state. Do not treat this observed map as an approved allowed-transition policy; MT-0104 owns transition enforcement after the business rules and payment prerequisites are resolved.
 
-The customer progress helper groups `payment_submitted`/`paid`, `verified`, `processing`, and `delivered`/`fulfilled`/`completed` into four steps. The order page and tracking page retain individual labels for the legacy values. MT-0102/MT-0106 own the operational wording and display consistency work.
+The customer progress helper groups `payment_submitted`/`paid`, `verified`, `processing`, and `delivered`/`fulfilled`/`completed` into four steps. The order page and tracking page retain individual labels for legacy values. MT-0102 records the source-backed meaning and customer-facing milestone wording; MT-0106 remains responsible for confirming that account order history and guest tracking expose consistent canonical status labels.
 
-### 4.6 Payment-proof image ingestion
+### 4.6 Operational meaning of customer milestones
+
+The four customer-facing progress steps are descriptive summaries of the current application writers. They are not a validated payment-settlement record, a supplier event, or an enforced transition graph.
+
+| Customer step | Order statuses | What the application records | What it does not prove |
+|---|---|---|---|
+| Payment received | `payment_submitted`, legacy `paid` | `payment_submitted` is written after a customer submits a payment screenshot and transaction reference for an order in `pending_payment`. `paid` is a legacy target accepted by the generic administrator updater. | Neither status is backed by a bank statement, provider callback or independent settlement check. A screenshot and reference are supporting evidence only. |
+| Verified | `verified` | The dedicated `reviewPayment` action lets an authenticated administrator mark a submitted proof and its order verified. The generic administrator updater can also set this status directly. | This is a manual staff decision, not an automated bank/provider settlement match. |
+| Processing | `processing` | The generic administrator updater records a staff-selected processing label. | No supplier acceptance, automated fulfilment event or delivery evidence is required by this status update. |
+| Delivered | `delivered`, legacy `fulfilled`, `completed` | The generic administrator updater records a staff-selected delivered label; `fulfilled` and `completed` are legacy display aliases with no current writer found. | The status update does not require a delivery record or prove customer receipt, code redemption or successful use. |
+
+`order_status_events` is an event/note table, not the authoritative order state: `addOrderNote` can write a caller-supplied status label without changing `orders.status`. The canonical state is `orders.status`, but the generic administrator updater can jump between its accepted targets. The four customer steps summarize those labels only. MT-0104 remains responsible for any future transition enforcement after owner-approved business rules and independent payment-settlement evidence are available.
+
+The customer-facing milestone wording now says that payment information is recorded, proof review is manual, and processing/delivery are staff status updates. It explicitly avoids saying a screenshot proves cleared funds or that a delivered status proves redemption. These labels do not create a new payment policy or business promise.
+
+### 4.7 Payment-proof image ingestion
 
 - Treat browser MIME and file-name extensions as untrusted hints. The server resolves the actual JPEG, PNG or WebP format with the pinned `sharp@0.35.5` decoder and requires the declared MIME to match.
 - Decode with strict warning handling, a 20-megapixel input ceiling and a four-channel ceiling. Empty, malformed, truncated, mismatched, multi-page and over-limit inputs are rejected.
