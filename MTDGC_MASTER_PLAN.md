@@ -332,7 +332,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0185 · P1 · TODO** — Improve catalog search for brand, product, game, denomination and common abbreviations.
 - [ ] **MT-0186 · P1 · TODO** — Add clear sorting by relevance, price and availability.
 - [ ] **MT-0187 · P1 · TODO** — Make filters usable on mobile without hiding the product list behind oversized controls.
-- [ ] **MT-0188 · P1 · TODO** — Keep cart contents and selected variants stable when customers navigate back.
+- [ ] **MT-0188 · P1 · IN PROGRESS** — Keep cart contents and selected variants stable when customers navigate back.
 - [ ] **MT-0189 · P1 · TODO** — Reduce checkout fields to only the information required for that product.
 - [ ] **MT-0190 · P1 · TODO** — Explain the manual payment step before the customer places the order.
 - [ ] **MT-0191 · P1 · TODO** — Add inline examples showing where to find game player IDs and zone identifiers.
@@ -1447,3 +1447,32 @@ There is no complete transition graph enforced by the application: direct admini
 - No Supabase rows, product URLs, product status, variants, prices, supplier records, checkout or payment settings were changed. No orders, purchases or payments were created. No additional spend was incurred.
 
 **Next imagery action:** source and verify permitted current logos for the seven outstanding Australian retailer cards before closing MT-0039. Maintain the 5×5 emerald M as the single MTDGC company mark throughout.
+
+
+## 34. Cart restoration resilience — 13 November 2026
+
+**Task:** MT-0188 — keep cart contents and selected variants stable when customers navigate back.
+
+**Status:** IMPLEMENTED IN BRANCH; full repository checks and browser back-navigation verification are still required. Do not mark DONE or merge until the exact branch checks pass and the affected journey is verified.
+
+**What changed**
+- The cart now restores saved items through one small, independently testable validator.
+- A damaged saved line is discarded without discarding other valid cart items.
+- The saved SKU, selected option, saved price and product-specific delivery fields are preserved exactly; the helper does not look up or invent a new price.
+- Older saved entries without an image or quantity are normalized safely. Restored quantities are capped at the existing maximum of 10.
+- Removing the cart key or clearing browser storage in another tab now clears the in-memory cart too.
+
+**Verification**
+- Six focused helper tests passed locally with Node 22.16 and TypeScript type stripping.
+- The full Bun test suite, lint, TypeScript check and production build were not run: Bun and the project dependencies are not installed in this working environment.
+- The previously observed GitHub Quality run failed before a runner started; that was a runner-startup failure, not an application test failure. No unchanged retry was issued. Inspect the exact new PR head result before any merge.
+- The selected product option is already carried in the product URL and cart snapshot; a real browser back-navigation check on the PR preview is still required. Do not create a real order or payment for this check.
+
+**Safety and release**
+- No database schema, production records, payment data, customer data, secrets, DNS, hosting settings or billing were changed.
+- No production deployment was requested or performed. A feature-branch preview, if created automatically, is not a production release.
+- Additional spend: $0.
+
+**Implementation branch:** https://github.com/eboxont-code/mtdgc/tree/automation/mt-0188-cart-persistence-20261113-run10
+
+**Next eligible task after MT-0188:** MT-0226 — report tracked support tickets per 100 orders and the most common issue categories. Use only aggregate category counts; the current production support table contains no tickets, so show an honest empty state until real requests exist.
