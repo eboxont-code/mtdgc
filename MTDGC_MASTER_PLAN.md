@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.2 · 8 November 2026
+**Version:** 2.3 · 13 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -233,7 +233,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0106 · P0 · TODO** — Ensure account order history and guest tracking show the same canonical status.
 - [ ] **MT-0107 · P1 · TODO** — Record a timestamp and actor for every status transition.
 - [x] **MT-0108 · P1 · DONE (implementation)** — Shared What happens next guidance covers all 13 statuses in customer order details, account orders and guest tracking results; 11 targeted tests passed and isolated 390px/desktop guidance checks passed. Real populated-order end-to-end verification is blocked by unavailable preview auth users; see section 32.
-- [ ] **MT-0109 · P1 · TODO** — Allow staff to add internal notes without exposing them to customers.
+- [~] **MT-0109 · P1 · IN PROGRESS** — The existing staff-note path is authenticated and administrator-guarded; customer guest/account/single-order projections omit note text and staff actor IDs, while the administrator detail panel alone reads and displays notes. Added five source-contract regression tests and recorded current production RLS evidence in section 34. Full exact-head quality verification, merge and release remain pending.
 - [ ] **MT-0110 · P1 · TODO** — Add an action-required state for missing player ID, region mismatch or delivery-email correction.
 - [ ] **MT-0111 · P1 · TODO** — Prevent duplicate checkout submissions from creating duplicate orders.
 - [ ] **MT-0112 · P1 · TODO** — Define order expiry for unpaid orders and release reserved supplier capacity safely.
@@ -1447,3 +1447,38 @@ There is no complete transition graph enforced by the application: direct admini
 - No Supabase rows, product URLs, product status, variants, prices, supplier records, checkout or payment settings were changed. No orders, purchases or payments were created. No additional spend was incurred.
 
 **Next imagery action:** source and verify permitted current logos for the seven outstanding Australian retailer cards before closing MT-0039. Maintain the 5×5 emerald M as the single MTDGC company mark throughout.
+## 34. Internal staff notes privacy boundary — 13 November 2026
+
+**Task:** MT-0109 · P1 · IN PROGRESS. The existing staff-note feature is present on current **main**; this focused change adds regression coverage and records the current production access boundary. It does not add customer access or change note-writing behaviour.
+
+### Current application boundary
+
+- **addOrderNote** is a server-side administrator action. It requires **requireSupabaseAuth** middleware and calls **assertAdmin(context)** as the first handler statement before inserting the note with **created_by**.
+- The administrator order-detail panel selects **order_status_events.note** and renders it in the staff-only history/notes section.
+- Public guest tracking and authenticated order history select only **order_status_events(status, created_at)** and map those two fields into their response. The single-order customer viewer does not select order events. Customer-facing order and tracking pages do not read or render note text.
+
+### Read-only production evidence — 13 November 2026
+
+- Production **public.order_status_events** has an **Admin status events** RLS policy for the **authenticated** role covering all commands. Both the read predicate and write check call **has_role(auth.uid(), 'admin')**.
+- **anon** has no table grant. The **authenticated** role has SELECT and INSERT grants, constrained by that administrator-only policy.
+- **created_at** is **timestamp with time zone NOT NULL DEFAULT now()**; **created_by** is nullable UUID. No note values or order/customer rows were queried.
+- The existing SECURITY DEFINER **has_role** role-membership disclosure finding remains separate and unchanged. No policy, grant, function or role was modified.
+
+### Regression coverage
+
+Five source-contract tests now pin:
+1. Guest tracking returns only event status and timestamp.
+2. Signed-in order history returns only event status and timestamp.
+3. The single-order customer viewer does not fetch staff notes.
+4. Staff note writes authenticate and pass the administrator guard before insertion, recording the staff actor.
+5. The administrator panel reads/displays notes while customer order and tracking pages do not.
+
+A Node 22.16 isolated harness ran the five checks against the exact relevant source excerpts retrieved from current **main**: **5/5 PASS**. This is a focused source-contract check, not a substitute for the repository's full Quality workflow.
+
+### Verification and release boundary
+
+- The implementation and plan update are in the new draft PR created from current **main**. The exact PR-head Quality workflow, preview result, review state and merge eligibility must be checked separately after the push.
+- The current production deployment before this change is READY at **dpl_8hjvYR7as67TFcsBoLyULvmRZHHM**, deployed from current **main** commit **b4d2f36508e60a2a472f8e0345bd770cf53ceb0a**. This change is not live; no merge or production deployment was attempted.
+- No production data, order, payment, customer, note, authentication user, storage object, schema, RLS policy, grant, credential, environment, hosting, DNS or billing setting was changed. Additional spend: **$0**.
+
+**Next task to assess:** MT-0107 — event actor/timestamp coverage. Production has a database timestamp default, but **created_by** is nullable and guest/system events have no authenticated actor. Define the actor model before claiming every event identifies its actor; do not invent guest/system identities or add a migration outside the approved cutover gate.

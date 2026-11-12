@@ -89,6 +89,15 @@ The customer progress helper groups `payment_submitted`/`paid`, `verified`, `pro
 - The server derives the `.webp` storage extension and `image/webp` content type from the normalized result; the browser cannot choose the stored MIME or extension.
 - The production `payment-proofs` bucket remains private and unchanged. Its existing storage-level 5 MiB cap is retained; application-side server validation remains the MIME/content gate because the bucket's `allowed_mime_types` setting is NULL. Only the trusted server upload path writes proof objects.
 
+### 4.8 Internal staff notes
+
+- Staff notes are written by the authenticated **addOrderNote** server function. It uses **requireSupabaseAuth** middleware and awaits the exact administrator-role guard before inserting the note and staff actor ID into **public.order_status_events**.
+- The administrator order-detail panel is the only current application view that selects and renders the event **note** field. Its direct browser query is constrained by the production row-level security policy.
+- Guest tracking (**lookupOrder**) and signed-in order history (**listMyOrders**) select only event **status** and **created_at**; their returned event objects contain only those two fields. The single-order customer viewer does not select order events. Customer-facing order pages therefore do not receive staff note text or **created_by**.
+- Read-only production metadata on 13 November 2026 confirms the **Admin status events** policy applies to authenticated users for all commands and checks **has_role(auth.uid(), 'admin')** in both its read and write predicates. The **anon** role has no table grant.
+- The **has_role** SECURITY DEFINER role-membership disclosure finding remains separately tracked; this note-visibility review does not remediate or alter that function, its grants or dependent policies.
+- Event **created_at** is non-null with a database **now()** default. **created_by** is nullable; guest/system actor attribution and free-text note retention remain separate review items. Notes may contain personal information if staff choose to enter it; retention criteria remain under MT-0293.
+
 ## 5. Guest Checkout Architecture
 - **No Account Required**: Orders are created with `user_id = NULL`.
 - **Identity**: `guest_email` and `guest_whatsapp` are captured.
