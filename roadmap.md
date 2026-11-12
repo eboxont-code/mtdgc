@@ -5,7 +5,7 @@
 > This file is preserved as a dated implementation and verification history. Checkboxes below record the status claimed by each historical pack when it was written; they are not a second live TODO register. When an old pack conflicts with the Master Plan, use the Master Plan and refresh the implementation evidence before changing task status.
 
 ## 12 Nov ordered pack
-- [ ] MT-0101/MT-0102/MT-0108: refresh source-only status map and milestone definitions; add shared next-action guidance to customer order details and guest tracking; verification pending; protected cart/checkout/router and all server actions unchanged; not published.
+- [x] MT-0101/MT-0102/MT-0108: source-only 13-status/transition map and four precise milestone definitions in Master Plan section 32; shared next-action guidance on order details/account orders/guest tracking; 11 tests and isolated 390px/desktop layout checks passed, build OK; real populated-order check blocked by unavailable auth users; protected files/server actions unchanged; not published.
 
 ## 5 Nov ordered pack
 - [x] MT-0144: prominent saved-region warnings above desktop and mobile purchase actions plus gift-card region confirm; listing region data only, no invented markets; tests and 390px check passed, no overflow; not published.

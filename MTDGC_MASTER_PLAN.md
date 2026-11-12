@@ -225,14 +225,14 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** The order state is consistent from checkout to delivery, with a complete audit trail and useful customer visibility.
 
-- [x] **MT-0101 · P0 · DONE** — Map all 13 live order-status enum values, current application writers, generic administrator targets, legacy display aliases and observed transitions; confirm that neither application nor database enforces a complete transition graph. Evidence: section 30 and Data Architecture section 4; current-main source inspection plus read-only production enum, aggregate status-count, column-type, proof-status constraint and order-trigger queries on 8 November 2026.
-- [ ] **MT-0102 · P0 · TODO** — Ensure Payment received, Verified, Processing and Delivered have precise operational definitions.
+- [x] **MT-0101 · P0 · DONE** — Source-only refresh of all 13 statuses, writers and permitted application transitions on 12 November 2026; see section 32. The generic administrator setter still allows direct jumps; no complete transition graph is enforced by that code. Historical live-schema evidence remains in section 30; no database inspection was performed for this refresh.
+- [x] **MT-0102 · P0 · DONE** — Precise source-grounded definitions for Payment received, Verified, Processing and Delivered in section 32 and shared customer milestone copy; distinguish proof submission/manual status labels from independent settlement or delivery evidence.
 - [ ] **MT-0103 · P0 · TODO** — Add explicit Cancelled, Failed, Refunded and Action required states where applicable.
 - [ ] **MT-0104 · P0 · TODO** — Prevent invalid status jumps, such as Pending directly to Delivered without payment verification.
 - [ ] **MT-0105 · P0 · TODO** — Verify guest order tracking requires the order number plus the matching email or phone.
 - [ ] **MT-0106 · P0 · TODO** — Ensure account order history and guest tracking show the same canonical status.
 - [ ] **MT-0107 · P1 · TODO** — Record a timestamp and actor for every status transition.
-- [ ] **MT-0108 · P1 · TODO** — Show customers what happens next at each stage and whether they need to act.
+- [x] **MT-0108 · P1 · DONE (implementation)** — Shared What happens next guidance covers all 13 statuses in customer order details, account orders and guest tracking results; 11 targeted tests passed and isolated 390px/desktop guidance checks passed. Real populated-order end-to-end verification is blocked by unavailable preview auth users; see section 32.
 - [ ] **MT-0109 · P1 · TODO** — Allow staff to add internal notes without exposing them to customers.
 - [ ] **MT-0110 · P1 · TODO** — Add an action-required state for missing player ID, region mismatch or delivery-email correction.
 - [ ] **MT-0111 · P1 · TODO** — Prevent duplicate checkout submissions from creating duplicate orders.
@@ -1362,3 +1362,57 @@ There is **no complete application-enforced allowed-transition graph**. The proo
 No production application code, database/schema, order/payment/customer record, storage object, RLS/grant, credential, environment, DNS, hosting or billing setting changed. No test order, payment, supplier/customer contact or purchase occurred. Additional spend: $0.
 
 **Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
+
+## 32. Order statuses and customer next steps - 12 November 2026
+
+**Scope:** MT-0101 source-only refresh, MT-0102 operational definitions, MT-0108 customer guidance. This section supersedes historical next-task references to MT-0102. No live database facts or business transition policy are inferred from this source inspection.
+
+### Current source status map
+
+The 13 values below are declared in `src/integrations/supabase/types.ts:609-622`; application writers are `src/lib/orders.functions.ts` and `src/lib/admin.functions.ts`. Customer aliases are in `src/lib/format.ts` and the order/tracking pages. An event label is not necessarily the current order status.
+
+| Order status | Current source writer / meaning | Customer next step |
+|---|---|---|
+| `pending` | Legacy initial label; no current application order writer found | Contact support to confirm payment instructions; upload is not enabled for this state |
+| `pending_payment` | New order or replacement-proof request | Pay with supplied details and upload screenshot/reference; do not pay again for a replacement proof |
+| `payment_submitted` | Customer proof submitted for manual review | Wait for review; submission does not verify payment |
+| `paid` | Generic administrator setter; manual/legacy Payment received label | Wait for confirmation; do not pay again |
+| `verified` | Accepted manual proof review or generic administrator setter | Wait for preparation unless staff request details |
+| `processing` | Generic administrator setter; preparation label | Wait unless staff request details |
+| `delivered` | Generic administrator setter; delivery label | Check the item's delivery destination; contact support if missing |
+| `fulfilled` | Legacy Delivered milestone alias; no current application writer found | Check the item's delivery destination |
+| `completed` | Legacy Delivered milestone alias; no current application writer found | Check the item's delivery destination |
+| `rejected` | Review rejected without resubmission, or generic administrator setter | Contact support; replacement upload requires return to `pending_payment` |
+| `failed` | Legacy display state; no current application writer found | Contact support before another payment |
+| `cancelled` | Generic administrator setter; status update only | No more payment/proof; contact support if already paid |
+| `refunded` | Generic administrator setter; status update only, no money transfer executed | Check payment account and ask support if refund is missing |
+
+### Transitions the application actually permits
+
+| Code path | From | To | Actual guard |
+|---|---|---|---|
+| `placeOrder` (`orders.functions.ts:147-167`) | New order | `pending_payment` | Explicit initial status |
+| `submitPaymentProof` (`orders.functions.ts:348-374`) | `pending_payment` | `payment_submitted` | Order access, screenshot/reference validation, latest-proof resubmission check and conditional current-status update |
+| `reviewPayment`, verify (`admin.functions.ts:235-265`) | `payment_submitted` | `verified` | Administrator, submitted proof and conditional current-status update |
+| `reviewPayment`, reject with `askNewProof` | `payment_submitted` | `pending_payment` | Same review guards; rejection note required; rejected event then pending-payment event |
+| `reviewPayment`, reject without `askNewProof` | `payment_submitted` | `rejected` | Same review guards; rejection note required |
+| `updateOrderStatus` (`admin.functions.ts:18-29`) | Any existing status, including the same status | `paid`, `verified`, `rejected`, `processing`, `delivered`, `cancelled`, `refunded` | Administrator and target validator only; no previous-state, proof or delivery prerequisite |
+| `addOrderNote` (`admin.functions.ts:32-39`) | Any | No change to `orders.status` | Administrator; writes an arbitrary text status event/note only |
+
+There is no complete transition graph enforced by the application: direct administrator jumps remain possible. Source inspection cannot establish the current live database's constraints. Transition enforcement belongs to MT-0104 and was not changed.
+
+### Precise operational definitions
+
+- **Payment received:** the application has accepted a screenshot/reference (`payment_submitted`), or staff have manually set `paid`; neither label is independent settlement confirmation.
+- **Verified:** staff accepted a submitted proof through `reviewPayment`, or manually set `verified`; the code records approval but does not require independent bank evidence on either path.
+- **Processing:** staff manually marked the order as being prepared for fulfilment; the setter neither starts an automated fulfilment job nor enforces prior verification.
+- **Delivered:** staff manually marked delivery (`delivered`), with `fulfilled`/`completed` as legacy milestone aliases; the setter does not require delivery evidence or guarantee a particular destination.
+
+### Implementation and verification evidence
+
+- `src/lib/order-next-step.ts` maps every source-declared status plus an unknown-status support fallback to a customer action and plain guidance; only `pending_payment` suggests the upload allowed by the existing server action.
+- `src/components/order-next-step.tsx` renders the same Matrix-token, polite-announcement line beside the current status in `src/routes/order.$orderNumber.tsx`, `src/routes/_authenticated/orders.tsx` and the found result in `src/routes/track-order.tsx`. No hidden/internal notes are exposed. Shared milestone descriptions in `format.ts` now distinguish labels from independent evidence; tracking no longer exposes raw labels for the current payment states.
+- `bun test src/lib/order-next-step.test.ts src/lib/format.test.ts`: **11 passed, 0 failed**, including all 13 action mappings, delivery aliases, unsupported rejected/legacy uploads and unknown fallback. Automatic preview build log: **build OK** after source edits.
+- Playwright checked **390px first, then 1280px desktop**: all 13 guidance variants rendered in an isolated component-only presentation check with no horizontal overflow; screenshots inspected; no runtime errors. Actual tracking rejected missing order/contact and the actual order page stayed contact-gated without revealing guidance.
+- **Verification limitation:** real populated account/order/tracking results were not exercised. Preview session minting failed because no auth users were available. No customer account, order or payment was created, and no invented records or mocked lookup response were used. A signed-in existing customer session and authorized order/contact are required for that final read-only end-to-end check.
+- **Skipped/unchanged:** protected cart, checkout, router/Sentry and product-help; no schema, migration, server action, storage, auth setting, transition permission, delivery time or payment detail changed. No publishing or deployment requested.
