@@ -5,6 +5,7 @@
 > This file is preserved as a dated implementation and verification history. Checkboxes below record the status claimed by each historical pack when it was written; they are not a second live TODO register. When an old pack conflicts with the Master Plan, use the Master Plan and refresh the implementation evidence before changing task status.
 
 ## 12 Nov ordered pack
+- [ ] MT-0181: inspect purchase presentation at 390px, 360px and desktop; small safe UI fixes only; no order/payment writes or publishing; confirmation and physical-device keyboard verification require an authorized test window.
 - [x] MT-0101/MT-0102/MT-0108: source-only 13-status/transition map and four precise milestone definitions in Master Plan section 32; shared next-action guidance on order details/account orders/guest tracking; 11 tests and isolated 390px/desktop layout checks passed, build OK; real populated-order check blocked by unavailable auth users; protected files/server actions unchanged; not published.
 
 ## 5 Nov ordered pack
