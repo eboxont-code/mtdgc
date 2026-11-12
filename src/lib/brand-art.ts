@@ -116,7 +116,11 @@ export function brandArtSvg(art: BrandArt, opts: { id: string; comingSoon?: bool
     const x = cursorX;
     const y = 150 - height / 2;
     cursorX += width + gap;
-    const markup = icon.body ?? (icon.path ? `<path d="${icon.path}" fill="${icon.color ?? art.fg}"/>` : "");
+    const rawMarkup = icon.body ?? (icon.path ? `<path d="${icon.path}" fill="${icon.color ?? art.fg}"/>` : "");
+    const scope = `logo-${id}`;
+    const markup = rawMarkup
+      .replace(/\\bid="([^"]+)"/g, (_match, name: string) => `id="${scope}-${name}"`)
+      .replace(/url\\(#([^)]+)\\)/g, (_match, name: string) => `url(#${scope}-${name})`);
     return `<svg x="${x}" y="${y}" width="${width}" height="${height}" viewBox="0 0 ${viewWidth} ${viewHeight}" preserveAspectRatio="xMidYMid meet">${markup}</svg>`;
   }).join("");
   const tag = opts.comingSoon
