@@ -10,6 +10,7 @@ import { ORDER_NOTICE, ORDER_STEPS, orderStepIndex, stepTime, formatNpr, SITE_UR
 import { GIFT_CARD_PRICE_DISCLOSURE } from "@/lib/gift-card-pricing";
 import { listMyOrders } from "@/lib/orders.functions";
 import { EmptyState } from "@/components/empty-state";
+import { OrderNextStep } from "@/components/order-next-step";
 import { Package } from "lucide-react";
 
 type Order = Awaited<ReturnType<typeof listMyOrders>>[number];
@@ -81,6 +82,7 @@ function OrdersPage() {
                       {ORDER_NOTICE[order.status] ?? ORDER_STEPS[current]?.title ?? order.status}
                     </span>
                   </div>
+                  <OrderNextStep status={order.status} />
                   <ol className="mt-3 grid gap-2 sm:grid-cols-4">
                     {ORDER_STEPS.map((step, index) => (
                       <li key={step.title} aria-current={index === current ? "step" : undefined} className={`text-xs ${index <= current ? "text-foreground" : "text-muted-foreground"}`}>
