@@ -10,6 +10,9 @@ These marks are embedded only to identify the third-party products listed in the
 - CapCut icon — `YuheshPandian/ICONIC`, `icons/light/capcut.svg`: https://github.com/YuheshPandian/ICONIC/blob/main/icons/light/capcut.svg
 - Genshin Impact mark — `HemantKArya/BloomeeTunes`, `packages/icons_plus/assets/images/logos/video-games/genshin-impact-logo.svg`: https://github.com/HemantKArya/BloomeeTunes/blob/main/packages/icons_plus/assets/images/logos/video-games/genshin-impact-logo.svg
 
+
+- DoorDash, Uber Eats and Ticketmaster — Simple Icons (`simple-icons/simple-icons`), `icons/doordash.svg`, `icons/ubereats.svg` and `icons/ticketmaster.svg`; distributed under CC0-1.0: https://github.com/simple-icons/simple-icons
+
 ## MIT license — Yuhesh Pandian P J (ICONIC)
 
 MIT License
