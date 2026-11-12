@@ -1435,6 +1435,7 @@ There is no complete transition graph enforced by the application: direct admini
 - Generated product artwork now includes verified Simple Icons marks for DoorDash, Uber Eats and Ticketmaster on their respective Australian gift-card tiles. Source identifiers and CC0-1.0 provenance are recorded in `THIRD_PARTY_LOGO_ASSETS.md`.
 - The existing generated marks for software/subscription/game products remain distinct from the MTDGC company logo. Product brands are not replaced with the MTDGC glyph.
 - The Australian card artwork audit identified seven remaining image files that still use generic text-led artwork rather than a verified current brand mark: Amart Furniture, Bunnings, Coles, JB Hi-Fi, Kmart, Supercheap Auto and Woolworths. Obtain current, permitted assets or documented source rights before replacing these; do not use outdated marks or assume that a third-party logo aggregator grants reuse rights.
+- The Clash of Clans product cover shows character artwork without the game title mark. Supercell's [official Media Center](https://supercell.com/en/media-center/) links to a brand asset portal, while its [Fan Content Policy](https://supercell.com/en/fan-content-policy/) governs use of game copyrights and trademarks for fan content. Do not substitute fan-kit or third-party artwork for commercial product merchandising without an applicable permission basis.
 - **MT-0039 remains TODO/open.** It is not complete until imagery rights and all remaining misleading product artwork have been reviewed and resolved.
 
 ### Verification and boundaries
