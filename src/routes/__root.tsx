@@ -17,6 +17,7 @@ import { BottomNav } from "../components/bottom-nav";
 import { ScrollReveals } from "../components/scroll-reveals";
 import { WhatsAppFab } from "../components/whatsapp-fab";
 import { Wordmark } from "../components/brand/wordmark";
+import { SITE_URL } from "../lib/format";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
@@ -105,6 +106,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     const leafOgDescription = [...pageMeta].reverse().find((meta) => meta && "property" in meta && meta.property === "og:description");
     const shareTitle = leafOgTitle && "content" in leafOgTitle ? String(leafOgTitle.content) : title;
     const shareDescription = leafOgDescription && "content" in leafOgDescription ? String(leafOgDescription.content) : description;
+    const hasOgImage = pageMeta.some((meta) => meta && "property" in meta && meta.property === "og:image");
+    const hasTwitterImage = pageMeta.some((meta) => meta && "name" in meta && meta.name === "twitter:image");
     return {
     meta: [
       { charSet: "utf-8" },
@@ -122,10 +125,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { property: "og:title", content: title },
       { property: "og:description", content: description },
+      ...(!hasOgImage ? [
+        { property: "og:image", content: `${SITE_URL}/og/mtdgc.png` },
+        { property: "og:image:alt", content: "MTDGC, Matrix Digital Goods & Commerce" },
+      ] : []),
       ...(canonical?.href ? [{ property: "og:url", content: canonical.href }] : []),
       { name: "twitter:title", content: shareTitle },
       { name: "twitter:description", content: shareDescription },
       { name: "twitter:card", content: "summary_large_image" },
+      ...(!hasTwitterImage ? [
+        { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
+        { name: "twitter:image:alt", content: "MTDGC, Matrix Digital Goods & Commerce" },
+      ] : []),
     ],
     links: [
       {
