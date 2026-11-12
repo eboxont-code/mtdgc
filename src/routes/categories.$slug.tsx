@@ -1,12 +1,19 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { canonicalLinks } from "@/lib/seo";
+
+import { PackageOpen } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
+import { StorefrontError, StorefrontLoading } from "@/components/storefront-state";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { ProductCard } from "@/components/product-card";
+import { ResellerNotice } from "@/components/reseller-notice";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { getCategoryBySlug, listCatalog } from "@/lib/catalog.functions";
 import { SITE_URL } from "@/lib/format";
+import { categoryListingSeo } from "@/lib/listing-seo";
 import { availabilityCounts } from "@/lib/product-availability";
 
 export const Route = createFileRoute("/categories/$slug")({
@@ -16,14 +23,12 @@ export const Route = createFileRoute("/categories/$slug")({
     const catalog = await listCatalog();
     return { ...result, categories: catalog.categories };
   },
-  head: ({ params, loaderData }) => {
+  head: ({ loaderData }) => {
     if (!loaderData?.category) {
       return { meta: [{ title: "Category not found | MTDGC" }, { name: "robots", content: "noindex" }] };
     }
     const category = loaderData.category;
-    const url = `${SITE_URL}/categories/${params.slug}`;
-    const title = `${category.name} for Nepal and Australia, prices in NPR | MTDGC`;
-    const description = category.description;
+    const { url, title, description } = categoryListingSeo(category);
     const shareSlug = ["game-top-ups", "gift-cards", "subscriptions"].includes(category.slug) ? category.slug : "mtdgc";
     const shareImage = `${SITE_URL}/og/${shareSlug}.png`;
     return {
@@ -42,7 +47,7 @@ export const Route = createFileRoute("/categories/$slug")({
         { name: "twitter:image", content: shareImage },
         { name: "twitter:image:alt", content: `${category.name} from MTDGC` },
       ],
-      links: [{ rel: "canonical", href: url }],
+      links: canonicalLinks(url ),
       scripts: [
         {
           type: "application/ld+json",
@@ -80,6 +85,8 @@ export const Route = createFileRoute("/categories/$slug")({
     };
   },
   component: CategoryPage,
+  pendingComponent: StorefrontLoading,
+  errorComponent: StorefrontError,
 });
 
 const CATEGORY_INTROS: Record<string, string> = {
@@ -103,12 +110,14 @@ function CategoryPage() {
         <Breadcrumbs
           items={[{ label: "Home", to: "/" }, { label: "Catalog", to: "/catalog" }, { label: category.name }]}
         />
-        <h1 className="font-display text-[26px] font-medium md:text-4xl">{category.name}</h1>
+        <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-primary">MTDGC · Matrix Digital Goods & Commerce</p>
+        <h1 className="mt-1 font-display text-[26px] font-medium md:text-4xl">{category.name}</h1>
         <p className="mt-2 max-w-[62ch] text-sm text-muted-foreground">{category.description}</p>
+        <ResellerNotice className="mt-2" />
         {CATEGORY_INTROS[category.slug] && (
           <p className="mt-3 max-w-[70ch] text-sm text-foreground/80">
             {CATEGORY_INTROS[category.slug]}{" "}
-            <Link to="/how-it-works" className="text-primary underline-offset-4 hover:underline">
+            <Link to="/how-it-works" className="text-primary underline underline-offset-4">
               See how ordering works
             </Link>
             .
@@ -129,23 +138,14 @@ function CategoryPage() {
             </div>
           </>
         ) : (
-          <div className="mt-8 rounded-lg border border-border py-14 text-center">
-            <p className="font-display font-medium">We are adding listings here.</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Tell us what you are looking for.
-            </p>
-            <Button asChild variant="outline" className="mt-3 min-h-11">
-              <Link to="/support">Contact support</Link>
-            </Button>
-          </div>
+          <EmptyState icon={PackageOpen} title="No listings in this category" text="Tell us what you are looking for." action={<Button asChild variant="outline"><Link to="/support">Contact support</Link></Button>} />
         )}
 
         <section className="mt-12 rounded-lg bg-panel p-5">
           <h2 className="font-display text-lg font-medium">Ordering from MTDGC</h2>
           <p className="mt-2 max-w-[70ch] text-sm text-foreground/80">
-            Choose a product and denomination, give us the account details the product needs, and place the order
-            at checkout. You get an order number and the payment details, then upload a screenshot of your payment. We
-            deliver once the payment is verified.
+            Choose a product, place the order, and pay the NPR total. Upload your payment confirmation.
+            Delivery follows verification, within the time shown on the listing.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <Button asChild variant="outline" size="sm"><Link to="/how-it-works">How ordering works</Link></Button>

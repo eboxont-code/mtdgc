@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, MessageCircle } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
+import { BuyerProtection } from "@/components/buyer-protection";
 import { HeroCarousel, buildSlides } from "@/components/home/hero-carousel";
 import { CategoryRail, ProductRail, SectionHeader, SeeAll } from "@/components/home/rails";
 import { ProductArt } from "@/components/product-art";
@@ -10,20 +11,22 @@ import { TrustBand } from "@/components/trust-band";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
+import { BRAND_DESCRIPTION, BRAND_FULL_NAME, BRAND_NAME, BRAND_TAGLINE, LOGO_ALT } from "@/lib/brand";
 import { listCatalog } from "@/lib/catalog.functions";
-import type { CatalogProduct } from "@/lib/catalog.functions";
+import type { CatalogCategory, CatalogProduct } from "@/lib/catalog.functions";
 import { SITE_URL, isOrderable, whatsappLink } from "@/lib/format";
-import { BRAND } from "@/lib/brand";
+import { LANDINGS } from "@/lib/landings";
 import { bestDeal } from "@/lib/pricing";
+import { canonicalLinks, faqLd } from "@/lib/seo";
 
-const FAQS = [
+const FAQS: [string, string][] = [
   [
     "How do I pay?",
-    "Place your order on this site, then pay using the QR or bank details shown for your order. Upload your payment screenshot and transaction reference for verification. If details are not shown, our team will send them shortly.",
+    "Place the order on this site. Your order page shows the QR code or bank details for the NPR total. Pay that amount, then upload your payment confirmation. Delivery follows verification.",
   ],
   [
     "How fast is delivery?",
-    "Each listing shows its usual delivery time. Payment verification comes before delivery. Contact support if your order is later than the time shown.",
+    "The listing states the delivery time to expect. Delivery follows payment verification. If an order passes that time, contact support with your order number.",
   ],
   [
     "Where do my key or account details appear?",
@@ -42,30 +45,20 @@ const FAQS = [
 export const Route = createFileRoute("/")({
   head: ({ loaderData }) => ({
     meta: [
-      { title: BRAND.title },
-      {
-        name: "description",
-        content:
-          BRAND.description,
-      },
-      { property: "og:title", content: BRAND.title },
-      {
-        property: "og:description",
-        content: BRAND.description,
-      },
+      { title: `${BRAND_NAME} | ${BRAND_FULL_NAME}` },
+      { name: "description", content: BRAND_DESCRIPTION },
+      { property: "og:title", content: `${BRAND_NAME} | ${BRAND_FULL_NAME}` },
+      { property: "og:description", content: BRAND_DESCRIPTION },
       { property: "og:url", content: `${SITE_URL}/` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:image", content: `${SITE_URL}/og/mtdgc.png` },
-      { property: "og:image:alt", content: BRAND.imageAlt },
+      { property: "og:image:alt", content: LOGO_ALT },
       { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
-      { name: "twitter:title", content: BRAND.title },
-      {
-        name: "twitter:description",
-        content: BRAND.description,
-      },
+      { name: "twitter:title", content: `${BRAND_NAME} | ${BRAND_FULL_NAME}` },
+      { name: "twitter:description", content: BRAND_DESCRIPTION },
     ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/` }],
+    links: canonicalLinks(`${SITE_URL}/`),
     scripts: [
       {
         type: "application/ld+json",
@@ -84,9 +77,16 @@ export const Route = createFileRoute("/")({
             })),
         }),
       },
+      faqLd(FAQS.map(([q, a]) => ({ q, a }))),
     ],
   }),
-  loader: () => listCatalog(),
+  loader: async () => {
+    try {
+      return await listCatalog();
+    } catch {
+      return { products: [] as CatalogProduct[], categories: [] as CatalogCategory[] };
+    }
+  },
   component: Index,
 });
 
@@ -130,8 +130,6 @@ function Index() {
 
   const products = data?.products ?? [];
   const categories = data?.categories ?? [];
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
-
   const sorted = useMemo(() => [...products].sort(byRank), [products]);
   const popular = useMemo(() => sorted.slice(0, 10), [sorted]);
   const slides = useMemo(() => buildSlides(sorted), [sorted]);
@@ -144,44 +142,24 @@ function Index() {
   const promoA = categories.find((c) => c.slug === "subscriptions");
   const promoB = categories.find((c) => c.slug === "gift-cards") ?? categories.find((c) => c.slug === "software");
 
-  const orgJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: BRAND.name,
-    alternateName: BRAND.legalName,
-    url: `${SITE_URL}/`,
-    description: BRAND.description,
-    logo: `${SITE_URL}/og/mtdgc.png`,
-    contactPoint: {
-      "@type": "ContactPoint",
-      contactType: "customer support",
-      url: `${SITE_URL}/support`,
-      availableLanguage: ["English", "Nepali"],
-    },
-  };
-  const siteJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: BRAND.name,
-    url: `${SITE_URL}/`,
-    potentialAction: {
-      "@type": "SearchAction",
-      target: `${SITE_URL}/catalog?q={search_term_string}`,
-      "query-input": "required name=search_term_string",
-    },
-  };
-
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }} />
       <SiteHeader />
 
       <main id="main-content" tabIndex={-1} className="focus:outline-none pb-16">
-        <div className="mx-auto max-w-6xl px-4 pt-1 md:pt-6">
-          <h1 className="sr-only md:not-sr-only md:truncate md:font-mono text-[10.5px] uppercase tracking-[0.06em] text-muted-foreground md:text-xs md:tracking-[0.14em]">
-            Game top-ups, gift cards and subscriptions in NPR
-          </h1>
+        <div className="mx-auto max-w-6xl px-4 pt-3 md:pt-6">
+          <header>
+            <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-primary">{BRAND_FULL_NAME}</p>
+            <h1 className="mt-1 font-display text-[1.75rem] font-semibold leading-none tracking-tight md:text-4xl">{BRAND_NAME}</h1>
+            <p className="mt-2 max-w-[40ch] text-sm leading-snug text-foreground/85">{BRAND_TAGLINE} Prices in NPR, with an Australian dollar guide.</p>
+          </header>
+          <nav aria-label="Popular guides" className="mt-3 flex gap-2 overflow-x-auto pb-1">
+            {LANDINGS.map((landing) => (
+              <Link key={landing.slug} to="/guides/$slug" params={{ slug: landing.slug }} className="shrink-0 rounded-full border border-border bg-card px-3 py-1.5 font-display text-xs text-foreground/85">
+                {landing.h1}
+              </Link>
+            ))}
+          </nav>
 
           <div className="mt-3 grid gap-3 md:mt-4 md:grid-cols-[2fr_1fr]">
             {slides.length > 0 && <HeroCarousel slides={slides} />}
@@ -248,18 +226,14 @@ function Index() {
         <section className="border-t border-border">
           <div className="mx-auto max-w-6xl px-4 py-7">
             <h2 className="mb-2 font-display text-[17px] font-medium md:text-2xl">Frequently asked</h2>
-            {FAQS.map(([question, answer], index) => (
-              <div key={question} className="border-b border-border">
-                <Button variant="ghost"
-                  className="flex w-full items-center justify-between py-4 text-left font-display text-sm font-medium"
-                  onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                  aria-expanded={openFaq === index}
-                >
+            {FAQS.map(([question, answer]) => (
+              <details key={question} className="group border-b border-border" open>
+                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between py-4 text-left font-display text-sm font-medium [&::-webkit-details-marker]:hidden">
                   {question}
-                  <ChevronDown className={`size-4 transition-transform ${openFaq === index ? "rotate-180" : ""}`} />
-                </Button>
-                {openFaq === index ? <p className="pb-4 pr-6 text-sm text-muted-foreground">{answer}</p> : null}
-              </div>
+                  <ChevronDown className="size-4 shrink-0 transition-transform group-open:rotate-180" />
+                </summary>
+                <p className="pb-4 pr-6 text-sm text-muted-foreground">{answer}</p>
+              </details>
             ))}
             <Link to="/faq" className="mt-4 inline-block font-display text-xs text-primary hover:underline">
               Read the full FAQ
@@ -289,6 +263,7 @@ function Index() {
         </section>
       </main>
 
+      <BuyerProtection />
       <SiteFooter />
     </div>
   );

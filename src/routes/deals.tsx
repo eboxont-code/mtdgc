@@ -4,10 +4,10 @@ import { PageHero } from "@/components/sections/page-hero";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { SITE_URL } from "@/lib/format";
-import { breadcrumbLd } from "@/lib/seo";
+import { breadcrumbLd, canonicalLinks } from "@/lib/seo";
 
-const title = "Deals on software and subscriptions in Nepal | MTDGC";
-const description = "Current sale prices on software and subscriptions. Prices in NPR.";
+const title = "Deals | MTDGC, Matrix Digital Goods & Commerce";
+const description = "Sale prices at MTDGC are published here when a listed price is reduced. Prices stay in NPR, with an Australian dollar guide on each listing.";
 
 export const Route = createFileRoute("/deals")({
   head: () => ({
@@ -22,7 +22,7 @@ export const Route = createFileRoute("/deals")({
       { name: "twitter:description", content: description },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/deals` }],
+    links: canonicalLinks(`${SITE_URL}/deals`),
     scripts: [breadcrumbLd([{ name: "Home", path: "/" }, { name: "Deals", path: "/deals" }])],
   }),
   component: DealsPage,

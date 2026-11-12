@@ -6,7 +6,7 @@ import { LayoutGrid, PackageCheck, Route as RouteIcon, ShoppingBag, Upload, User
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { SITE_URL } from "@/lib/format";
-import { breadcrumbLd, pageLd } from "@/lib/seo";
+import { breadcrumbLd, pageLd, canonicalLinks } from "@/lib/seo";
 
 export const Route = createFileRoute("/how-it-works")({
   head: () => ({
@@ -28,7 +28,7 @@ export const Route = createFileRoute("/how-it-works")({
       { property: "og:image:alt", content: "MTDGC, the digital marketplace for Nepal and Australia" },
       { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
     ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/how-it-works` }],
+    links: canonicalLinks(`${SITE_URL}/how-it-works`),
     scripts: [
       pageLd("WebPage", "MTDGC How it works", "/how-it-works", "Choose a product, provide delivery details, place an order, pay by QR or bank transfer and upload your screenshot and transaction reference for verification."),
       breadcrumbLd([{ name: "Home", path: "/" }, { name: "How it works", path: "/how-it-works" }]),
@@ -41,8 +41,8 @@ const STEPS: Array<[string, string, LucideIcon]> = [
   ["Choose a product and denomination", "Each product page shows the available packs or amounts, the region the product works in and what we need from you.", LayoutGrid],
   ["Add your details", "Game top-ups need a player ID, and some need a zone or server. Gift cards and subscriptions need a delivery email. We check these before fulfilling.", UserRound],
   ["Place your order at checkout", "Checkout takes three short steps on this site. When you place the order you get an order number to keep.", ShoppingBag],
-  ["Pay and upload your proof", "Your order page shows the payment details for your order. Pay, then upload a screenshot of the payment so our team can verify it.", Upload],
-  ["Receive your item", "We deliver once your payment is verified. Top-ups are credited to the account you gave us. Codes and subscription details are sent to your delivery email.", PackageCheck],
+  ["Pay and upload your confirmation", "Your order page shows the QR code or bank details for the NPR total. Pay that amount, then upload your payment confirmation.", Upload],
+  ["Receive your item", "After payment is verified, top-ups are credited to the account you gave us. Codes and subscription details are sent to your delivery email and shown on your order page.", PackageCheck],
 ];
 
 function HowItWorksPage() {
@@ -56,7 +56,7 @@ function HowItWorksPage() {
           icon={RouteIcon}
           eyebrow="Five steps"
           title="How ordering and delivery works"
-          intro="MTDGC reviews every order by hand before delivering it. Here is the full process, with no steps hidden."
+          intro="Order on MTDGC in five steps. You choose the product, pay in NPR, and receive it after payment is verified. The delivery time on each listing is the time to expect."
         />
 
         <ol className="mt-8 grid gap-3 sm:grid-cols-2">
@@ -74,13 +74,26 @@ function HowItWorksPage() {
           ))}
         </ol>
 
-        <section className="mt-12">
+        <section className="mt-12" aria-labelledby="delivery-times">
+          <h2 id="delivery-times" className="font-display text-lg font-medium">Delivery times</h2>
+          <p className="mt-2 text-sm text-foreground/80">
+            The delivery time on the product page is the time to expect after payment is verified. Top-ups are credited
+            to the player ID on the order. Codes and subscription details go to your delivery email and your order page.
+            If an order passes that time, contact support with your order number.
+          </p>
+          <p className="mt-3 text-sm">
+            <Link to="/policies/delivery" className="text-primary">Read the delivery policy</Link>
+            {" · "}
+            <Link to="/policies/refunds" className="text-primary">Read the refund policy</Link>
+          </p>
+        </section>
+
+        <section className="mt-10">
           <h2 className="font-display text-lg font-medium">Payments</h2>
           <p className="mt-2 text-sm text-foreground/80">
-            There is no card checkout on this website and we do not store card details. After you place your order,
-            your order page shows the payment details. Pay using only those details, then upload your payment
-            screenshot and transaction reference so our team can verify it. If payment details are not yet shown,
-            you can still place your order. Our team will send payment details shortly.
+            MTDGC does not take card numbers on this website. After you place your order, the order page shows the
+            QR code or bank details for the NPR total. Pay that amount, then upload your payment confirmation.
+            Delivery follows verification.
           </p>
         </section>
 

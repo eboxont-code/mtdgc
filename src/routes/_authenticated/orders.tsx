@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { canonicalLinks } from "@/lib/seo";
 import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useState } from "react";
 
@@ -10,6 +11,7 @@ import { ORDER_NOTICE, ORDER_STEPS, orderStepIndex, stepTime, formatNpr, SITE_UR
 import { GIFT_CARD_PRICE_DISCLOSURE } from "@/lib/gift-card-pricing";
 import { listMyOrders } from "@/lib/orders.functions";
 import { EmptyState } from "@/components/empty-state";
+import { OrderNextStep } from "@/components/order-next-step";
 import { Package } from "lucide-react";
 
 type Order = Awaited<ReturnType<typeof listMyOrders>>[number];
@@ -28,7 +30,7 @@ export const Route = createFileRoute("/_authenticated/orders")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/orders` }],
+    links: canonicalLinks(`${SITE_URL}/orders`),
   }),
   component: OrdersPage,
 });
@@ -81,6 +83,7 @@ function OrdersPage() {
                       {ORDER_NOTICE[order.status] ?? ORDER_STEPS[current]?.title ?? order.status}
                     </span>
                   </div>
+                  <OrderNextStep status={order.status} />
                   <ol className="mt-3 grid gap-2 sm:grid-cols-4">
                     {ORDER_STEPS.map((step, index) => (
                       <li key={step.title} aria-current={index === current ? "step" : undefined} className={`text-xs ${index <= current ? "text-foreground" : "text-muted-foreground"}`}>

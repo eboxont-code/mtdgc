@@ -4,7 +4,15 @@
 >
 > This file is preserved as a dated implementation and verification history. Checkboxes below record the status claimed by each historical pack when it was written; they are not a second live TODO register. When an old pack conflicts with the Master Plan, use the Master Plan and refresh the implementation evidence before changing task status.
 
+## 12 Nov ordered pack
+- [ ] MT-0181: inspect purchase presentation at 390px, 360px and desktop; small safe UI fixes only; no order/payment writes or publishing; confirmation and physical-device keyboard verification require an authorized test window.
+- [x] MT-0101/MT-0102/MT-0108: source-only 13-status/transition map and four precise milestone definitions in Master Plan section 32; shared next-action guidance on order details/account orders/guest tracking; 11 tests and isolated 390px/desktop layout checks passed, build OK; real populated-order check blocked by unavailable auth users; protected files/server actions unchanged; not published.
+
 ## 5 Nov ordered pack
+- [x] MT-0144: prominent saved-region warnings above desktop and mobile purchase actions plus gift-card region confirm; listing region data only, no invented markets; tests and 390px check passed, no overflow; not published.
+- [x] MT-0195: shared EmptyState/Skeleton loading, retry and empty presentation on catalog/category/product lists and product loading/errors; 390px failure-to-retry flow and unavailable purchase lock verified; protected home/global/cart/checkout states skipped; not published.
+- [x] MT-0196: visible option focus, unique required-field descriptions, selection/result announcements, 44px tabs and mobile filter focus restoration; keyboard checks and reduced-motion axe audit passed at 390px/desktop; existing scroll-reveal contrast flags and protected global controls left unchanged; not published.
+- [x] MT-0197: catalog eager images reduced to first two, remaining five lazy; existing 320px dimensions and async decoding verified; related art already lazy and fonts already self-hosted; script deferral skipped in protected root/router, JSON-LD retained; 20 regression tests and automatic build passed; not published.
 - [ ] MT-0188: existing plan URL remains the selection source; back-navigation and reload verification pending; not published.
 - [ ] MT-0189: product forms already render listing requirements only; restored and submitted fields now exclude unrelated keys; protected checkout contact fields and legacy cart-line cleanup skipped; verification pending; not published.
 - [x] MT-0185: client-side brand/name/game/denomination search and FF/PUBG/ML/MLBB/NFX aliases; URL state retained; rule tests and real FF search passed; not published.
@@ -108,7 +116,7 @@
 
 ## Current launch pack
 - [ ] Force Lovable project display name to MTDGC and verify
-- [ ] Complete MTDGC identity sweep, favicon, manifest, inner-route metadata
+- [x] Complete MTDGC identity sweep: manifest name/short_name now MTDGC; existing brand icons preserved and verified HTTP 200/sizes; 24 public pages verified with unique titles/descriptions and self canonicals; 390px About page has no overflow; not published.
 - [ ] Ship catalog, product detail, persistent cart, honest checkout, account/admin surfaces
 - [ ] Add sitemap.xml and verify HTTP 200
 - [ ] Final mobile, accessibility, asset, metadata, navigation, and brand smoke test

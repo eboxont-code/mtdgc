@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.2 · 8 November 2026
+**Version:** 2.3 · 13 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -225,14 +225,14 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** The order state is consistent from checkout to delivery, with a complete audit trail and useful customer visibility.
 
-- [x] **MT-0101 · P0 · DONE** — Map all 13 live order-status enum values, current application writers, generic administrator targets, legacy display aliases and observed transitions; confirm that neither application nor database enforces a complete transition graph. Evidence: section 30 and Data Architecture section 4; current-main source inspection plus read-only production enum, aggregate status-count, column-type, proof-status constraint and order-trigger queries on 8 November 2026.
-- [ ] **MT-0102 · P0 · TODO** — Ensure Payment received, Verified, Processing and Delivered have precise operational definitions.
+- [x] **MT-0101 · P0 · DONE** — Source-only refresh of all 13 statuses, writers and permitted application transitions on 12 November 2026; see section 32. The generic administrator setter still allows direct jumps; no complete transition graph is enforced by that code. Historical live-schema evidence remains in section 30; no database inspection was performed for this refresh.
+- [x] **MT-0102 · P0 · DONE** — Precise source-grounded definitions for Payment received, Verified, Processing and Delivered in section 32 and shared customer milestone copy; distinguish proof submission/manual status labels from independent settlement or delivery evidence.
 - [ ] **MT-0103 · P0 · TODO** — Add explicit Cancelled, Failed, Refunded and Action required states where applicable.
 - [ ] **MT-0104 · P0 · TODO** — Prevent invalid status jumps, such as Pending directly to Delivered without payment verification.
 - [ ] **MT-0105 · P0 · TODO** — Verify guest order tracking requires the order number plus the matching email or phone.
 - [ ] **MT-0106 · P0 · TODO** — Ensure account order history and guest tracking show the same canonical status.
 - [ ] **MT-0107 · P1 · TODO** — Record a timestamp and actor for every status transition.
-- [ ] **MT-0108 · P1 · TODO** — Show customers what happens next at each stage and whether they need to act.
+- [x] **MT-0108 · P1 · DONE (implementation)** — Shared What happens next guidance covers all 13 statuses in customer order details, account orders and guest tracking results; 11 targeted tests passed and isolated 390px/desktop guidance checks passed. Real populated-order end-to-end verification is blocked by unavailable preview auth users; see section 32.
 - [ ] **MT-0109 · P1 · TODO** — Allow staff to add internal notes without exposing them to customers.
 - [ ] **MT-0110 · P1 · TODO** — Add an action-required state for missing player ID, region mismatch or delivery-email correction.
 - [ ] **MT-0111 · P1 · TODO** — Prevent duplicate checkout submissions from creating duplicate orders.
@@ -278,7 +278,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0141 · P0 · TODO** — Review the current Terms, Privacy, Delivery and Refund policies for consistency across Nepal and Australia.
 - [ ] **MT-0142 · P0 · TODO** — Resolve any conflict between the advertised markets and the markets covered by legal terms.
 - [ ] **MT-0143 · P0 · TODO** — Ensure refund rules distinguish undelivered, supplier-failed, incorrect-item and successfully redeemed digital goods.
-- [ ] **MT-0144 · P0 · TODO** — Make region-lock warnings prominent before payment for every region-restricted code.
+- [x] **MT-0144 · P0 · DONE** — Region-lock warnings prominent before add-to-cart/buy on region-restricted product pages (desktop order summary, details column, mobile sticky bar) plus required gift-card region confirmation; uses saved listing region only; verified at 390px with no overflow; not published.
 - [ ] **MT-0145 · P0 · TODO** — Make wrong-player-ID warnings visible before confirming an irreversible top-up.
 - [ ] **MT-0146 · P1 · TODO** — Publish support response hours only after they are operationally staffed.
 - [ ] **MT-0147 · P1 · TODO** — Create ticket categories for payment, delayed delivery, invalid code, wrong item, refund and account access.
@@ -326,7 +326,7 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** Customers can discover the right digital item, understand restrictions and complete an order without confusion.
 
 - [ ] **MT-0181 · P0 · TODO** — Test the full purchase journey on common Android phones and narrow mobile screens.
-- [ ] **MT-0182 · P0 · REVIEW** — Availability labels, purchasable counts and disabled coming-soon actions were implemented and rule-tested in the 5 November pack; confirm the current production page before marking complete because the roadmap pack recorded the change as not yet published.
+- [x] **MT-0182 · P0 · DONE AND LIVE** — Current production verification on 11 November 2026 confirms the catalog/category availability labels and counts agree, coming-soon purchase actions are disabled, and the temporarily unavailable Netflix listing remains disabled. Evidence: the MT-0182 verification record in section 15; current production deployment and exact-head quality evidence are linked there.
 - [x] **MT-0183 · P0 · DONE AND LIVE** — Ensure the product card, product page and checkout show matching prices and variants; PR #17 merged at `9f944ec36ec3f87e3e603ff308b20979a1013183` and production deployment `dpl_cfXAs4hrfTSgdurWL1Veb5prUA5v` is READY on that exact SHA.
 - [ ] **MT-0184 · P0 · REVIEW** — Production purchase summaries were checked on five orderable pages on 8 November. Mobile Legends user-ID guidance is inaccurate in production; correction and regression coverage are in draft PR #19. See section 28; production and visual/mobile verification remain pending.
 - [ ] **MT-0185 · P1 · TODO** — Improve catalog search for brand, product, game, denomination and common abbreviations.
@@ -350,7 +350,7 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** MTDGC earns qualified demand through useful category and product information, not thin pages or unsupported claims.
 
-- [!] **MT-0201 · P0 · BLOCKED** — Canonical brand description is implemented in draft PR #33, but exact-head Quality run 42470238332 failed before runner startup (zero steps/logs) and the exact-head Vercel preview was rejected by the free daily build limit. Local focused checks passed; full repository quality and production release remain unverified.
+- [!] **MT-0201 · P0 · BLOCKED** — The README-approved neutral description is implemented in existing draft [PR #33](https://github.com/eboxont-code/mtdgc/pull/33) across shared brand metadata, Organization/WebSite structured data, the About introduction, shared footer, homepage image alt text and web manifest. Focused regression coverage is added. Current-main Quality run [43241725039](https://github.com/eboxont-code/mtdgc/actions/runs/43241725039) failed before the runner started; no lint, tests, typecheck or build ran. The exact PR-head quality workflow and production release remain required. Keep the PR draft; do not merge until the exact head passes. The separate market claims and Australia service-area metadata remain unchanged under MT-0202 pending owner/qualified review.
 - [ ] **MT-0202 · P0 · TODO** — Resolve the homepage's Nepal-and-Australia positioning against actual checkout and legal-market support.
 - [ ] **MT-0203 · P1 · TODO** — Create original category landing pages for game top-ups, gift cards, subscriptions and software.
 - [ ] **MT-0204 · P1 · TODO** — Write product descriptions that explain what is delivered, how it works and what restrictions apply.
@@ -530,7 +530,7 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-task register are authoritative.
+MT-0201 is being refreshed in existing draft PR #33. Its new description is not live; the current-main quality run failed before the testing computer started. Task statuses in the 308-task register remain authoritative.
 
 | Order | Task | Status |
 |---:|---|---|
@@ -543,7 +543,7 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 7 | MT-0086 — require independent payment settlement matching before fulfilment | BLOCKED; no bank-statement feed, provider callback or owner-approved manual settlement evidence is available |
 | 8 | MT-0087 — prevent duplicate transaction references/screenshots across orders | BLOCKED; concurrency-safe uniqueness requires the approved Supabase cutover/migration gate |
 | 9 | MT-0101 — map current order statuses and observed transition paths | DONE; 13-value enum, application writers, UI mappings, production aggregate counts and lack of transition enforcement are documented in section 30 and Data Architecture section 4 |
-| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | NEXT P0; can be documented from the current payment-review code and existing operational evidence without production writes |
+| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | BLOCKED; exact-head Quality run [43001915772](https://github.com/eboxont-code/mtdgc/actions/runs/43001915772) and current-main run [43241725039](https://github.com/eboxont-code/mtdgc/actions/runs/43241725039) failed before any job step started; no full checks ran |
 | 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 
@@ -704,6 +704,34 @@ No product, variant, category, price, availability flag or database record was c
 **Evidence sources:** read-only query of the MTDGC `public.products`, `public.product_variants` and `public.categories` tables on 6 November 2026; public pages [Catalog](https://mtdgc.com/catalog), [All products](https://mtdgc.com/products), [Game Top-Ups](https://mtdgc.com/categories/game-top-ups) and [Gift Cards](https://mtdgc.com/categories/gift-cards).
 
 
+
+### MT-0182 production availability verification — 11 November 2026
+
+**Task:** MT-0182 · P0 · DONE AND LIVE. This closes the remaining review item from the 5 November storefront pack: the existing availability presentation is now confirmed on the current public production deployment.
+
+**Production deployment and live checks**
+
+- The connected Vercel project `mtdgc` is linked to this repository. The documentation-only plan updates produced production deployments [dpl_FkRmJmmpzLXv4JC85NfSkJWekDbR](https://vercel.com/boxont/mtdgc/FkRmJmmpzLXv4JC85NfSkJWekDbR) (**READY**, commit `5dfed8c58002ea92980eebd92b610d5e5562c25b`) and [dpl_56srinni595fR7JPvHFzFKqSMwRy](https://vercel.com/boxont/mtdgc/56srinni595fR7JPvHFzFKqSMwRy) (**READY**, current production commit `83e5f94b9094c58f6f759a17c07dbcb5dbffac51`). The latest deployment aliases `mtdgc.com` and `www.mtdgc.com`; live smoke checks were repeated after it.
+- The live [catalog](https://mtdgc.com/catalog) reports **36 listed / 5 available now / 30 coming soon / 1 unavailable**.
+- The live category pages reconcile to the same totals: [Game Top-Ups](https://mtdgc.com/categories/game-top-ups) 6 / 4 / 2 / 0; [Gift Cards](https://mtdgc.com/categories/gift-cards) 12 / 1 / 11 / 0; [Subscriptions](https://mtdgc.com/categories/subscriptions) 7 / 0 / 6 / 1; [Software](https://mtdgc.com/categories/software) 11 / 0 / 11 / 0. The four categories sum to 36 / 5 / 30 / 1. This is the current snapshot; section 15's 6 November historical snapshot remains unchanged.
+- The live [Genshin Impact Genesis Crystals sample listing](https://mtdgc.com/products/sample-genshin-impact-crystals) shows `Price coming soon` and a `Coming soon` action. The current product route renders that action disabled for non-purchasable products; the catalog tile shows the availability label and no purchasable price.
+- The live [Netflix Subscription listing](https://mtdgc.com/products/netflix-subscription) shows `Temporarily unavailable` and a disabled purchase action. It is not counted as available now.
+- These were non-destructive page reads only. No form was submitted, and no order, payment or customer record was created.
+
+**Source and test evidence**
+
+- Current `main` uses the shared `src/lib/product-availability.ts` rules for purchasable variants, availability labels and counts. Catalog/category pages use the shared counts; product tiles show status instead of a price when no variant is purchasable; product-page actions are disabled when the selected product is not orderable.
+- `src/lib/product-availability.test.ts` covers coming-soon counts, product/variant eligibility, hidden sample prices, unavailable listings and consistent lowest-variant selection.
+- The helper/test source commit `233ddd3792b49e7d776b23641b8a64b3028eb846` is an ancestor of tested commit `21102f8816158e3cf31d0ef450c7298cb22869e5`; that tested commit is an ancestor of current production commit `83e5f94b9094c58f6f759a17c07dbcb5dbffac51`.
+- Exact-head Quality run [42430253311](https://github.com/eboxont-code/mtdgc/actions/runs/42430253311) on `21102f8816158e3cf31d0ef450c7298cb22869e5` **passed** lint, unit tests, TypeScript typecheck and production build. An earlier intermediate run [42424656734](https://github.com/eboxont-code/mtdgc/actions/runs/42424656734) failed typecheck; the later tested descendant passed all checks.
+- The two documentation-only plan commits' GitHub Quality runs [43008843526](https://github.com/eboxont-code/mtdgc/actions/runs/43008843526) and [43009170312](https://github.com/eboxont-code/mtdgc/actions/runs/43009170312) both failed before runner startup (`runner_id` 0, no steps executed); lint, tests, typecheck and build did not run on those documentation-only commits. No application source changed in either commit. The exact-head source run above remains the latest completed quality evidence for the shipped availability code.
+- Read-only Supabase metadata reports the connected production project as `ACTIVE_HEALTHY`, with 36 product rows and 54 variant rows. No customer/order/payment rows were read; no schema change was required.
+
+**Scope and safeguards**
+
+This verifies the storefront's presentation and purchasability controls only. It does not prove supplier stock, supplier authorisation, region compatibility, price validity, margin or successful fulfilment. Those remain subject to their separate supplier and test-order gates. No application code, product/variant record, price, availability flag, order, payment, customer data, schema, credential, environment, DNS, hosting or billing setting was changed. Additional spend: **$0**.
+
+**Next eligible task:** MT-0165 — perform a read-only review of current repository/configuration references for exposed secrets, supplier credentials and payment settings. Do not reveal secret values or change credentials. The earlier `.env` history review (MT-0302) is already complete and must not be repeated.
 
 ## 16. Historical environment-file credential review — 6 November 2026
 
@@ -1335,34 +1363,108 @@ No production application code, database/schema, order/payment/customer record, 
 
 **Next P0 task:** MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered from the actual proof-review behaviour and existing evidence. Do not describe screenshot submission as independent settlement confirmation.
 
+## 32. Order statuses and customer next steps - 12 November 2026
 
-## 33. Canonical MTDGC brand description — 8 November 2026
+**Scope:** MT-0101 source-only refresh, MT-0102 operational definitions, MT-0108 customer guidance. This section supersedes historical next-task references to MT-0102. No live database facts or business transition policy are inferred from this source inspection.
 
-**Task:** MT-0201 · P0 · IN PROGRESS. [PR #33](https://github.com/eboxont-code/mtdgc/pull/33) is open and draft, based on current main `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`. The source/test commit at PR creation is `c069a825dad0ae0b66db67adc35a43bfa788c79e`; the plan-record commit is a documentation-only descendant.
+### Current source status map
 
-### Canonical source
+The 13 values below are declared in `src/integrations/supabase/types.ts:609-622`; application writers are `src/lib/orders.functions.ts` and `src/lib/admin.functions.ts`. Customer aliases are in `src/lib/format.ts` and the order/tracking pages. An event label is not necessarily the current order status.
 
-The opening statement in README.md is the approved source of the brand description:
+| Order status | Current source writer / meaning | Customer next step |
+|---|---|---|
+| `pending` | Legacy initial label; no current application order writer found | Contact support to confirm payment instructions; upload is not enabled for this state |
+| `pending_payment` | New order or replacement-proof request | Pay with supplied details and upload screenshot/reference; do not pay again for a replacement proof |
+| `payment_submitted` | Customer proof submitted for manual review | Wait for review; submission does not verify payment |
+| `paid` | Generic administrator setter; manual/legacy Payment received label | Wait for confirmation; do not pay again |
+| `verified` | Accepted manual proof review or generic administrator setter | Wait for preparation unless staff request details |
+| `processing` | Generic administrator setter; preparation label | Wait unless staff request details |
+| `delivered` | Generic administrator setter; delivery label | Check the item's delivery destination; contact support if missing |
+| `fulfilled` | Legacy Delivered milestone alias; no current application writer found | Check the item's delivery destination |
+| `completed` | Legacy Delivered milestone alias; no current application writer found | Check the item's delivery destination |
+| `rejected` | Review rejected without resubmission, or generic administrator setter | Contact support; replacement upload requires return to `pending_payment` |
+| `failed` | Legacy display state; no current application writer found | Contact support before another payment |
+| `cancelled` | Generic administrator setter; status update only | No more payment/proof; contact support if already paid |
+| `refunded` | Generic administrator setter; status update only, no money transfer executed | Check payment account and ask support if refund is missing |
 
-> Matrix Digital Goods & Commerce is a digital-goods storefront for game top-ups, gift cards, subscriptions and software.
+### Transitions the application actually permits
 
-### Implementation
+| Code path | From | To | Actual guard |
+|---|---|---|---|
+| `placeOrder` (`orders.functions.ts:147-167`) | New order | `pending_payment` | Explicit initial status |
+| `submitPaymentProof` (`orders.functions.ts:348-374`) | `pending_payment` | `payment_submitted` | Order access, screenshot/reference validation, latest-proof resubmission check and conditional current-status update |
+| `reviewPayment`, verify (`admin.functions.ts:235-265`) | `payment_submitted` | `verified` | Administrator, submitted proof and conditional current-status update |
+| `reviewPayment`, reject with `askNewProof` | `payment_submitted` | `pending_payment` | Same review guards; rejection note required; rejected event then pending-payment event |
+| `reviewPayment`, reject without `askNewProof` | `payment_submitted` | `rejected` | Same review guards; rejection note required |
+| `updateOrderStatus` (`admin.functions.ts:18-29`) | Any existing status, including the same status | `paid`, `verified`, `rejected`, `processing`, `delivered`, `cancelled`, `refunded` | Administrator and target validator only; no previous-state, proof or delivery prerequisite |
+| `addOrderNote` (`admin.functions.ts:32-39`) | Any | No change to `orders.status` | Administrator; writes an arbitrary text status event/note only |
 
-- Added one shared brand definition for the public name, legal name, page title, canonical description and image alt text.
-- Reused it in the homepage title/description, Open Graph and Twitter metadata, Organization structured data, root metadata fallbacks, About-page metadata/structured data/hero introduction and the shared site footer.
-- Added two regression tests: one pins the approved wording and brand identity; the other prevents the canonical description from implying a live market, current availability, reseller authorisation or instant delivery.
-- Separate market-positioning content and the existing About-page `areaServed` data remain unchanged for MT-0002/MT-0202 review. Legal policies, product availability, prices, supplier claims and fulfilment rules were not changed.
+There is no complete transition graph enforced by the application: direct administrator jumps remain possible. Source inspection cannot establish the current live database's constraints. Transition enforcement belongs to MT-0104 and was not changed.
 
-### Verification boundary
+### Precise operational definitions
 
-- Local Node.js 22.16 test run: **2/2 PASS**.
-- Standalone strict TypeScript check of the shared brand definition: **PASS**.
-- Exact PR-head GitHub Quality run [42470238332](https://github.com/eboxont-code/mtdgc/actions/runs/42470238332) failed before runner startup; the job has zero steps and no logs. Full lint, Bun suite, project-wide typecheck and production build are therefore UNAVAILABLE, not failed application checks. Do not retry unchanged; revisit only after new runner evidence.
-- Vercel rejected the exact-head preview under the free daily build limit; no paid workaround was attempted. No production deployment or live metadata verification is claimed. Production remains READY on older commit 3de811c7cfce91eb262cf79523d8053995bfb777; main is not yet deployed.
-- No production data, database/schema, orders, payments, supplier records, authentication, environment variables, DNS, hosting or billing settings were changed. Additional spend: **$0**.
+- **Payment received:** the application has accepted a screenshot/reference (`payment_submitted`), or staff have manually set `paid`; neither label is independent settlement confirmation.
+- **Verified:** staff accepted a submitted proof through `reviewPayment`, or manually set `verified`; the code records approval but does not require independent bank evidence on either path.
+- **Processing:** staff manually marked the order as being prepared for fulfilment; the setter neither starts an automated fulfilment job nor enforces prior verification.
+- **Delivered:** staff manually marked delivery (`delivered`), with `fulfilled`/`completed` as legacy milestone aliases; the setter does not require delivery evidence or guarantee a particular destination.
 
-### Release state and next candidate
+### Implementation and verification evidence
 
-MT-0201 is BLOCKED until a new runner can complete the exact-head quality workflow and the production release can be verified. PR #33 remains OPEN/DRAFT; no merge commit exists and no new metadata is live.
+- `src/lib/order-next-step.ts` maps every source-declared status plus an unknown-status support fallback to a customer action and plain guidance; only `pending_payment` suggests the upload allowed by the existing server action.
+- `src/components/order-next-step.tsx` renders the same Matrix-token, polite-announcement line beside the current status in `src/routes/order.$orderNumber.tsx`, `src/routes/_authenticated/orders.tsx` and the found result in `src/routes/track-order.tsx`. No hidden/internal notes are exposed. Shared milestone descriptions in `format.ts` now distinguish labels from independent evidence; tracking no longer exposes raw labels for the current payment states.
+- `bun test src/lib/order-next-step.test.ts src/lib/format.test.ts`: **11 passed, 0 failed**, including all 13 action mappings, delivery aliases, unsupported rejected/legacy uploads and unknown fallback. Automatic preview build log: **build OK** after source edits.
+- Playwright checked **390px first, then 1280px desktop**: all 13 guidance variants rendered in an isolated component-only presentation check with no horizontal overflow; screenshots inspected; no runtime errors. Actual tracking rejected missing order/contact and the actual order page stayed contact-gated without revealing guidance.
+- **Verification limitation:** real populated account/order/tracking results were not exercised. Preview session minting failed because no auth users were available. No customer account, order or payment was created, and no invented records or mocked lookup response were used. A signed-in existing customer session and authorized order/contact are required for that final read-only end-to-end check.
+- **Skipped/unchanged:** protected cart, checkout, router/Sentry and product-help; no schema, migration, server action, storage, auth setting, transition permission, delivery time or payment detail changed. No publishing or deployment requested.
 
-The next independent P0 candidate is **MT-0292 — map personal-data fields and known processors from the current application and project metadata**. The initial map can be completed from source/schema evidence; supplier recipients, external processing locations and retention details that are not present in the records must remain explicitly UNKNOWN/BLOCKED rather than inferred.
+
+## 33. Brand-mark consistency and catalogue product-art audit — 12 November 2026
+
+**Scope:** Align the visible MTDGC company identity across shared UI states and page metadata; improve product-specific logo artwork only where a verifiable reusable mark is available. This work does not change product status, supplier legitimacy, resale authority or launch eligibility.
+
+### MTDGC company identity
+
+- The approved 5×5 emerald M remains the canonical company glyph in `src/components/brand/glyph.tsx`; `src/components/brand/wordmark.tsx` remains the shared wordmark implementation.
+- The shared wordmark is present in the storefront header/footer, not-found and error fallbacks, and authenticated-account loading state. The homepage hero fallback uses the shared glyph rather than the retired 3×3 matrix.
+- The standalone server-generated 500 page (`src/lib/error-page.ts`), used when SSR fails before React can render, now draws the same 5×5 M and full MTDGC wordmark using the approved emerald/forest palette.
+- Browser, favicon, Apple touch and manifest icon assets use the 5×5 M. Existing designed Open Graph share cards are retained rather than replaced with a plain favicon. The 48×48 browser favicon and 192×192 app icon were also visually checked against the 512×512 and Apple touch variants.
+- Root metadata now supplies the branded `/og/mtdgc.png` preview for routes that do not define their own image. Route-specific preview images remain in control where present.
+- The obsolete, unreferenced root `h.html` snapshot from 24 October, which contained the retired 3×3 mark and stale page markup, was removed. It had no code references.
+
+### Product-art changes
+
+- Generated product artwork now includes verified Simple Icons marks for DoorDash, Uber Eats and Ticketmaster on their respective Australian gift-card tiles. Source identifiers and CC0-1.0 provenance are recorded in `THIRD_PARTY_LOGO_ASSETS.md`.
+- The existing generated marks for software/subscription/game products remain distinct from the MTDGC company logo. Product brands are not replaced with the MTDGC glyph.
+- The Australian card artwork audit identified seven remaining image files that still use generic text-led artwork rather than a verified current brand mark: Amart Furniture, Bunnings, Coles, JB Hi-Fi, Kmart, Supercheap Auto and Woolworths. Obtain current, permitted assets or documented source rights before replacing these; do not use outdated marks or assume that a third-party logo aggregator grants reuse rights.
+- The Clash of Clans product cover shows character artwork without the game title mark. Supercell's [official Media Center](https://supercell.com/en/media-center/) links to a brand asset portal, while its [Fan Content Policy](https://supercell.com/en/fan-content-policy/) governs use of game copyrights and trademarks for fan content. Do not substitute fan-kit or third-party artwork for commercial product merchandising without an applicable permission basis.
+- **MT-0039 remains TODO/open.** It is not complete until imagery rights and all remaining misleading product artwork have been reviewed and resolved.
+
+### Verification and boundaries
+
+- GitHub commits on `main` updated the shared fallback branding, authenticated loading mark, root social-image defaults, product brand-mark map, provenance notes and removal of the stale HTML snapshot.
+- The latest Vercel production deployment for main commit `19c98f25cd55bb2de19e4fc41369cc8039b7e1ab` reached `READY` at deployment `dpl_6bRFrqFC1DEwg8YvpaQ2HJT77pMi`; `mtdgc.com` and `www.mtdgc.com` aliases remained attached with no alias error.
+- GitHub Actions Quality runs continued to report failure without starting a job step or exposing runner logs (`steps: null`, `logs_url: null`). This is not evidence of a source test failure, but it also does not constitute passing CI. The Vercel deployment is the verified production-build signal.
+- No Supabase rows, product URLs, product status, variants, prices, supplier records, checkout or payment settings were changed. No orders, purchases or payments were created. No additional spend was incurred.
+
+**Next imagery action:** source and verify permitted current logos for the seven outstanding Australian retailer cards before closing MT-0039. Maintain the 5×5 emerald M as the single MTDGC company mark throughout.
+
+
+## 34. Canonical MTDGC brand description refresh — 13 November 2026
+
+**Task:** MT-0201 · P0 · BLOCKED in existing [PR #33](https://github.com/eboxont-code/mtdgc/pull/33). The branch is refreshed onto current main with a history-preserving merge; it remains a draft until the exact-head quality workflow passes and the production result is verified.
+
+### Approved description and implementation
+
+- README.md remains the source of truth: “Matrix Digital Goods & Commerce is a digital-goods storefront for game top-ups, gift cards, subscriptions and software.”
+- The shared `BRAND_DESCRIPTION` now matches that sentence exactly. Root fallback metadata, homepage/About metadata, Organization and WebSite structured data already consume this constant; the About introduction and shared footer now use it too.
+- The web manifest uses the same description. The homepage social-image alt text now uses the neutral company-logo description.
+- The separate homepage tagline, About-page market statements and Australia `areaServed` metadata are deliberately unchanged. Their accuracy is a separate MT-0202 owner/qualified-review decision; this task does not claim Australia-local sales are approved or enabled.
+
+### Verification and release boundary
+
+- Focused source-contract regression coverage checks the README wording, shared page metadata/footer references, About introduction, web-manifest description and absence of unsupported market/availability/reseller/delivery claims in the canonical description.
+- Current-main Quality run [43241725039](https://github.com/eboxont-code/mtdgc/actions/runs/43241725039) failed before any job step started. This is a runner-startup failure, not an application-test failure; lint, unit tests, typecheck and production build did not run. The official GitHub status page reported Actions operational after the 11 November incident was resolved at 21:21 UTC. Account Actions allowance and repository Actions settings are not readable through the connected access.
+- The exact PR-head Quality result and a current preview build remain to be checked. The current production deployment is READY on main commit `d51ca37ea6adc9a93344816856236f680c213392` at [deployment `dpl_GaZMp1juExA9KkyrVkEyu8DzKVqC`](https://vercel.com/boxont/mtdgc/GaZMp1juExA9KkyrVkEyu8DzKVqC), with `mtdgc.com` and `www.mtdgc.com` aliases. This brand-description change is not live.
+- No production database writes, migrations, order/customer/payment changes, credentials, environment, hosting, DNS or billing changes. Additional spend: $0.
+
+**Next eligible P0 task:** MT-0292 — map personal-data fields and known processors from source and schema metadata only. Record any supplier recipients, processor locations, storage countries or retention periods as UNKNOWN unless directly evidenced; do not inspect customer rows or infer legal requirements.

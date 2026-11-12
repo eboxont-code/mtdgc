@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { canonicalLinks } from "@/lib/seo";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -34,7 +35,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/admin` }],
+    links: canonicalLinks(`${SITE_URL}/admin`),
   }),
   component: AdminPage,
 });

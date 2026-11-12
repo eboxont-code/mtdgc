@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { canonicalLinks } from "@/lib/seo";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { SiteFooter } from "@/components/site-footer";
@@ -22,7 +23,7 @@ export const Route = createFileRoute("/cart")({
       { property: "og:type", content: "website" },
       { name: "robots", content: "noindex" },
     ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/cart` }],
+    links: canonicalLinks(`${SITE_URL}/cart`),
   }),
   component: CartPage,
 });

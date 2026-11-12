@@ -5,7 +5,7 @@ import { PageHero } from "@/components/sections/page-hero";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { SITE_URL } from "@/lib/format";
-import { breadcrumbLd, pageLd } from "@/lib/seo";
+import { breadcrumbLd, pageLd, canonicalLinks } from "@/lib/seo";
 
 export const Route = createFileRoute("/policies/privacy")({
   head: () => ({
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/policies/privacy")({
       { property: "og:image:alt", content: "MTDGC, the digital marketplace for Nepal and Australia" },
       { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
     ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/policies/privacy` }],
+    links: canonicalLinks(`${SITE_URL}/policies/privacy`),
     scripts: [
       pageLd("WebPage", "MTDGC Privacy policy", "/policies/privacy", "Privacy policy from MTDGC, the digital marketplace for Nepal and Australia."),
       breadcrumbLd([{ name: "Home", path: "/" }, { name: "Privacy policy", path: "/policies/privacy" }]),
@@ -38,7 +38,7 @@ function PrivacyPage() {
       <SiteHeader />
       <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-3xl px-4 pb-16 pt-6">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Privacy policy" }]} />
-        <PageHero eyebrow="Policy" title="Privacy policy" intro="Last updated 4 October 2026" />
+        <PageHero eyebrow="MTDGC · Matrix Digital Goods & Commerce" title="Privacy policy" intro="What MTDGC collects to deliver an order, and how to ask about your data." />
         <div className="mt-6 space-y-4 text-sm text-foreground/80">
           <p>
             MTDGC collects only what is needed to fulfil an order: your name, the contact number or email you want us to

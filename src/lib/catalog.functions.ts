@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/integrations/supabase/types";
+import { catalogFixtureEnabled, fixtureCatalog, fixtureCategory, fixtureProduct } from "@/lib/catalog-fixture";
 import { pricesHidden } from "@/lib/price-visibility";
 
 export type Variant = {
@@ -41,6 +42,14 @@ export type CatalogProduct = {
   created_at: string;
   category: { slug: string; name: string } | null;
   variants: Variant[];
+};
+
+export type PublicReview = {
+  id: string;
+  rating: number;
+  body: string;
+  created_at: string;
+  is_verified_purchase: boolean;
 };
 
 export type CatalogCategory = {
@@ -111,7 +120,9 @@ async function cached<T>(key: string, load: () => Promise<T>): Promise<T> {
   return value;
 }
 
-export const listCatalog = createServerFn({ method: "GET" }).handler(() => cached("catalog", async () => {
+export const listCatalog = createServerFn({ method: "GET" }).handler(() => {
+  if (catalogFixtureEnabled()) return fixtureCatalog();
+  return cached("catalog", async () => {
   const supabase = publicClient();
   const [products, categories] = await Promise.all([
     supabase.from("products").select(PRODUCT_SELECT).eq("is_published", true),
@@ -123,11 +134,14 @@ export const listCatalog = createServerFn({ method: "GET" }).handler(() => cache
     products: (products.data ?? []).map((row) => shape(row as RawProduct)),
     categories: (categories.data ?? []) as CatalogCategory[],
   };
-}));
+  });
+});
 
 export const getProductBySlug = createServerFn({ method: "GET" })
   .inputValidator((data: { slug: string }) => data)
-  .handler(({ data }) => cached(`product:${data.slug}`, async () => {
+  .handler(({ data }) => {
+    if (catalogFixtureEnabled()) return fixtureProduct(data.slug);
+    return cached(`product:${data.slug}`, async () => {
     const supabase = publicClient();
     const { data: row, error } = await supabase
       .from("products")
@@ -136,15 +150,18 @@ export const getProductBySlug = createServerFn({ method: "GET" })
       .eq("is_published", true)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    if (!row) return { product: null, related: [] as CatalogProduct[], explore: [] as CatalogProduct[] };
+    if (!row) return { product: null, related: [] as CatalogProduct[], explore: [] as CatalogProduct[], reviews: [] as PublicReview[] };
 
     const product = shape(row as RawProduct);
-    const { data: relatedRows } = await supabase
-      .from("products")
-      .select(PRODUCT_SELECT)
-      .eq("is_published", true)
-      .neq("slug", data.slug)
-      .limit(8);
+    const [{ data: relatedRows }, { data: reviewRows }] = await Promise.all([
+      supabase.from("products").select(PRODUCT_SELECT).eq("is_published", true).neq("slug", data.slug).limit(8),
+      supabase
+        .from("reviews")
+        .select("id, rating, body, created_at, is_verified_purchase")
+        .eq("product_id", product.id)
+        .eq("is_approved", true)
+        .order("created_at", { ascending: false }),
+    ]);
     const others = (relatedRows ?? []).map((r) => shape(r as RawProduct));
     const sameCategory = others.filter((r) => r.category?.slug === product.category?.slug);
     const otherCategories = others.filter((r) => r.category?.slug !== product.category?.slug);
@@ -152,12 +169,15 @@ export const getProductBySlug = createServerFn({ method: "GET" })
       product,
       related: (sameCategory.length ? sameCategory : others).slice(0, 4),
       explore: sameCategory.length ? otherCategories.slice(0, 4) : [],
+      reviews: (reviewRows ?? []) as PublicReview[],
     };
-  }));
+    });
+  });
 
 export const getCategoryBySlug = createServerFn({ method: "GET" })
   .inputValidator((data: { slug: string }) => data)
   .handler(async ({ data }) => {
+    if (catalogFixtureEnabled()) return fixtureCategory(data.slug);
     const supabase = publicClient();
     const { data: category, error } = await supabase
       .from("categories")

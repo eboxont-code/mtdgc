@@ -7,7 +7,7 @@ import { HelpCircle } from "lucide-react";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { SITE_URL } from "@/lib/format";
-import { breadcrumbLd, pageLd } from "@/lib/seo";
+import { breadcrumbLd, pageLd, canonicalLinks } from "@/lib/seo";
 
 const FAQS: [string, string][] = [
   [
@@ -59,7 +59,7 @@ export const Route = createFileRoute("/faq")({
       {
         name: "description",
         content:
-          "Answers about MTDGC delivery times, payment, player IDs, gift card regions, refunds and account security.",
+          "Answers from MTDGC, Matrix Digital Goods & Commerce, on delivery times, NPR payment, player IDs, gift card regions, refunds and account security.",
       },
       { property: "og:title", content: "MTDGC frequently asked questions" },
       { property: "og:description", content: "Delivery, payment, regions, refunds and security questions answered." },
@@ -72,7 +72,7 @@ export const Route = createFileRoute("/faq")({
       { property: "og:image:alt", content: "MTDGC, the digital marketplace for Nepal and Australia" },
       { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
     ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/faq` }],
+    links: canonicalLinks(`${SITE_URL}/faq`),
     scripts: [
       breadcrumbLd([{ name: "Home", path: "/" }, { name: "FAQ", path: "/faq" }]),
       {

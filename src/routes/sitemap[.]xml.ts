@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 
 import type { Database } from "@/integrations/supabase/types";
 import { SITE_URL } from "@/lib/format";
+import { LANDING_PATHS } from "@/lib/landings";
 
 // Static pages. No lastmod: we only publish dates we can stand behind.
 const STATIC_PAGES: [string, string][] = [
@@ -19,6 +20,8 @@ const STATIC_PAGES: [string, string][] = [
   ["/policies/delivery", "0.4"],
   ["/policies/privacy", "0.4"],
   ["/policies/terms", "0.4"],
+  ["/deals", "0.5"],
+  ...LANDING_PATHS.map((path): [string, string] => [path, "0.8"]),
 ];
 
 const esc = (value: string) =>

@@ -1,25 +1,33 @@
 import { supabase } from "@/integrations/supabase/client";
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
+import { canonicalLinks } from "@/lib/seo";
 import { Check, Clock, Globe, MessageCircle, ShieldCheck, ShoppingBag, Zap } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { StorefrontError, StorefrontLoading } from "@/components/storefront-state";
 import { ProductArt } from "@/components/product-art";
+import { ProductRegionNotice } from "@/components/product-region-notice";
 import { ProductRail, SectionHeader } from "@/components/home/rails";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { WishlistButton } from "@/components/wishlist-button";
 import { getProductBySlug } from "@/lib/catalog.functions";
+import { productListingSeo } from "@/lib/listing-seo";
 import { PRICE_COMING_SOON, pricesHidden } from "@/lib/price-visibility";
 import { availabilityLabel, isPurchasableVariant, lowestPurchasableVariant, purchasableVariants, selectProductVariant } from "@/lib/product-availability";
 import { requiredProductFields } from "@/lib/product-fields";
+import { listingRegion } from "@/lib/product-region";
 import { useCart } from "@/lib/cart";
-import { categoryTypeFromSlug, formatNpr, isOrderable, SITE_URL, SUPPORT_MESSAGE, whatsappLink } from "@/lib/format";
+import { categoryTypeFromSlug, formatAudGuide, formatNpr, isOrderable, publicDeliveryMethod, publicDeliveryTime, SITE_URL, SUPPORT_MESSAGE, whatsappLink } from "@/lib/format";
 import { enabledProviders } from "@/lib/payments";
 import { compareAt } from "@/lib/pricing";
 import { GIFT_CARD_PRICE_DISCLOSURE, isGiftCardCategory } from "@/lib/gift-card-pricing";
 import { productFaqs, requirementHelp } from "@/lib/product-help";
+import { reviewStructuredData } from "@/lib/reviews";
+import { ApprovedReviews } from "@/components/approved-reviews";
+import { ResellerNotice } from "@/components/reseller-notice";
 import { AccordionList } from "@/components/sections/accordion-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -29,27 +37,28 @@ export const Route = createFileRoute("/products/$slug")({
   }),
   loader: async ({ params }) => {
     const result = await getProductBySlug({ data: { slug: params.slug } });
-    if (!result.product) throw notFound();
-    return result;
+    const product = result.product;
+    if (!product) throw notFound();
+    return { product, related: result.related, explore: result.explore, reviews: result.reviews };
   },
   head: ({ loaderData }) => {
     if (!loaderData?.product) {
       return { meta: [{ title: "Product not found | MTDGC" }, { name: "robots", content: "noindex" }] };
     }
     const product = loaderData.product;
-    const url = `${SITE_URL}/products/${product.slug}`;
-    const title = product.seo_title?.trim() || `${product.name} price in Nepal | MTDGC`;
+    const { url, title, description } = productListingSeo(product);
     const image = product.image_url ? (product.image_url.startsWith("http") ? product.image_url : `${SITE_URL}${product.image_url}`) : undefined;
     const orderableVariants = purchasableVariants(product);
     const lowestPrice = lowestPurchasableVariant(product)?.price_minor ?? 0;
+    const reviewsLd = reviewStructuredData(loaderData.reviews);
     return {
       meta: [
         { title },
-        { name: "description", content: product.seo_description },
+        { name: "description", content: description },
         { property: "og:title", content: title },
-        { property: "og:description", content: product.seo_description },
+        { property: "og:description", content: description },
       { name: "twitter:title", content: title },
-      { name: "twitter:description", content: product.seo_description  },
+      { name: "twitter:description", content: description },
         { property: "og:url", content: url },
         { property: "og:type", content: "product" },
         ...(image ? [
@@ -66,7 +75,7 @@ export const Route = createFileRoute("/products/$slug")({
         ] : []),
         { name: "twitter:card", content: "summary_large_image" },
       ],
-      links: [{ rel: "canonical", href: url }],
+      links: canonicalLinks(url ),
       scripts: [
         {
           type: "application/ld+json",
@@ -95,7 +104,8 @@ export const Route = createFileRoute("/products/$slug")({
                     : "https://schema.org/OutOfStock",
                 url,
               })) } : {}),
-            seller: { "@type": "Organization", name: "MTDGC", url: `${SITE_URL}/` },
+            seller: { "@type": "Organization", name: "MTDGC", legalName: "Matrix Digital Goods & Commerce", url: `${SITE_URL}/` },
+            ...(reviewsLd ?? {}),
             itemCondition: "https://schema.org/NewCondition",
             hasMerchantReturnPolicy: {
               "@type": "MerchantReturnPolicy",
@@ -120,10 +130,12 @@ export const Route = createFileRoute("/products/$slug")({
     };
   },
   component: ProductPage,
+  pendingComponent: StorefrontLoading,
+  errorComponent: StorefrontError,
 });
 
 function ProductPage() {
-  const { product, related, explore } = Route.useLoaderData();
+  const { product, related, explore, reviews } = Route.useLoaderData();
   const { add, setDrawerOpen } = useCart();
   const { plan } = Route.useSearch();
   const selectedVariant = selectProductVariant(product, plan);
@@ -161,9 +173,11 @@ function ProductPage() {
     ? availabilityLabel({ ...product, variants: [variant] })
     : availabilityLabel(product);
 
-  const regionText = product.region?.trim() ?? "";
+  const regionText = listingRegion(product.region) ?? "";
   const needsRegionConfirm = categoryTypeFromSlug(product.category?.slug ?? "") === "gift_card" && regionText.length > 0;
-  const [regionConfirmed, setRegionConfirmed] = useState(false);
+  const regionConfirmationKey = `${product.id}:${regionText}`;
+  const [confirmedRegionKey, setConfirmedRegionKey] = useState<string | null>(null);
+  const regionConfirmed = confirmedRegionKey === regionConfirmationKey;
   const regionRef = useRef<HTMLInputElement>(null);
 
   const navigate = useNavigate();
@@ -207,8 +221,9 @@ function ProductPage() {
   const productType = categoryTypeFromSlug(product.category?.slug ?? "");
   const isPlan = productType === "software" || productType === "subscription";
   const isGiftCard = isGiftCardCategory(product.category?.slug);
-  const deliveryTime = product.delivery_time.trim() === "Confirmed after order review" ? "" : product.delivery_time.trim();
-  const deliveryMethod = product.delivery_method.trim() === "Confirmed after order review" ? "" : product.delivery_method.trim();
+  const deliveryTime = publicDeliveryTime(product.delivery_time);
+  const deliveryMethod = publicDeliveryMethod(product.delivery_method);
+  const audGuide = orderable && variant && !hidePrices ? formatAudGuide(variant.price_minor) : null;
 
   const purchaseDetails = [
     { label: "Region", value: product.region?.trim() },
@@ -236,9 +251,9 @@ function ProductPage() {
 
   const trust = (
     <ul className="space-y-2 text-[13px] text-foreground/85">
-      <li className="flex gap-2"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />We verify your payment and deliver once it is checked.</li>
-      <li className="flex gap-2"><Check className="mt-0.5 size-4 shrink-0 text-primary" /><span>Refunds follow our <Link to="/policies/refunds" className="text-primary underline-offset-2 hover:underline">refund policy</Link>.</span></li>
-      {wa && <li className="flex gap-2"><MessageCircle className="mt-0.5 size-4 shrink-0 text-primary" /><span>Questions first? <a href={wa} target="_blank" rel="noopener noreferrer" className="text-primary underline-offset-2 hover:underline">Ask on WhatsApp</a>.</span></li>}
+      <li className="flex gap-2"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />Pay the NPR total. Delivery follows payment verification, within the time on this listing.</li>
+      <li className="flex gap-2"><Check className="mt-0.5 size-4 shrink-0 text-primary" /><span>Refunds follow our <Link to="/policies/refunds" className="text-primary underline underline-offset-2">refund policy</Link>.</span></li>
+      {wa && <li className="flex gap-2"><MessageCircle className="mt-0.5 size-4 shrink-0 text-primary" /><span>Questions first? <a href={wa} target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2">Ask on WhatsApp</a>.</span></li>}
     </ul>
   );
 
@@ -283,6 +298,7 @@ function ProductPage() {
                 <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-primary">{product.brand}</p>
                 <h1 className="mt-1 font-display text-[22px] font-semibold leading-tight">{product.name}</h1>
                 <p className="mt-1 line-clamp-3 text-[13px] text-muted-foreground">{product.summary}</p>
+                <ResellerNotice className="mt-2" />
               </div>
             </div>
 
@@ -299,10 +315,13 @@ function ProductPage() {
                     {hidePrices ? PRICE_COMING_SOON : orderable && variant ? formatNpr(variant.price_minor) : selectedAvailability}
                     {orderable && variantWas && <span className="ml-2 text-sm font-normal text-muted-foreground line-through">{formatNpr(variantWas)}</span>}
                   </p>
+                  {audGuide && <p className="font-mono text-[11px] text-muted-foreground">{audGuide}</p>}
                 </div>
               </div>
+              {audGuide && <p className="mt-2 text-[11px] text-muted-foreground">You pay the NPR price. The A$ amount is a guide for customers in Australia.</p>}
               {deliveryTime && <p className="mt-1 text-xs text-muted-foreground">{deliveryTime}</p>}
               {purchaseDetailsBlock && <div className="mt-3">{purchaseDetailsBlock}</div>}
+              {regionText && <div className="mt-3"><ProductRegionNotice region={regionText} /></div>}
               <div className="mt-4">{actions}</div>
               <div className="mt-4 border-t border-border pt-4">{trust}</div>
             </div>
@@ -314,8 +333,10 @@ function ProductPage() {
               <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-primary">{product.brand}</p>
               <h1 className="mt-1 font-display text-4xl font-semibold">{product.name}</h1>
               <p className="mt-2 text-sm text-muted-foreground">{product.summary}</p>
+              <ResellerNotice className="mt-2" />
             </div>
 
+            <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">{variant?.name ? `${variant.name}. ` : ""}{selectedAvailability}{orderable && variant && !hidePrices ? `. ${formatNpr(variant.price_minor)}` : ""}</p>
             <ul className="mt-1 flex flex-wrap gap-1.5 md:mt-4">
               <li className={`rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.08em] ${orderable ? "border-primary/40 text-primary" : "border-warn/40 text-warn"}`}>{selectedAvailability}</li>
               {!isPlan && deliveryMethod && <li className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-[11px]"><Zap className="size-3.5 text-primary" />{deliveryMethod}</li>}
@@ -323,6 +344,7 @@ function ProductPage() {
               {!isPlan && deliveryTime && <li className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-[11px]"><Clock className="size-3.5 text-primary" />{deliveryTime}</li>}
               {!isPlan && product.platform && <li className="rounded-full border border-border bg-card px-2.5 py-1 text-[11px]">{product.platform}</li>}
             </ul>
+            {regionText && <div className="mt-4"><ProductRegionNotice region={regionText} /></div>}
             {isPlan && (deliveryMethod || deliveryTime) && (
               <dl className="mt-4 space-y-2 text-sm">
                 {deliveryMethod && <div className="grid grid-cols-1 gap-1 sm:grid-cols-2"><dt className="text-muted-foreground">You receive</dt><dd>{deliveryMethod}</dd></div>}
@@ -334,17 +356,18 @@ function ProductPage() {
               <section className="mt-6 rounded-2xl border border-border bg-card p-4 md:p-5">
                 <StepTitle n={1}>Your details</StepTitle>
                 <div className="mt-4 space-y-3">
-                  {product.requirements.map((requirement) => {
+                  {product.requirements.map((requirement, index) => {
                     const help = requirementHelp(requirement);
-                    const id = `req-${requirement.replace(/\W+/g, "-").toLowerCase()}`;
+                    const id = `req-${index}-${requirement.replace(/\W+/g, "-").toLowerCase()}`;
                     return (
                       <div key={requirement}>
                         <label htmlFor={id} className="font-display text-xs text-muted-foreground">{requirement}</label>
                         <input
                           ref={(node) => { fieldRefs.current[requirement] = node; }}
                           id={id}
+                          required
                           aria-invalid={invalidFields.includes(requirement)}
-                          aria-describedby={`${id}-help${invalidFields.includes(requirement) ? ` ${id}-error` : ""}`}
+                          aria-describedby={[help ? `${id}-help` : "", invalidFields.includes(requirement) ? `${id}-error` : ""].filter(Boolean).join(" ") || undefined}
                           value={fields[requirement] ?? ""}
                           onChange={(event) => { const v = event.target.value; setFields((current) => ({ ...current, [requirement]: v })); try { const all = JSON.parse(localStorage.getItem("mtdgc-fields-v1") ?? "{}"); all[requirement] = v; localStorage.setItem("mtdgc-fields-v1", JSON.stringify(all)); } catch { /* ignore */ } }}
                           className="mt-1 h-11 w-full rounded-xl border border-border bg-secondary px-3 font-mono text-sm outline-none focus:border-primary aria-[invalid=true]:border-destructive"
@@ -371,7 +394,7 @@ function ProductPage() {
                       return (
                         <label
                           key={item.sku}
-                          className={`relative flex ${itemOrderable ? "cursor-pointer" : "cursor-not-allowed opacity-60"} flex-col gap-1 rounded-xl border p-3 transition-colors ${selected ? "border-primary bg-primary/10" : "border-border bg-secondary/60 hover:border-primary/40"}`}
+                          className={`relative flex has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-background ${itemOrderable ? "cursor-pointer" : "cursor-not-allowed opacity-60"} flex-col gap-1 rounded-xl border p-3 transition-colors ${selected ? "border-primary bg-primary/10" : "border-border bg-secondary/60 hover:border-primary/40"}`}
                         >
                           <input type="radio" name="variant" value={item.sku} checked={selected} disabled={!itemOrderable} onChange={() => void navigate({ to: "/products/$slug", params: { slug: product.slug }, search: (previous) => ({ ...previous, plan: item.sku }), replace: true })} className="sr-only" />
                           {selected && <Check className="absolute right-2 top-2 size-4 text-primary" aria-hidden="true" />}
@@ -379,6 +402,7 @@ function ProductPage() {
                           <span className="pr-5 font-mono text-[13px] font-medium leading-tight">{item.name}</span>
                           <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">{itemOrderable ? (isGiftCard ? "MTDGC selling price" : "Price") : "Availability"}</span>
                           <span className="font-mono text-sm font-bold text-price">{hidePrices ? PRICE_COMING_SOON : itemOrderable ? formatNpr(item.price_minor) : itemAvailability}</span>
+                          {itemOrderable && !hidePrices && <span className="font-mono text-[10px] text-muted-foreground">{formatAudGuide(item.price_minor)}</span>}
                           {itemOrderable && was && <span className="font-mono text-[11px] text-muted-foreground line-through">{formatNpr(was)}</span>}
                           {item.status === "low_stock" && <span className="font-mono text-[10px] uppercase text-warn">Limited</span>}
                           <span className="font-mono text-[10px] text-muted-foreground">{itemAvailability}</span>
@@ -404,10 +428,10 @@ function ProductPage() {
                   </li>
                 ))}
               </ul>
-              <ol aria-label="How manual payment works" className="mt-3 space-y-1.5 text-xs text-foreground/85">
-                <li className="flex gap-2"><span className="font-mono text-primary">1.</span><span>Place your order. Checkout then shows our QR code or bank details.</span></li>
-                <li className="flex gap-2"><span className="font-mono text-primary">2.</span><span>Pay the exact total in NPR, then upload your payment screenshot or transaction reference.</span></li>
-                <li className="flex gap-2"><span className="font-mono text-primary">3.</span><span>We check the payment by hand and deliver your order once it is verified.</span></li>
+              <ol aria-label="How payment works" className="mt-3 space-y-1.5 text-xs text-foreground/85">
+                <li className="flex gap-2"><span className="font-mono text-primary">1.</span><span>Place your order. Your order page shows the QR code or bank details for the NPR total.</span></li>
+                <li className="flex gap-2"><span className="font-mono text-primary">2.</span><span>Pay that total, then upload your payment confirmation.</span></li>
+                <li className="flex gap-2"><span className="font-mono text-primary">3.</span><span>We verify the payment and deliver within the time shown on this listing.</span></li>
               </ol>
             </section>
 
@@ -420,7 +444,7 @@ function ProductPage() {
                     type="checkbox"
                     required
                     checked={regionConfirmed}
-                    onChange={(e) => { setRegionConfirmed(e.target.checked); if (e.target.checked) setError(null); }}
+                    onChange={(e) => { setConfirmedRegionKey(e.target.checked ? regionConfirmationKey : null); if (e.target.checked) setError(null); }}
                     className="size-5 shrink-0 accent-primary"
                   />
                   <span>I confirm my account region is {regionText}.</span>
@@ -438,9 +462,9 @@ function ProductPage() {
 
             <Tabs defaultValue="about" className="mt-6 rounded-2xl border border-border bg-card p-3 md:p-4">
               <TabsList className="grid h-auto w-full grid-cols-3 gap-1 bg-secondary/60 p-1">
-                <TabsTrigger value="about" className="min-h-10 px-1 text-xs data-[state=active]:text-primary sm:text-sm">About</TabsTrigger>
-                <TabsTrigger value="redeem" className="min-h-10 px-1 text-xs data-[state=active]:text-primary sm:text-sm">How to redeem</TabsTrigger>
-                <TabsTrigger value="refund" className="min-h-10 px-1 text-xs data-[state=active]:text-primary sm:text-sm">Refunds</TabsTrigger>
+                <TabsTrigger value="about" className="min-h-11 px-1 text-xs data-[state=active]:text-primary sm:text-sm">About</TabsTrigger>
+                <TabsTrigger value="redeem" className="min-h-11 px-1 text-xs data-[state=active]:text-primary sm:text-sm">How to redeem</TabsTrigger>
+                <TabsTrigger value="refund" className="min-h-11 px-1 text-xs data-[state=active]:text-primary sm:text-sm">Refunds</TabsTrigger>
               </TabsList>
               <TabsContent value="about" className="px-1 pt-2">
                 <h2 className="sr-only">About this product</h2>
@@ -453,7 +477,7 @@ function ProductPage() {
               <TabsContent value="refund" className="px-1 pt-2">
                 <h2 className="sr-only">Refund eligibility</h2>
                 <p className="text-sm text-foreground/80">{product.refund_eligibility}</p>
-                <Link to="/policies/refunds" className="mt-2 inline-block text-xs text-primary underline-offset-2 hover:underline">Read the full refund policy</Link>
+                <Link to="/policies/refunds" className="mt-2 inline-block text-xs text-primary underline underline-offset-2">Read the full refund policy</Link>
               </TabsContent>
             </Tabs>
 
@@ -465,9 +489,11 @@ function ProductPage() {
               />
               <p className="mt-3 text-xs text-muted-foreground">
                 Payment, delivery and refund basics are the same for every product. See{" "}
-                <Link to="/how-it-works" className="text-primary underline-offset-2 hover:underline">how it works</Link>.
+                <Link to="/how-it-works" className="text-primary underline underline-offset-2">how it works</Link>.
               </p>
             </section>
+
+            <ApprovedReviews reviews={reviews} />
           </div>
         </div>
 
@@ -489,11 +515,15 @@ function ProductPage() {
 
       {/* Sticky buy bar on phones */}
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-3 pb-[calc(0.6rem+env(safe-area-inset-bottom))] pt-2.5 backdrop-blur-xl md:hidden">
-        {purchaseDetailsBlock && <div className="mb-3 max-h-[25vh] overflow-y-auto">{purchaseDetailsBlock}</div>}
+        {(purchaseDetailsBlock || regionText) && <div className="mb-3 max-h-[25vh] space-y-2 overflow-y-auto">
+          {purchaseDetailsBlock}
+          <ProductRegionNotice region={regionText} />
+        </div>}
         <div className="flex items-center gap-2.5">
           <div className="min-w-0 flex-1">
             <p className="truncate text-[10px] text-muted-foreground">{isGiftCard ? "Face value: " + (variant?.name ?? "Choose a denomination") : variant?.name ?? "Choose an option"}</p>
             <p className={`font-mono font-bold leading-tight text-price ${hidePrices ? "text-[13px]" : "text-[15px]"}`}>{hidePrices ? PRICE_COMING_SOON : orderable && variant ? (isGiftCard ? "MTDGC price " : "") + formatNpr(variant.price_minor) : selectedAvailability}</p>
+            {audGuide && <p className="font-mono text-[10px] leading-4 text-muted-foreground">{audGuide}</p>}
           </div>
           {wa && (
             <a href={wa} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp support (opens in a new tab)" className="grid size-11 shrink-0 place-items-center rounded-xl border border-border text-primary">

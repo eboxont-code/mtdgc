@@ -16,15 +16,18 @@ import { CartDrawer } from "../components/cart-drawer";
 import { BottomNav } from "../components/bottom-nav";
 import { ScrollReveals } from "../components/scroll-reveals";
 import { WhatsAppFab } from "../components/whatsapp-fab";
+import { Wordmark } from "../components/brand/wordmark";
+import { BRAND_DESCRIPTION, BRAND_FULL_NAME, BRAND_NAME } from "../lib/brand";
+import { SITE_URL } from "../lib/format";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { BRAND } from "../lib/brand";
+import { hreflangLinks, organizationLd, websiteLd } from "../lib/seo";
 
 function NotFoundComponent() {
 
   return (
     <main id="main-content" tabIndex={-1} className="focus:outline-none flex min-h-screen items-center justify-center bg-background px-4 font-body text-foreground">
       <div className="max-w-md text-center">
-        <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">MTDGC</p>
+        <div className="mb-7 flex justify-center"><Wordmark size="lg" /></div>
         <h1 className="mt-3 font-display text-3xl font-medium">This page is not here</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           The link may be out of date or mistyped. The catalog below has every product MTDGC currently sells.
@@ -64,6 +67,7 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
+        <div className="mb-7 flex justify-center"><Wordmark size="lg" /></div>
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
           This page didn't load
         </h1>
@@ -97,13 +101,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     const pageMeta = matches.flatMap((match) => match.meta ?? []);
     const titleMeta = [...pageMeta].reverse().find((meta) => meta && "title" in meta);
     const descriptionMeta = [...pageMeta].reverse().find((meta) => meta && "name" in meta && meta.name === "description");
-    const title = titleMeta && "title" in titleMeta ? String(titleMeta.title) : BRAND.title;
-    const description = descriptionMeta && "content" in descriptionMeta ? String(descriptionMeta.content) : BRAND.description;
+    const title = titleMeta && "title" in titleMeta ? String(titleMeta.title) : `${BRAND_NAME} | ${BRAND_FULL_NAME}`;
+    const description = descriptionMeta && "content" in descriptionMeta ? String(descriptionMeta.content) : BRAND_DESCRIPTION;
     const canonical = [...matches].reverse().flatMap((match) => match.links ?? []).find((link) => link?.rel === "canonical");
+    const canonicalHref = canonical && "href" in canonical && canonical.href ? String(canonical.href) : "";
     const leafOgTitle = [...pageMeta].reverse().find((meta) => meta && "property" in meta && meta.property === "og:title");
     const leafOgDescription = [...pageMeta].reverse().find((meta) => meta && "property" in meta && meta.property === "og:description");
     const shareTitle = leafOgTitle && "content" in leafOgTitle ? String(leafOgTitle.content) : title;
     const shareDescription = leafOgDescription && "content" in leafOgDescription ? String(leafOgDescription.content) : description;
+    const hasOgImage = pageMeta.some((meta) => meta && "property" in meta && meta.property === "og:image");
+    const hasTwitterImage = pageMeta.some((meta) => meta && "name" in meta && meta.name === "twitter:image");
     return {
     meta: [
       { charSet: "utf-8" },
@@ -116,15 +123,24 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         : []),
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "theme-color", content: "#070b09" },
-      { name: "author", content: BRAND.name },
-      { property: "og:site_name", content: BRAND.name },
+      { name: "author", content: `${BRAND_NAME}, ${BRAND_FULL_NAME}` },
+      { name: "application-name", content: BRAND_NAME },
+      { property: "og:site_name", content: BRAND_NAME },
       { property: "og:type", content: "website" },
       { property: "og:title", content: title },
       { property: "og:description", content: description },
+      ...(!hasOgImage ? [
+        { property: "og:image", content: `${SITE_URL}/og/mtdgc.png` },
+        { property: "og:image:alt", content: `${BRAND_NAME}, ${BRAND_FULL_NAME}` },
+      ] : []),
       ...(canonical?.href ? [{ property: "og:url", content: canonical.href }] : []),
       { name: "twitter:title", content: shareTitle },
       { name: "twitter:description", content: shareDescription },
       { name: "twitter:card", content: "summary_large_image" },
+      ...(!hasTwitterImage ? [
+        { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
+        { name: "twitter:image:alt", content: `${BRAND_NAME}, ${BRAND_FULL_NAME}` },
+      ] : []),
     ],
     links: [
       {
@@ -133,12 +149,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { rel: "preload", href: "/fonts/jetbrains-mono-latin-700-normal.woff2", as: "font", type: "font/woff2", crossOrigin: "anonymous" },
       { rel: "preload", href: displayFont, as: "font", type: "font/woff2", crossOrigin: "anonymous" },
-      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
-      { rel: "icon", href: "/favicon.ico", sizes: "16x16 32x32 48x48" },
+      // Keep the approved 5x5 emerald M consistent across search, browsers and app icons.
+      { rel: "icon", href: "/icon-512.png", type: "image/png", sizes: "512x512" },
+      { rel: "icon", href: "/icon-192.png", type: "image/png", sizes: "192x192" },
+      { rel: "icon", href: "/favicon-48x48.png", type: "image/png", sizes: "48x48" },
       { rel: "icon", href: "/favicon-32x32.png", type: "image/png", sizes: "32x32" },
+      { rel: "icon", href: "/favicon.ico", type: "image/x-icon", sizes: "64x64" },
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml", sizes: "any" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
       { rel: "manifest", href: "/site.webmanifest" },
+      ...(canonicalHref ? hreflangLinks(canonicalHref) : []),
     ],
+    scripts: [organizationLd(), websiteLd()],
   }; },
   shellComponent: RootShell,
   component: RootComponent,

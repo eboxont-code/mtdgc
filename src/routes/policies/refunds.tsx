@@ -5,7 +5,7 @@ import { PageHero } from "@/components/sections/page-hero";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { SITE_URL } from "@/lib/format";
-import { breadcrumbLd, pageLd } from "@/lib/seo";
+import { breadcrumbLd, pageLd, canonicalLinks } from "@/lib/seo";
 
 export const Route = createFileRoute("/policies/refunds")({
   head: () => ({
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/policies/refunds")({
       { property: "og:image:alt", content: "MTDGC, the digital marketplace for Nepal and Australia" },
       { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
     ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/policies/refunds` }],
+    links: canonicalLinks(`${SITE_URL}/policies/refunds`),
     scripts: [
       pageLd("WebPage", "MTDGC Refund policy", "/policies/refunds", "Full refunds when MTDGC cannot deliver, software key reveal limits, listing-specific subscription replacement periods, gift card code limits and credited top-up restrictions."),
       breadcrumbLd([{ name: "Home", path: "/" }, { name: "Refund policy", path: "/policies/refunds" }]),
@@ -38,11 +38,10 @@ function RefundsPage() {
       <SiteHeader />
       <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-3xl px-4 pb-16 pt-6">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Refund policy" }]} />
-        <PageHero eyebrow="Policy" title="Refund policy" intro="Last updated 27 October 2026" />
+        <PageHero eyebrow="MTDGC · Matrix Digital Goods & Commerce" title="Refund policy" intro="When a payment is returned, and when a delivered code or top-up cannot be reversed." />
         <div className="mt-6 space-y-4 text-sm text-foreground/80">
           <p>
-            Every MTDGC order is reviewed before it is fulfilled. If you need to cancel, tell us before fulfilment
-            starts and we will cancel the order and return any payment already made.
+            If you need to cancel, tell us before delivery starts and we will cancel the order and return any payment already made.
           </p>
           <p>
             Once a gift card code has been sent or revealed, or in-game currency has been credited to an account, the

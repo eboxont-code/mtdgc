@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 
 import { ProductArt } from "@/components/product-art";
 import type { CatalogProduct } from "@/lib/catalog.functions";
-import { formatNpr } from "@/lib/format";
+import { formatAudGuide, formatNpr } from "@/lib/format";
 import { availabilityLabel, isPurchasable, lowestPurchasableVariant } from "@/lib/product-availability";
 import { bestDeal } from "@/lib/pricing";
 import { PRICE_COMING_SOON, pricesHidden } from "@/lib/price-visibility";
@@ -72,6 +72,9 @@ export function ProductTile({ product, priority = false, className = "" }: { pro
             ) : (
               <span className="text-muted-foreground">{pricesHidden(product) ? PRICE_COMING_SOON : availabilityLabel(product)}</span>
             )}
+          </p>
+          <p className="min-h-4 font-mono text-[10px] leading-4 text-muted-foreground">
+            {orderable && price !== null ? formatAudGuide(deal ? deal.variant.price_minor : price) : "\u00a0"}
           </p>
         </div>
       </Link>

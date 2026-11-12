@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 import { CodeRain } from "@/components/brand/code-rain";
+import { Glyph } from "@/components/brand/glyph";
 import { ProductArt } from "@/components/product-art";
 import type { CatalogProduct } from "@/lib/catalog.functions";
 import { isOrderable } from "@/lib/format";
@@ -33,8 +34,8 @@ export function buildSlides(products: CatalogProduct[]): Slide[] {
     slides.push({
       id: "top-ups",
       eyebrow: "Game top-ups",
-      title: "Top up with just your player ID",
-      body: `${topUps.slice(0, 3).map((p) => p.name.replace(/ (UC|Diamonds|Passes)$/, "")).join(", ")} and more. Priced in NPR.`,
+      title: "Game top-ups, credited to your ID",
+      body: `${topUps.slice(0, 3).map((p) => p.name.replace(/ (UC|Diamonds|Passes)$/, "")).join(", ")} and more. Priced in NPR, with an A$ guide.`,
       cta: "Shop top-ups",
       to: "/catalog",
       search: { category: "game-top-ups" },
@@ -86,10 +87,11 @@ export function buildSlides(products: CatalogProduct[]): Slide[] {
 function SlideArt({ art }: { art: CatalogProduct[] }) {
   if (!art.length) {
     return (
-      <div aria-hidden="true" className="grid grid-cols-3 gap-1.5 opacity-90">
-        {Array.from({ length: 9 }, (_, i) => (
-          <span key={i} className={`size-5 rounded-[5px] bg-primary md:size-7 ${[1, 2, 3, 4, 5, 8].includes(i) ? "" : "opacity-20"}`} />
-        ))}
+      <div
+        aria-hidden="true"
+        className="grid size-[88px] place-items-center rounded-[22px] border border-primary/25 bg-[#050d08] shadow-[0_12px_40px_-16px_rgba(54,245,147,0.3)] md:size-[124px] md:rounded-[30px]"
+      >
+        <Glyph className="size-[76px] md:size-[108px]" />
       </div>
     );
   }

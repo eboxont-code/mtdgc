@@ -7,6 +7,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { PageHero } from "@/components/sections/page-hero";
 import { PackageSearch } from "lucide-react";
 import { OrderLoading } from "@/components/order-loading";
+import { OrderNextStep } from "@/components/order-next-step";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
@@ -15,8 +16,8 @@ import { GIFT_CARD_PRICE_DISCLOSURE } from "@/lib/gift-card-pricing";
 import { lookupOrder } from "@/lib/orders.functions";
 import { isSupportedOrderReference } from "@/lib/order-reference";
 
-const STATUS_TEXT: Record<string, string> = { ...STATUS_LABEL, pending: "Placed", paid: "Payment confirmed", processing: "Processing", fulfilled: "Fulfilled", completed: "Completed", cancelled: "Cancelled", failed: "Failed", refunded: "Refunded" };
-import { breadcrumbLd, pageLd } from "@/lib/seo";
+const STATUS_TEXT: Record<string, string> = { ...STATUS_LABEL, pending: "Placed", pending_payment: "Waiting for payment", payment_submitted: "Payment proof received, being checked", paid: "Payment marked received", verified: "Payment verified", rejected: "Payment review rejected", delivered: "Delivered", processing: "Processing", fulfilled: "Fulfilled", completed: "Completed", cancelled: "Cancelled", failed: "Failed", refunded: "Refunded" };
+import { breadcrumbLd, pageLd, canonicalLinks } from "@/lib/seo";
 
 export const Route = createFileRoute("/track-order")({
   validateSearch: (search: Record<string, unknown>): { order?: string } =>
@@ -37,7 +38,7 @@ export const Route = createFileRoute("/track-order")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/track-order` }],
+    links: canonicalLinks(`${SITE_URL}/track-order`),
     scripts: [
       pageLd("WebPage", "MTDGC Track order", "/track-order", "Track order from MTDGC, the digital marketplace for Nepal and Australia."),
       breadcrumbLd([{ name: "Home", path: "/" }, { name: "Track order", path: "/track-order" }]),
@@ -183,6 +184,7 @@ function TrackOrderPage() {
             <p className="text-xs text-muted-foreground">
               Placed {new Date(found.createdAt).toLocaleDateString("en-GB")} · {formatNpr(found.totalMinor)} · Status: {STATUS_TEXT[found.status] ?? found.status}
             </p>
+            <OrderNextStep status={found.status} />
             <ul className="mt-2 text-sm">
               {found.items.map((i) => (
                 <li key={i.name + "-" + i.variantName}>

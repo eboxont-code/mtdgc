@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { canonicalLinks } from "@/lib/seo";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 
@@ -11,6 +12,7 @@ import { GIFT_CARD_PRICE_DISCLOSURE } from "@/lib/gift-card-pricing";
 import { getOrderForViewer } from "@/lib/orders.functions";
 import { PaymentProofForm } from "@/components/payment-proof-form";
 import { OrderLoading } from "@/components/order-loading";
+import { OrderNextStep } from "@/components/order-next-step";
 
 export const Route = createFileRoute("/order/$orderNumber")({
   head: ({ params }) => ({
@@ -25,7 +27,7 @@ export const Route = createFileRoute("/order/$orderNumber")({
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
     ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/order/${params.orderNumber}` }],
+    links: canonicalLinks(`${SITE_URL}/order/${params.orderNumber}`),
   }),
   component: OrderPage,
 });
@@ -98,6 +100,7 @@ function OrderPage() {
         {state === "found" && order && (
           <section className="mt-5 rounded-lg border border-input bg-card p-5 text-sm">
             <p className="font-display">Status: <strong>{STATUS_TEXT[order.status] ?? order.status}</strong></p>
+            <OrderNextStep status={order.status} />
             <p className="mt-1 text-muted-foreground">Placed {new Date(order.createdAt).toLocaleString("en-NP")}</p>
             <ul className="mt-3 space-y-1">
               {order.items.map((i) => (
