@@ -34,8 +34,8 @@ export function buildSlides(products: CatalogProduct[]): Slide[] {
     slides.push({
       id: "top-ups",
       eyebrow: "Game top-ups",
-      title: "Top up with just your player ID",
-      body: `${topUps.slice(0, 3).map((p) => p.name.replace(/ (UC|Diamonds|Passes)$/, "")).join(", ")} and more. Priced in NPR.`,
+      title: "Game top-ups, credited to your ID",
+      body: `${topUps.slice(0, 3).map((p) => p.name.replace(/ (UC|Diamonds|Passes)$/, "")).join(", ")} and more. Priced in NPR, with an A$ guide.`,
       cta: "Shop top-ups",
       to: "/catalog",
       search: { category: "game-top-ups" },

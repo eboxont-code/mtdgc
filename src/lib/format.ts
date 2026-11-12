@@ -2,6 +2,36 @@ export function formatNpr(minor: number): string {
   return `Rs ${(minor / 100).toLocaleString("en-NP", { maximumFractionDigits: 0 })}`;
 }
 
+/**
+ * Display-only Australian dollar guide. Checkout, carts and stored prices stay in NPR.
+ * 1 AUD ≈ 90 NPR is a reading rate, not a settlement rate. Refresh NPR_PER_AUD_GUIDE when you want the guide updated.
+ */
+export const NPR_PER_AUD_GUIDE = 90;
+
+export function formatAudGuide(nprMinor: number): string | null {
+  if (!Number.isFinite(nprMinor) || nprMinor <= 0) return null;
+  const aud = nprMinor / 100 / NPR_PER_AUD_GUIDE;
+  return `≈ A$${aud.toFixed(2)} guide`;
+}
+
+/** Customer-facing delivery time. Stored placeholder copy is not shown. */
+export function publicDeliveryTime(value: string | null | undefined): string {
+  const trimmed = value?.trim() ?? "";
+  if (!trimmed || trimmed.toLowerCase() === "confirmed after order review") {
+    return "Delivered after payment is verified";
+  }
+  return trimmed;
+}
+
+/** Customer-facing delivery method. Stored placeholder copy is not shown. */
+export function publicDeliveryMethod(value: string | null | undefined): string {
+  const trimmed = value?.trim() ?? "";
+  if (!trimmed || trimmed.toLowerCase() === "confirmed after order review" || trimmed.toLowerCase() === "manual digital fulfilment") {
+    return "Digital delivery after payment is verified";
+  }
+  return trimmed;
+}
+
 // MTDGC support WhatsApp number (support only, never part of ordering or payment).
 // Digits only with country code, as wa.me expects. Use only through whatsappLink().
 export const WHATSAPP_NUMBER: string = "9779740204403";
@@ -77,13 +107,28 @@ export function categoryTypeFromSlug(slug: string): keyof typeof PRODUCT_TYPE_LA
   }
 }
 
-export const SITE_URL = "https://mtdgc.com";
+function readSiteUrl(): string {
+  let raw = "";
+  try {
+    const fromVite = import.meta.env?.["VITE_SITE_URL"];
+    if (typeof fromVite === "string") raw = fromVite;
+  } catch {
+    /* bun test has no Vite env */
+  }
+  if (!raw && typeof process !== "undefined") {
+    raw = process.env["VITE_SITE_URL"] || process.env["SITE_URL"] || "";
+  }
+  if (/^https?:\/\//.test(raw)) return raw.replace(/\/+$/, "");
+  return "https://mtdgc.com";
+}
+
+export const SITE_URL = readSiteUrl();
 
 export const ORDER_STEPS: Array<{ title: string; body: string; statuses: string[] }> = [
-  { title: "Payment received", body: "Payment proof has been submitted for review, or staff have marked payment received. This is not payment verification.", statuses: ["payment_submitted", "paid"] },
-  { title: "Verified", body: "Staff have approved the payment review or manually marked the order verified. This status alone is not independent bank confirmation.", statuses: ["verified"] },
-  { title: "Processing", body: "Staff have marked the order as being prepared for fulfilment.", statuses: ["processing"] },
-  { title: "Delivered", body: "The order is marked delivered. Check the delivery destination for your item; this status alone is not delivery evidence.", statuses: ["delivered", "fulfilled", "completed"] },
+  { title: "Payment received", body: "Your payment confirmation is in. Delivery waits until the payment is verified.", statuses: ["payment_submitted", "paid"] },
+  { title: "Verified", body: "Payment is verified. Your order moves on to delivery.", statuses: ["verified"] },
+  { title: "Processing", body: "Your order is being prepared for delivery.", statuses: ["processing"] },
+  { title: "Delivered", body: "Your order is marked delivered. Check your order page and delivery email for the key, code or top-up.", statuses: ["delivered", "fulfilled", "completed"] },
 ];
 
 export const ORDER_NOTICE: Record<string, string> = {

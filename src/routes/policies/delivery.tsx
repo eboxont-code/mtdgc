@@ -5,7 +5,7 @@ import { PageHero } from "@/components/sections/page-hero";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { SITE_URL } from "@/lib/format";
-import { breadcrumbLd, pageLd } from "@/lib/seo";
+import { breadcrumbLd, pageLd, canonicalLinks } from "@/lib/seo";
 
 export const Route = createFileRoute("/policies/delivery")({
   head: () => ({
@@ -23,9 +23,9 @@ export const Route = createFileRoute("/policies/delivery")({
       { property: "og:image:alt", content: "MTDGC, the digital marketplace for Nepal and Australia" },
       { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
     ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/policies/delivery` }],
+    links: canonicalLinks(`${SITE_URL}/policies/delivery`),
     scripts: [
-      pageLd("WebPage", "MTDGC Delivery policy", "/policies/delivery", "Digital delivery for software, subscriptions, deals, gift cards and game top-ups. Listing delivery times apply after payment verification; payment checks and supplier downtime can cause delays."),
+      pageLd("WebPage", "MTDGC Delivery policy", "/policies/delivery", "Digital delivery from MTDGC, Matrix Digital Goods & Commerce. The delivery time on each listing is the time to expect after payment is verified."),
       breadcrumbLd([{ name: "Home", path: "/" }, { name: "Delivery policy", path: "/policies/delivery" }]),
     ],
   }),
@@ -38,14 +38,14 @@ function DeliveryPage() {
       <SiteHeader />
       <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-3xl px-4 pb-16 pt-6">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Delivery policy" }]} />
-        <PageHero eyebrow="Policy" title="Delivery policy" intro="Last updated 27 October 2026" />
+        <PageHero eyebrow="MTDGC · Matrix Digital Goods & Commerce" title="Delivery policy" intro="How digital delivery works, and the delivery time to expect on each listing." />
         <div className="mt-6 space-y-4 text-sm text-foreground/80">
           <p>
-            All MTDGC products are digital. Nothing is shipped. Each listing shows its usual delivery time.
-            We verify your payment before preparing the order.
+            All MTDGC products are digital. Nothing is shipped. Each listing shows the delivery time to expect
+            after payment is verified.
           </p>
           <p>
-            Payment checks or supplier downtime can delay delivery. We do not promise instant delivery.
+            That listed time is the time to plan for. If an order runs past it, contact support with your order number and we will check it.
           </p>
           <p>
             Delivery depends on the details you give us being correct. A wrong player ID, zone, server or email address

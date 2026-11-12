@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
+import { canonicalLinks } from "@/lib/seo";
 import { Check, Clock, Globe, MessageCircle, ShieldCheck, ShoppingBag, Zap } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -19,11 +20,14 @@ import { availabilityLabel, isPurchasableVariant, lowestPurchasableVariant, purc
 import { requiredProductFields } from "@/lib/product-fields";
 import { listingRegion } from "@/lib/product-region";
 import { useCart } from "@/lib/cart";
-import { categoryTypeFromSlug, formatNpr, isOrderable, SITE_URL, SUPPORT_MESSAGE, whatsappLink } from "@/lib/format";
+import { categoryTypeFromSlug, formatAudGuide, formatNpr, isOrderable, publicDeliveryMethod, publicDeliveryTime, SITE_URL, SUPPORT_MESSAGE, whatsappLink } from "@/lib/format";
 import { enabledProviders } from "@/lib/payments";
 import { compareAt } from "@/lib/pricing";
 import { GIFT_CARD_PRICE_DISCLOSURE, isGiftCardCategory } from "@/lib/gift-card-pricing";
 import { productFaqs, requirementHelp } from "@/lib/product-help";
+import { reviewStructuredData } from "@/lib/reviews";
+import { ApprovedReviews } from "@/components/approved-reviews";
+import { ResellerNotice } from "@/components/reseller-notice";
 import { AccordionList } from "@/components/sections/accordion-list";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -33,8 +37,9 @@ export const Route = createFileRoute("/products/$slug")({
   }),
   loader: async ({ params }) => {
     const result = await getProductBySlug({ data: { slug: params.slug } });
-    if (!result.product) throw notFound();
-    return result;
+    const product = result.product;
+    if (!product) throw notFound();
+    return { product, related: result.related, explore: result.explore, reviews: result.reviews };
   },
   head: ({ loaderData }) => {
     if (!loaderData?.product) {
@@ -45,6 +50,7 @@ export const Route = createFileRoute("/products/$slug")({
     const image = product.image_url ? (product.image_url.startsWith("http") ? product.image_url : `${SITE_URL}${product.image_url}`) : undefined;
     const orderableVariants = purchasableVariants(product);
     const lowestPrice = lowestPurchasableVariant(product)?.price_minor ?? 0;
+    const reviewsLd = reviewStructuredData(loaderData.reviews);
     return {
       meta: [
         { title },
@@ -69,7 +75,7 @@ export const Route = createFileRoute("/products/$slug")({
         ] : []),
         { name: "twitter:card", content: "summary_large_image" },
       ],
-      links: [{ rel: "canonical", href: url }],
+      links: canonicalLinks(url ),
       scripts: [
         {
           type: "application/ld+json",
@@ -98,7 +104,8 @@ export const Route = createFileRoute("/products/$slug")({
                     : "https://schema.org/OutOfStock",
                 url,
               })) } : {}),
-            seller: { "@type": "Organization", name: "MTDGC", url: `${SITE_URL}/` },
+            seller: { "@type": "Organization", name: "MTDGC", legalName: "Matrix Digital Goods & Commerce", url: `${SITE_URL}/` },
+            ...(reviewsLd ?? {}),
             itemCondition: "https://schema.org/NewCondition",
             hasMerchantReturnPolicy: {
               "@type": "MerchantReturnPolicy",
@@ -128,7 +135,7 @@ export const Route = createFileRoute("/products/$slug")({
 });
 
 function ProductPage() {
-  const { product, related, explore } = Route.useLoaderData();
+  const { product, related, explore, reviews } = Route.useLoaderData();
   const { add, setDrawerOpen } = useCart();
   const { plan } = Route.useSearch();
   const selectedVariant = selectProductVariant(product, plan);
@@ -214,8 +221,9 @@ function ProductPage() {
   const productType = categoryTypeFromSlug(product.category?.slug ?? "");
   const isPlan = productType === "software" || productType === "subscription";
   const isGiftCard = isGiftCardCategory(product.category?.slug);
-  const deliveryTime = product.delivery_time.trim() === "Confirmed after order review" ? "" : product.delivery_time.trim();
-  const deliveryMethod = product.delivery_method.trim() === "Confirmed after order review" ? "" : product.delivery_method.trim();
+  const deliveryTime = publicDeliveryTime(product.delivery_time);
+  const deliveryMethod = publicDeliveryMethod(product.delivery_method);
+  const audGuide = orderable && variant && !hidePrices ? formatAudGuide(variant.price_minor) : null;
 
   const purchaseDetails = [
     { label: "Region", value: product.region?.trim() },
@@ -243,7 +251,7 @@ function ProductPage() {
 
   const trust = (
     <ul className="space-y-2 text-[13px] text-foreground/85">
-      <li className="flex gap-2"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />We verify your payment and deliver once it is checked.</li>
+      <li className="flex gap-2"><ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />Pay the NPR total. Delivery follows payment verification, within the time on this listing.</li>
       <li className="flex gap-2"><Check className="mt-0.5 size-4 shrink-0 text-primary" /><span>Refunds follow our <Link to="/policies/refunds" className="text-primary underline underline-offset-2">refund policy</Link>.</span></li>
       {wa && <li className="flex gap-2"><MessageCircle className="mt-0.5 size-4 shrink-0 text-primary" /><span>Questions first? <a href={wa} target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2">Ask on WhatsApp</a>.</span></li>}
     </ul>
@@ -290,6 +298,7 @@ function ProductPage() {
                 <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-primary">{product.brand}</p>
                 <h1 className="mt-1 font-display text-[22px] font-semibold leading-tight">{product.name}</h1>
                 <p className="mt-1 line-clamp-3 text-[13px] text-muted-foreground">{product.summary}</p>
+                <ResellerNotice className="mt-2" />
               </div>
             </div>
 
@@ -306,8 +315,10 @@ function ProductPage() {
                     {hidePrices ? PRICE_COMING_SOON : orderable && variant ? formatNpr(variant.price_minor) : selectedAvailability}
                     {orderable && variantWas && <span className="ml-2 text-sm font-normal text-muted-foreground line-through">{formatNpr(variantWas)}</span>}
                   </p>
+                  {audGuide && <p className="font-mono text-[11px] text-muted-foreground">{audGuide}</p>}
                 </div>
               </div>
+              {audGuide && <p className="mt-2 text-[11px] text-muted-foreground">You pay the NPR price. The A$ amount is a guide for customers in Australia.</p>}
               {deliveryTime && <p className="mt-1 text-xs text-muted-foreground">{deliveryTime}</p>}
               {purchaseDetailsBlock && <div className="mt-3">{purchaseDetailsBlock}</div>}
               {regionText && <div className="mt-3"><ProductRegionNotice region={regionText} /></div>}
@@ -322,6 +333,7 @@ function ProductPage() {
               <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-primary">{product.brand}</p>
               <h1 className="mt-1 font-display text-4xl font-semibold">{product.name}</h1>
               <p className="mt-2 text-sm text-muted-foreground">{product.summary}</p>
+              <ResellerNotice className="mt-2" />
             </div>
 
             <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">{variant?.name ? `${variant.name}. ` : ""}{selectedAvailability}{orderable && variant && !hidePrices ? `. ${formatNpr(variant.price_minor)}` : ""}</p>
@@ -390,6 +402,7 @@ function ProductPage() {
                           <span className="pr-5 font-mono text-[13px] font-medium leading-tight">{item.name}</span>
                           <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">{itemOrderable ? (isGiftCard ? "MTDGC selling price" : "Price") : "Availability"}</span>
                           <span className="font-mono text-sm font-bold text-price">{hidePrices ? PRICE_COMING_SOON : itemOrderable ? formatNpr(item.price_minor) : itemAvailability}</span>
+                          {itemOrderable && !hidePrices && <span className="font-mono text-[10px] text-muted-foreground">{formatAudGuide(item.price_minor)}</span>}
                           {itemOrderable && was && <span className="font-mono text-[11px] text-muted-foreground line-through">{formatNpr(was)}</span>}
                           {item.status === "low_stock" && <span className="font-mono text-[10px] uppercase text-warn">Limited</span>}
                           <span className="font-mono text-[10px] text-muted-foreground">{itemAvailability}</span>
@@ -415,10 +428,10 @@ function ProductPage() {
                   </li>
                 ))}
               </ul>
-              <ol aria-label="How manual payment works" className="mt-3 space-y-1.5 text-xs text-foreground/85">
-                <li className="flex gap-2"><span className="font-mono text-primary">1.</span><span>Place your order. Checkout then shows our QR code or bank details.</span></li>
-                <li className="flex gap-2"><span className="font-mono text-primary">2.</span><span>Pay the exact total in NPR, then upload your payment screenshot or transaction reference.</span></li>
-                <li className="flex gap-2"><span className="font-mono text-primary">3.</span><span>We check the payment by hand and deliver your order once it is verified.</span></li>
+              <ol aria-label="How payment works" className="mt-3 space-y-1.5 text-xs text-foreground/85">
+                <li className="flex gap-2"><span className="font-mono text-primary">1.</span><span>Place your order. Your order page shows the QR code or bank details for the NPR total.</span></li>
+                <li className="flex gap-2"><span className="font-mono text-primary">2.</span><span>Pay that total, then upload your payment confirmation.</span></li>
+                <li className="flex gap-2"><span className="font-mono text-primary">3.</span><span>We verify the payment and deliver within the time shown on this listing.</span></li>
               </ol>
             </section>
 
@@ -479,6 +492,8 @@ function ProductPage() {
                 <Link to="/how-it-works" className="text-primary underline underline-offset-2">how it works</Link>.
               </p>
             </section>
+
+            <ApprovedReviews reviews={reviews} />
           </div>
         </div>
 
@@ -508,6 +523,7 @@ function ProductPage() {
           <div className="min-w-0 flex-1">
             <p className="truncate text-[10px] text-muted-foreground">{isGiftCard ? "Face value: " + (variant?.name ?? "Choose a denomination") : variant?.name ?? "Choose an option"}</p>
             <p className={`font-mono font-bold leading-tight text-price ${hidePrices ? "text-[13px]" : "text-[15px]"}`}>{hidePrices ? PRICE_COMING_SOON : orderable && variant ? (isGiftCard ? "MTDGC price " : "") + formatNpr(variant.price_minor) : selectedAvailability}</p>
+            {audGuide && <p className="font-mono text-[10px] leading-4 text-muted-foreground">{audGuide}</p>}
           </div>
           {wa && (
             <a href={wa} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp support (opens in a new tab)" className="grid size-11 shrink-0 place-items-center rounded-xl border border-border text-primary">

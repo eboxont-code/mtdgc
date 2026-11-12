@@ -33,6 +33,7 @@ import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedWishlistRouteImport } from './routes/_authenticated/wishlist'
 import { Route as CategoriesIndexRouteImport } from './routes/categories.index'
 import { Route as CategoriesSlugRouteImport } from './routes/categories.$slug'
+import { Route as GuidesSlugRouteImport } from './routes/guides.$slug'
 import { Route as OrderOrderNumberRouteImport } from './routes/order.$orderNumber'
 import { Route as PoliciesDeliveryRouteImport } from './routes/policies/delivery'
 import { Route as PoliciesPrivacyRouteImport } from './routes/policies/privacy'
@@ -160,6 +161,11 @@ const CategoriesSlugRoute = CategoriesSlugRouteImport.update({
   path: '/categories/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuidesSlugRoute = GuidesSlugRouteImport.update({
+  id: '/guides/$slug',
+  path: '/guides/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OrderOrderNumberRoute = OrderOrderNumberRouteImport.update({
   id: '/order/$orderNumber',
   path: '/order/$orderNumber',
@@ -219,6 +225,7 @@ export interface FileRoutesByFullPath {
   '/orders': typeof AuthenticatedOrdersRoute
   '/wishlist': typeof AuthenticatedWishlistRoute
   '/categories/$slug': typeof CategoriesSlugRoute
+  '/guides/$slug': typeof GuidesSlugRoute
   '/order/$orderNumber': typeof OrderOrderNumberRoute
   '/policies/delivery': typeof PoliciesDeliveryRoute
   '/policies/privacy': typeof PoliciesPrivacyRoute
@@ -251,6 +258,7 @@ export interface FileRoutesByTo {
   '/orders': typeof AuthenticatedOrdersRoute
   '/wishlist': typeof AuthenticatedWishlistRoute
   '/categories/$slug': typeof CategoriesSlugRoute
+  '/guides/$slug': typeof GuidesSlugRoute
   '/order/$orderNumber': typeof OrderOrderNumberRoute
   '/policies/delivery': typeof PoliciesDeliveryRoute
   '/policies/privacy': typeof PoliciesPrivacyRoute
@@ -285,6 +293,7 @@ export interface FileRoutesById {
   '/_authenticated/orders': typeof AuthenticatedOrdersRoute
   '/_authenticated/wishlist': typeof AuthenticatedWishlistRoute
   '/categories/$slug': typeof CategoriesSlugRoute
+  '/guides/$slug': typeof GuidesSlugRoute
   '/order/$orderNumber': typeof OrderOrderNumberRoute
   '/policies/delivery': typeof PoliciesDeliveryRoute
   '/policies/privacy': typeof PoliciesPrivacyRoute
@@ -319,6 +328,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/wishlist'
     | '/categories/$slug'
+    | '/guides/$slug'
     | '/order/$orderNumber'
     | '/policies/delivery'
     | '/policies/privacy'
@@ -351,6 +361,7 @@ export interface FileRouteTypes {
     | '/orders'
     | '/wishlist'
     | '/categories/$slug'
+    | '/guides/$slug'
     | '/order/$orderNumber'
     | '/policies/delivery'
     | '/policies/privacy'
@@ -384,6 +395,7 @@ export interface FileRouteTypes {
     | '/_authenticated/orders'
     | '/_authenticated/wishlist'
     | '/categories/$slug'
+    | '/guides/$slug'
     | '/order/$orderNumber'
     | '/policies/delivery'
     | '/policies/privacy'
@@ -414,6 +426,7 @@ export interface RootRouteChildren {
   TrackRoute: typeof TrackRoute
   TrackOrderRoute: typeof TrackOrderRoute
   CategoriesSlugRoute: typeof CategoriesSlugRoute
+  GuidesSlugRoute: typeof GuidesSlugRoute
   OrderOrderNumberRoute: typeof OrderOrderNumberRoute
   PoliciesDeliveryRoute: typeof PoliciesDeliveryRoute
   PoliciesPrivacyRoute: typeof PoliciesPrivacyRoute
@@ -594,6 +607,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategoriesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guides/$slug': {
+      id: '/guides/$slug'
+      path: '/guides/$slug'
+      fullPath: '/guides/$slug'
+      preLoaderRoute: typeof GuidesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/order/$orderNumber': {
       id: '/order/$orderNumber'
       path: '/order/$orderNumber'
@@ -683,6 +703,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrackRoute: TrackRoute,
   TrackOrderRoute: TrackOrderRoute,
   CategoriesSlugRoute: CategoriesSlugRoute,
+  GuidesSlugRoute: GuidesSlugRoute,
   OrderOrderNumberRoute: OrderOrderNumberRoute,
   PoliciesDeliveryRoute: PoliciesDeliveryRoute,
   PoliciesPrivacyRoute: PoliciesPrivacyRoute,

@@ -2,7 +2,10 @@ import { Link } from "@tanstack/react-router";
 
 import { Wordmark } from "@/components/brand/wordmark";
 import { PaymentsRow } from "@/components/trust-band";
+import { ResellerNotice } from "@/components/reseller-notice";
+import { BRAND_FULL_NAME, BRAND_NAME, BRAND_TAGLINE } from "@/lib/brand";
 import { SUPPORT_MESSAGE, WHATSAPP_DISPLAY, whatsappLink } from "@/lib/format";
+import { LANDINGS } from "@/lib/landings";
 
 const GROUPS: { title: string; links: { to: string; label: string }[] }[] = [
   {
@@ -17,6 +20,10 @@ const GROUPS: { title: string; links: { to: string; label: string }[] }[] = [
       { to: "/track-order", label: "Track an order" },
       { to: "/account", label: "Your account" },
     ],
+  },
+  {
+    title: "Popular",
+    links: LANDINGS.map((landing) => ({ to: `/guides/${landing.slug}`, label: landing.h1 })),
   },
   {
     title: "Company",
@@ -42,13 +49,13 @@ export function SiteFooter() {
   return (
     <footer className="border-t border-border bg-panel">
       <div className="mx-auto max-w-6xl px-4 py-10">
-        <div className="grid gap-8 md:grid-cols-[1.2fr_repeat(3,0.6fr)]">
+        <div className="grid gap-8 md:grid-cols-[1.2fr_repeat(4,0.6fr)]">
           <div>
             <Wordmark size="lg" />
             <p className="mt-2 max-w-[46ch] text-xs text-muted-foreground">
-              A digital marketplace for Nepal and Australia: subscriptions and gift cards first, with software, deals and
-              game top-ups too. Prices in NPR.
+              {BRAND_NAME}, {BRAND_FULL_NAME}. {BRAND_TAGLINE} Prices in NPR, with an Australian dollar guide.
             </p>
+            <ResellerNotice className="mt-2" />
             <p className="mt-3 text-xs text-muted-foreground">
               MTDGC will never ask for your password, OTP or payment PIN.
             </p>

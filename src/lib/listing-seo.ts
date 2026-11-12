@@ -26,11 +26,11 @@ export function productListingSeo(product: ProductIdentity) {
   return {
     title: `${details.join(" | ")} | MTDGC`,
     description: [
-      `View ${name} on MTDGC.`,
+      `Buy ${name} from MTDGC, Matrix Digital Goods & Commerce.`,
       type ? `Category: ${type}.` : "",
       region ? `Region: ${region}.` : "",
       platform ? `Platform: ${platform}.` : "",
-      "See listing details and options.",
+      "Priced in NPR with an Australian dollar guide. Delivered after payment is verified.",
     ].filter(Boolean).join(" "),
     url: listingCanonical("products", product.slug),
   };
@@ -41,7 +41,7 @@ export function categoryListingSeo(category: ListingIdentity & { description?: s
   const description = clean(category.description);
   return {
     title: `${name} | MTDGC`,
-    description: `Browse ${name} listings on MTDGC. ${description || "View individual listings for product details and options."}`,
+    description: `Shop ${name} at MTDGC, Matrix Digital Goods & Commerce, for Nepal and Australia. ${description || "Each listing shows the options, region and delivery time."}`,
     url: listingCanonical("categories", category.slug),
   };
 }
