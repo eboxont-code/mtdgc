@@ -1416,3 +1416,32 @@ There is no complete transition graph enforced by the application: direct admini
 - Playwright checked **390px first, then 1280px desktop**: all 13 guidance variants rendered in an isolated component-only presentation check with no horizontal overflow; screenshots inspected; no runtime errors. Actual tracking rejected missing order/contact and the actual order page stayed contact-gated without revealing guidance.
 - **Verification limitation:** real populated account/order/tracking results were not exercised. Preview session minting failed because no auth users were available. No customer account, order or payment was created, and no invented records or mocked lookup response were used. A signed-in existing customer session and authorized order/contact are required for that final read-only end-to-end check.
 - **Skipped/unchanged:** protected cart, checkout, router/Sentry and product-help; no schema, migration, server action, storage, auth setting, transition permission, delivery time or payment detail changed. No publishing or deployment requested.
+
+
+## 33. Brand-mark consistency and catalogue product-art audit — 12 November 2026
+
+**Scope:** Align the visible MTDGC company identity across shared UI states and page metadata; improve product-specific logo artwork only where a verifiable reusable mark is available. This work does not change product status, supplier legitimacy, resale authority or launch eligibility.
+
+### MTDGC company identity
+
+- The approved 5×5 emerald M remains the canonical company glyph in `src/components/brand/glyph.tsx`; `src/components/brand/wordmark.tsx` remains the shared wordmark implementation.
+- The shared wordmark is present in the storefront header/footer, not-found and error fallbacks, and authenticated-account loading state. The homepage hero fallback uses the shared glyph rather than the retired 3×3 matrix.
+- Browser, favicon, Apple touch and manifest icon assets use the 5×5 M. Existing designed Open Graph share cards are retained rather than replaced with a plain favicon.
+- Root metadata now supplies the branded `/og/mtdgc.png` preview for routes that do not define their own image. Route-specific preview images remain in control where present.
+- The obsolete, unreferenced root `h.html` snapshot from 24 October, which contained the retired 3×3 mark and stale page markup, was removed. It had no code references.
+
+### Product-art changes
+
+- Generated product artwork now includes verified Simple Icons marks for DoorDash, Uber Eats and Ticketmaster on their respective Australian gift-card tiles. Source identifiers and CC0-1.0 provenance are recorded in `THIRD_PARTY_LOGO_ASSETS.md`.
+- The existing generated marks for software/subscription/game products remain distinct from the MTDGC company logo. Product brands are not replaced with the MTDGC glyph.
+- The Australian card artwork audit identified seven remaining image files that still use generic text-led artwork rather than a verified current brand mark: Amart Furniture, Bunnings, Coles, JB Hi-Fi, Kmart, Supercheap Auto and Woolworths. Obtain current, permitted assets or documented source rights before replacing these; do not use outdated marks or assume that a third-party logo aggregator grants reuse rights.
+- **MT-0039 remains TODO/open.** It is not complete until imagery rights and all remaining misleading product artwork have been reviewed and resolved.
+
+### Verification and boundaries
+
+- GitHub commits on `main` updated the shared fallback branding, authenticated loading mark, root social-image defaults, product brand-mark map, provenance notes and removal of the stale HTML snapshot.
+- Vercel production deployments for the latest company-brand and product-art commits reached `READY` and retained the `mtdgc.com` / `www.mtdgc.com` aliases.
+- GitHub Actions Quality runs continued to report failure without starting a job step or exposing runner logs (`steps: null`, `logs_url: null`). This is not evidence of a source test failure, but it also does not constitute passing CI. The Vercel deployment is the verified production-build signal.
+- No Supabase rows, product URLs, product status, variants, prices, supplier records, checkout or payment settings were changed. No orders, purchases or payments were created. No additional spend was incurred.
+
+**Next imagery action:** source and verify permitted current logos for the seven outstanding Australian retailer cards before closing MT-0039. Maintain the 5×5 emerald M as the single MTDGC company mark throughout.
