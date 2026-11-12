@@ -1426,7 +1426,8 @@ There is no complete transition graph enforced by the application: direct admini
 
 - The approved 5×5 emerald M remains the canonical company glyph in `src/components/brand/glyph.tsx`; `src/components/brand/wordmark.tsx` remains the shared wordmark implementation.
 - The shared wordmark is present in the storefront header/footer, not-found and error fallbacks, and authenticated-account loading state. The homepage hero fallback uses the shared glyph rather than the retired 3×3 matrix.
-- Browser, favicon, Apple touch and manifest icon assets use the 5×5 M. Existing designed Open Graph share cards are retained rather than replaced with a plain favicon.
+- The standalone server-generated 500 page (`src/lib/error-page.ts`), used when SSR fails before React can render, now draws the same 5×5 M and full MTDGC wordmark using the approved emerald/forest palette.
+- Browser, favicon, Apple touch and manifest icon assets use the 5×5 M. Existing designed Open Graph share cards are retained rather than replaced with a plain favicon. The 48×48 browser favicon and 192×192 app icon were also visually checked against the 512×512 and Apple touch variants.
 - Root metadata now supplies the branded `/og/mtdgc.png` preview for routes that do not define their own image. Route-specific preview images remain in control where present.
 - The obsolete, unreferenced root `h.html` snapshot from 24 October, which contained the retired 3×3 mark and stale page markup, was removed. It had no code references.
 
@@ -1441,7 +1442,7 @@ There is no complete transition graph enforced by the application: direct admini
 ### Verification and boundaries
 
 - GitHub commits on `main` updated the shared fallback branding, authenticated loading mark, root social-image defaults, product brand-mark map, provenance notes and removal of the stale HTML snapshot.
-- Vercel production deployments for the latest company-brand and product-art commits reached `READY` and retained the `mtdgc.com` / `www.mtdgc.com` aliases.
+- The latest Vercel production deployment for main commit `19c98f25cd55bb2de19e4fc41369cc8039b7e1ab` reached `READY` at deployment `dpl_6bRFrqFC1DEwg8YvpaQ2HJT77pMi`; `mtdgc.com` and `www.mtdgc.com` aliases remained attached with no alias error.
 - GitHub Actions Quality runs continued to report failure without starting a job step or exposing runner logs (`steps: null`, `logs_url: null`). This is not evidence of a source test failure, but it also does not constitute passing CI. The Vercel deployment is the verified production-build signal.
 - No Supabase rows, product URLs, product status, variants, prices, supplier records, checkout or payment settings were changed. No orders, purchases or payments were created. No additional spend was incurred.
 
