@@ -55,9 +55,9 @@ export const Route = createFileRoute("/")({
       { property: "og:url", content: `${SITE_URL}/` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:image", content: `${SITE_URL}/og/mtdgc.png` },
+      { property: "og:image", content: `${SITE_URL}/icon-512.png` },
       { property: "og:image:alt", content: "MTDGC, the digital marketplace for Nepal and Australia" },
-      { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
+      { name: "twitter:image", content: `${SITE_URL}/icon-512.png` },
       { name: "twitter:title", content: "MTDGC | Software and subscriptions in Nepal" },
       {
         name: "twitter:description",
@@ -150,7 +150,7 @@ function Index() {
     alternateName: "Matrix Digital Goods & Commerce",
     url: `${SITE_URL}/`,
     description: "Digital commerce company serving Nepal and Australia selling game top-ups, gift cards and subscriptions.",
-    logo: `${SITE_URL}/og/mtdgc.png`,
+    logo: `${SITE_URL}/icon-512.png`,
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "customer support",
