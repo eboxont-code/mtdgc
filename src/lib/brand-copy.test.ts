@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { strict as assert } from "node:assert";
 import { describe, test } from "node:test";
 
-import { BRAND_DESCRIPTION, BRAND_FULL_NAME, BRAND_NAME, RESELLER_NOTICE } from "./brand";
+import { BRAND_DESCRIPTION, BRAND_FULL_NAME, BRAND_NAME, RESELLER_NOTICE, organizationJson, websiteJson } from "./brand";
 import { formatAudGuide, NPR_PER_AUD_GUIDE, publicDeliveryMethod, publicDeliveryTime } from "./format";
 import { LANDINGS } from "./landings";
 import { reviewStructuredData } from "./reviews";
@@ -17,6 +17,32 @@ describe("brand copy", () => {
     assert.equal(BANNED.test(copy), false);
     assert.match(RESELLER_NOTICE, /independent reseller/i);
     assert.match(RESELLER_NOTICE, /trademarks belong to their owners/i);
+  });
+
+  test("uses the README-approved canonical description across brand surfaces", () => {
+    const expected =
+      "Matrix Digital Goods & Commerce is a digital-goods storefront for game top-ups, gift cards, subscriptions and software.";
+    assert.equal(BRAND_DESCRIPTION, expected);
+    assert.equal(organizationJson().description, BRAND_DESCRIPTION);
+    assert.equal(websiteJson().description, BRAND_DESCRIPTION);
+
+    const readme = readFileSync(new URL("../../README.md", import.meta.url), "utf8");
+    assert.ok(readme.includes("**Matrix Digital Goods & Commerce** is a digital-goods storefront for game top-ups, gift cards, subscriptions and software."));
+
+    const root = readFileSync(new URL("../../src/routes/__root.tsx", import.meta.url), "utf8");
+    const home = readFileSync(new URL("../../src/routes/index.tsx", import.meta.url), "utf8");
+    const about = readFileSync(new URL("../../src/routes/about.tsx", import.meta.url), "utf8");
+    const footer = readFileSync(new URL("../../src/components/site-footer.tsx", import.meta.url), "utf8");
+    assert.match(root, /BRAND_DESCRIPTION/);
+    assert.match(home, /content: BRAND_DESCRIPTION/);
+    assert.match(home, /content: LOGO_ALT/);
+    assert.match(about, /intro=\{BRAND_DESCRIPTION\}/);
+    assert.match(footer, /\{BRAND_DESCRIPTION\}/);
+    assert.doesNotMatch(footer, /BRAND_TAGLINE|Australian dollar guide/);
+
+    const manifest = JSON.parse(readFileSync(new URL("../../public/site.webmanifest", import.meta.url), "utf8")) as { description?: string };
+    assert.equal(manifest.description, BRAND_DESCRIPTION);
+    assert.doesNotMatch(BRAND_DESCRIPTION, /Nepal|Australia|available now|authori[sz]ed reseller|instant delivery/i);
   });
 
   test("customer pages do not publish policy dates or a request-to-buy line", () => {

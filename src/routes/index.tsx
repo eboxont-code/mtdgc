@@ -11,7 +11,7 @@ import { TrustBand } from "@/components/trust-band";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
-import { BRAND_DESCRIPTION, BRAND_FULL_NAME, BRAND_NAME, BRAND_TAGLINE } from "@/lib/brand";
+import { BRAND_DESCRIPTION, BRAND_FULL_NAME, BRAND_NAME, BRAND_TAGLINE, LOGO_ALT } from "@/lib/brand";
 import { listCatalog } from "@/lib/catalog.functions";
 import type { CatalogCategory, CatalogProduct } from "@/lib/catalog.functions";
 import { SITE_URL, isOrderable, whatsappLink } from "@/lib/format";
@@ -53,7 +53,7 @@ export const Route = createFileRoute("/")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:image", content: `${SITE_URL}/og/mtdgc.png` },
-      { property: "og:image:alt", content: "MTDGC, the digital marketplace for Nepal and Australia" },
+      { property: "og:image:alt", content: LOGO_ALT },
       { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
       { name: "twitter:title", content: `${BRAND_NAME} | ${BRAND_FULL_NAME}` },
       { name: "twitter:description", content: BRAND_DESCRIPTION },

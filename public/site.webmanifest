@@ -1,7 +1,7 @@
 {
   "name": "MTDGC",
   "short_name": "MTDGC",
-  "description": "MTDGC, Matrix Digital Goods & Commerce. Game top-ups, gift cards and subscriptions for Nepal and Australia.",
+  "description": "Matrix Digital Goods & Commerce is a digital-goods storefront for game top-ups, gift cards, subscriptions and software.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

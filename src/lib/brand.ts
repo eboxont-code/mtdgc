@@ -6,7 +6,7 @@ export const BRAND_FULL_NAME = "Matrix Digital Goods & Commerce";
 export const BRAND_TAGLINE = "Game top-ups, gift cards and subscriptions for Nepal and Australia.";
 
 export const BRAND_DESCRIPTION =
-  "MTDGC (Matrix Digital Goods & Commerce) is the Nepal and Australia store for game top-ups, gift cards and subscriptions. Prices are in NPR, with an Australian dollar guide. You order on this site and receive your item after payment is verified.";
+  "Matrix Digital Goods & Commerce is a digital-goods storefront for game top-ups, gift cards, subscriptions and software.";
 
 export const RESELLER_NOTICE =
   "Brand names and logos appear only to identify the product being sold. Trademarks belong to their owners. MTDGC is an independent reseller.";

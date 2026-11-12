@@ -7,7 +7,7 @@ import { ResellerNotice } from "@/components/reseller-notice";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
-import { BRAND_DESCRIPTION, BRAND_FULL_NAME, BRAND_NAME, BRAND_TAGLINE, organizationJson } from "@/lib/brand";
+import { BRAND_DESCRIPTION, BRAND_FULL_NAME, BRAND_NAME, organizationJson } from "@/lib/brand";
 import { SITE_URL, WHATSAPP_DISPLAY, whatsappLink } from "@/lib/format";
 import { breadcrumbLd, ldScript, pageLd, canonicalLinks } from "@/lib/seo";
 
@@ -44,7 +44,7 @@ function AboutPage() {
       <SiteHeader />
       <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-3xl px-4 pb-8 pt-6">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "About" }]} />
-        <PageHero eyebrow={BRAND_FULL_NAME} title={BRAND_NAME} intro={BRAND_TAGLINE} />
+        <PageHero eyebrow={BRAND_FULL_NAME} title={BRAND_NAME} intro={BRAND_DESCRIPTION} />
 
         <section className="mt-6 space-y-4 text-sm leading-relaxed text-foreground/85">
           <p>

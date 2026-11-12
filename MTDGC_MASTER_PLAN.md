@@ -2,7 +2,7 @@
 
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
-**Version:** 2.2 · 8 November 2026
+**Version:** 2.3 · 13 November 2026
 **Purpose:** Build a reliable, profitable digital-commerce operation by stabilising Nepal first, piloting Australia-to-Nepal digital gifting second, and entering the Australian-local market only after sourcing, payments, legal requirements and fulfilment are proven.
 
 > **This is an original MTDGC plan.** Its business model, priorities, workstreams and tasks are purpose-built for digital products and digital fulfilment.
@@ -350,7 +350,7 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** MTDGC earns qualified demand through useful category and product information, not thin pages or unsupported claims.
 
-- [ ] **MT-0201 · P0 · TODO** — Set one canonical brand description and use it consistently across the site and metadata.
+- [!] **MT-0201 · P0 · BLOCKED** — The README-approved neutral description is implemented in existing draft [PR #33](https://github.com/eboxont-code/mtdgc/pull/33) across shared brand metadata, Organization/WebSite structured data, the About introduction, shared footer, homepage image alt text and web manifest. Focused regression coverage is added. Current-main Quality run [43241725039](https://github.com/eboxont-code/mtdgc/actions/runs/43241725039) failed before the runner started; no lint, tests, typecheck or build ran. The exact PR-head quality workflow and production release remain required. Keep the PR draft; do not merge until the exact head passes. The separate market claims and Australia service-area metadata remain unchanged under MT-0202 pending owner/qualified review.
 - [ ] **MT-0202 · P0 · TODO** — Resolve the homepage's Nepal-and-Australia positioning against actual checkout and legal-market support.
 - [ ] **MT-0203 · P1 · TODO** — Create original category landing pages for game top-ups, gift cards, subscriptions and software.
 - [ ] **MT-0204 · P1 · TODO** — Write product descriptions that explain what is delivered, how it works and what restrictions apply.
@@ -530,7 +530,7 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-task register are authoritative.
+MT-0201 is being refreshed in existing draft PR #33. Its new description is not live; the current-main quality run failed before the testing computer started. Task statuses in the 308-task register remain authoritative.
 
 | Order | Task | Status |
 |---:|---|---|
@@ -543,7 +543,7 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 7 | MT-0086 — require independent payment settlement matching before fulfilment | BLOCKED; no bank-statement feed, provider callback or owner-approved manual settlement evidence is available |
 | 8 | MT-0087 — prevent duplicate transaction references/screenshots across orders | BLOCKED; concurrency-safe uniqueness requires the approved Supabase cutover/migration gate |
 | 9 | MT-0101 — map current order statuses and observed transition paths | DONE; 13-value enum, application writers, UI mappings, production aggregate counts and lack of transition enforcement are documented in section 30 and Data Architecture section 4 |
-| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | NEXT P0; can be documented from the current payment-review code and existing operational evidence without production writes |
+| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | BLOCKED; exact-head Quality run [43001915772](https://github.com/eboxont-code/mtdgc/actions/runs/43001915772) and current-main run [43241725039](https://github.com/eboxont-code/mtdgc/actions/runs/43241725039) failed before any job step started; no full checks ran |
 | 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 
@@ -1447,3 +1447,24 @@ There is no complete transition graph enforced by the application: direct admini
 - No Supabase rows, product URLs, product status, variants, prices, supplier records, checkout or payment settings were changed. No orders, purchases or payments were created. No additional spend was incurred.
 
 **Next imagery action:** source and verify permitted current logos for the seven outstanding Australian retailer cards before closing MT-0039. Maintain the 5×5 emerald M as the single MTDGC company mark throughout.
+
+
+## 34. Canonical MTDGC brand description refresh — 13 November 2026
+
+**Task:** MT-0201 · P0 · BLOCKED in existing [PR #33](https://github.com/eboxont-code/mtdgc/pull/33). The branch is refreshed onto current main with a history-preserving merge; it remains a draft until the exact-head quality workflow passes and the production result is verified.
+
+### Approved description and implementation
+
+- README.md remains the source of truth: “Matrix Digital Goods & Commerce is a digital-goods storefront for game top-ups, gift cards, subscriptions and software.”
+- The shared `BRAND_DESCRIPTION` now matches that sentence exactly. Root fallback metadata, homepage/About metadata, Organization and WebSite structured data already consume this constant; the About introduction and shared footer now use it too.
+- The web manifest uses the same description. The homepage social-image alt text now uses the neutral company-logo description.
+- The separate homepage tagline, About-page market statements and Australia `areaServed` metadata are deliberately unchanged. Their accuracy is a separate MT-0202 owner/qualified-review decision; this task does not claim Australia-local sales are approved or enabled.
+
+### Verification and release boundary
+
+- Focused source-contract regression coverage checks the README wording, shared page metadata/footer references, About introduction, web-manifest description and absence of unsupported market/availability/reseller/delivery claims in the canonical description.
+- Current-main Quality run [43241725039](https://github.com/eboxont-code/mtdgc/actions/runs/43241725039) failed before any job step started. This is a runner-startup failure, not an application-test failure; lint, unit tests, typecheck and production build did not run. The official GitHub status page reported Actions operational after the 11 November incident was resolved at 21:21 UTC. Account Actions allowance and repository Actions settings are not readable through the connected access.
+- The exact PR-head Quality result and a current preview build remain to be checked. The current production deployment is READY on main commit `d51ca37ea6adc9a93344816856236f680c213392` at [deployment `dpl_GaZMp1juExA9KkyrVkEyu8DzKVqC`](https://vercel.com/boxont/mtdgc/GaZMp1juExA9KkyrVkEyu8DzKVqC), with `mtdgc.com` and `www.mtdgc.com` aliases. This brand-description change is not live.
+- No production database writes, migrations, order/customer/payment changes, credentials, environment, hosting, DNS or billing changes. Additional spend: $0.
+
+**Next eligible P0 task:** MT-0292 — map personal-data fields and known processors from source and schema metadata only. Record any supplier recipients, processor locations, storage countries or retention periods as UNKNOWN unless directly evidenced; do not inspect customer rows or infer legal requirements.

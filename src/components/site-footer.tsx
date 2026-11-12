@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { Wordmark } from "@/components/brand/wordmark";
 import { PaymentsRow } from "@/components/trust-band";
 import { ResellerNotice } from "@/components/reseller-notice";
-import { BRAND_FULL_NAME, BRAND_NAME, BRAND_TAGLINE } from "@/lib/brand";
+import { BRAND_DESCRIPTION } from "@/lib/brand";
 import { SUPPORT_MESSAGE, WHATSAPP_DISPLAY, whatsappLink } from "@/lib/format";
 import { LANDINGS } from "@/lib/landings";
 
@@ -52,9 +52,7 @@ export function SiteFooter() {
         <div className="grid gap-8 md:grid-cols-[1.2fr_repeat(4,0.6fr)]">
           <div>
             <Wordmark size="lg" />
-            <p className="mt-2 max-w-[46ch] text-xs text-muted-foreground">
-              {BRAND_NAME}, {BRAND_FULL_NAME}. {BRAND_TAGLINE} Prices in NPR, with an Australian dollar guide.
-            </p>
+            <p className="mt-2 max-w-[46ch] text-xs text-muted-foreground">{BRAND_DESCRIPTION}</p>
             <ResellerNotice className="mt-2" />
             <p className="mt-3 text-xs text-muted-foreground">
               MTDGC will never ask for your password, OTP or payment PIN.
