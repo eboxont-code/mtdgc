@@ -7,6 +7,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { PageHero } from "@/components/sections/page-hero";
 import { PackageSearch } from "lucide-react";
 import { OrderLoading } from "@/components/order-loading";
+import { OrderNextStep } from "@/components/order-next-step";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
@@ -15,7 +16,7 @@ import { GIFT_CARD_PRICE_DISCLOSURE } from "@/lib/gift-card-pricing";
 import { lookupOrder } from "@/lib/orders.functions";
 import { isSupportedOrderReference } from "@/lib/order-reference";
 
-const STATUS_TEXT: Record<string, string> = { ...STATUS_LABEL, pending: "Placed", paid: "Payment confirmed", processing: "Processing", fulfilled: "Fulfilled", completed: "Completed", cancelled: "Cancelled", failed: "Failed", refunded: "Refunded" };
+const STATUS_TEXT: Record<string, string> = { ...STATUS_LABEL, pending: "Placed", pending_payment: "Waiting for payment", payment_submitted: "Payment proof received, being checked", paid: "Payment marked received", verified: "Payment verified", rejected: "Payment review rejected", delivered: "Delivered", processing: "Processing", fulfilled: "Fulfilled", completed: "Completed", cancelled: "Cancelled", failed: "Failed", refunded: "Refunded" };
 import { breadcrumbLd, pageLd } from "@/lib/seo";
 
 export const Route = createFileRoute("/track-order")({
@@ -183,6 +184,7 @@ function TrackOrderPage() {
             <p className="text-xs text-muted-foreground">
               Placed {new Date(found.createdAt).toLocaleDateString("en-GB")} · {formatNpr(found.totalMinor)} · Status: {STATUS_TEXT[found.status] ?? found.status}
             </p>
+            <OrderNextStep status={found.status} />
             <ul className="mt-2 text-sm">
               {found.items.map((i) => (
                 <li key={i.name + "-" + i.variantName}>

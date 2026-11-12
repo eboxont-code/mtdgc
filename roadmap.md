@@ -4,6 +4,9 @@
 >
 > This file is preserved as a dated implementation and verification history. Checkboxes below record the status claimed by each historical pack when it was written; they are not a second live TODO register. When an old pack conflicts with the Master Plan, use the Master Plan and refresh the implementation evidence before changing task status.
 
+## 12 Nov ordered pack
+- [ ] MT-0101/MT-0102/MT-0108: refresh source-only status map and milestone definitions; add shared next-action guidance to customer order details and guest tracking; verification pending; protected cart/checkout/router and all server actions unchanged; not published.
+
 ## 5 Nov ordered pack
 - [x] MT-0144: prominent saved-region warnings above desktop and mobile purchase actions plus gift-card region confirm; listing region data only, no invented markets; tests and 390px check passed, no overflow; not published.
 - [x] MT-0195: shared EmptyState/Skeleton loading, retry and empty presentation on catalog/category/product lists and product loading/errors; 390px failure-to-retry flow and unavailable purchase lock verified; protected home/global/cart/checkout states skipped; not published.
