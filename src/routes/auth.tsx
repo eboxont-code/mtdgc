@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { canonicalLinks } from "@/lib/seo";
 import { useEffect, useState } from "react";
 
 import { SiteFooter } from "@/components/site-footer";
@@ -30,7 +31,7 @@ export const Route = createFileRoute("/auth")({
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
     ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/auth` }],
+    links: canonicalLinks(`${SITE_URL}/auth`),
   }),
   component: AuthPage,
 });

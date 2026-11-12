@@ -21,7 +21,7 @@ export type BrandIcon = { path?: string; color?: string; width?: number; height?
 export type BrandArt = { label: string; sub: string; bg: [string, string]; fg: string; icons: BrandIcon[] };
 
 // Additional verified marks from Iconify's CC0 logos set and attributed third-party brand SVG collections.
-const SVG_ICON: Record<string, BrandIcon> = {
+const SVG_ICON = {
   "adobe": {
     "width": 512,
     "height": 134,
@@ -137,5 +137,5 @@ export function brandArtSvg(art: BrandArt, opts: { id: string; comingSoon?: bool
   const tag = opts.comingSoon
     ? `<g><rect x="252" y="22" width="126" height="32" rx="16" fill="#000" fill-opacity="0.45"/><text x="315" y="43" text-anchor="middle" font-family="JetBrains Mono, ui-monospace, monospace" font-size="13" font-weight="700" letter-spacing="1" fill="#FFFFFF">COMING SOON</text></g>`
     : "";
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="${label}"><defs><linearGradient id="g-${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${art.bg[0]}"/><stop offset="1" stop-color="${art.bg[1]}"/></linearGradient><pattern id="p-${id}" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="${art.fg}" stroke-opacity="0.06" stroke-width="1"/></pattern></defs><rect width="400" height="400" fill="url(#g-${id})"/><rect width="400" height="400" fill="url(#p-${id})"/>${icons}<text x="200" y="${labelY}" text-anchor="middle" font-family="Space Grotesk, ui-sans-serif, system-ui, sans-serif" font-size="${labelSize}" font-weight="700" fill="${art.fg}">${label}</text><text x="200" y="${subY}" text-anchor="middle" font-family="JetBrains Mono, ui-monospace, monospace" font-size="16" font-weight="500" letter-spacing="3" fill="${art.fg}" fill-opacity="0.72">${sub}</text>${tag}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="${label}, sold by MTDGC"><defs><linearGradient id="g-${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${art.bg[0]}"/><stop offset="1" stop-color="${art.bg[1]}"/></linearGradient><pattern id="p-${id}" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="${art.fg}" stroke-opacity="0.06" stroke-width="1"/></pattern></defs><rect width="400" height="400" fill="url(#g-${id})"/><rect width="400" height="400" fill="url(#p-${id})"/>${icons}<text x="200" y="${labelY}" text-anchor="middle" font-family="Space Grotesk, ui-sans-serif, system-ui, sans-serif" font-size="${labelSize}" font-weight="700" fill="${art.fg}">${label}</text><text x="200" y="${subY}" text-anchor="middle" font-family="JetBrains Mono, ui-monospace, monospace" font-size="16" font-weight="500" letter-spacing="3" fill="${art.fg}" fill-opacity="0.72">${sub}</text>${tag}</svg>`;
 }

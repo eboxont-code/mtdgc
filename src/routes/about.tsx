@@ -1,47 +1,37 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { BuyerProtection } from "@/components/buyer-protection";
 import { PageHero } from "@/components/sections/page-hero";
+import { ResellerNotice } from "@/components/reseller-notice";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
-import { SITE_URL, whatsappLink } from "@/lib/format";
-import { breadcrumbLd, pageLd } from "@/lib/seo";
+import { BRAND_DESCRIPTION, BRAND_FULL_NAME, BRAND_NAME, BRAND_TAGLINE, organizationJson } from "@/lib/brand";
+import { SITE_URL, WHATSAPP_DISPLAY, whatsappLink } from "@/lib/format";
+import { breadcrumbLd, ldScript, pageLd, canonicalLinks } from "@/lib/seo";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About MTDGC | Matrix Digital Goods & Commerce" },
-      {
-        name: "description",
-        content:
-          "MTDGC is a digital commerce company serving Nepal and Australia selling game top-ups, gift cards and subscriptions, with more digital product lines being prepared.",
-      },
-      { property: "og:title", content: "About MTDGC" },
-      { property: "og:description", content: "Who MTDGC is, what we sell and how digital delivery works." },
-      { name: "twitter:title", content: "About MTDGC"  },
-      { name: "twitter:description", content: "Who MTDGC is, what we sell and how digital delivery works."  },
+      { title: `About ${BRAND_NAME} | ${BRAND_FULL_NAME}` },
+      { name: "description", content: BRAND_DESCRIPTION },
+      { property: "og:title", content: `About ${BRAND_NAME} | ${BRAND_FULL_NAME}` },
+      { property: "og:description", content: BRAND_DESCRIPTION },
+      { name: "twitter:title", content: `About ${BRAND_NAME} | ${BRAND_FULL_NAME}` },
+      { name: "twitter:description", content: BRAND_DESCRIPTION },
       { property: "og:url", content: `${SITE_URL}/about` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:image", content: `${SITE_URL}/og/mtdgc.png` },
-      { property: "og:image:alt", content: "MTDGC, the digital marketplace for Nepal and Australia" },
+      { property: "og:image:alt", content: `${BRAND_NAME}, ${BRAND_FULL_NAME}` },
       { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
     ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/about` }],
+    links: canonicalLinks(`${SITE_URL}/about`),
     scripts: [
-      pageLd("AboutPage", "About MTDGC", "/about", "Who MTDGC is, what we sell and how digital delivery works.", {
-        mainEntity: {
-          "@type": "Organization",
-          name: "MTDGC",
-          legalName: "Matrix Digital Goods & Commerce",
-          url: SITE_URL,
-          areaServed: ["NP", "AU"],
-          description:
-            "Digital commerce company serving Nepal and Australia selling game top-ups, gift cards and subscriptions with manual order review before fulfilment.",
-        },
-      }),
+      pageLd("AboutPage", `About ${BRAND_NAME}`, "/about", BRAND_DESCRIPTION, { mainEntity: organizationJson() }),
       breadcrumbLd([{ name: "Home", path: "/" }, { name: "About", path: "/about" }]),
+      ldScript(organizationJson()),
     ],
   }),
   component: AboutPage,
@@ -52,67 +42,51 @@ function AboutPage() {
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
       <SiteHeader />
-      <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-3xl px-4 pb-16 pt-6">
+      <main id="main-content" tabIndex={-1} className="focus:outline-none mx-auto max-w-3xl px-4 pb-8 pt-6">
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "About" }]} />
-        <PageHero eyebrow="Company" title="About MTDGC" intro="Matrix Digital Goods and Commerce. Digital products for customers in Nepal and Australia, checked by a person before delivery." />
+        <PageHero eyebrow={BRAND_FULL_NAME} title={BRAND_NAME} intro={BRAND_TAGLINE} />
 
-        <section className="mt-6 space-y-4 text-sm text-foreground/80">
+        <section className="mt-6 space-y-4 text-sm leading-relaxed text-foreground/85">
           <p>
-            MTDGC stands for Matrix Digital Goods and Commerce. We are a digital commerce company serving customers
-            in Nepal and Australia. Our first product lines are game top-ups, digital gift cards and subscription plans, and the
-            catalog is built so we can add software, AI services, mobile products and business services as each line is
-            properly sourced.
+            {BRAND_NAME} is {BRAND_FULL_NAME}. The name on the store is {BRAND_NAME}. It is the store for game top-ups, gift cards and subscriptions for customers in Nepal and Australia.
           </p>
           <p>
-            Every order is reviewed by a person before it is fulfilled. That is slower than a fully automated shop, but
-            it means we can check the player ID you sent, confirm the product is genuinely available in your region and
-            correct mistakes before anything is delivered. We do not describe delivery as instant, because our
-            fulfilment is not automated yet.
+            You order on this website. Each listing shows the pack, the region and the delivery time to expect. Checkout gives you an order number and the NPR total. You pay that total by QR or bank transfer, upload your payment confirmation, and the top-up, code or subscription details are delivered after payment is verified.
           </p>
           <p>
-            Prices on this site are shown in Nepalese rupees. You place your order through the checkout on this site and
-            receive an order number with the payment details. After you pay, you upload a screenshot of the payment,
-            and we deliver once our team has verified it. WhatsApp is there if you need support.
+            Prices are in Nepalese rupees. Customers in Australia also see an Australian dollar guide beside the NPR price so the amount is easy to read. The guide is not a second price. The amount you pay is the NPR total at checkout.
           </p>
           <p>
-            We publish only claims we can stand behind. There are no customer counts, ratings or review numbers on this
-            site until real orders and real reviews exist to support them.
+            {BRAND_NAME} serves customers in Nepal and Australia from this store. Support is on WhatsApp at {WHATSAPP_DISPLAY} and on the support page. Have your order number ready and the team will pick up the order from there.
           </p>
+        </section>
+
+        <ResellerNotice className="mt-4" />
+
+        <section className="mt-10" aria-labelledby="what-we-sell">
+          <h2 id="what-we-sell" className="font-display text-lg font-medium">What {BRAND_NAME} sells</h2>
+          <ul className="mt-3 space-y-2 text-sm text-foreground/85">
+            <li><Link to="/categories/$slug" params={{ slug: "game-top-ups" }} className="text-primary">Game top-ups</Link>: in-game currency and passes, credited with the player details on the listing.</li>
+            <li><Link to="/categories/$slug" params={{ slug: "gift-cards" }} className="text-primary">Gift cards</Link>: digital codes and wallet balance, with the region stated on the listing.</li>
+            <li><Link to="/categories/$slug" params={{ slug: "subscriptions" }} className="text-primary">Subscriptions</Link>: plans for a fixed period, with the length and delivery details on the listing.</li>
+            <li><Link to="/catalog" className="text-primary">Full catalog</Link>: every published listing, with its price and delivery time.</li>
+          </ul>
         </section>
 
         <section className="mt-10" aria-labelledby="reach-us">
-          <h2 id="reach-us" className="font-display text-lg font-medium">How to reach us</h2>
+          <h2 id="reach-us" className="font-display text-lg font-medium">Contact {BRAND_NAME}</h2>
+          <p className="mt-2 text-sm text-foreground/85">
+            Customer support for Nepal and Australia is WhatsApp {WHATSAPP_DISPLAY}, the support form, and order tracking with your order number.
+          </p>
           <div className="mt-3 flex flex-col items-start gap-3 sm:flex-row sm:flex-wrap">
             <Button asChild variant="outline" className="min-h-11"><Link to="/support">Contact support</Link></Button>
             <Button asChild variant="outline" className="min-h-11"><Link to="/track-order">Track an order</Link></Button>
-            {supportUrl && <Button asChild variant="outline" className="min-h-11"><a href={supportUrl} target="_blank" rel="noreferrer">Message support on WhatsApp</a></Button>}
+            <Button asChild variant="outline" className="min-h-11"><Link to="/policies/refunds">Refund policy</Link></Button>
+            {supportUrl && <Button asChild variant="outline" className="min-h-11"><a href={supportUrl} target="_blank" rel="noreferrer">WhatsApp {WHATSAPP_DISPLAY}</a></Button>}
           </div>
         </section>
-
-        <section className="mt-10">
-          <h2 className="font-display text-lg font-medium">What we sell</h2>
-          <ul className="mt-3 space-y-2 text-sm text-foreground/80">
-            <li><Link to="/catalog" search={{ category: "software" }} className="text-primary">Software</Link>: licence keys and activations, when listings are available.</li>
-            <li><Link to="/categories/$slug" params={{ slug: "subscriptions" }} className="text-primary">Subscriptions</Link>: streaming, music, AI tools and cloud storage, subject to the available listings.</li>
-            <li><Link to="/deals" className="text-primary">Deals</Link>: a place for software and subscription offers when sale prices are available.</li>
-            <li><Link to="/categories/$slug" params={{ slug: "gift-cards" }} className="text-primary">Gift cards</Link>: digital gift cards and wallet codes with the region stated on the listing.</li>
-            <li><Link to="/categories/$slug" params={{ slug: "game-top-ups" }} className="text-primary">Game top-ups</Link>: options delivered using the player details requested on each listing.</li>
-          </ul>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Available options and prices are shown on each listing. Coming-soon products are not open for orders.
-          </p>
-        </section>
-
-        <section className="mt-10">
-          <h2 className="font-display text-lg font-medium">Keep reading</h2>
-          <ul className="mt-3 space-y-2 text-sm">
-            <li><Link to="/how-it-works" className="text-primary">How ordering and delivery works</Link></li>
-            <li><Link to="/faq" className="text-primary">Frequently asked questions</Link></li>
-            <li><Link to="/policies/refunds" className="text-primary">Refund policy</Link></li>
-            <li><Link to="/catalog" className="text-primary">Browse the catalog</Link></li>
-          </ul>
-        </section>
       </main>
+      <BuyerProtection />
       <SiteFooter />
     </div>
   );

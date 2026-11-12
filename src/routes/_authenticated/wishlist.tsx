@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { canonicalLinks } from "@/lib/seo";
 import { useCallback, useEffect, useState } from "react";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
@@ -27,7 +28,7 @@ export const Route = createFileRoute("/_authenticated/wishlist")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/wishlist` }],
+    links: canonicalLinks(`${SITE_URL}/wishlist`),
   }),
   component: WishlistPage,
 });

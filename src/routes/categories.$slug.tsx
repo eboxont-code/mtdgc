@@ -1,4 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { canonicalLinks } from "@/lib/seo";
 
 import { PackageOpen } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
@@ -6,6 +7,7 @@ import { StorefrontError, StorefrontLoading } from "@/components/storefront-stat
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { ProductCard } from "@/components/product-card";
+import { ResellerNotice } from "@/components/reseller-notice";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
@@ -45,7 +47,7 @@ export const Route = createFileRoute("/categories/$slug")({
         { name: "twitter:image", content: shareImage },
         { name: "twitter:image:alt", content: `${category.name} from MTDGC` },
       ],
-      links: [{ rel: "canonical", href: url }],
+      links: canonicalLinks(url ),
       scripts: [
         {
           type: "application/ld+json",
@@ -108,8 +110,10 @@ function CategoryPage() {
         <Breadcrumbs
           items={[{ label: "Home", to: "/" }, { label: "Catalog", to: "/catalog" }, { label: category.name }]}
         />
-        <h1 className="font-display text-[26px] font-medium md:text-4xl">{category.name}</h1>
+        <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-primary">MTDGC · Matrix Digital Goods & Commerce</p>
+        <h1 className="mt-1 font-display text-[26px] font-medium md:text-4xl">{category.name}</h1>
         <p className="mt-2 max-w-[62ch] text-sm text-muted-foreground">{category.description}</p>
+        <ResellerNotice className="mt-2" />
         {CATEGORY_INTROS[category.slug] && (
           <p className="mt-3 max-w-[70ch] text-sm text-foreground/80">
             {CATEGORY_INTROS[category.slug]}{" "}
@@ -140,9 +144,8 @@ function CategoryPage() {
         <section className="mt-12 rounded-lg bg-panel p-5">
           <h2 className="font-display text-lg font-medium">Ordering from MTDGC</h2>
           <p className="mt-2 max-w-[70ch] text-sm text-foreground/80">
-            Choose a product and denomination, give us the account details the product needs, and place the order
-            at checkout. You get an order number and the payment details, then upload a screenshot of your payment. We
-            deliver once the payment is verified.
+            Choose a product, place the order, and pay the NPR total. Upload your payment confirmation.
+            Delivery follows verification, within the time shown on the listing.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <Button asChild variant="outline" size="sm"><Link to="/how-it-works">How ordering works</Link></Button>

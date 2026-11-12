@@ -17,8 +17,10 @@ import { BottomNav } from "../components/bottom-nav";
 import { ScrollReveals } from "../components/scroll-reveals";
 import { WhatsAppFab } from "../components/whatsapp-fab";
 import { Wordmark } from "../components/brand/wordmark";
+import { BRAND_DESCRIPTION, BRAND_FULL_NAME, BRAND_NAME } from "../lib/brand";
 import { SITE_URL } from "../lib/format";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { hreflangLinks, organizationLd, websiteLd } from "../lib/seo";
 
 function NotFoundComponent() {
 
@@ -99,9 +101,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     const pageMeta = matches.flatMap((match) => match.meta ?? []);
     const titleMeta = [...pageMeta].reverse().find((meta) => meta && "title" in meta);
     const descriptionMeta = [...pageMeta].reverse().find((meta) => meta && "name" in meta && meta.name === "description");
-    const title = titleMeta && "title" in titleMeta ? String(titleMeta.title) : "MTDGC | Digital Marketplace for Nepal and Australia";
-    const description = descriptionMeta && "content" in descriptionMeta ? String(descriptionMeta.content) : "Subscriptions and gift cards for Nepal and Australia, priced in NPR.";
+    const title = titleMeta && "title" in titleMeta ? String(titleMeta.title) : `${BRAND_NAME} | ${BRAND_FULL_NAME}`;
+    const description = descriptionMeta && "content" in descriptionMeta ? String(descriptionMeta.content) : BRAND_DESCRIPTION;
     const canonical = [...matches].reverse().flatMap((match) => match.links ?? []).find((link) => link?.rel === "canonical");
+    const canonicalHref = canonical && "href" in canonical && canonical.href ? String(canonical.href) : "";
     const leafOgTitle = [...pageMeta].reverse().find((meta) => meta && "property" in meta && meta.property === "og:title");
     const leafOgDescription = [...pageMeta].reverse().find((meta) => meta && "property" in meta && meta.property === "og:description");
     const shareTitle = leafOgTitle && "content" in leafOgTitle ? String(leafOgTitle.content) : title;
@@ -120,14 +123,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         : []),
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { name: "theme-color", content: "#070b09" },
-      { name: "author", content: "MTDGC" },
-      { property: "og:site_name", content: "MTDGC" },
+      { name: "author", content: `${BRAND_NAME}, ${BRAND_FULL_NAME}` },
+      { name: "application-name", content: BRAND_NAME },
+      { property: "og:site_name", content: BRAND_NAME },
       { property: "og:type", content: "website" },
       { property: "og:title", content: title },
       { property: "og:description", content: description },
       ...(!hasOgImage ? [
         { property: "og:image", content: `${SITE_URL}/og/mtdgc.png` },
-        { property: "og:image:alt", content: "MTDGC, Matrix Digital Goods & Commerce" },
+        { property: "og:image:alt", content: `${BRAND_NAME}, ${BRAND_FULL_NAME}` },
       ] : []),
       ...(canonical?.href ? [{ property: "og:url", content: canonical.href }] : []),
       { name: "twitter:title", content: shareTitle },
@@ -135,7 +139,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       ...(!hasTwitterImage ? [
         { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
-        { name: "twitter:image:alt", content: "MTDGC, Matrix Digital Goods & Commerce" },
+        { name: "twitter:image:alt", content: `${BRAND_NAME}, ${BRAND_FULL_NAME}` },
       ] : []),
     ],
     links: [
@@ -154,7 +158,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml", sizes: "any" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
       { rel: "manifest", href: "/site.webmanifest" },
+      ...(canonicalHref ? hreflangLinks(canonicalHref) : []),
     ],
+    scripts: [organizationLd(), websiteLd()],
   }; },
   shellComponent: RootShell,
   component: RootComponent,

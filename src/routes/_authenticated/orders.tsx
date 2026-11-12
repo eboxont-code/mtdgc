@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { canonicalLinks } from "@/lib/seo";
 import { useServerFn } from "@tanstack/react-start";
 import { useCallback, useEffect, useState } from "react";
 
@@ -29,7 +30,7 @@ export const Route = createFileRoute("/_authenticated/orders")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/orders` }],
+    links: canonicalLinks(`${SITE_URL}/orders`),
   }),
   component: OrdersPage,
 });

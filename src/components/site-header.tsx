@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { useCart } from "@/lib/cart";
 import { SUPPORT_MESSAGE, whatsappLink } from "@/lib/format";
+import { LANDINGS } from "@/lib/landings";
 
 const CATEGORIES = [
   { slug: "game-top-ups", label: "Game top-ups", icon: Gamepad2 },
@@ -16,15 +17,16 @@ const CATEGORIES = [
 ];
 
 const NAV = [
+  { to: "/about", label: "About" },
   { to: "/how-it-works", label: "How it works" },
   { to: "/track-order", label: "Track order" },
   { to: "/support", label: "Support" },
 ] as const;
 
 const NOTICES = [
-  "Prices in NPR. Payments verified before delivery.",
-  "Every order is checked by a person.",
-  "Track any order with your order number.",
+  "MTDGC · Matrix Digital Goods & Commerce",
+  "Prices in NPR, with an A$ guide. You pay in NPR.",
+  "Delivered after payment is verified. Track with your order number.",
 ];
 
 function Notices() {
@@ -178,6 +180,16 @@ export function SiteHeader() {
                   Full catalog
                 </Link>
               </li>
+            </ul>
+            <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Popular</p>
+            <ul className="mt-2 space-y-1">
+              {LANDINGS.map((landing) => (
+                <li key={landing.slug}>
+                  <Link to="/guides/$slug" params={{ slug: landing.slug }} onClick={() => setMenuOpen(false)} className="flex min-h-11 items-center rounded-lg px-2 font-display text-[15px] hover:bg-secondary">
+                    {landing.h1}
+                  </Link>
+                </li>
+              ))}
             </ul>
             <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Help</p>
             <ul className="mt-2 space-y-1">

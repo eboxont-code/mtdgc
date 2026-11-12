@@ -38,7 +38,7 @@ export function renderErrorPage(): string {
   </head>
   <body>
     <div class="card">
-      <div class="brand" aria-label="MTDGC, Matrix Digital Goods and Commerce">
+      <div class="brand" aria-label="MTDGC, Matrix Digital Goods &amp; Commerce">
         <svg viewBox="0 0 32 32" role="img" aria-label="MTDGC 5 by 5 emerald M" shape-rendering="geometricPrecision">${cells}</svg>
         <span class="brand-copy">
           <strong>MTDGC</strong>

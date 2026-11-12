@@ -1,4 +1,5 @@
 import type { CatalogProduct } from "@/lib/catalog.functions";
+import { publicDeliveryMethod, publicDeliveryTime } from "@/lib/format";
 
 const HELP: Array<[RegExp, string]> = [
   [/player id|user id|uid/i, "Open the game, tap your profile picture and copy the number shown under your name."],
@@ -33,7 +34,7 @@ export function productFaqs(product: CatalogProduct): Array<{ q: string; a: stri
     },
     {
       q: `How is ${product.name} delivered?`,
-      a: `${product.delivery_method}. Expected time: ${product.delivery_time}.`,
+      a: `${publicDeliveryMethod(product.delivery_method)}. Expected time: ${publicDeliveryTime(product.delivery_time)}.`,
     },
   ];
 }

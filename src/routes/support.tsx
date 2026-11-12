@@ -8,17 +8,17 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { SITE_URL, whatsappLink } from "@/lib/format";
-import { breadcrumbLd, pageLd } from "@/lib/seo";
+import { SITE_URL, WHATSAPP_DISPLAY, whatsappLink } from "@/lib/format";
+import { breadcrumbLd, pageLd, canonicalLinks } from "@/lib/seo";
 
 export const Route = createFileRoute("/support")({
   head: () => ({
     meta: [
-      { title: "Support and order help | MTDGC" },
+      { title: "Contact MTDGC | Matrix Digital Goods & Commerce" },
       {
         name: "description",
         content:
-          "Get help with an MTDGC order. Report a wrong player ID, a missing delivery or ask about a refund, and reach the team on WhatsApp.",
+          "Contact MTDGC, Matrix Digital Goods & Commerce, on WhatsApp or the support form. Order help, delivery questions and refunds for customers in Nepal and Australia.",
       },
       { property: "og:title", content: "MTDGC support and order help" },
       { property: "og:description", content: "Order help, delivery questions and refund requests for MTDGC customers." },
@@ -31,9 +31,9 @@ export const Route = createFileRoute("/support")({
       { property: "og:image:alt", content: "MTDGC, the digital marketplace for Nepal and Australia" },
       { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
     ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/support` }],
+    links: canonicalLinks(`${SITE_URL}/support`),
     scripts: [
-      pageLd("ContactPage", "MTDGC Support", "/support", "Support from MTDGC, the digital marketplace for Nepal and Australia.", { contactPoint: { "@type": "ContactPoint", contactType: "customer support", url: `${SITE_URL}/support`, availableLanguage: ["English", "Nepali"] } }),
+      pageLd("ContactPage", "Contact MTDGC", "/support", "Contact MTDGC, Matrix Digital Goods & Commerce, for order help in Nepal and Australia.", { contactPoint: { "@type": "ContactPoint", contactType: "customer support", telephone: "+9779740204403", url: `${SITE_URL}/support`, availableLanguage: ["English", "Nepali"] } }),
       breadcrumbLd([{ name: "Home", path: "/" }, { name: "Support", path: "/support" }]),
     ],
   }),
@@ -113,9 +113,9 @@ function SupportPage() {
         <PageHero
           variant="split"
           icon={LifeBuoy}
-          eyebrow="Support"
-          title="Support and order help"
-          intro="Send your order number and a short description of the problem and our team will work through it with you."
+          eyebrow="MTDGC · Matrix Digital Goods & Commerce"
+          title="Contact MTDGC"
+          intro={`Support for customers in Nepal and Australia. WhatsApp ${WHATSAPP_DISPLAY}, or send a request with your order number.`}
         >
         <div className="mt-5 flex flex-wrap gap-2">
           {supportUrl && (

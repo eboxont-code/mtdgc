@@ -11,17 +11,17 @@ import { Button } from "@/components/ui/button";
 import { listCatalog } from "@/lib/catalog.functions";
 import { SITE_URL } from "@/lib/format";
 import { availabilityCounts } from "@/lib/product-availability";
-import { breadcrumbLd, itemListLd } from "@/lib/seo";
+import { breadcrumbLd, itemListLd, canonicalLinks } from "@/lib/seo";
 
 export const Route = createFileRoute("/categories/")({
   loader: () => listCatalog(),
   head: ({ loaderData }) => ({
     meta: [
-      { title: "Shop by category: software, subscriptions and more | MTDGC" },
+      { title: "Shop by category | MTDGC, Matrix Digital Goods & Commerce" },
       {
         name: "description",
         content:
-          "Browse MTDGC categories: game top-ups, gift cards and subscriptions. Each category page lists what is available and how delivery works.",
+          "Browse MTDGC categories: game top-ups, gift cards and subscriptions for Nepal and Australia. Each category lists what is available and the delivery time to expect.",
       },
       { property: "og:title", content: "Shop by category: software, subscriptions and more | MTDGC" },
       { property: "og:description", content: "Game top-ups, gift cards and subscriptions available from MTDGC." },
@@ -31,7 +31,7 @@ export const Route = createFileRoute("/categories/")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/categories` }],
+    links: canonicalLinks(`${SITE_URL}/categories`),
     scripts: [
       itemListLd("MTDGC Categories", "/categories", "Digital goods sold by MTDGC in NPR.", (loaderData?.categories ?? []).map((c) => ({ name: c.name, path: `/categories/${c.slug}` }))),
       breadcrumbLd([{ name: "Home", path: "/" }, { name: "Categories", path: "/categories" }]),

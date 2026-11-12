@@ -17,5 +17,6 @@ Disallow: /account
 Disallow: /auth
 Disallow: /checkout
 Disallow: /cart
+Disallow: /order
 
 Sitemap: https://mtdgc.com/sitemap.xml

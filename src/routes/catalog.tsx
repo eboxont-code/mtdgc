@@ -14,7 +14,7 @@ import { listCatalog } from "@/lib/catalog.functions";
 import { compareCatalogProducts, searchScore } from "@/lib/catalog-search";
 import { SITE_URL } from "@/lib/format";
 import { availabilityCounts, isComingSoon, isPurchasable, isUnavailable } from "@/lib/product-availability";
-import { breadcrumbLd, itemListLd } from "@/lib/seo";
+import { breadcrumbLd, itemListLd, canonicalLinks } from "@/lib/seo";
 
 export const Route = createFileRoute("/catalog")({
   validateSearch: (search: Record<string, unknown>): { q?: string | undefined; category?: string | undefined; sort?: string | undefined; availability?: string | undefined; price?: string | undefined } => ({
@@ -27,11 +27,11 @@ export const Route = createFileRoute("/catalog")({
   loader: () => listCatalog(),
   head: ({ loaderData }) => ({
     meta: [
-      { title: "Catalog | MTDGC digital goods for Nepal and Australia" },
+      { title: "Catalog | MTDGC, Matrix Digital Goods & Commerce" },
       {
         name: "description",
         content:
-          "Browse the MTDGC catalog of game top-ups, gift cards and subscriptions. Search, filter by category and sort by price, all priced in NPR.",
+          "Browse the MTDGC catalog of game top-ups, gift cards and subscriptions for Nepal and Australia. Prices in NPR, with an Australian dollar guide.",
       },
       { property: "og:title", content: "MTDGC catalog" },
       { property: "og:description", content: "Game top-ups, gift cards and subscriptions for Nepal and Australia, priced in NPR." },
@@ -44,7 +44,7 @@ export const Route = createFileRoute("/catalog")({
       { property: "og:image:alt", content: "MTDGC, the digital marketplace for Nepal and Australia" },
       { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
     ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/catalog` }],
+    links: canonicalLinks(`${SITE_URL}/catalog`),
     scripts: [
       itemListLd("MTDGC Catalog", "/catalog", "Digital goods sold by MTDGC in NPR.", (loaderData?.products ?? []).map((p) => ({ name: p.name, path: `/products/${p.slug}` }))),
       breadcrumbLd([{ name: "Home", path: "/" }, { name: "Catalog", path: "/catalog" }]),

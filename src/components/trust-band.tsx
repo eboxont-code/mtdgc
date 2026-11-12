@@ -3,10 +3,10 @@ import { Landmark, MessageCircle, PackageSearch, QrCode, ShieldCheck, Wallet } f
 import { enabledProviders } from "@/lib/payments";
 
 const POINTS = [
-  { icon: ShieldCheck, title: "Payments verified by hand", body: "We check your payment and details before delivery." },
-  { icon: Wallet, title: "Prices in NPR", body: "Every price is shown in Nepalese rupees." },
-  { icon: PackageSearch, title: "Track every order", body: "Follow each step with your order number." },
-  { icon: MessageCircle, title: "Real people on WhatsApp", body: "For support. Orders are placed on the site." },
+  { icon: ShieldCheck, title: "Verified, then delivered", body: "Pay the NPR total. Your order is delivered after payment is verified." },
+  { icon: Wallet, title: "NPR, with an A$ guide", body: "You pay in rupees. Australian customers can read the dollar guide." },
+  { icon: PackageSearch, title: "Track every order", body: "Follow payment and delivery with your order number." },
+  { icon: MessageCircle, title: "Support on WhatsApp", body: "Orders are placed on the site. Message the team if you need help." },
 ];
 
 export function TrustBand() {
@@ -46,7 +46,7 @@ export function PaymentsRow({ className = "" }: { className?: string }) {
           <span key={provider.id} className="inline-flex items-center rounded-lg border border-border bg-secondary px-2.5 py-1 text-xs">{provider.label}</span>
         ),
       )}
-      <p className="w-full text-[11px] text-muted-foreground md:ml-auto md:w-auto">You pay after placing the order, then upload your payment screenshot.</p>
+      <p className="w-full text-[11px] text-muted-foreground md:ml-auto md:w-auto">Pay the NPR total, upload your payment confirmation, and we deliver after it is verified.</p>
     </div>
   );
 }

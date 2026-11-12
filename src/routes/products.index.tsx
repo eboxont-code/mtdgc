@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { listCatalog } from "@/lib/catalog.functions";
 import { SITE_URL } from "@/lib/format";
 import { availabilityCounts } from "@/lib/product-availability";
-import { breadcrumbLd, itemListLd } from "@/lib/seo";
+import { breadcrumbLd, itemListLd, canonicalLinks } from "@/lib/seo";
 
 export const Route = createFileRoute("/products/")({
   loader: () => listCatalog(),
@@ -22,7 +22,7 @@ export const Route = createFileRoute("/products/")({
       {
         name: "description",
         content:
-          "Every MTDGC product page in one list, covering game top-ups, gift cards and subscriptions priced in Nepalese rupees.",
+          "Every product at MTDGC, Matrix Digital Goods & Commerce: game top-ups, gift cards and subscriptions for Nepal and Australia, priced in NPR with an Australian dollar guide.",
       },
       { property: "og:title", content: "All MTDGC products" },
       { property: "og:description", content: "Every MTDGC product page in one list, priced in Nepalese rupees." },
@@ -35,7 +35,7 @@ export const Route = createFileRoute("/products/")({
       { property: "og:image:alt", content: "MTDGC, the digital marketplace for Nepal and Australia" },
       { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
     ],
-    links: [{ rel: "canonical", href: `${SITE_URL}/products` }],
+    links: canonicalLinks(`${SITE_URL}/products`),
     scripts: [
       itemListLd("MTDGC Products", "/products", "Digital goods sold by MTDGC in NPR.", (loaderData?.products ?? []).map((p) => ({ name: p.name, path: `/products/${p.slug}` }))),
       breadcrumbLd([{ name: "Home", path: "/" }, { name: "Products", path: "/products" }]),
