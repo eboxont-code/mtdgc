@@ -2,6 +2,7 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 import { supabase } from "@/integrations/supabase/client";
 import { LoaderCircle } from "lucide-react";
+import { Wordmark } from "@/components/brand/wordmark";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/_authenticated")({
 function AccountLoading() {
   return (
     <main id="main-content" className="mx-auto flex min-h-80 max-w-6xl flex-col items-center justify-center gap-4 px-4 py-12" aria-busy="true">
-      <span className="font-display text-2xl font-bold text-primary">MTDGC</span>
+      <Wordmark size="lg" />
       <div role="status" className="flex items-center gap-3 text-muted-foreground">
         <LoaderCircle className="size-5 motion-safe:animate-spin" aria-hidden="true" />
         <p>Loading your account</p>
