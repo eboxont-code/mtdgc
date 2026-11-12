@@ -80,10 +80,10 @@ export function categoryTypeFromSlug(slug: string): keyof typeof PRODUCT_TYPE_LA
 export const SITE_URL = "https://mtdgc.com";
 
 export const ORDER_STEPS: Array<{ title: string; body: string; statuses: string[] }> = [
-  { title: "Payment received", body: "We have your payment screenshot and will check it against our account.", statuses: ["payment_submitted", "paid"] },
-  { title: "Verified", body: "Your payment matched and the order is confirmed.", statuses: ["verified"] },
-  { title: "Processing", body: "We are preparing your key, account details or code.", statuses: ["processing"] },
-  { title: "Delivered", body: "Your order has been delivered to your order page and email.", statuses: ["delivered", "fulfilled", "completed"] },
+  { title: "Payment received", body: "Payment proof has been submitted for review, or staff have marked payment received. This is not payment verification.", statuses: ["payment_submitted", "paid"] },
+  { title: "Verified", body: "Staff have approved the payment review or manually marked the order verified. This status alone is not independent bank confirmation.", statuses: ["verified"] },
+  { title: "Processing", body: "Staff have marked the order as being prepared for fulfilment.", statuses: ["processing"] },
+  { title: "Delivered", body: "The order is marked delivered. Check the delivery destination for your item; this status alone is not delivery evidence.", statuses: ["delivered", "fulfilled", "completed"] },
 ];
 
 export const ORDER_NOTICE: Record<string, string> = {
