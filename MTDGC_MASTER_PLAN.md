@@ -302,7 +302,7 @@ Do not set numerical targets until a reliable baseline exists.
 
 - [ ] **MT-0161 · P0 · TODO** — Audit authentication and authorisation for customer accounts, support requests and admin routes.
 - [ ] **MT-0162 · P0 · TODO** — Verify one customer cannot access another customer's orders by changing an ID or URL.
-- [ ] **MT-0163 · P0 · TODO** — Verify payment uploads and delivered codes are stored privately, not in public buckets.
+- [!] **MT-0163 · P0 · BLOCKED** — The production `payment-proofs` bucket is private and its read policy is limited to the order owner or an admin, but no delivered-code bucket, table or order field exists. There is no current delivered-code storage path to verify; re-audit when one is introduced. See [storage audit PR #56](https://github.com/eboxont-code/mtdgc/pull/56).
 - [ ] **MT-0164 · P0 · TODO** — Ensure admin-only actions are enforced server-side, not only hidden in the interface.
 - [ ] **MT-0165 · P0 · TODO** — Review secrets, supplier credentials and payment configuration for accidental exposure.
 - [ ] **MT-0166 · P1 · TODO** — Enable strong admin authentication and remove unused staff accounts.
@@ -328,7 +328,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0181 · P0 · TODO** — Test the full purchase journey on common Android phones and narrow mobile screens.
 - [x] **MT-0182 · P0 · DONE AND LIVE** — Current production verification on 11 November 2026 confirms the catalog/category availability labels and counts agree, coming-soon purchase actions are disabled, and the temporarily unavailable Netflix listing remains disabled. Evidence: the MT-0182 verification record in section 15; current production deployment and exact-head quality evidence are linked there.
 - [x] **MT-0183 · P0 · DONE AND LIVE** — Ensure the product card, product page and checkout show matching prices and variants; PR #17 merged at `9f944ec36ec3f87e3e603ff308b20979a1013183` and production deployment `dpl_cfXAs4hrfTSgdurWL1Veb5prUA5v` is READY on that exact SHA.
-- [ ] **MT-0184 · P0 · REVIEW** — Production purchase summaries were checked on five orderable pages on 8 November. Mobile Legends user-ID guidance is inaccurate in production; correction and regression coverage are in draft PR #19. See section 28; production and visual/mobile verification remain pending.
+- [x] **MT-0184 · P0 · DONE AND LIVE** — The live [Mobile Legends product page](https://mtdgc.com/products/mobile-legends-diamonds) now asks for both the Mobile Legends user ID and Zone ID and explains where each appears in the game profile. Verified 13 November 2026; physical-device testing remains separate under MT-0181. See [verification PR #30](https://github.com/eboxont-code/mtdgc/pull/30).
 - [ ] **MT-0185 · P1 · TODO** — Improve catalog search for brand, product, game, denomination and common abbreviations.
 - [ ] **MT-0186 · P1 · TODO** — Add clear sorting by relevance, price and availability.
 - [ ] **MT-0187 · P1 · TODO** — Make filters usable on mobile without hiding the product list behind oversized controls.
@@ -350,8 +350,8 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** MTDGC earns qualified demand through useful category and product information, not thin pages or unsupported claims.
 
-- [ ] **MT-0201 · P0 · TODO** — Set one canonical brand description and use it consistently across the site and metadata.
-- [ ] **MT-0202 · P0 · TODO** — Resolve the homepage's Nepal-and-Australia positioning against actual checkout and legal-market support.
+- [x] **MT-0201 · P0 · DONE AND LIVE** — [PR #65](https://github.com/eboxont-code/mtdgc/pull/65) merged as `d51ca37`; the production deployment for that exact commit is READY and the live [homepage](https://mtdgc.com) displays the canonical full name and description.
+- [!] **MT-0202 · P0 · BLOCKED** — The checkout remains NPR-only. Choosing Australian audience/positioning requires an owner-approved market scope and legal/checkout readiness; do not infer this from the existing Australian dollar guide.
 - [ ] **MT-0203 · P1 · TODO** — Create original category landing pages for game top-ups, gift cards, subscriptions and software.
 - [ ] **MT-0204 · P1 · TODO** — Write product descriptions that explain what is delivered, how it works and what restrictions apply.
 - [ ] **MT-0205 · P1 · TODO** — Add unique title tags and meta descriptions for indexable product and category pages.
@@ -375,14 +375,14 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** The operator can manage the business from reliable dashboards and expand only when each market and category passes its launch gate.
 
-- [ ] **MT-0221 · P0 · TODO** — Create a single order dashboard showing paid, awaiting verification, processing, overdue, delivered, failed and refunded orders.
-- [ ] **MT-0222 · P0 · TODO** — Create a daily reconciliation report for order value, payments received, supplier costs and refunds.
-- [ ] **MT-0223 · P0 · TODO** — Track contribution margin per order and category after direct costs.
-- [ ] **MT-0224 · P0 · TODO** — Track order completion rate, failed fulfilment rate and refund rate.
-- [ ] **MT-0225 · P1 · TODO** — Track time from order creation to payment verification and from verification to delivery.
-- [ ] **MT-0226 · P1 · TODO** — Track support contacts per 100 orders and the most common issue categories.
-- [ ] **MT-0227 · P1 · TODO** — Track product availability and supplier confirmation freshness.
-- [ ] **MT-0228 · P1 · TODO** — Create alerts for overdue paid orders and supplier outages.
+- [!] **MT-0221 · P0 · BLOCKED** — The production order schema has no due/overdue timestamp and no verified delivery SLA. The overdue bucket cannot be defined without supplier and owner evidence.
+- [!] **MT-0222 · P0 · BLOCKED** — The supplier register is empty; there are no verified supplier costs, settlement fees or refund ledger. Payment-proof screenshots are not a settlement feed.
+- [!] **MT-0223 · P0 · BLOCKED** — No verified supplier costs or settlement fees are available, so contribution margin would be invented.
+- [!] **MT-0224 · P0 · BLOCKED** — The `failed` order status has no current writer and `refunded` is only a status label; there is no verified fulfilment-failure or refund transaction evidence for real rates.
+- [!] **MT-0225 · P1 · BLOCKED** — `order_status_events.status` is free text and the note path can create labels without changing order state. The current event stream is not a reliable source for payment-to-delivery timing until event meanings and transition writes are defined.
+- [!] **MT-0226 · P1 · BLOCKED** — Support-ticket metrics are implemented on [branch `automation/mt-0226-support-metrics-20261113-run11`](https://github.com/eboxont-code/mtdgc/tree/automation/mt-0226-support-metrics-20261113-run11); local helper tests and strict helper typecheck pass. PR/required checks are held until the owner confirms GitHub Actions is enabled and free included usage remains. The metric is explicitly limited to in-app support tickets, not WhatsApp/off-platform contacts. See [MTDGC_SUPPORT_METRICS.md](MTDGC_SUPPORT_METRICS.md).
+- [!] **MT-0227 · P1 · BLOCKED** — The supplier register is empty and production has no supplier-confirmation timestamp/source, so availability freshness cannot be measured.
+- [!] **MT-0228 · P1 · BLOCKED** — No verified delivery SLA/due timestamp or supplier-outage source exists; alert thresholds would be invented.
 - [ ] **MT-0229 · P1 · TODO** — Build a product launch checklist requiring supplier, region, price, test order, policy and support readiness.
 - [ ] **MT-0230 · P1 · TODO** — Build a market launch checklist covering currency, payment, tax, consumer law, sourcing and customer support.
 - [ ] **MT-0231 · P2 · TODO** — Evaluate Australia as a separate market with AUD prices, local gift-card sourcing and appropriate payment settlement.
@@ -530,7 +530,7 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-task register are authoritative.
+MT-0188 is in progress in draft [PR #66](https://github.com/eboxont-code/mtdgc/pull/66). Its exact-head quality job produced no executed steps or job logs, and the preview browser back-navigation check remains unverified. Do not retry until the owner confirms Actions is enabled and free included usage remains. Task statuses in the 308-task register are authoritative.
 
 | Order | Task | Status |
 |---:|---|---|
@@ -543,7 +543,7 @@ No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-t
 | 7 | MT-0086 — require independent payment settlement matching before fulfilment | BLOCKED; no bank-statement feed, provider callback or owner-approved manual settlement evidence is available |
 | 8 | MT-0087 — prevent duplicate transaction references/screenshots across orders | BLOCKED; concurrency-safe uniqueness requires the approved Supabase cutover/migration gate |
 | 9 | MT-0101 — map current order statuses and observed transition paths | DONE; 13-value enum, application writers, UI mappings, production aggregate counts and lack of transition enforcement are documented in section 30 and Data Architecture section 4 |
-| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | NEXT P0; can be documented from the current payment-review code and existing operational evidence without production writes |
+| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | DONE; section 32 supersedes this historical next-P0 pointer |
 | 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
 | 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
 
