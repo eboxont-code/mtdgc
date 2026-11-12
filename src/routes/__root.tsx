@@ -16,6 +16,7 @@ import { CartDrawer } from "../components/cart-drawer";
 import { BottomNav } from "../components/bottom-nav";
 import { ScrollReveals } from "../components/scroll-reveals";
 import { WhatsAppFab } from "../components/whatsapp-fab";
+import { Wordmark } from "../components/brand/wordmark";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
@@ -23,7 +24,7 @@ function NotFoundComponent() {
   return (
     <main id="main-content" tabIndex={-1} className="focus:outline-none flex min-h-screen items-center justify-center bg-background px-4 font-body text-foreground">
       <div className="max-w-md text-center">
-        <p className="font-display text-xs uppercase tracking-widest text-muted-foreground">MTDGC</p>
+        <div className="mb-7 flex justify-center"><Wordmark size="lg" /></div>
         <h1 className="mt-3 font-display text-3xl font-medium">This page is not here</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           The link may be out of date or mistyped. The catalog below has every product MTDGC currently sells.
@@ -63,6 +64,7 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
+        <div className="mb-7 flex justify-center"><Wordmark size="lg" /></div>
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
           This page didn't load
         </h1>
