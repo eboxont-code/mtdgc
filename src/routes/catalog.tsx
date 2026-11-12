@@ -40,9 +40,9 @@ export const Route = createFileRoute("/catalog")({
       { property: "og:url", content: `${SITE_URL}/catalog` },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:image", content: `${SITE_URL}/icon-512.png` },
+      { property: "og:image", content: `${SITE_URL}/og/mtdgc.png` },
       { property: "og:image:alt", content: "MTDGC, the digital marketplace for Nepal and Australia" },
-      { name: "twitter:image", content: `${SITE_URL}/icon-512.png` },
+      { name: "twitter:image", content: `${SITE_URL}/og/mtdgc.png` },
     ],
     links: [{ rel: "canonical", href: `${SITE_URL}/catalog` }],
     scripts: [
