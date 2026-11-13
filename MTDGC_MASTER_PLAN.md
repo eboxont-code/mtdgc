@@ -384,7 +384,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0227 · P1 · TODO** — Track product availability and supplier confirmation freshness.
 - [ ] **MT-0228 · P1 · TODO** — Create alerts for overdue paid orders and supplier outages.
 - [ ] **MT-0229 · P1 · TODO** — Build a product launch checklist requiring supplier, region, price, test order, policy and support readiness.
-- [ ] **MT-0230 · P1 · TODO** — Build a market launch checklist covering currency, payment, tax, consumer law, sourcing and customer support.
+- [!] **MT-0230 · P1 · BLOCKED** — Evidence-gated market launch checklist created at [MARKET_LAUNCH_CHECKLIST.md](./MARKET_LAUNCH_CHECKLIST.md). Seven focused local contract tests pass; required repository verification and merge remain blocked pending a real GitHub Actions runner. No market route is approved. See section 34.
 - [ ] **MT-0231 · P2 · TODO** — Evaluate Australia as a separate market with AUD prices, local gift-card sourcing and appropriate payment settlement.
 - [ ] **MT-0232 · P2 · TODO** — Evaluate Nepal payment integrations and settlement reliability before replacing manual bank verification.
 - [ ] **MT-0233 · P2 · TODO** — Evaluate digital delivery APIs based on legitimate supplier access and measurable fulfilment benefit.
@@ -530,22 +530,18 @@ Run at least three cases per SKU: a normal successful order, a delayed or failed
 
 ## 10. Immediate next actions
 
-No numbered task is currently marked **IN PROGRESS**. Task statuses in the 308-task register are authoritative.
+The 308-task register remains authoritative. Sections 32–34 supersede the earlier MT-0102 reference; MT-0102 is DONE and must not be selected again. Finish existing pull requests rather than duplicating their work.
 
 | Order | Task | Status |
 |---:|---|---|
-| 1 | MT-0045 — test one low-value transaction per supplier/product family | BLOCKED; no identified/verified supplier or product scope; a real transaction and fulfilment would require external evidence and spend |
-| 2 | MT-0046 — document supplier delivery times, cut-off, failure process and escalation | BLOCKED; no supplier identity or documented operational terms/contact |
-| 3 | MT-0061–MT-0063 — build landed cost and order-level gross margin from source costs | BLOCKED; supplier costs, dated FX, payment/settlement fees, refunds and variable fulfilment/support costs are absent |
-| 4 | MT-0064 — approve minimum contribution-margin floor | BLOCKED; business-owner decision required |
-| 5 | MT-0065 — enforce a current-price/margin gate at checkout | BLOCKED; depends on the approved floor and trusted cost/price-expiry data; schema changes remain behind the Supabase cutover |
-| 6 | MT-0085 — restrict payment-proof access to the order owner and authorised staff | MERGED BUT NOT LIVE; PR #20 merged as `a793dff`; Vercel free daily deployment limit blocked production release; see section 29 |
-| 7 | MT-0086 — require independent payment settlement matching before fulfilment | BLOCKED; no bank-statement feed, provider callback or owner-approved manual settlement evidence is available |
-| 8 | MT-0087 — prevent duplicate transaction references/screenshots across orders | BLOCKED; concurrency-safe uniqueness requires the approved Supabase cutover/migration gate |
-| 9 | MT-0101 — map current order statuses and observed transition paths | DONE; 13-value enum, application writers, UI mappings, production aggregate counts and lack of transition enforcement are documented in section 30 and Data Architecture section 4 |
-| 10 | MT-0102 — define the operational meaning of Payment received, Verified, Processing and Delivered | NEXT P0; can be documented from the current payment-review code and existing operational evidence without production writes |
-| 11 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified |
-| 12 | Resume MT-0282 only after Netflix supplier/issuer evidence and a successful authorised test order are recorded | BLOCKED |
+| 1 | MT-0086 — require independent payment settlement matching before fulfilment | BLOCKED; no bank-statement feed, provider callback or owner-approved manual settlement evidence is available. |
+| 2 | MT-0087 — prevent duplicate transaction references/screenshots across orders | BLOCKED; concurrency-safe uniqueness remains behind the approved Supabase cutover/migration gate. |
+| 3 | MT-0103 / MT-0104 — action-required status and transition enforcement | BLOCKED; owner-approved status meanings and settlement prerequisites are missing. Do not invent a transition graph. |
+| 4 | Existing PRs for MT-0105, MT-0106, MT-0122, MT-0123, MT-0161–MT-0165 and MT-0201 | IN PROGRESS in existing PRs; do not open duplicates. Each exact head must pass all required checks and release gates before merge. |
+| 5 | MT-0230 — market launch checklist | BLOCKED at required verification/merge; the checklist and seven focused local tests are ready, but the current GitHub runner-startup issue prevents treating repository checks as passed. See section 34. |
+| 6 | MT-0029 — product-type templates | NEXT ELIGIBLE; use reusable placeholders and existing fields only. Do not invent product, supplier, price, region or legal facts, and do not change the held database schema. |
+| 7 | Complete Boxont-controlled Supabase cutover before releasing held PR #1 and migrations 0010–0017 | BLOCKED; target project, backup/restore and migration gates remain unverified. |
+| 8 | MT-0282 — Netflix | BLOCKED until supplier/issuer evidence and a successful authorised test order are recorded. |
 
 **Repository security note:** The tracked root `.env` has been removed from `main`; local environment files are ignored and `.env.example` contains placeholders only. A review of the `.env` history found project identifiers, API URLs and Supabase publishable keys only—no service-role key, secret key, database password, migration URL or other private credential. The old `.env` blob remains on `backend-code-route` and `redesign-matrix`; those are stale/held branches and must not be merged or deployed without removing the file at their branch tips and rechecking their configuration.
 
@@ -1447,3 +1443,37 @@ There is no complete transition graph enforced by the application: direct admini
 - No Supabase rows, product URLs, product status, variants, prices, supplier records, checkout or payment settings were changed. No orders, purchases or payments were created. No additional spend was incurred.
 
 **Next imagery action:** source and verify permitted current logos for the seven outstanding Australian retailer cards before closing MT-0039. Maintain the 5×5 emerald M as the single MTDGC company mark throughout.
+
+
+## 34. Market launch readiness checklist — 13 November 2026
+
+**Task:** MT-0230. The [Market Launch Readiness Checklist](./MARKET_LAUNCH_CHECKLIST.md) is an internal evidence template for one exact market, legal seller, purchase journey and product scope. It is not legal advice, market approval or permission to enable checkout.
+
+### Acceptance criteria covered
+
+- Nepal domestic, Australia-local and Australia-buyer-to-Nepal-recipient journeys are separate.
+- Buyer, payer, recipient, delivery and redemption countries are distinct. Customer checkout, processor settlement, supplier quote and product-denomination currencies are distinct.
+- Provider eligibility, settlement reconciliation, tax, consumer rights, refunds, sourcing authority, product-region compatibility, fulfilment, support and cross-border data handling require dated evidence.
+- Qualified local legal/tax review and an authorised end-to-end test are required. Only the owner can approve the exact market and journey.
+- Unsupported prices, supplier claims, legal conclusions, payment claims, credential collection and real test purchases without owner approval are prohibited.
+- Seven focused contract tests protect the checklist's journey, currency, evidence, privacy and approval rules.
+
+### Evidence inspected
+
+- The current Master Plan defines three intended journeys; it also says Australia-local must not be marketed as active until its independent gates pass.
+- The Supplier Register has no verified supplier records. No supplier or product scope was invented.
+- A read-only inventory of the Supabase public schema showed product, variant, order, payment-setting, payment-proof and support-ticket tables, but no supplier table or distinct payer/recipient/delivery/settlement-market model. No production row data was read. No migration or database write was made.
+- Vercel reports the existing main production deployment as READY for commit `cbbdbd501e95c0db9997d9506eae81c202ab498e` (deployment `dpl_AejHiyGA1ggDkJzofhRfqa5TDnGr`), with verified `mtdgc.com` and `www.mtdgc.com` aliases. This is not a deployment of this checklist branch.
+
+### Verification and release status
+
+- Focused checklist contract tests: **7 passed** locally with Node 22.16 using experimental TypeScript stripping.
+- Markdown hygiene: **passed** (final newline and no trailing whitespace).
+- Full Bun test suite, lint, typecheck and production build: **not run**; Bun and repository dependencies are not installed in this execution environment.
+- Current-main Quality run `43365715350` and existing PR #67 run `43363511865` had no executed steps and no downloadable job logs. GitHub did not start the testing computer; this is not an application test failure. The public GitHub status page showed no active incident when checked; the 11 November incident was marked resolved.
+- Account Actions usage and repository Actions permissions cannot be inspected through the connected GitHub access. The owner can check [account Actions usage](https://github.com/settings/billing/usage) and [MTDGC Actions settings](https://github.com/eboxont-code/mtdgc/settings/actions). Do not enable paid usage or change budgets.
+- Keep the pull request in draft and do not merge until the exact latest PR head has genuinely passed required checks. Merging to main triggers the existing Vercel production workflow; no production deployment has been requested or made for this task.
+
+**Production impact:** none. No production database, order, customer, payment, credential, DNS, hosting or billing data/settings were changed. Additional spend: **$0**.
+
+**Next eligible task:** MT-0029 — create reusable product-type templates using existing fields and placeholders only; do not add product-specific claims or change the held database schema.
