@@ -98,7 +98,8 @@ function TrackOrderPage() {
     setError(null);
     setLoading(true);
     try {
-      const result = await lookup({ data: { orderNumber: order, contact: who } });
+      const { data: sessionData } = await supabase.auth.getSession();
+      const result = await lookup({ data: { orderNumber: order, contact: who, bearer: sessionData.session?.access_token } });
       if (result.status === "found") setFound(result.order);
       else if (result.status === "rate_limited") setError("Too many attempts. Please wait a few minutes and try again.");
       else setError("We could not find an order with that number and contact. Please confirm both and try again, or contact us through the support page.");

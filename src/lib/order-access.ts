@@ -31,13 +31,13 @@ export function isAuthenticatedOrderOwner(order: OrderAccessRecord, authenticate
   return Boolean(authenticatedUserId && order.user_id && authenticatedUserId === order.user_id);
 }
 
-/** Contact fallback is order-scoped and is used only after the caller's rate limit check. */
+/** Contact fallback is guest-only and is used only after the caller's rate limit check. */
 export async function hasOrderContactAccess(
   order: OrderAccessRecord,
   orderNumber: string,
   contact?: string,
 ): Promise<boolean> {
-  if (!contact?.trim()) return false;
+  if (order.user_id || !contact?.trim()) return false;
   const normalised = normaliseContact(contact);
   const hashMatches = Boolean(order.verification_hash)
     && (await sha256Hex(orderNumber.toUpperCase() + normalised)) === order.verification_hash;
