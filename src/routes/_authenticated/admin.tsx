@@ -20,6 +20,11 @@ import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { SITE_URL } from "@/lib/format";
+import {
+  countSupportCategories,
+  supportTicketsPer100Orders,
+  type SupportCategoryCount,
+} from "@/lib/support-metrics";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -40,6 +45,32 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
 });
 
+const SUPPORT_CATEGORY_PAGE_SIZE = 500;
+
+type SupportMetricsState =
+  | { status: "loading" }
+  | { status: "error" }
+  | { status: "ready"; categories: SupportCategoryCount[] };
+
+async function loadSupportIssueTypes(): Promise<{ issue_type: string | null }[]> {
+  const rows: { issue_type: string | null }[] = [];
+
+  for (let offset = 0; ; offset += SUPPORT_CATEGORY_PAGE_SIZE) {
+    const { data, error } = await supabase
+      .from("support_tickets")
+      .select("issue_type")
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true })
+      .range(offset, offset + SUPPORT_CATEGORY_PAGE_SIZE - 1);
+
+    if (error) throw error;
+
+    const page = data ?? [];
+    rows.push(...page);
+    if (page.length < SUPPORT_CATEGORY_PAGE_SIZE) return rows;
+  }
+}
+
 function AdminPage() {
   const [allowed, setAllowed] = useState<boolean | null>(null);
   const [tab, setTab] = useState<"overview" | "catalog" | "orders" | "support" | "reviews" | "verify" | "payments">("overview");
@@ -48,6 +79,7 @@ function AdminPage() {
   const [orderCount, setOrderCount] = useState(0);
   const [ticketCount, setTicketCount] = useState(0);
   const [reviewCount, setReviewCount] = useState(0);
+  const [supportMetrics, setSupportMetrics] = useState<SupportMetricsState>({ status: "loading" });
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [pendingReviews, setPendingReviews] = useState<ReviewRow[]>([]);
@@ -93,8 +125,12 @@ function AdminPage() {
       if (!active) return;
       setAllowed(Boolean(isAdmin));
       if (!isAdmin) return;
+      setSupportMetrics({ status: "loading" });
 
-      const [productRows, orderRows, ticketRows, reviewRows] = await Promise.all([
+      const supportIssueTypesPromise = loadSupportIssueTypes()
+        .then((data) => ({ data, failed: false as const }))
+        .catch(() => ({ data: null, failed: true as const }));
+      const [productRows, orderRows, ticketRows, reviewRows, supportIssueTypes] = await Promise.all([
         supabase
           .from("products")
           .select("id, name, slug, status, is_published, product_variants(sku, name, price_minor, stock_quantity, status)")
@@ -115,9 +151,16 @@ function AdminPage() {
           .eq("is_approved", false)
           .order("created_at", { ascending: false })
           .limit(10),
+        supportIssueTypesPromise,
       ]);
       if (!active) return;
-      if (productRows.error || orderRows.error || ticketRows.error || reviewRows.error) {
+      if (
+        productRows.error ||
+        orderRows.error ||
+        ticketRows.error ||
+        reviewRows.error ||
+        supportIssueTypes.failed
+      ) {
         setLoadError("Some admin data could not be loaded. Refresh to try again.");
       }
       setProducts((productRows.data ?? []) as ProductRow[]);
@@ -127,6 +170,23 @@ function AdminPage() {
       setOrderCount(orderRows.count ?? 0);
       setTicketCount(ticketRows.count ?? 0);
       setReviewCount(reviewRows.count ?? 0);
+
+      if (
+        orderRows.error ||
+        ticketRows.error ||
+        supportIssueTypes.failed ||
+        orderRows.count === null ||
+        ticketRows.count === null ||
+        !supportIssueTypes.data ||
+        supportIssueTypes.data.length !== ticketRows.count
+      ) {
+        setSupportMetrics({ status: "error" });
+      } else {
+        setSupportMetrics({
+          status: "ready",
+          categories: countSupportCategories(supportIssueTypes.data),
+        });
+      }
     })();
     return () => {
       active = false;
@@ -142,6 +202,11 @@ function AdminPage() {
       toast.error("Could not archive that product. Please try again.");
     }
   };
+
+  const supportRate =
+    supportMetrics.status === "ready"
+      ? supportTicketsPer100Orders(ticketCount, orderCount)
+      : null;
 
   return (
     <div className="min-h-screen bg-background font-body text-foreground antialiased">
@@ -182,6 +247,72 @@ function AdminPage() {
                 </div>
               ))}
             </div>
+
+            <section
+              className="mt-6 rounded-2xl border border-border p-4 md:p-5"
+              aria-labelledby="support-metrics-heading"
+            >
+              <div className="grid gap-5 md:grid-cols-2">
+                <div>
+                  <p className="font-display text-xs uppercase tracking-[0.1em] text-muted-foreground">
+                    Recorded support tickets per 100 orders
+                  </p>
+                  <p className="mt-1 font-display text-3xl font-semibold">
+                    {supportMetrics.status === "ready" && supportRate !== null
+                      ? supportRate.toFixed(1)
+                      : "—"}
+                  </p>
+                  {supportMetrics.status === "ready" ? (
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {orderCount === 0
+                        ? "No orders are recorded yet, so a rate cannot be calculated."
+                        : String(ticketCount) + " recorded support tickets across " + String(orderCount) + " orders."}
+                    </p>
+                  ) : supportMetrics.status === "loading" ? (
+                    <p className="mt-1 text-sm text-muted-foreground">Loading support metrics.</p>
+                  ) : (
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Support metrics could not be loaded. Refresh to try again.
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <h2 id="support-metrics-heading" className="font-display text-lg font-medium">
+                    Most common recorded issue categories
+                  </h2>
+                  {supportMetrics.status === "ready" && supportMetrics.categories.length > 0 ? (
+                    <ol className="mt-2 space-y-2">
+                      {supportMetrics.categories.slice(0, 5).map((item) => (
+                        <li
+                          key={item.category}
+                          className="flex items-center justify-between gap-3 text-sm"
+                        >
+                          <span>{item.category}</span>
+                          <span className="shrink-0 text-muted-foreground">
+                            {item.count} {item.count === 1 ? "ticket" : "tickets"}
+                          </span>
+                        </li>
+                      ))}
+                    </ol>
+                  ) : supportMetrics.status === "ready" ? (
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      No support tickets have been recorded yet.
+                    </p>
+                  ) : supportMetrics.status === "loading" ? (
+                    <p className="mt-2 text-sm text-muted-foreground">Loading issue categories.</p>
+                  ) : (
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Issue categories could not be loaded.
+                    </p>
+                  )}
+                </div>
+              </div>
+              <p className="mt-4 text-xs text-muted-foreground">
+                This report includes only requests submitted through the MTDGC support form.
+                WhatsApp conversations and other off-platform contacts are not recorded here.
+              </p>
+            </section>
 
             </div>
             <div role="tabpanel" id="admin-catalog" aria-labelledby="admin-tab-catalog" hidden={tab !== "catalog"}>
