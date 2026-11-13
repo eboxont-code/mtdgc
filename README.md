@@ -24,6 +24,7 @@ A product must not become orderable until its supplier, resale rights, region, v
 - [Roadmap history](./roadmap.md) — dated implementation notes and verification records; the Master Plan is authoritative for current task status.
 - [Data architecture](./MTDGC_DATA_ARCHITECTURE.md) — current order, payment, identity and access-control design.
 - [Personal data map](./MTDGC_DATA_MAP.md) — source-backed inventory of personal-data fields, known processors, evidenced locations and unresolved data-flow questions.
+- [Sensitive admin change audit](./MTDGC_ADMIN_CHANGE_AUDIT.md) — current actor, timestamp and reason coverage, plus the remaining audit-log gaps.
 - [Repository working rules](./AGENTS.md) — Lovable sync and code-boundary guidance.
 
 Read the Master Plan before starting work. Update it with evidence when a task changes status. Do not maintain a competing TODO list.
