@@ -11,12 +11,11 @@ import { OrderNextStep } from "@/components/order-next-step";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
-import { ORDER_NOTICE, ORDER_STEPS, orderStepIndex, stepTime, formatNpr, SITE_URL, STATUS_LABEL, whatsappLink } from "@/lib/format";
+import { ORDER_NOTICE, ORDER_STEPS, orderStepIndex, orderStatusLabel, stepTime, formatNpr, SITE_URL, whatsappLink } from "@/lib/format";
 import { GIFT_CARD_PRICE_DISCLOSURE } from "@/lib/gift-card-pricing";
 import { lookupOrder } from "@/lib/orders.functions";
 import { isSupportedOrderReference } from "@/lib/order-reference";
 
-const STATUS_TEXT: Record<string, string> = { ...STATUS_LABEL, pending: "Placed", pending_payment: "Waiting for payment", payment_submitted: "Payment proof received, being checked", paid: "Payment marked received", verified: "Payment verified", rejected: "Payment review rejected", delivered: "Delivered", processing: "Processing", fulfilled: "Fulfilled", completed: "Completed", cancelled: "Cancelled", failed: "Failed", refunded: "Refunded" };
 import { breadcrumbLd, pageLd, canonicalLinks } from "@/lib/seo";
 
 export const Route = createFileRoute("/track-order")({
@@ -183,7 +182,7 @@ function TrackOrderPage() {
           <section role="status" className="mt-8 rounded-lg border border-input bg-card p-4 md:max-w-xl">
             <h2 className="font-display text-lg font-medium">Order {found.orderNumber}</h2>
             <p className="text-xs text-muted-foreground">
-              Placed {new Date(found.createdAt).toLocaleDateString("en-GB")} · {formatNpr(found.totalMinor)} · Status: {STATUS_TEXT[found.status] ?? found.status}
+              Placed {new Date(found.createdAt).toLocaleDateString("en-GB")} · {formatNpr(found.totalMinor)} · Status: {orderStatusLabel(found.status)}
             </p>
             <OrderNextStep status={found.status} />
             <ul className="mt-2 text-sm">

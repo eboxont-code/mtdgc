@@ -312,3 +312,20 @@ No customer, order, payment, auth-user or Storage-object values were read. No sc
 - No dedicated delivered-code table, bucket, object path, access policy, signed reveal action or application retention/deletion job was found in the inspected production metadata/current-main source. The only proof-object deletion in the upload flow is compensating cleanup after a failed order-status update; it is not a retention policy.
 - **Not approved:** delivered-code upload/reveal permissions, customer/admin access model, retention/deletion timing, and any visible bank-detail masking rule. Do not invent these rules or implement a storage migration before the owner approves them and the Boxont-controlled Supabase cutover/backup/restore gate is complete.
 - Production migration history includes 0010 and 0011, while their corresponding files were not found at the expected paths on current `main`; reconcile migration history before schema work. No production migration or storage configuration was changed during this audit.
+## 9. Customer-facing order-status labels
+
+The customer-facing status line uses one shared `orderStatusLabel` helper in authenticated order history, public guest tracking and the single-order page. It does not change the stored enum or the underlying order state.
+
+| Stored order status | Canonical customer label |
+|---|---|
+| `pending`, `pending_payment` | Waiting for payment |
+| `payment_submitted`, `paid` | The current first `ORDER_STEPS` title (currently “Payment received”) |
+| `verified` | The current second `ORDER_STEPS` title (currently “Verified”) |
+| `processing` | The current third `ORDER_STEPS` title (currently “Processing”) |
+| `delivered`, `fulfilled`, `completed` | The current fourth `ORDER_STEPS` title (currently “Delivered”) |
+| `rejected` | Rejected |
+| `failed` | Failed |
+| `cancelled` | Cancelled |
+| `refunded` | Refunded |
+
+The four progress-step groups continue to come from `ORDER_STEPS`; explanatory next-action text continues to come from `ORDER_NOTICE`. Unknown future values remain visible as their stored label. This keeps the three customer views consistent without introducing a new business state machine or implying that a manual status proves payment settlement, supplier acceptance or redemption.

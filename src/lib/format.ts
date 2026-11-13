@@ -143,6 +143,28 @@ export function orderStepIndex(status: string): number {
   return ORDER_STEPS.findIndex((step) => step.statuses.includes(status));
 }
 
+/** One customer-facing label for each persisted order status across all order views. */
+export function orderStatusLabel(status: string): string {
+  const step = ORDER_STEPS.find((candidate) => candidate.statuses.includes(status));
+  if (step) return step.title;
+
+  switch (status) {
+    case "pending":
+    case "pending_payment":
+      return "Waiting for payment";
+    case "rejected":
+      return "Rejected";
+    case "failed":
+      return "Failed";
+    case "cancelled":
+      return "Cancelled";
+    case "refunded":
+      return "Refunded";
+    default:
+      return status;
+  }
+}
+
 /** Latest time an order entered any status belonging to the given step. */
 export function stepTime(stepIndex: number, events: Array<{ status: string; at: string }>): string | null {
   const step = ORDER_STEPS[stepIndex];

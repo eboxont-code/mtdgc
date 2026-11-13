@@ -7,7 +7,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { formatNpr, whatsappLink, SITE_URL } from "@/lib/format";
+import { formatNpr, orderStatusLabel, whatsappLink, SITE_URL } from "@/lib/format";
 import { GIFT_CARD_PRICE_DISCLOSURE } from "@/lib/gift-card-pricing";
 import { getOrderForViewer } from "@/lib/orders.functions";
 import { PaymentProofForm } from "@/components/payment-proof-form";
@@ -33,22 +33,6 @@ export const Route = createFileRoute("/order/$orderNumber")({
 });
 
 type Found = { orderNumber: string; status: string; createdAt: string; totalMinor: number; items: { name: string; variantName: string; isGiftCard: boolean; quantity: number; unitPriceMinor: number; totalMinor: number }[] };
-
-const STATUS_TEXT: Record<string, string> = {
-  pending: "Waiting for payment",
-  pending_payment: "Waiting for payment",
-  payment_submitted: "Payment received, being checked",
-  paid: "Payment received",
-  verified: "Payment verified",
-  processing: "Processing",
-  delivered: "Delivered",
-  fulfilled: "Delivered",
-  completed: "Delivered",
-  rejected: "We could not match the payment",
-  failed: "Payment failed",
-  cancelled: "Cancelled",
-  refunded: "Refunded",
-};
 
 function OrderPage() {
   const { orderNumber } = Route.useParams();
@@ -99,7 +83,7 @@ function OrderPage() {
         )}
         {state === "found" && order && (
           <section className="mt-5 rounded-lg border border-input bg-card p-5 text-sm">
-            <p className="font-display">Status: <strong>{STATUS_TEXT[order.status] ?? order.status}</strong></p>
+            <p className="font-display">Status: <strong>{orderStatusLabel(order.status)}</strong></p>
             <OrderNextStep status={order.status} />
             <p className="mt-1 text-muted-foreground">Placed {new Date(order.createdAt).toLocaleString("en-NP")}</p>
             <ul className="mt-3 space-y-1">

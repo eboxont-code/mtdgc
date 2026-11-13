@@ -7,7 +7,7 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
-import { ORDER_NOTICE, ORDER_STEPS, orderStepIndex, stepTime, formatNpr, SITE_URL } from "@/lib/format";
+import { ORDER_STEPS, orderStepIndex, orderStatusLabel, stepTime, formatNpr, SITE_URL } from "@/lib/format";
 import { GIFT_CARD_PRICE_DISCLOSURE } from "@/lib/gift-card-pricing";
 import { listMyOrders } from "@/lib/orders.functions";
 import { EmptyState } from "@/components/empty-state";
@@ -80,7 +80,7 @@ function OrdersPage() {
                       </p>
                     </div>
                     <span className="rounded bg-secondary px-2 py-0.5 font-display text-[10px] uppercase tracking-[0.1em]">
-                      {ORDER_NOTICE[order.status] ?? ORDER_STEPS[current]?.title ?? order.status}
+                      {orderStatusLabel(order.status)}
                     </span>
                   </div>
                   <OrderNextStep status={order.status} />
