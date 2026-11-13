@@ -1,6 +1,6 @@
 import { describe, test } from "node:test";
 import { strict as assert } from "node:assert";
-import { compareCatalogProducts, searchScore } from "./catalog-search";
+import { catalogFacetOptions, compareCatalogProducts, matchesCatalogFacets, searchScore } from "./catalog-search";
 
 const product = (name: string, brand = name) => ({
   name, brand, summary: "", region: "Nepal", platform: "Android", category: { name: "Game top-ups" }, tags: [], currency: "NPR",
@@ -137,5 +137,39 @@ describe("MT-0033 catalog search synonyms", () => {
     assert.ok(searchScore(freeFire, "topup") > 0);
     assert.ok(searchScore(roblox, "giftcard") > 0);
     assert.ok(searchScore(roblox, "giftcards") > 0);
+  });
+});
+
+describe("MT-0034 catalog platform and region filters", () => {
+  const products = [
+    { ...product("Free Fire"), platform: "Mobile", region: "Global" },
+    { ...product("PUBG"), platform: "PC", region: "Australia" },
+    { ...product("Netflix"), platform: " Web and mobile ", region: "Nepal" },
+    { ...product("PC gift"), platform: "pc", region: "Global" },
+    { ...product("Unknown platform"), platform: null, region: "Global" },
+    { ...product("Blank platform"), platform: "   ", region: "   " },
+  ];
+
+  test("platform choices are derived, trimmed, deduplicated and sorted", () => {
+    assert.deepEqual(catalogFacetOptions(products, "platform"), ["Mobile", "PC", "Web and mobile"]);
+  });
+
+  test("region choices include only real non-empty catalogue values", () => {
+    assert.deepEqual(catalogFacetOptions(products, "region"), ["Australia", "Global", "Nepal"]);
+  });
+
+  test("platform and region filters combine without changing other products", () => {
+    assert.equal(matchesCatalogFacets(products[1]!, { platform: "PC", region: "Australia" }), true);
+    assert.equal(matchesCatalogFacets(products[0]!, { platform: "PC", region: "Australia" }), false);
+    assert.equal(matchesCatalogFacets(products[0]!, { platform: "Mobile", region: "Global" }), true);
+  });
+
+  test("matching ignores surrounding whitespace and letter case", () => {
+    assert.equal(matchesCatalogFacets(products[1]!, { platform: " pc ", region: "australia" }), true);
+  });
+
+  test("All keeps products with an empty platform visible", () => {
+    assert.equal(matchesCatalogFacets(products[4]!, { platform: "all", region: "Global" }), true);
+    assert.equal(matchesCatalogFacets(products[4]!, { platform: "Mobile", region: "Global" }), false);
   });
 });

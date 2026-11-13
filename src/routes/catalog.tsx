@@ -11,18 +11,20 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { listCatalog } from "@/lib/catalog.functions";
-import { compareCatalogProducts, searchScore } from "@/lib/catalog-search";
+import { catalogFacetOptions, compareCatalogProducts, matchesCatalogFacets, searchScore } from "@/lib/catalog-search";
 import { SITE_URL } from "@/lib/format";
 import { availabilityCounts, isComingSoon, isPurchasable, isUnavailable } from "@/lib/product-availability";
 import { breadcrumbLd, itemListLd, canonicalLinks } from "@/lib/seo";
 
 export const Route = createFileRoute("/catalog")({
-  validateSearch: (search: Record<string, unknown>): { q?: string | undefined; category?: string | undefined; sort?: string | undefined; availability?: string | undefined; price?: string | undefined } => ({
+  validateSearch: (search: Record<string, unknown>): { q?: string | undefined; category?: string | undefined; sort?: string | undefined; availability?: string | undefined; price?: string | undefined; platform?: string | undefined; region?: string | undefined } => ({
     q: typeof search["q"] === "string" ? (search["q"] as string) : undefined,
     category: typeof search["category"] === "string" ? search["category"] as string : undefined,
     sort: typeof search["sort"] === "string" ? search["sort"] as string : undefined,
     availability: typeof search["availability"] === "string" ? search["availability"] as string : undefined,
     price: typeof search["price"] === "string" ? search["price"] as string : undefined,
+    platform: typeof search["platform"] === "string" ? (search["platform"] as string).slice(0, 80) : undefined,
+    region: typeof search["region"] === "string" ? (search["region"] as string).slice(0, 80) : undefined,
   }),
   loader: () => listCatalog(),
   head: ({ loaderData }) => ({
@@ -75,47 +77,73 @@ function CatalogPage() {
   const sort = SORTS.find((item) => item.id === search.sort)?.id ?? "relevance";
   const [availability, setAvailability] = useState(search.availability ?? "all");
   const [price, setPrice] = useState(search.price ?? "all");
+  const [platform, setPlatform] = useState(search.platform ?? "all");
+  const [region, setRegion] = useState(search.region ?? "all");
   const [shown, setShown] = useState(PAGE_SIZE);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const filterButtonRef = useRef<HTMLButtonElement>(null);
   useEffect(() => { setQuery((search.q ?? "").slice(0, 100)); }, [search.q]);
   useEffect(() => { setCategory(search.category ?? "all"); }, [search.category]);
   useEffect(() => { setAvailability(search.availability ?? "all"); setPrice(search.price ?? "all"); }, [search.availability, search.price]);
-  useEffect(() => { setShown(PAGE_SIZE); }, [query, category, sort, availability, price]);
+  useEffect(() => { setPlatform(search.platform ?? "all"); setRegion(search.region ?? "all"); }, [search.platform, search.region]);
+  useEffect(() => { setShown(PAGE_SIZE); }, [query, category, sort, availability, price, platform, region]);
+
+  const platformOptions = useMemo(() => catalogFacetOptions(products, "platform"), [products]);
+  const regionOptions = useMemo(() => catalogFacetOptions(products, "region"), [products]);
 
   const visible = useMemo(() => {
     const filtered = products.filter((product) => {
       const matchesCategory = category === "all" || product.category?.slug === category;
+      const matchesFacets = matchesCatalogFacets(product, { platform, region });
       const matchesAvailability = availability === "all" || (availability === "available" ? isPurchasable(product) : availability === "coming_soon" ? isComingSoon(product) : isUnavailable(product));
       const lowest = lowestPrice(product);
       const matchesPrice = price === "all" || (lowest !== null && (price === "under-1000" ? lowest < 100000 : price === "1000-3000" ? lowest >= 100000 && lowest <= 300000 : lowest > 300000));
-      return matchesCategory && matchesAvailability && matchesPrice && searchScore(product, query) > 0;
+      return matchesCategory && matchesFacets && matchesAvailability && matchesPrice && searchScore(product, query) > 0;
     });
 
     const sorted = [...filtered];
     sorted.sort((a, b) => compareCatalogProducts(a, b, sort, query, lowestPrice));
     return sorted;
-  }, [products, query, category, availability, price, sort]);
+  }, [products, query, category, availability, price, platform, region, sort]);
 
-  const syncUrl = (next: { q?: string; category?: string; sort?: string; availability?: string; price?: string }) => {
-    void navigate({ search: (prev) => ({ ...prev, q: next.q || undefined, category: next.category === "all" ? undefined : next.category, sort: next.sort === "relevance" ? undefined : next.sort, availability: next.availability === "all" ? undefined : next.availability, price: next.price === "all" ? undefined : next.price }), replace: true });
+  const syncUrl = (next: Partial<{ q: string; category: string; sort: string; availability: string; price: string; platform: string; region: string }>) => {
+    void navigate({
+      search: (prev) => ({
+        ...prev,
+        ...(next.q !== undefined ? { q: next.q || undefined } : {}),
+        ...(next.category !== undefined ? { category: next.category === "all" ? undefined : next.category } : {}),
+        ...(next.sort !== undefined ? { sort: next.sort === "relevance" ? undefined : next.sort } : {}),
+        ...(next.availability !== undefined ? { availability: next.availability === "all" ? undefined : next.availability } : {}),
+        ...(next.price !== undefined ? { price: next.price === "all" ? undefined : next.price } : {}),
+        ...(next.platform !== undefined ? { platform: next.platform === "all" ? undefined : next.platform } : {}),
+        ...(next.region !== undefined ? { region: next.region === "all" ? undefined : next.region } : {}),
+      }),
+      replace: true,
+    });
   };
 
   const activeCategory = categories.find((item) => item.slug === category);
   const counts = availabilityCounts(visible);
-  const filterCount = Number(category !== "all") + Number(availability !== "all") + Number(price !== "all");
-  const setFilter = (next: { availability?: string; price?: string }) => {
-    const a = next.availability ?? availability;
-    const p = next.price ?? price;
-    setAvailability(a);
-    setPrice(p);
-    syncUrl({ q: query, category, sort, availability: a, price: p });
+  const filterCount = Number(category !== "all") + Number(platform !== "all") + Number(region !== "all") + Number(availability !== "all") + Number(price !== "all");
+  const setFilter = (next: { platform?: string; region?: string; availability?: string; price?: string }) => {
+    const nextPlatform = next.platform ?? platform;
+    const nextRegion = next.region ?? region;
+    const nextAvailability = next.availability ?? availability;
+    const nextPrice = next.price ?? price;
+    setPlatform(nextPlatform);
+    setRegion(nextRegion);
+    setAvailability(nextAvailability);
+    setPrice(nextPrice);
+    syncUrl({ q: query, category, sort, platform: nextPlatform, region: nextRegion, availability: nextAvailability, price: nextPrice });
   };
   const clearAll = () => {
     setQuery("");
     setCategory("all");
-    setAvailability("all"); setPrice("all");
-    syncUrl({ q: "", category: "all", sort: "relevance", availability: "all", price: "all" });
+    setPlatform("all");
+    setRegion("all");
+    setAvailability("all");
+    setPrice("all");
+    syncUrl({ q: "", category: "all", sort: "relevance", platform: "all", region: "all", availability: "all", price: "all" });
   };
 
   const chip = (active: boolean) =>
@@ -123,6 +151,28 @@ function CatalogPage() {
 
   const filterGroups = (
     <div className="space-y-6">
+      {platformOptions.length > 1 && (
+        <fieldset>
+          <legend className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Platform</legend>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Button variant="outline" aria-pressed={platform === "all"} className={chip(platform === "all")} onClick={() => setFilter({ platform: "all" })}>All platforms</Button>
+            {platformOptions.map((value) => (
+              <Button variant="outline" key={value} aria-pressed={platform === value} className={chip(platform === value)} onClick={() => setFilter({ platform: value })}>{value}</Button>
+            ))}
+          </div>
+        </fieldset>
+      )}
+      {regionOptions.length > 1 && (
+        <fieldset>
+          <legend className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Region</legend>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Button variant="outline" aria-pressed={region === "all"} className={chip(region === "all")} onClick={() => setFilter({ region: "all" })}>All regions</Button>
+            {regionOptions.map((value) => (
+              <Button variant="outline" key={value} aria-pressed={region === value} className={chip(region === value)} onClick={() => setFilter({ region: value })}>{value}</Button>
+            ))}
+          </div>
+        </fieldset>
+      )}
       <fieldset>
         <legend className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Availability</legend>
         <div className="mt-2 flex flex-wrap gap-2">
@@ -276,7 +326,7 @@ function CatalogPage() {
           </fieldset>
           <div className="mt-4">{filterGroups}</div>
           <div className="mt-6 flex gap-2">
-            <Button variant="outline" className="flex-1" onClick={() => { setCategory("all"); setAvailability("all"); setPrice("all"); syncUrl({ q: query, category: "all", sort, availability: "all", price: "all" }); }}>Reset</Button>
+            <Button variant="outline" className="flex-1" onClick={() => { setCategory("all"); setPlatform("all"); setRegion("all"); setAvailability("all"); setPrice("all"); syncUrl({ q: query, category: "all", sort, platform: "all", region: "all", availability: "all", price: "all" }); }}>Reset</Button>
             <Button className="flex-1" onClick={() => setFiltersOpen(false)}>Show {visible.length} {visible.length === 1 ? "product" : "products"}</Button>
           </div>
         </SheetContent>
