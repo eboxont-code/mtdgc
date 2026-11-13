@@ -283,3 +283,13 @@ The map records the exact personal-data columns and the known browser, Vercel an
 Vercel environment metadata shows separate Preview and Production service-role entries, while Supabase URL/project-ID and publishable-key entries are scoped to both environments. Values were not decrypted. Preview must be treated as potentially production-connected until the owner confirms separate non-production project and credentials. The existing `has_role` SECURITY DEFINER execute warning remains a separate coordinated migration issue.
 
 No customer, order, payment, auth-user or Storage-object values were read. No schema, RLS, bucket, environment, secret, hosting, DNS or billing settings were changed.
+
+## 9. Order-lookup rate-limit failure handling
+
+- Public `lookupOrder`, the contact fallback in `getOrderForViewer`, and the contact fallback in `submitPaymentProof` share a per-IP window of 10 attempts in 10 minutes, using the existing `order_lookup_attempts` table.
+- The count query must succeed and return a valid, non-negative integer below the limit. A query error, missing count or invalid count fails closed; the order lookup/contact check does not continue.
+- The attempt row must be recorded successfully before lookup proceeds. Insert errors also fail closed. Public tracking distinguishes a reached limit from a temporary inability to verify the limiter without revealing whether an order exists.
+- The 24-hour cleanup in `lookupOrder` is best-effort. Enforcement counts only the rolling 10-minute window, so cleanup failure does not turn a failed count/insert into an allowed request.
+- **Residual limitation:** count and insert are separate database requests, so simultaneous requests can race and exceed the nominal limit. An atomic, concurrency-safe cap requires a database function/constraint and the approved Supabase migration/cutover gate; no production schema change is included here. The IP key still depends on the hosting proxy headers being trustworthy.
+- Payment-proof submission returns a temporary-unavailable response and stops before proof upload or order mutation when the count query or attempt insert fails; it does not treat an unavailable counter as zero.
+
