@@ -17,6 +17,7 @@ A product must not become orderable until its supplier, resale rights, region, v
 
 - [MTDGC Master Plan](./MTDGC_MASTER_PLAN.md) — canonical strategy, workstreams, status register, launch gates, risks and next actions.
 - [Supplier Register](./SUPPLIER_REGISTER.md) — internal supplier identity, source, authorisation, product-scope and fulfilment due diligence register.
+- [Product Launch Checklist](./PRODUCT_LAUNCH_CHECKLIST.md) — one evidence-gated checklist per exact product, variant and region; no automatic supplier or product approval.
 - [Roadmap history](./roadmap.md) — dated implementation notes and verification records; the Master Plan is authoritative for current task status.
 - [Data architecture](./MTDGC_DATA_ARCHITECTURE.md) — current order, payment, identity and access-control design.
 - [Repository working rules](./AGENTS.md) — Lovable sync and code-boundary guidance.
