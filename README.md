@@ -20,6 +20,7 @@ A product must not become orderable until its supplier, resale rights, region, v
 - [Product Launch Checklist](./PRODUCT_LAUNCH_CHECKLIST.md) — one evidence-gated checklist per exact product, variant and region; no automatic supplier or product approval.
 - [Market Launch Checklist](./MARKET_LAUNCH_CHECKLIST.md) — internal evidence gates for each market and purchase journey; template only, not approval.
 - [Prohibited Products Policy](./MTDGC_PROHIBITED_PRODUCTS.md) — internal hard-reject and hold rules for digital products and fulfilment methods.
+- [Customer-Facing Claims Standard](./MTDGC_CLAIM_STANDARD.md) — keeps public promises separate from verified facts, internal targets and supplier estimates.
 - [Roadmap history](./roadmap.md) — dated implementation notes and verification records; the Master Plan is authoritative for current task status.
 - [Data architecture](./MTDGC_DATA_ARCHITECTURE.md) — current order, payment, identity and access-control design.
 - [Personal data map](./MTDGC_DATA_MAP.md) — source-backed inventory of personal-data fields, known processors, evidenced locations and unresolved data-flow questions.
