@@ -259,3 +259,18 @@ No environment values, database rows, storage objects, credentials or production
 - Read-only production inspection also confirmed `public.order_lookup_attempts` has RLS enabled, no client policies and table grants only for `service_role`; browser roles have no direct access to the lookup-attempt records. The server-side guest lookup uses the service client for its rate-limit counter. This does not resolve the separate fail-open handling of counter-query errors.
 - The lookup-attempt counter is a separate abuse-throttling control. Its current count-query fallback can fail open if the database query errors, and insert/cleanup errors are not surfaced. The contact proof still applies, but rate-limit error handling remains a separate hardening task.
 - No production order, contact, token, payment or customer values were read for this verification. No production schema, RLS policy or grant was changed.
+## 9. Personal-data processing map
+
+The source-backed inventory of personal-data fields, purposes, processors, storage/access locations and unresolved evidence is maintained in [MTDGC_DATA_MAP.md](./MTDGC_DATA_MAP.md).
+
+Current read-only location evidence, refreshed 10 November 2026:
+- Supabase Postgres, Auth and Storage project: `ap-southeast-1` (Singapore), ACTIVE_HEALTHY.
+- Current Vercel production application deployment: READY in `iad1` (US East), deployment `dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay`, deployed commit `de1b11f540bf1933dc78ec2487392a0024a15de2`.
+
+The payment-proof table and Storage objects have RLS enabled. Payment-proof rows are readable only under the authenticated owner-or-admin policy; proof objects are readable only by the matching authenticated order owner or an administrator. The payment QR bucket is administrator-only. Both buckets are private, but neither has a Storage-level MIME allowlist. The application-side proof-image validator is therefore still an important control.
+
+The map records the exact personal-data columns and the known browser, Vercel and Supabase flows. It also keeps supplier identity, manual hand-off, email delivery, OAuth/WhatsApp provider locations, telemetry, logs, backups, support access and retention as UNKNOWN where no authoritative evidence exists. No legal-compliance claim is made.
+
+Vercel environment metadata shows separate Preview and Production service-role entries, while Supabase URL/project-ID and publishable-key entries are scoped to both environments. Values were not decrypted. Preview must be treated as potentially production-connected until the owner confirms separate non-production project and credentials. The existing `has_role` SECURITY DEFINER execute warning remains a separate coordinated migration issue.
+
+No customer, order, payment, auth-user or Storage-object values were read. No schema, RLS, bucket, environment, secret, hosting, DNS or billing settings were changed.
