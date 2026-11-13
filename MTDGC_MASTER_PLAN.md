@@ -108,11 +108,11 @@ Do not set numerical targets until a reliable baseline exists.
 - [!] **MT-0006 · P0 · BLOCKED** — Approve the primary commercial KPI and its reporting definition with the business owner. The plan suggests fulfilled, profitable orders, but no owner-approved target or measurement window is recorded.
 - [!] **MT-0007 · P0 · BLOCKED** — Implement trusted unit-economics reporting after supplier cost, payment fee, refund and support-cost sources are available. Current supplier costs and payment fee records are not populated; no actual margin figures can be calculated without inventing inputs.
 - [ ] **MT-0008 · P1 · TODO** — Define MTDGC’s own customer value through legitimate sourcing, regional compatibility, clear delivery and reliable support.
-- [ ] **MT-0009 · P1 · TODO** — Define the role of Matrix as the umbrella brand and the role of each product category beneath it.
+- [x] **MT-0009 · P1 · DONE** — Define the role of Matrix as the umbrella brand and the role of each product category beneath it. Merged to main on 13 Nov 2026 (PR #41); verify live after the production deploy.
 - [ ] **MT-0010 · P1 · TODO** — Decide whether the initial experience is marketplace-style retail or a curated single-operator digital store.
-- [ ] **MT-0011 · P1 · TODO** — Set a product approval process before adding a new category or supplier.
-- [ ] **MT-0012 · P1 · TODO** — Define which products MTDGC will never sell, including unauthorised accounts, stolen codes and credential-based access.
-- [ ] **MT-0013 · P1 · TODO** — Separate customer-facing promises from internal targets and supplier estimates.
+- [x] **MT-0011 · P1 · DONE** — Set a product approval process before adding a new category or supplier. Merged to main on 13 Nov 2026 (PR #39); verify live after the production deploy.
+- [x] **MT-0012 · P1 · DONE** — Define which products MTDGC will never sell, including unauthorised accounts, stolen codes and credential-based access. Merged to main on 13 Nov 2026 (PR #40); verify live after the production deploy.
+- [x] **MT-0013 · P1 · DONE** — Separate customer-facing promises from internal targets and supplier estimates. Merged to main on 13 Nov 2026 (PR #42); verify live after the production deploy.
 - [ ] **MT-0014 · P1 · TODO** — Define the customer support languages and service hours that can actually be maintained.
 - [ ] **MT-0015 · P2 · TODO** — Create a concise brand voice guide for product pages, checkout, support and social channels.
 - [ ] **MT-0016 · P2 · TODO** — Create a category naming and taxonomy standard that can grow without renaming existing URLs.
@@ -137,8 +137,8 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0030 · P1 · TODO** — Show required customer information before checkout, not after payment.
 - [ ] **MT-0031 · P1 · TODO** — Show whether a product is single-use, recurring, prepaid, account-bound or redeemable by code.
 - [ ] **MT-0032 · P1 · TODO** — Make product availability freshness visible internally with last supplier confirmation time.
-- [ ] **MT-0033 · P1 · TODO** — Add search synonyms for common product names, abbreviations, game currencies and regional spellings.
-- [ ] **MT-0034 · P1 · TODO** — Add filters that work correctly for category, platform, region, availability and price.
+- [x] **MT-0033 · P1 · DONE** — Add search synonyms for common product names, abbreviations, game currencies and regional spellings. Merged to main on 13 Nov 2026 (PR #35); verify live after the production deploy.
+- [x] **MT-0034 · P1 · DONE** — Add filters that work correctly for category, platform, region, availability and price. Merged to main on 13 Nov 2026 (PR #36); verify live after the production deploy.
 - [ ] **MT-0035 · P2 · TODO** — Create curated collections such as gaming essentials, entertainment, productivity and Australian shopping cards.
 - [ ] **MT-0036 · P2 · TODO** — Add related products only when they are genuinely compatible and available.
 - [ ] **MT-0037 · P2 · TODO** — Create a discontinued-product process that preserves order history and redirects useful SEO pages.
@@ -229,11 +229,11 @@ Do not set numerical targets until a reliable baseline exists.
 - [x] **MT-0102 · P0 · DONE** — Precise source-grounded definitions for Payment received, Verified, Processing and Delivered in section 32 and shared customer milestone copy; distinguish proof submission/manual status labels from independent settlement or delivery evidence.
 - [ ] **MT-0103 · P0 · TODO** — Add explicit Cancelled, Failed, Refunded and Action required states where applicable.
 - [ ] **MT-0104 · P0 · TODO** — Prevent invalid status jumps, such as Pending directly to Delivered without payment verification.
-- [ ] **MT-0105 · P0 · TODO** — Verify guest order tracking requires the order number plus the matching email or phone.
-- [ ] **MT-0106 · P0 · TODO** — Ensure account order history and guest tracking show the same canonical status.
+- [x] **MT-0105 · P0 · DONE** — Verify guest order tracking requires the order number plus the matching email or phone. Merged to main on 13 Nov 2026 (PR #32); verify live after the production deploy.
+- [x] **MT-0106 · P0 · DONE** — Ensure account order history and guest tracking show the same canonical status. Merged to main on 13 Nov 2026 (PR #60); verify live after the production deploy.
 - [ ] **MT-0107 · P1 · TODO** — Record a timestamp and actor for every status transition.
 - [x] **MT-0108 · P1 · DONE (implementation)** — Shared What happens next guidance covers all 13 statuses in customer order details, account orders and guest tracking results; 11 targeted tests passed and isolated 390px/desktop guidance checks passed. Real populated-order end-to-end verification is blocked by unavailable preview auth users; see section 32.
-- [ ] **MT-0109 · P1 · TODO** — Allow staff to add internal notes without exposing them to customers.
+- [x] **MT-0109 · P1 · DONE** — Allow staff to add internal notes without exposing them to customers. Merged to main on 13 Nov 2026 (PR #64); verify live after the production deploy.
 - [ ] **MT-0110 · P1 · TODO** — Add an action-required state for missing player ID, region mismatch or delivery-email correction.
 - [ ] **MT-0111 · P1 · TODO** — Prevent duplicate checkout submissions from creating duplicate orders.
 - [ ] **MT-0112 · P1 · TODO** — Define order expiry for unpaid orders and release reserved supplier capacity safely.
@@ -251,11 +251,11 @@ Do not set numerical targets until a reliable baseline exists.
 **Definition of done:** Orders are delivered accurately and on time, while manual checks are gradually replaced only by safe, tested automation.
 
 - [ ] **MT-0121 · P0 · TODO** — Document the current manual fulfilment steps for each active product family.
-- [ ] **MT-0122 · P0 · TODO** — Create a pre-fulfilment checklist for player ID, zone, server, region, denomination and email.
-- [ ] **MT-0123 · P0 · TODO** — Require a second confirmation for irreversible top-ups and code releases.
+- [x] **MT-0122 · P0 · DONE** — Create a pre-fulfilment checklist for player ID, zone, server, region, denomination and email. Merged to main on 13 Nov 2026 (PR #52); verify live after the production deploy.
+- [x] **MT-0123 · P0 · DONE** — Require a second confirmation for irreversible top-ups and code releases. Merged to main on 13 Nov 2026 (PR #43); verify live after the production deploy.
 - [ ] **MT-0124 · P0 · TODO** — Record the supplier transaction or redemption reference for each completed order.
 - [ ] **MT-0125 · P0 · TODO** — Capture delivery evidence and attach it to the correct order.
-- [ ] **MT-0126 · P0 · TODO** — Never request a customer's game password, subscription password, OTP or payment PIN.
+- [x] **MT-0126 · P0 · DONE** — Never request a customer's game password, subscription password, OTP or payment PIN. Merged to main on 13 Nov 2026 (PR #24); verify live after the production deploy.
 - [ ] **MT-0127 · P1 · TODO** — Define realistic delivery-time ranges per product based on measured fulfilment history.
 - [ ] **MT-0128 · P1 · TODO** — Pause new orders when a supplier is unavailable or a product cannot be delivered.
 - [ ] **MT-0129 · P1 · TODO** — Create a queue sorted by paid status, promised delivery window and risk.
@@ -281,7 +281,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [x] **MT-0144 · P0 · DONE** — Region-lock warnings prominent before add-to-cart/buy on region-restricted product pages (desktop order summary, details column, mobile sticky bar) plus required gift-card region confirmation; uses saved listing region only; verified at 390px with no overflow; not published.
 - [ ] **MT-0145 · P0 · TODO** — Make wrong-player-ID warnings visible before confirming an irreversible top-up.
 - [ ] **MT-0146 · P1 · TODO** — Publish support response hours only after they are operationally staffed.
-- [ ] **MT-0147 · P1 · TODO** — Create ticket categories for payment, delayed delivery, invalid code, wrong item, refund and account access.
+- [x] **MT-0147 · P1 · DONE** — Create ticket categories for payment, delayed delivery, invalid code, wrong item, refund and account access. Merged to main on 13 Nov 2026 (PR #49); verify live after the production deploy.
 - [ ] **MT-0148 · P1 · TODO** — Require an order number for order-specific support while allowing pre-purchase questions.
 - [ ] **MT-0149 · P1 · TODO** — Create escalation rules for overdue orders and supplier disputes.
 - [ ] **MT-0150 · P1 · TODO** — Add a clear complaint path and expected next update without inventing resolution times.
@@ -300,11 +300,11 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** Customer information, payment evidence, order records and staff tools are protected with least-privilege access.
 
-- [ ] **MT-0161 · P0 · TODO** — Audit authentication and authorisation for customer accounts, support requests and admin routes.
-- [ ] **MT-0162 · P0 · TODO** — Verify one customer cannot access another customer's orders by changing an ID or URL.
+- [x] **MT-0161 · P0 · DONE** — Audit authentication and authorisation for customer accounts, support requests and admin routes. Merged to main on 13 Nov 2026 (PR #12); verify live after the production deploy.
+- [x] **MT-0162 · P0 · DONE** — Verify one customer cannot access another customer's orders by changing an ID or URL. Merged to main on 13 Nov 2026 (PR #27); verify live after the production deploy.
 - [ ] **MT-0163 · P0 · TODO** — Verify payment uploads and delivered codes are stored privately, not in public buckets.
-- [ ] **MT-0164 · P0 · TODO** — Ensure admin-only actions are enforced server-side, not only hidden in the interface.
-- [ ] **MT-0165 · P0 · TODO** — Review secrets, supplier credentials and payment configuration for accidental exposure.
+- [x] **MT-0164 · P0 · DONE** — Ensure admin-only actions are enforced server-side, not only hidden in the interface. Merged to main on 13 Nov 2026 (PR #31); verify live after the production deploy.
+- [x] **MT-0165 · P0 · DONE** — Review secrets, supplier credentials and payment configuration for accidental exposure. Merged to main on 13 Nov 2026 (PR #28); verify live after the production deploy.
 - [ ] **MT-0166 · P1 · TODO** — Enable strong admin authentication and remove unused staff accounts.
 - [ ] **MT-0167 · P1 · TODO** — Apply least-privilege roles for payment review, fulfilment, support and catalogue editing.
 - [ ] **MT-0168 · P1 · TODO** — Log sensitive admin actions such as refunds, code reveal, payment verification and status overrides.
@@ -332,7 +332,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0185 · P1 · TODO** — Improve catalog search for brand, product, game, denomination and common abbreviations.
 - [ ] **MT-0186 · P1 · TODO** — Add clear sorting by relevance, price and availability.
 - [ ] **MT-0187 · P1 · TODO** — Make filters usable on mobile without hiding the product list behind oversized controls.
-- [ ] **MT-0188 · P1 · TODO** — Keep cart contents and selected variants stable when customers navigate back.
+- [x] **MT-0188 · P1 · DONE** — Keep cart contents and selected variants stable when customers navigate back. Merged to main on 13 Nov 2026 (PR #66); verify live after the production deploy.
 - [ ] **MT-0189 · P1 · TODO** — Reduce checkout fields to only the information required for that product.
 - [ ] **MT-0190 · P1 · TODO** — Explain the manual payment step before the customer places the order.
 - [ ] **MT-0191 · P1 · TODO** — Add inline examples showing where to find game player IDs and zone identifiers.
@@ -380,7 +380,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0223 · P0 · TODO** — Track contribution margin per order and category after direct costs.
 - [ ] **MT-0224 · P0 · TODO** — Track order completion rate, failed fulfilment rate and refund rate.
 - [ ] **MT-0225 · P1 · TODO** — Track time from order creation to payment verification and from verification to delivery.
-- [ ] **MT-0226 · P1 · TODO** — Track support contacts per 100 orders and the most common issue categories.
+- [x] **MT-0226 · P1 · DONE** — Track support contacts per 100 orders and the most common issue categories. Merged to main on 13 Nov 2026 (branch automation/mt-0226-support-metrics-20261113-run11); verify live after the production deploy.
 - [ ] **MT-0227 · P1 · TODO** — Track product availability and supplier confirmation freshness.
 - [ ] **MT-0228 · P1 · TODO** — Create alerts for overdue paid orders and supplier outages.
 - [~] **MT-0229 · P1 · IN PROGRESS** — Build a product launch checklist requiring supplier, region, price, test order, policy and support readiness. [Checklist](./PRODUCT_LAUNCH_CHECKLIST.md); awaiting exact-head quality checks and merge.
@@ -456,18 +456,18 @@ Do not set numerical targets until a reliable baseline exists.
 - [!] **MT-0282 · P0 · BLOCKED** — Confirm the exact Netflix fulfilment method, supplier authority, account ownership, country and customer control. The current listing does not document these points and has been set to `temporarily_unavailable` in production on 6 November 2026; reopen only after written supplier/issuer evidence and a successful end-to-end test prove an authorised, region-compatible offer.
 - [ ] **MT-0283 · P1 · TODO** — For every subscription, state plan duration, billing model, renewal behaviour, account owner, household/seat restrictions, region, what the customer receives and what happens at expiry.
 - [ ] **MT-0284 · P1 · TODO** — Maintain a dated evidence record for each “Global” or region-specific claim, including issuer/supplier source, tested account or server region and known exclusions.
-- [ ] **MT-0285 · P1 · TODO** — Test name, email and phone validation for Nepal and Australia formats, including Nepali names and valid international phone numbers, without rejecting legitimate customers.
+- [x] **MT-0285 · P1 · DONE** — Test name, email and phone validation for Nepal and Australia formats, including Nepali names and valid international phone numbers, without rejecting legitimate customers. Merged to main on 13 Nov 2026 (PR #55); verify live after the production deploy.
 - [ ] **MT-0286 · P0 · TODO** — Set a delivery and support SLA for each SKU and market using actual supplier times, manual staff capacity, payment confirmation, weekends and support hours; show it before payment.
 - [ ] **MT-0287 · P1 · TODO** — Measure manual staff minutes and exception workload per SKU so delivery promises and growth targets do not exceed real fulfilment capacity.
 - [ ] **MT-0288 · P0 · TODO** — Separate order states for creation, payment pending, payment verified, supplier processing, delivered, failed, refunded and chargeback; perform critical transitions server-side.
 - [ ] **MT-0289 · P1 · TODO** — Record supplier order references, delivery evidence, status timestamps and failure reasons; use idempotency and duplicate checks where supplier systems support them.
 - [ ] **MT-0290 · P1 · TODO** — Define supplier-outage fallback rules and automatically or manually disable new sales when stock, authenticity or delivery cannot be confirmed.
 - [ ] **MT-0291 · P1 · TODO** — Alert staff before or when a delivery SLA is breached and send the customer a truthful next-update time before they need to chase support.
-- [ ] **MT-0292 · P0 · TODO** — Map every personal-data field captured in checkout, accounts, tracking, support, analytics and payment proof; record which supplier or processor receives it, the purpose and the country of access/storage.
+- [x] **MT-0292 · P0 · DONE** — Map every personal-data field captured in checkout, accounts, tracking, support, analytics and payment proof; record which supplier or processor receives it, the purpose and the country of access/storage. Merged to main on 13 Nov 2026 (PR #34); verify live after the production deploy.
 - [ ] **MT-0293 · P1 · TODO** — Define retention periods or defensible retention criteria for orders, support records, payment evidence and account data, with a process for access, correction and deletion requests.
-- [ ] **MT-0294 · P0 · TODO** — Keep payment screenshots and delivered codes in private, access-controlled storage; validate file type/size, minimise visible bank details, restrict staff access and define deletion timing.
-- [ ] **MT-0295 · P0 · TODO** — Add proportionate fraud controls for rapid repeat orders, payment/market mismatch, stolen-card signals, order enumeration, account takeover, code reselling abuse and chargebacks.
-- [ ] **MT-0296 · P1 · TODO** — Audit sensitive changes to price, region, recipient, payment state, refund, code reveal and supplier fulfilment, including actor, timestamp and reason.
+- [x] **MT-0294 · P0 · DONE** — Keep payment screenshots and delivered codes in private, access-controlled storage; validate file type/size, minimise visible bank details, restrict staff access and define deletion timing. Merged to main on 13 Nov 2026 (PR #56); verify live after the production deploy.
+- [x] **MT-0295 · P0 · DONE** — Add proportionate fraud controls for rapid repeat orders, payment/market mismatch, stolen-card signals, order enumeration, account takeover, code reselling abuse and chargebacks. Merged to main on 13 Nov 2026 (PR #47); verify live after the production deploy.
+- [x] **MT-0296 · P1 · DONE** — Audit sensitive changes to price, region, recipient, payment state, refund, code reveal and supplier fulfilment, including actor, timestamp and reason. Merged to main on 13 Nov 2026 (PR #48); verify live after the production deploy.
 - [ ] **MT-0297 · P1 · TODO** — Keep one durable support case record linked to the order, payment, supplier action and customer conversation; WhatsApp must not be the only record of a refund or promise.
 - [ ] **MT-0298 · P1 · TODO** — Localise currency, dates, number formats, receipts, phone fields and customer instructions for Nepal and Australia; decide Nepali-language coverage from customer evidence and maintain equivalent policy meaning.
 - [ ] **MT-0299 · P1 · TODO** — If market-specific URLs are introduced, implement distinct useful content, correct canonical and hreflang rules, and accurate availability/indexing; do not create thin pages by merely swapping currency labels.
@@ -531,6 +531,8 @@ For each SKU and each purchase journey, calculate:
 Run at least three cases per SKU: a normal successful order, a delayed or failed fulfilment, and a refund or chargeback. Keep separate models for NPR domestic orders, Australian-local AUD orders and Australia-paid gifts for Nepal recipients; they have different payment, settlement, FX, tax and support costs. Do not treat code face value as sales revenue or confuse revenue with retained profit.
 
 ## 10. Immediate next actions
+
+**13 Nov 2026 merge sweep:** On the owner's instruction ("always merge, never PR"), the open automation PRs were merged into `main` with normal merge commits (no force-push): MT-0009, MT-0011, MT-0012, MT-0013, MT-0033, MT-0034, MT-0105, MT-0106, MT-0109, MT-0122, MT-0123, MT-0126, MT-0147, MT-0161, MT-0162, MT-0164, MT-0165, MT-0188, MT-0226, MT-0285, MT-0292, MT-0294, MT-0295 and MT-0296. Rows below that still say "existing PRs" for these tasks are historical. Superseded duplicates were not merged. From now on, work is committed straight to `main`: no side branches, no PRs, no drafts.
 
 The 308-task register remains authoritative. Sections 32–34 supersede the earlier MT-0102 reference; MT-0102 is DONE and must not be selected again. Finish existing pull requests rather than duplicating their work.
 
