@@ -7,6 +7,7 @@ import { findUnsafeCustomerRequirement, isSafeCustomerRequirements, UNSAFE_CUSTO
 import { generateOrderReference } from "@/lib/order-reference";
 import { assertOrderDetailsConfirmed } from "@/lib/order-confirmation";
 import { evaluateOrderLookupRateLimit } from "@/lib/order-lookup-rate-limit";
+import { buildOrderItemFieldsSnapshot, hasReservedOrderItemField } from "@/lib/pre-fulfilment";
 import {
   buildPaymentProofAssociation,
   hasOrderAccessToken,
@@ -28,6 +29,9 @@ const lineSchema = z.object({
 }).refine(
   (line) => !findUnsafeCustomerRequirement(Object.keys(line.fields)),
   { message: UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE },
+).refine(
+  (line) => !hasReservedOrderItemField(line.fields),
+  { message: "Reserved order metadata cannot be supplied as a customer detail" },
 ).refine((line) => {
   const snapshotValues = [line.expectedProductName, line.expectedVariantName, line.expectedPriceMinor];
   const supplied = snapshotValues.filter((value) => value !== undefined).length;
@@ -90,7 +94,7 @@ export const placeOrder = createServerFn({ method: "POST" })
     const skus = data.lines.map((l) => l.sku);
     const { data: variants, error } = await supabaseAdmin
       .from("product_variants")
-      .select("id, sku, name, price_minor, currency, status, product_id, products(id, name, image_url, currency, is_published, status, requirements, categories(slug))")
+      .select("id, sku, name, price_minor, currency, status, product_id, products(id, name, image_url, currency, is_published, status, region, requirements, categories(slug))")
       .in("sku", skus);
     if (error) throw new Error("Could not load products");
 
@@ -103,6 +107,7 @@ export const placeOrder = createServerFn({ method: "POST" })
         currency: string;
         is_published: boolean;
         status: string;
+        region: string;
         requirements: unknown;
         categories: { slug: string } | null;
       } | null | undefined;
@@ -121,7 +126,7 @@ export const placeOrder = createServerFn({ method: "POST" })
           quantity: line.quantity,
           unit_price_minor: v.price_minor,
           line_total_minor: v.price_minor * line.quantity,
-          fields: line.fields,
+          fields: buildOrderItemFieldsSnapshot(line.fields, p.region, p.requirements),
         },
         checkoutLine: {
           sku: v.sku,
