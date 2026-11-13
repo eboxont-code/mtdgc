@@ -17,7 +17,55 @@ type SearchProduct = {
 };
 
 const aliases: Record<string, string> = {
-  ff: "free fire", pubg: "pubg", ml: "mobile legends", mlbb: "mobile legends", nfx: "netflix",
+  // Game names, abbreviations and denominations present in the current catalogue.
+  ff: "free fire",
+  freefire: "free fire",
+  pubgm: "pubg mobile",
+  pubgmobile: "pubg mobile",
+  pubgmobileuc: "pubg mobile uc",
+  uc: "pubg mobile uc",
+  ml: "mobile legends",
+  mlbb: "mobile legends",
+  mobilelegends: "mobile legends",
+  mobilelegendsdiamonds: "mobile legends diamonds",
+  coc: "clash of clans",
+  clashofclans: "clash of clans",
+  goldpass: "gold pass",
+  eventpass: "event pass",
+  weeklypass: "weekly diamond pass",
+  vp: "valorant points",
+  valorantpoints: "valorant points",
+  robux: "roblox",
+  robloxgiftcard: "roblox gift card",
+  steamwallet: "steam wallet",
+  steamwalletcode: "steam wallet code",
+  // Subscription and software names used in the current catalogue.
+  nfx: "netflix",
+  netflixsubscription: "netflix subscription",
+  disneyplus: "disney hotstar",
+  m365: "microsoft 365",
+  microsoft365: "microsoft 365",
+  ms365: "microsoft 365",
+  office365: "microsoft 365",
+  gpt: "chatgpt",
+  chatgptplus: "chatgpt plus",
+  ytpremium: "youtube premium",
+  googleone: "google one",
+  adobecc: "adobe creative cloud",
+  capcutpro: "capcut pro",
+  // Regional abbreviations and common spacing/spelling variants.
+  au: "australia",
+  aus: "australia",
+  australian: "australia",
+  np: "nepal",
+  nepali: "nepal",
+  nepalese: "nepal",
+  giftcard: "gift card",
+  giftcards: "gift card",
+  topup: "top up",
+  topups: "top up",
+  license: "licence",
+  licenses: "licence",
 };
 
 function normalize(value: string): string {
@@ -30,7 +78,15 @@ export function searchScore(product: SearchProduct, query: string): number {
   if (!tokens.length) return 1;
   const title = normalize(`${product.name} ${product.brand}`);
   const options = normalize(product.variants.filter((v) => v.status !== "archived").map((v) => `${v.name} ${v.sku}`).join(" "));
-  const details = normalize([product.summary, product.region, product.platform, product.category?.name, ...product.tags].filter(Boolean).join(" "));
+  const details = normalize([
+    product.summary,
+    product.region,
+    product.platform,
+    product.category?.name,
+    product.currency,
+    ...product.tags,
+    ...product.variants.filter((v) => v.status !== "archived").map((v) => v.currency),
+  ].filter(Boolean).join(" "));
   if (!tokens.every((token) => `${title} ${options} ${details}`.includes(token))) return 0;
   return tokens.reduce((score, token) => score + (title.includes(token) ? 10 : options.includes(token) ? 5 : 1), 0) + (title.includes(tokens.join(" ")) ? 20 : 0);
 }
