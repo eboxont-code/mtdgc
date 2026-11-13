@@ -1,6 +1,17 @@
-# MTDGC launch-ready marketplace
+# MT-0102: clear order-status meanings
 
-## Goal
+## Scope
+- Clarify the four existing milestones in shared customer wording: Payment received means proof or a payment record received, not independently confirmed funds; Verified means staff approved the payment review; Processing means staff marked preparation underway; Delivered means staff marked delivery complete.
+- Reuse those same definitions in tracking, the how-it-works page and four FAQ answers. Keep existing components and Matrix tokens.
+- Verify visible wording at 390px first, then desktop, with no horizontal overflow. Record tests and browser evidence in the Master Plan.
+- Leave protected files, server actions, order data, pricing and status permissions unchanged. Do not publish.
+
+## Technical details
+- Reuse `ORDER_STEPS` in `format.ts` as the shared definition source; keep existing status mappings unchanged.
+- Add existing-component presentation to how-it-works and derive FAQ answer text from the shared definitions so tracking and help cannot drift.
+- Run existing order-guidance and formatting tests; no copy or snapshot tests.
+
+## Historical plan (not part of this task)
 Upgrade the existing MTDGC storefront into a data-driven digital marketplace without replacing its brand or warm retail design. Launch with the seven configured product lines and researched catalog candidates kept as unpublished drafts until MTDGC confirms pricing, regions, stock, fulfilment, and refund rules.
 
 ## What will be built
