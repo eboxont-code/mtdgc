@@ -383,7 +383,9 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0226 · P1 · TODO** — Track support contacts per 100 orders and the most common issue categories.
 - [ ] **MT-0227 · P1 · TODO** — Track product availability and supplier confirmation freshness.
 - [ ] **MT-0228 · P1 · TODO** — Create alerts for overdue paid orders and supplier outages.
-- [ ] **MT-0229 · P1 · TODO** — Build a product launch checklist requiring supplier, region, price, test order, policy and support readiness.
+- [~] **MT-0229 · P1 · IN PROGRESS** — Build a product launch checklist requiring supplier, region, price, test order, policy and support readiness. [Checklist](./PRODUCT_LAUNCH_CHECKLIST.md); awaiting exact-head quality checks and merge.
+  - 13 Nov 2026: The checklist template and document-contract tests are implemented in this branch. It records evidence gates only; it does not approve a supplier/product, create a test order, change catalogue status or write to production.
+  - **Next eligible task:** MT-0226 already has an active separate branch, automation/mt-0226-support-metrics-20261113-run11; do not duplicate it. Revisit after that work is resolved. MT-0227/MT-0228 still need supplier-confirmation evidence and owner-approved alert thresholds.
 - [ ] **MT-0230 · P1 · TODO** — Build a market launch checklist covering currency, payment, tax, consumer law, sourcing and customer support.
 - [ ] **MT-0231 · P2 · TODO** — Evaluate Australia as a separate market with AUD prices, local gift-card sourcing and appropriate payment settlement.
 - [ ] **MT-0232 · P2 · TODO** — Evaluate Nepal payment integrations and settlement reliability before replacing manual bank verification.
