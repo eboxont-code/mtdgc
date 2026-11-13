@@ -239,3 +239,12 @@ This recheck used Vercel environment-variable metadata with decryption disabled 
 - The supplier identity and product-scope registers remain empty/NOT ASSESSED; the supplier register explicitly prohibits storing passwords, API keys, bank credentials, access tokens or customer secrets.
 
 No environment values, database rows, storage objects, credentials or production settings were changed. Additional spend: $0.
+
+## 9. Administrator server-function authorization contract
+
+- The current `src/lib/admin.functions.ts` exposes 14 administrator server functions. Every export uses `requireSupabaseAuth` middleware and awaits `assertAdmin(context)` as the first handler statement, before any read or mutation.
+- `assertAdmin` queries `has_role` for the validated `context.userId` and role `admin`. It delegates the result to `isAdminRoleConfirmed`; the helper permits access only when the RPC has no error and returns the exact boolean `true`.
+- The AST regression contract in `src/lib/admin-authorization.test.ts` pins the 14-function inventory, checks authenticated middleware and first-statement authorization, and verifies the guard/helper contract. Existing `admin-access.test.ts` tests exact-true success and false, missing, ambiguous and error-bearing denial cases.
+- The administrator page's browser-side role check remains a navigation/presentation gate only. The server middleware and handler guard are the enforcement boundary; database RLS remains a separate defence for direct authenticated-client access.
+- Residual finding: production `public.has_role(uuid, app_role)` remains SECURITY DEFINER and executable by `anon` and `authenticated`. Remediation must coordinate function privileges and dependent RLS policies after the approved Supabase cutover. No production function, policy, grant or role was changed.
+- Evidence: current-main source audit at commit `de1b11f540bf1933dc78ec2487392a0024a15de2` and read-only Supabase policy/function metadata on 10 November 2026; production deployment `dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay` is READY on the same commit. Draft PR #31 contains the regression contract; full exact-head quality verification is still required before this task can be marked DONE.
