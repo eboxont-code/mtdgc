@@ -1,11 +1,11 @@
-# MT-0031: listing-based product usage labels
+# MT-0144 and MT-0145: region and player-detail warnings
 
 ## What changes
-- Reuse saved delivery-method and explicit usage-tag data to show short usage labels on existing product cards, rows and product purchase summaries.
-- Direct delivery to a saved player/account ID is labelled account-bound; saved digital-code delivery is labelled redeemable by code. Single-use, recurring and prepaid labels appear only when explicitly stated in saved usage tags, never from category, brand or plan length.
-- Show nothing when no supported usage information exists. Keep Matrix styling, availability and pricing unchanged.
-- Verify current products at 390px first, then desktop; record dated MT-0031 evidence in the Master Plan. Do not publish.
+- Reuse existing saved-region warnings above desktop and mobile purchase actions; verify their placement without inventing regions or additional restrictions.
+- Add "Check your player ID, zone and server. Top-ups cannot be reversed once delivered." beside the existing top-up detail fields, and associate it with those fields for screen readers.
+- Preserve Matrix tokens, existing product data, prices, cart, checkout, product-help, router/Sentry and server actions.
+- Verify existing code and top-up pages at 390px first, then desktop, checking warning placement and horizontal overflow. Record evidence; do not publish.
 
 ## Technical details
-- Add a browser-safe pure usage-label helper with conservative exact matching and tests for the five labels, unsupported/absent data and no category-based guessing.
-- Reuse the helper in existing card presentation and the existing details block above mobile and desktop purchase actions. No protected cart, checkout, router/Sentry, server action or listing-data changes.
+- Scope the additive top-up notice using the existing game-top-up category, without changing requirements or purchase eligibility.
+- Reuse the existing region-notice component and run its existing listing-region tests. No copy or snapshot tests.
