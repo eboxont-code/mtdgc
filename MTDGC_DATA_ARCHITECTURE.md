@@ -90,10 +90,11 @@ The customer progress helper groups `payment_submitted`/`paid`, `verified`, `pro
 - The production `payment-proofs` bucket remains private and unchanged. Its existing storage-level 5 MiB cap is retained; application-side server validation remains the MIME/content gate because the bucket's `allowed_mime_types` setting is NULL. Only the trusted server upload path writes proof objects.
 
 ## 5. Guest Checkout Architecture
-- **No Account Required**: Orders are created with `user_id = NULL`.
-- **Identity**: `guest_email` and `guest_whatsapp` are captured.
-- **Security**: A unique `guest_access_token` (UUID) is generated for each order.
-- **Tracking**: Users can view order status via a URL containing the `order_id` and `guest_access_token`.
+- **No Account Required**: Guest orders are created with `user_id = NULL`.
+- **Identity**: The order stores the supplied `guest_email` and `guest_phone`. `verification_hash` stores a SHA-256 digest of the order number plus the normalised primary contact; it is not a replacement for the saved contact fields.
+- **Order access token**: Checkout generates a per-order 256-bit bearer token, stores only its SHA-256 digest in `access_token_hash`, and returns the token to the customer.
+- **Public tracking**: The `/track-order` form requires the order number and the email or phone used on that order. The server resolves the exact order first and then checks the order-scoped contact proof. The browser does not query `public.orders` directly.
+- **Other order views**: `getOrderForViewer` accepts the order-specific access token, the authenticated account owner, or a contact fallback after its rate-limit check.
 
 ## 6. Launch Strategy (Separation)
 
@@ -248,3 +249,13 @@ No environment values, database rows, storage objects, credentials or production
 - The administrator page's browser-side role check remains a navigation/presentation gate only. The server middleware and handler guard are the enforcement boundary; database RLS remains a separate defence for direct authenticated-client access.
 - Residual finding: production `public.has_role(uuid, app_role)` remains SECURITY DEFINER and executable by `anon` and `authenticated`. Remediation must coordinate function privileges and dependent RLS policies after the approved Supabase cutover. No production function, policy, grant or role was changed.
 - Evidence: current-main source audit at commit `de1b11f540bf1933dc78ec2487392a0024a15de2` and read-only Supabase policy/function metadata on 10 November 2026; production deployment `dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay` is READY on the same commit. Draft PR #31 contains the regression contract; full exact-head quality verification is still required before this task can be marked DONE.
+
+## 9. Guest order tracking access and verification
+
+- The public server function requires a trimmed order number (4–40 characters) and contact (3–120 characters). It uppercases the order number, queries only that exact order, then invokes the shared `hasOrderContactAccess` helper.
+- The helper normalises email to lowercase and phone numbers to digits. It accepts the SHA-256 hash of the uppercased order number plus normalised contact, or an exact case-insensitive match to the saved `guest_email`. A phone match is therefore tied to the exact order number and cannot be reused to open a different order.
+- Missing orders and mismatched contacts return the same generic `not_found` response. The order number alone is not an authentication credential.
+- Read-only production policy/grant inspection on 10 November 2026 confirmed RLS is enabled on `public.orders`. The SELECT policy applies only to authenticated users and requires `auth.uid() = user_id` or administrator role; table grants include no `anon` SELECT privilege. Guest tracking is mediated by the server-only lookup function.
+- Read-only production inspection also confirmed `public.order_lookup_attempts` has RLS enabled, no client policies and table grants only for `service_role`; browser roles have no direct access to the lookup-attempt records. The server-side guest lookup uses the service client for its rate-limit counter. This does not resolve the separate fail-open handling of counter-query errors.
+- The lookup-attempt counter is a separate abuse-throttling control. Its current count-query fallback can fail open if the database query errors, and insert/cleanup errors are not surfaced. The contact proof still applies, but rate-limit error handling remains a separate hardening task.
+- No production order, contact, token, payment or customer values were read for this verification. No production schema, RLS policy or grant was changed.
