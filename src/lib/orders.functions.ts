@@ -5,6 +5,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { hasCheckoutPriceSnapshotChanges } from "@/lib/checkout-price-snapshot";
 import { findUnsafeCustomerRequirement, isSafeCustomerRequirements, UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE } from "@/lib/supplier-safety";
 import { generateOrderReference } from "@/lib/order-reference";
+import { assertOrderDetailsConfirmed } from "@/lib/order-confirmation";
 import {
   buildPaymentProofAssociation,
   hasOrderAccessToken,
@@ -49,6 +50,7 @@ const orderSchema = z
     email: z.string().trim().max(120).email().optional().or(z.literal("")),
     note: z.string().trim().max(500).optional(),
     bearer: z.string().max(4000).optional(),
+    detailsConfirmed: z.boolean().optional().default(false),
     lines: z.array(lineSchema).min(1).max(20),
   })
   .refine((d) => Boolean(d.phone) || Boolean(d.email), "Add a mobile number or an email");
@@ -138,6 +140,11 @@ export const placeOrder = createServerFn({ method: "POST" })
     if (hasCheckoutPriceSnapshotChanges(data.lines, checkoutLines)) {
       return { status: "cart_changed" as const, totalMinor: subtotal, lines: checkoutLines };
     }
+    // Resolve the category from the selected SKU; never trust a client-supplied category.
+    assertOrderDetailsConfirmed(
+      resolvedLines.map((line) => line.checkoutLine.categorySlug),
+      data.detailsConfirmed,
+    );
     const email = data.email || null;
     const contactKey = normaliseContact(data.phone || data.email || "");
     const tokenBytes = crypto.getRandomValues(new Uint8Array(32));
