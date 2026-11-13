@@ -240,3 +240,10 @@ Body/input text and outline badges use foreground; muted text and inactive navig
 - Aggregate-only, read-only product/variant metadata grouped by parent product status returned 15 available-status variants under the five available products, 36 coming-soon variants under the 30 coming-soon products, and 3 available-status variants under the one temporarily-unavailable product. The latter three are not purchasable because product-level availability takes precedence; both product and variant must be orderable with a positive NPR price.
 - The public catalogue still shows 36 listed / 5 available now / 30 coming soon / 1 unavailable. Category available-now counts remain Game Top-Ups 4, Gift Cards 1, Subscriptions 0 and Software 0. Live Steam Wallet Code and Netflix pages show disabled actions; Roblox Gift Card and PUBG Mobile UC show available purchase actions.
 - No catalogue, price, availability, order, payment, customer, schema, storage, credential, environment, hosting, DNS or billing data was changed. No order or payment was created. Additional spend: $0.
+## 10 November 2026 — MT-0285 Nepal and Australia contact validation
+
+- Prepared shared checkout contact checks and direct tests for the existing server-side fields. Coverage includes Nepali Unicode names, Nepal and Australian local/international phone formats, email-only and phone-only contact, missing contact, malformed values and current length limits.
+- Local Node 22.16 helper tests passed 6/6; strict TypeScript 5.8.3 helper check passed.
+- PR #55 is open as a draft. Its exact code-bearing revision failed the GitHub Quality job before any step started; full application tests, lint, typecheck and production build did not execute.
+- Vercel rejected the preview because the free daily deployment limit was reached. The new checkout validation is not live.
+- No production data, orders, payments, customer records, database/schema, credentials, hosting or billing settings changed. Additional spend: $0.
