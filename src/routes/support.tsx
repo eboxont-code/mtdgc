@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { SITE_URL, WHATSAPP_DISPLAY, whatsappLink } from "@/lib/format";
 import { CUSTOMER_CREDENTIAL_WARNING } from "@/lib/supplier-safety";
+import { restoreSupportIssueType, SUPPORT_ISSUE_TYPES, type SupportIssueType } from "@/lib/support-issues";
 import { breadcrumbLd, pageLd, canonicalLinks } from "@/lib/seo";
 
 export const Route = createFileRoute("/support")({
@@ -43,14 +44,6 @@ export const Route = createFileRoute("/support")({
 
 const DRAFT_KEY = "mtdgc-support-draft";
 
-const ISSUE_TYPES = [
-  "Wrong player ID or UID",
-  "Order not delivered",
-  "Refund request",
-  "Payment question",
-  "Something else",
-];
-
 const SUPPORT_ANSWERS = [
   ["My key does not activate", "Check the activation steps and supported region on the listing. Send support the error message and your order number. Any replacement is subject to the replacement period shown on that listing."],
   ["My subscription stopped working", "Check the plan and activation instructions on the listing, then send support your order number and the problem. Coverage follows the listing's replacement period; changes made to a shared plan are not covered."],
@@ -62,7 +55,7 @@ const SUPPORT_ANSWERS = [
 ] as const;
 
 function SupportPage() {
-  const [issueType, setIssueType] = useState(ISSUE_TYPES[0] ?? "Something else");
+  const [issueType, setIssueType] = useState<SupportIssueType>(SUPPORT_ISSUE_TYPES[0]);
   const supportUrl = whatsappLink("Hello MTDGC, I need help with an order.");
   const [orderNumber, setOrderNumber] = useState("");
   const [description, setDescription] = useState("");
@@ -74,7 +67,7 @@ function SupportPage() {
       const raw = sessionStorage.getItem(DRAFT_KEY);
       if (!raw) return;
       const d = JSON.parse(raw) as { issueType?: string; orderNumber?: string; description?: string };
-      if (d.issueType && ISSUE_TYPES.includes(d.issueType)) setIssueType(d.issueType);
+      if (d.issueType) setIssueType(restoreSupportIssueType(d.issueType));
       setOrderNumber(d.orderNumber ?? "");
       setDescription(d.description ?? "");
       sessionStorage.removeItem(DRAFT_KEY);
@@ -168,10 +161,10 @@ function SupportPage() {
               <select
                 id="support-issue"
                 value={issueType}
-                onChange={(event) => setIssueType(event.target.value)}
+                onChange={(event) => setIssueType(restoreSupportIssueType(event.target.value))}
                 className="mt-1 min-h-11 w-full rounded-md border border-border bg-card px-2 font-display text-sm"
               >
-                {ISSUE_TYPES.map((type) => (
+                {SUPPORT_ISSUE_TYPES.map((type) => (
                   <option key={type} value={type}>{type}</option>
                 ))}
               </select>
