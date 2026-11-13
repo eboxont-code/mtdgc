@@ -22,6 +22,20 @@ const live = {
 };
 
 describe("catalog availability and price consistency", () => {
+  test("plan selection follows the current URL SKU without retaining a previous selection", () => {
+    const product = {
+      ...live,
+      variants: [
+        ...live.variants,
+        { sku: "SKU-2", name: "Second option", status: "available", price_minor: 20000, currency: "NPR" },
+      ],
+    };
+    assert.equal(selectProductVariant(product, "SKU-2")?.sku, "SKU-2");
+    assert.equal(selectProductVariant(product, "SKU-1")?.sku, "SKU-1");
+    assert.equal(selectProductVariant(product, "SKU-2")?.sku, "SKU-2");
+    assert.equal(selectProductVariant(product)?.sku, "SKU-1");
+    assert.equal(selectProductVariant(product, "UNKNOWN")?.sku, "SKU-1");
+  });
   test("coming-soon records never contribute to the purchasable count", () => {
     const soon = { ...live, status: "coming_soon" };
     assert.equal(isPurchasable(soon), false);

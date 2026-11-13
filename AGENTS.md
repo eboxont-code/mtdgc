@@ -25,6 +25,7 @@
 - Product purchase summaries reuse existing listing fields above desktop and mobile actions, omitting empty values without changing purchase eligibility or listing data.
 - Catalog search and sorting use browser-safe pure helpers with query-only aliases and the existing display-price callback; URL state and mobile filter sheets never mutate listing records or hidden-price rules.
 - Product delivery fields are projected from the current listing requirements on restoration and before adding a line; this prevents unrelated fields leaking between products without changing protected cart or checkout logic.
+- Product option selection derives only from the validated plan search parameter through selectProductVariant; replacing that parameter preserves the chosen option on reload and return navigation without duplicate component state.
 - Product region notices share a listing-only presentation above desktop/mobile actions; gift-card confirmation is scoped to the current product and saved region so navigation cannot reuse a different confirmation.
 - Product and category head metadata use the browser-safe listing-seo helper with saved identity fields and query-free canonicals so view-state parameters never create duplicate page identities.
 - Storefront loader presentation uses shared route pending/error components and existing EmptyState/Skeleton primitives; retries invalidate existing reads without changing server actions or eligibility.
