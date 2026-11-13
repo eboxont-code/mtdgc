@@ -129,7 +129,7 @@ export function ProductForm({ productId, onSaved, onCancel }: { productId?: stri
       {field("delivery_time", "Delivery time")}
       <div className="md:col-span-2">
         {field("requirements", "Required details, separated by commas")}
-        <p className="mt-1 text-xs text-muted-foreground">Request only product identifiers and necessary delivery contact details. Passwords, OTPs, PINs, recovery codes and account-access credentials are not permitted.</p>
+        <p className="mt-1 text-xs text-muted-foreground">{UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE}</p>
       </div>
       {field("image_url", "Image URL")}
       {field("seo_title", "SEO title")}
