@@ -1,17 +1,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { MAX_QTY, parseStoredCart, type CartLine } from "./cart-storage";
 
-export type CartLine = {
-  sku: string;
-  productSlug: string;
-  productName: string;
-  variantName: string;
-  priceMinor: number;
-  image: string | null;
-  region?: string;
-  categorySlug?: string | undefined;
-  quantity: number;
-  fields?: Record<string, string>;
-};
+export { MAX_QTY } from "./cart-storage";
+export type { CartLine } from "./cart-storage";
+
 
 type CartContextValue = {
   lines: CartLine[];
@@ -32,10 +24,8 @@ const STORAGE_KEY = "mtdgc.cart.v1";
 
 /** Sample and coming-soon items have no public price and can never sit in the cart. */
 function cartable(line: Pick<CartLine, "productSlug" | "priceMinor">): boolean {
-  return !line.productSlug.startsWith("sample-") && line.priceMinor > 0;
+  return typeof line.productSlug === "string" && line.productSlug.trim().length > 0 && !line.productSlug.startsWith("sample-") && Number.isSafeInteger(line.priceMinor) && line.priceMinor > 0;
 }
-export const MAX_QTY = 10;
-
 const CartContext = createContext<CartContextValue | null>(null);
 
 export function CartProvider({ children }: { children: ReactNode }) {
@@ -46,11 +36,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed: unknown = JSON.parse(raw);
-        if (Array.isArray(parsed)) setLines((parsed as CartLine[]).filter(cartable));
-      }
+      setLines(parseStoredCart(window.localStorage.getItem(STORAGE_KEY)));
     } catch {
       // ignore unreadable storage
     }
@@ -59,13 +45,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const sync = (event: StorageEvent) => {
-      if (event.key !== STORAGE_KEY || !event.newValue) return;
-      try {
-        const parsed: unknown = JSON.parse(event.newValue);
-        if (Array.isArray(parsed)) setLines((parsed as CartLine[]).filter(cartable));
-      } catch {
-        // Ignore malformed data written by another tab.
-      }
+      if (event.key !== STORAGE_KEY && event.key !== null) return;
+      setLines(parseStoredCart(event.newValue));
     };
     window.addEventListener("storage", sync);
     return () => window.removeEventListener("storage", sync);
