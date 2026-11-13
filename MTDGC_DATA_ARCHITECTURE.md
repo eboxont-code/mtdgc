@@ -181,3 +181,61 @@ Cross-customer contact fallback remains a separate task (MT-0162). This audit do
 - Public `lookupOrder` now selects the server-resolved `user_id`. For account orders it validates the optional Bearer token with Supabase Auth and checks the exact owner; it never falls back to contact matching. For guest orders it retains the existing order-number-plus-contact check.
 - The tracking page forwards the current session token when one exists. The order-detail and payment-proof paths already pass the session token; their shared contact fallback is now denied for account-owned orders while guest contact access remains unchanged.
 - No order ID, owner ID or access decision is accepted from the browser. The service-role client still bypasses RLS, so these explicit server checks are required. No RLS policy or database schema change is part of this task.
+## 11. Secrets and payment configuration boundaries — 8 November 2026
+
+This refresh uses current GitHub `main` at `ca01edaafa42b5b859089ce18d5decaf6fbd4db3`, read-only Vercel environment metadata with decryption disabled, and read-only production Supabase schema/policy metadata.
+
+### Repository and application key separation
+
+- Current `main` has no tracked root `.env`; the contents lookup returned NOT_FOUND. `.gitignore` ignores `.env` and `.env.*` while explicitly allowing `.env.example`.
+- All seven assignments in `.env.example` are blank. The browser Supabase client uses only the Supabase URL and publishable key; it does not reference the service-role key or migration URL.
+- The server-only Supabase client reads `SUPABASE_SERVICE_ROLE_KEY` from `process.env`, disables session persistence, and documents that it bypasses RLS. It is not a browser client and must remain confined to trusted server handlers.
+- The CI workflow supplies a non-secret placeholder for the service-role variable. No production key is copied into CI configuration or the tracked environment template.
+- The supplier register has no verified supplier identities or credentials and explicitly prohibits storing passwords, API keys, bank credentials, access tokens or customer secrets.
+
+### Vercel environment metadata — owner action required
+
+- Vercel project `mtdgc` is linked to `eboxont-code/mtdgc`. Environment-variable metadata was read with decryption disabled; no environment values were requested or printed.
+- The returned variable names include `SUPABASE_SERVICE_ROLE_KEY` as a sensitive secret for both Production and Preview. Separate entries exist, but because neither value was decrypted this audit cannot determine whether the values are identical or independently scoped.
+- Supabase URL, project ID and publishable-key configuration entries exist for Production and Preview. `VITE_SENTRY_DSN` is marked plain/public. No eSewa, Khalti, Stripe, PayPal or supplier API credential variable name was present in the returned metadata; no migration URL variable was present.
+- **Owner-only blocker:** until the owner verifies that Preview uses a separate non-production Supabase project and service-role credential, treat Preview code as potentially able to access production Supabase with service-role privileges. Resolve only with owner-approved isolation evidence or an explicit owner-approved environment change. Do not decrypt, rotate, remove or edit any Vercel variable during this audit.
+
+### Payment configuration and storage
+
+- The production `public.payment_settings` schema contains only `id`, QR path, bank name, account name/number, customer instructions, Fonepay enabled flag and audit timestamps/user. No gateway API key, merchant secret, password or supplier credential column exists.
+- A read-only count found zero payment-settings rows. No bank account, instruction, QR, customer, order or payment-proof values were read.
+- Public `getPaymentSettings` selects only QR path, bank name, account name/number, instructions and Fonepay flag, then returns a 3,600-second signed QR URL. These are intended customer-facing payment instructions, not merchant API credentials.
+- `getAdminPaymentSettings`, `savePaymentSettings` and `uploadPaymentQr` use authenticated middleware and call the administrator guard before database or storage access. The save schema accepts only the customer-facing bank/instruction fields and Fonepay flag.
+- Production `payment-qr` and `payment-proofs` buckets are private. QR object operations are administrator-only; proof reads remain limited to the related order owner or an administrator.
+
+### Historical environment-file boundary and scanner limits
+
+- Current main does not contain `.env`. The stale held branches `backend-code-route` and `redesign-matrix` still contain the same historical `.env` blob `122c165e8c74b43be3765b9cb4e35a1a44a5e459` previously reviewed on 7 November. That earlier read-only review found only project identifiers, Supabase URLs and publishable keys, not private credentials. Keep both branches held; neither is safe to merge without a fresh branch-tip review.
+- The added `security-config.test.ts` regression guard checks blank environment-template values, ignore rules, browser/server key separation, CI placeholders, high-confidence credential patterns in current text files, public payment field allowlists, administrator guards and the payment-settings type shape.
+- The scanner skips generated/dependency directories, binary files and text files over 5 MiB. It does not scan all historical Git objects or external secret stores, and GitHub's private code-search index is unavailable. It reports paths/categories only, never matched values.
+
+### Verification and safety
+
+- Current-main Quality run [42437058568](https://github.com/eboxont-code/mtdgc/actions/runs/42437058568) passed on the base commit. The previous MT-0165 draft's full Quality run [42415852547](https://github.com/eboxont-code/mtdgc/actions/runs/42415852547) passed on its old base `9c745dda3951bc8af616ea09061cb828e16f89d6`, but that branch is 63 commits behind current main and is not current-head verification.
+- The current Vercel production deployment remains READY on older commit `3de811c7cfce91eb262cf79523d8053995bfb777`. The Preview service-role risk is not remediated by this audit.
+- No environment values were decrypted, printed, copied or changed. No production database/schema, RLS, storage, authentication, credentials, DNS, hosting or billing settings were modified. No supplier/customer contact, purchase or additional spend occurred. Additional spend: $0.
+
+
+## 12. MT-0165 current environment and payment metadata recheck — 9 November 2026
+
+This recheck used Vercel environment-variable metadata with decryption disabled and read-only Supabase schema/storage metadata. It does not inspect or disclose secret values.
+
+### Vercel Preview and Production scope
+
+- `SUPABASE_URL` and `SUPABASE_PROJECT_ID` each appear as one variable entry targeting both `preview` and `production`; publishable-key entries also target both. These shared entries apply the same configured value to both environments.
+- `SUPABASE_SERVICE_ROLE_KEY` appears as two sensitive entries, separately targeted to Production and Preview. Neither value was decrypted, so the audit cannot establish whether they are identical or separately scoped to different projects.
+- The current metadata therefore does not demonstrate an isolated Preview Supabase project: Preview and Production share the same URL/project-ID entries. Owner confirmation and, if required, an approved non-production project/configuration are needed before claiming isolation. Do not decrypt or change environment variables as part of this audit.
+
+### Payment settings and storage metadata
+
+- Production `public.payment_settings` has RLS enabled, zero rows and only nine customer-facing/audit columns: `id`, QR path, bank name, account name/number, instructions, Fonepay flag, updated timestamp and updated user. No gateway, merchant or supplier credential columns exist.
+- `payment-proofs` and `payment-qr` storage buckets are private, with 5 MiB and 2 MiB limits respectively. Their `allowed_mime_types` metadata is NULL, so application-side file validation remains necessary.
+- The payment QR bucket has authenticated administrator insert/read/update/delete policies. The payment-proof bucket has an authenticated related-order-owner/admin read policy. No storage objects, bank details, payment values or customer records were read.
+- The supplier identity and product-scope registers remain empty/NOT ASSESSED; the supplier register explicitly prohibits storing passwords, API keys, bank credentials, access tokens or customer secrets.
+
+No environment values, database rows, storage objects, credentials or production settings were changed. Additional spend: $0.
