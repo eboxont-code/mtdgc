@@ -266,6 +266,7 @@ p a, li a {
 }
 
 /* Purchase-journey targets retain the existing Matrix surfaces and typography. */
+header .size-11 { flex-shrink: 0; }
 header [role="search"] { min-height: 46px; }
 header nav[aria-label="Main"] a,
 header nav[aria-label="Categories"] a,
@@ -298,6 +299,21 @@ section[aria-roledescription="carousel"] button[aria-current="true"]::after {
 }
 section[aria-roledescription="carousel"] a { min-height: 44px; }
 
+#main-content nav[aria-label="Breadcrumb"] a,
+#main-content button,
+.fixed.inset-x-0.bottom-0.z-40 button {
+  min-width: 44px;
+  min-height: 44px;
+}
+#main-content select#sort { min-height: 44px; }
+#main-content label:has(> select#sort) { min-height: 46px; }
+#main-content li > div > a.font-display,
+footer li a {
+  display: inline-flex;
+  align-items: center;
+  min-width: 44px;
+  min-height: 44px;
+}
 #main-content input[id^="cart-"] { min-height: 44px; }
 #main-content details:has(input[id^="cart-"]) > summary {
   display: flex;
@@ -308,6 +324,10 @@ section[aria-roledescription="carousel"] a { min-height: 44px; }
 @media (max-width: 767px) {
   #main-content :is(input, textarea, select) {
     scroll-margin-block: 180px;
+  }
+  #main-content ol[aria-label="Checkout steps"] span.truncate {
+    white-space: normal;
+    overflow: visible;
   }
   /* Keep pinned actions out of the editing area; they return after blur. */
   body:has(#main-content :is(input:not([type="radio"]):not([type="checkbox"]), textarea, select):focus) .fixed.inset-x-0.bottom-0.z-40 {
