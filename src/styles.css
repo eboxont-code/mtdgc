@@ -264,3 +264,93 @@ p a, li a {
     padding-bottom: max(8rem, calc(7rem + env(safe-area-inset-bottom)));
   }
 }
+
+/* Purchase-journey targets retain the existing Matrix surfaces and typography. */
+header .size-11 { flex-shrink: 0; }
+@media (max-width: 380px) {
+  header a[aria-label$="home"],
+  header a[aria-label$="home"] > span,
+  header a[aria-label$="home"] .flex-col { min-width: 0; }
+  header a[aria-label$="home"] .whitespace-nowrap {
+    white-space: normal;
+    line-height: 1.25;
+  }
+}
+header [role="search"] { min-height: 46px; }
+header nav[aria-label="Main"] a,
+header nav[aria-label="Categories"] a,
+nav[aria-label="Popular guides"] a,
+#main-content a.rounded-full.border.inline-flex {
+  min-height: 44px;
+  align-items: center;
+}
+nav[aria-label="Popular guides"] a { display: inline-flex; }
+
+/* The visible carousel dots stay small inside full-sized touch targets. */
+section[aria-roledescription="carousel"] button[aria-label^="Show slide"] {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  background: transparent;
+}
+section[aria-roledescription="carousel"] button[aria-label^="Show slide"]::after {
+  content: "";
+  position: absolute;
+  inset: 19px;
+  border-radius: 999px;
+  background: var(--foreground);
+  opacity: 0.25;
+}
+section[aria-roledescription="carousel"] button[aria-current="true"]::after {
+  inset-inline: 12px;
+  background: var(--primary);
+  opacity: 1;
+}
+section[aria-roledescription="carousel"] a { min-height: 44px; }
+@media (max-width: 380px) {
+  section[aria-roledescription="carousel"] .h-\[184px\] { height: 208px; }
+}
+
+#main-content nav[aria-label="Breadcrumb"] a,
+#main-content button,
+.fixed.inset-x-0.bottom-0.z-40 button {
+  min-width: 44px;
+  min-height: 44px;
+}
+#main-content select#sort { min-height: 44px; }
+#main-content label:has(> select#sort) { min-height: 46px; }
+#main-content li > div > a.font-display,
+footer li a {
+  display: inline-flex;
+  align-items: center;
+  min-width: 44px;
+  min-height: 44px;
+}
+#main-content :is(p, li) a.underline,
+#main-content :is(p, li) a.underline-offset-2 {
+  display: inline-flex;
+  align-items: center;
+  min-width: 44px;
+  min-height: 44px;
+}
+#main-content input[id^="cart-"] { min-height: 44px; }
+#main-content details:has(input[id^="cart-"]) > summary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+@media (max-width: 767px) {
+  #main-content :is(input, textarea, select) {
+    scroll-margin-block: 180px;
+  }
+  #main-content ol[aria-label="Checkout steps"] span.truncate {
+    white-space: normal;
+    overflow: visible;
+  }
+  /* Keep pinned actions out of the editing area; they return after blur. */
+  body:has(#main-content :is(input:not([type="radio"]):not([type="checkbox"]), textarea, select):focus) .fixed.inset-x-0.bottom-0.z-40 {
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
