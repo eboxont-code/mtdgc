@@ -307,6 +307,9 @@ section[aria-roledescription="carousel"] button[aria-current="true"]::after {
   opacity: 1;
 }
 section[aria-roledescription="carousel"] a { min-height: 44px; }
+@media (max-width: 380px) {
+  section[aria-roledescription="carousel"] .h-\[184px\] { height: 208px; }
+}
 
 #main-content nav[aria-label="Breadcrumb"] a,
 #main-content button,
