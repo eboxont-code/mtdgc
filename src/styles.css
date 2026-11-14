@@ -323,6 +323,13 @@ footer li a {
   min-width: 44px;
   min-height: 44px;
 }
+#main-content :is(p, li) a.underline,
+#main-content :is(p, li) a.underline-offset-2 {
+  display: inline-flex;
+  align-items: center;
+  min-width: 44px;
+  min-height: 44px;
+}
 #main-content input[id^="cart-"] { min-height: 44px; }
 #main-content details:has(input[id^="cart-"]) > summary {
   display: flex;
