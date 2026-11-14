@@ -267,6 +267,15 @@ p a, li a {
 
 /* Purchase-journey targets retain the existing Matrix surfaces and typography. */
 header .size-11 { flex-shrink: 0; }
+@media (max-width: 380px) {
+  header a[aria-label$="home"],
+  header a[aria-label$="home"] > span,
+  header a[aria-label$="home"] .flex-col { min-width: 0; }
+  header a[aria-label$="home"] .whitespace-nowrap {
+    white-space: normal;
+    line-height: 1.25;
+  }
+}
 header [role="search"] { min-height: 46px; }
 header nav[aria-label="Main"] a,
 header nav[aria-label="Categories"] a,
