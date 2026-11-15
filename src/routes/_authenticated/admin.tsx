@@ -95,9 +95,10 @@ function AdminPage() {
   const updateOrderStatus = async (id: string, status: string) => {
     try {
       await updateOrderStatusFn({ data: { id, status: status as never } });
-    } catch {
-      setLoadError("Could not update that order status. Please try again.");
-      toast.error("Could not update that order status. Please try again.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Could not update that order status. Please try again.";
+      setLoadError(message);
+      toast.error(message);
       return;
     }
     setOrders((rows) => rows.map((row) => (row.id === id ? { ...row, status } : row)));
