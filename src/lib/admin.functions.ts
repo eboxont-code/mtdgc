@@ -46,6 +46,29 @@ export const addOrderNote = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const getAdminOrderDashboard = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => z.object({ days: z.union([z.literal(7), z.literal(30), z.literal(90), z.literal(0)]) }).parse(input))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context as Ctx);
+    const rows: import("@/lib/order-dashboard").DashboardOrder[] = [];
+    const since = data.days ? new Date(Date.now() - data.days * 86400000).toISOString() : null;
+    for (let offset = 0; ; offset += 500) {
+      let query = context.supabase.from("orders").select("id, order_number, status, total_minor, created_at, order_status_events(status, created_at), payment_proofs(status, reviewed_at), order_items(fields)").order("created_at", { ascending: false }).order("id").range(offset, offset + 499);
+      if (since) query = query.gte("created_at", since);
+      const { data: page, error } = await query;
+      if (error || !page) throw new Error("Could not load the order dashboard. Counts and metrics are unavailable.");
+      rows.push(...page.map((order) => ({
+        id: order.id, order_number: order.order_number, status: order.status, total_minor: order.total_minor, created_at: order.created_at,
+        events: order.order_status_events ?? [],
+        verifiedAt: (order.payment_proofs ?? []).filter((proof) => proof.status === "verified" && proof.reviewed_at).map((proof) => proof.reviewed_at).filter((at): at is string => at !== null).sort()[0] ?? null,
+        // Flag only actual saved player/zone/server fields, never infer risk from a product name.
+        topUp: (order.order_items ?? []).some((item) => item.fields && typeof item.fields === "object" && !Array.isArray(item.fields) && Object.keys(item.fields).some((key) => /player|user.?id|zone|server|tag/i.test(key) && !key.startsWith("_"))),
+      })));
+      if (page.length < 500) return rows;
+    }
+  });
+
 export const approveReview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
