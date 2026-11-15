@@ -40,17 +40,15 @@ function RefundsPage() {
         <Breadcrumbs items={[{ label: "Home", to: "/" }, { label: "Refund policy" }]} />
         <PageHero eyebrow="MTDGC · Matrix Digital Goods & Commerce" title="Refund policy" intro="When a payment is returned, and when a delivered code or top-up cannot be reversed." />
         <div className="mt-6 space-y-4 text-sm text-foreground/80">
-          <p>
+          <section aria-labelledby="refund-undelivered"><h2 id="refund-undelivered" className="font-display text-lg font-medium text-foreground">Undelivered orders</h2><p className="mt-2">
             If you need to cancel, tell us before delivery starts and we will cancel the order and return any payment already made.
-          </p>
-          <p>
+          </p></section>
+          <section aria-labelledby="refund-supplier"><h2 id="refund-supplier" className="font-display text-lg font-medium text-foreground">Supplier-failed orders</h2><p className="mt-2">If an order fails on our side or we cannot source the product, we refund in full or redeliver the correct item, whichever you prefer.</p></section>
+          <section aria-labelledby="refund-incorrect"><h2 id="refund-incorrect" className="font-display text-lg font-medium text-foreground">Incorrect items</h2><p className="mt-2">If we deliver the wrong item, we refund in full or redeliver the correct item, whichever you prefer.</p></section>
+          <section aria-labelledby="refund-redeemed"><h2 id="refund-redeemed" className="font-display text-lg font-medium text-foreground">Successfully redeemed digital goods</h2><p className="mt-2">
             Once a gift card code has been sent or revealed, or in-game currency has been credited to an account, the
             order cannot be reversed. This is a limitation of digital goods, not a company preference.
-          </p>
-          <p>
-            If an order fails on our side, if we cannot source the product, or if we deliver the wrong item, we refund
-            in full or redeliver the correct item, whichever you prefer.
-          </p>
+          </p></section>
           <p>
             If a top-up was sent to the wrong player ID because the ID you gave us was incorrect, we cannot recover it.
             Check your player ID carefully before confirming, and tell us immediately if you spot a mistake.

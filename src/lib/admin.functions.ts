@@ -6,6 +6,7 @@ import type { Database } from "@/integrations/supabase/types";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { findUnsafeCustomerRequirement, UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE } from "@/lib/supplier-safety";
 import { isAdminRoleConfirmed } from "@/lib/admin-access";
+import { DUPLICATE_REFERENCE_ERROR, PAYMENT_GATE_ERROR, hasDuplicatePaymentReference, hasVerifiedOrderPayment } from "@/lib/payment-verification";
 
 type Ctx = { supabase: SupabaseClient<Database>; userId: string };
 
@@ -23,8 +24,14 @@ export const updateOrderStatus = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid(), status: orderStatus, note: z.string().trim().max(500).optional() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context as Ctx);
-    const { error } = await context.supabase.from("orders").update({ status: data.status, updated_at: new Date().toISOString() }).eq("id", data.id);
+    if (["verified", "processing", "delivered"].includes(data.status)) {
+      const { data: order, error: orderError } = await context.supabase.from("orders").select("id, total_minor, status").eq("id", data.id).maybeSingle();
+      const { data: proofs, error: proofError } = await context.supabase.from("payment_proofs").select("order_id, status, amount_minor, reviewed_at, reviewed_by").eq("order_id", data.id);
+      if (orderError || proofError || !order || !hasVerifiedOrderPayment(order.id, order.total_minor, proofs ?? []) || !["verified", "processing", "delivered"].includes(order.status)) throw new Error(PAYMENT_GATE_ERROR);
+    }
+    const { data: changed, error } = await context.supabase.from("orders").update({ status: data.status, updated_at: new Date().toISOString() }).eq("id", data.id).select("id");
     if (error) throw new Error("Could not update the order");
+    if (!changed?.length) throw new Error("Order not found or access denied");
     await context.supabase.from("order_status_events").insert({ order_id: data.id, status: data.status, note: data.note ?? null, created_by: context.userId });
     return { ok: true };
   });
@@ -239,9 +246,19 @@ export const reviewPayment = createServerFn({ method: "POST" })
     await assertAdmin(context as Ctx);
     if (data.decision === "reject" && !data.note) throw new Error("Add a note explaining the rejection");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: proof } = await supabaseAdmin.from("payment_proofs").select("id, order_id, status").eq("id", data.proofId).maybeSingle();
+    const { data: proof } = await supabaseAdmin.from("payment_proofs").select("id, order_id, status, transaction_ref").eq("id", data.proofId).maybeSingle();
     if (!proof || proof.status !== "submitted") throw new Error("This proof has already been reviewed");
     const verified = data.decision === "verify";
+    if (verified) {
+      // Check all pages, including rejected proofs. Do not treat a rejected reference as reusable.
+      // This blocks existing duplicates; concurrent insert protection still requires the held database constraint.
+      for (let offset = 0; ; offset += 500) {
+        const { data: references, error: referenceError } = await supabaseAdmin.from("payment_proofs").select("order_id, transaction_ref").order("id").range(offset, offset + 499);
+        if (referenceError || !references) throw new Error("Could not check transaction references. Payment was not verified.");
+        if (hasDuplicatePaymentReference(proof.order_id, proof.transaction_ref, references)) throw new Error(DUPLICATE_REFERENCE_ERROR);
+        if (references.length < 500) break;
+      }
+    }
     const orderStatus = verified ? "verified" : data.askNewProof ? "pending_payment" : "rejected";
     const { data: moved, error } = await supabaseAdmin
       .from("orders")
@@ -251,13 +268,14 @@ export const reviewPayment = createServerFn({ method: "POST" })
       .select("id");
     if (error) throw new Error("Could not update the order");
     if (!moved?.length) throw new Error("This order is no longer waiting for verification");
-    await supabaseAdmin.from("payment_proofs").update({
+    const { error: proofUpdateError } = await supabaseAdmin.from("payment_proofs").update({
       status: verified ? "verified" : "rejected",
       resubmit_requested: !verified && !!data.askNewProof,
       review_note: data.note ?? null,
       reviewed_by: context.userId,
       reviewed_at: new Date().toISOString(),
     }).eq("id", proof.id);
+    if (proofUpdateError) throw new Error("Could not save the payment review. Fulfilment remains blocked until the proof is verified.");
     if (!verified && data.askNewProof) {
       await supabaseAdmin.from("order_status_events").insert({ order_id: proof.order_id, status: "rejected", note: data.note ?? null, created_by: context.userId });
     }
