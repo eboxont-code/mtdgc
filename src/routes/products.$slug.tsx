@@ -8,6 +8,9 @@ import { Breadcrumbs } from "@/components/breadcrumbs";
 import { StorefrontError, StorefrontLoading } from "@/components/storefront-state";
 import { ProductArt } from "@/components/product-art";
 import { ProductRegionNotice } from "@/components/product-region-notice";
+import { TopupWarning } from "@/components/topup-warning";
+import { PlayerIdHelp } from "@/components/player-id-help";
+import { isTopup, productIdentifierHelp, validateProductDetails } from "@/lib/topup-details";
 import { ProductRail, SectionHeader } from "@/components/home/rails";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -172,6 +175,7 @@ function ProductPage() {
   const [error, setError] = useState<string | null>(null);
   const fieldRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const [invalidFields, setInvalidFields] = useState<string[]>([]);
+  const [detailErrors, setDetailErrors] = useState<Record<string, string>>({});
 
   const variant = selectedVariant;
   const hidePrices = pricesHidden(product);
@@ -197,9 +201,11 @@ function ProductPage() {
       regionRef.current?.focus();
       return;
     }
-    const missing = safeRequirements.filter((requirement) => !(fields[requirement] ?? "").trim());
+    const validation = validateProductDetails(safeRequirements, fields);
+    const missing = Object.keys(validation);
+    setDetailErrors(validation);
     if (missing.length) {
-      setError(`Please fill in: ${missing.join(", ")}.`);
+      setError(`Please check: ${missing.join(", ")}.`);
       setInvalidFields(missing);
       fieldRefs.current[missing[0] ?? ""]?.focus();
       return;
@@ -332,6 +338,7 @@ function ProductPage() {
               {deliveryTime && <p className="mt-1 text-xs text-muted-foreground">{deliveryTime}</p>}
               {purchaseDetailsBlock && <div className="mt-3">{purchaseDetailsBlock}</div>}
               {regionText && <div className="mt-3"><ProductRegionNotice region={regionText} /></div>}
+              {isTopup(product.category?.slug) && <div className="mt-3"><TopupWarning /></div>}
               <div className="mt-4">{actions}</div>
               <div className="mt-4 border-t border-border pt-4">{trust}</div>
             </div>
@@ -371,9 +378,10 @@ function ProductPage() {
               <section className="mt-6 rounded-2xl border border-border bg-card p-4 md:p-5">
                 <StepTitle n={1}>Your details</StepTitle>
                 <p role="note" className="mt-3 text-xs text-muted-foreground">{CUSTOMER_CREDENTIAL_WARNING}</p>
+                {isTopup(product.category?.slug) && <div className="mt-3"><TopupWarning /><PlayerIdHelp brand={product.brand} /></div>}
                 <div className="mt-4 space-y-3">
                   {safeRequirements.map((requirement, index) => {
-                    const help = requirementHelp(requirement);
+                    const help = productIdentifierHelp(product.name, requirement) ?? requirementHelp(requirement);
                     const id = `req-${index}-${requirement.replace(/\W+/g, "-").toLowerCase()}`;
                     return (
                       <div key={requirement}>
@@ -382,6 +390,7 @@ function ProductPage() {
                           ref={(node) => { fieldRefs.current[requirement] = node; }}
                           id={id}
                           required
+                          maxLength={120}
                           aria-invalid={invalidFields.includes(requirement)}
                           aria-describedby={[help ? `${id}-help` : "", invalidFields.includes(requirement) ? `${id}-error` : ""].filter(Boolean).join(" ") || undefined}
                           value={fields[requirement] ?? ""}
@@ -389,7 +398,7 @@ function ProductPage() {
                           className="mt-1 h-11 w-full rounded-xl border border-border bg-secondary px-3 font-mono text-sm outline-none focus:border-primary aria-[invalid=true]:border-destructive"
                         />
                         {help && <p id={`${id}-help`} className="mt-1 text-xs text-muted-foreground">{help}</p>}
-                        {invalidFields.includes(requirement) && <p id={`${id}-error`} className="mt-1 text-xs text-destructive">This detail is required.</p>}
+                        {invalidFields.includes(requirement) && <p id={`${id}-error`} className="mt-1 text-xs text-destructive">{detailErrors[requirement]}</p>}
                       </div>
                     );
                   })}
@@ -534,6 +543,7 @@ function ProductPage() {
         {(purchaseDetailsBlock || regionText) && <div className="mb-3 max-h-[25vh] space-y-2 overflow-y-auto">
           {purchaseDetailsBlock}
           <ProductRegionNotice region={regionText} />
+          {isTopup(product.category?.slug) && <TopupWarning />}
         </div>}
         <div className="flex items-center gap-2.5">
           <div className="min-w-0 flex-1">
