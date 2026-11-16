@@ -1,12 +1,13 @@
-import { expect, test } from "bun:test";
+import { test } from "node:test";
+import { strict as assert } from "node:assert";
 import { createSubmissionGuard } from "./submission-guard";
 
 test("duplicate submission cannot enter while the first request is pending", () => {
   const guard = createSubmissionGuard();
-  expect(guard.begin()).toBe(true);
-  expect(guard.begin()).toBe(false);
-  expect(guard.pending()).toBe(true);
+  assert.equal(guard.begin(), true);
+  assert.equal(guard.begin(), false);
+  assert.equal(guard.pending(), true);
   guard.end();
-  expect(guard.pending()).toBe(false);
-  expect(guard.begin()).toBe(true);
+  assert.equal(guard.pending(), false);
+  assert.equal(guard.begin(), true);
 });
