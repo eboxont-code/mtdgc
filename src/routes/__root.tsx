@@ -19,7 +19,7 @@ import { WhatsAppFab } from "../components/whatsapp-fab";
 import { Wordmark } from "../components/brand/wordmark";
 import { BRAND_DESCRIPTION, BRAND_FULL_NAME, BRAND_NAME } from "../lib/brand";
 import { SITE_URL } from "../lib/format";
-import { reportLovableError } from "../lib/lovable-error-reporting";
+import { reportAppError } from "../lib/error-reporting";
 import { hreflangLinks, organizationLd, websiteLd } from "../lib/seo";
 
 function NotFoundComponent() {
@@ -61,7 +61,7 @@ function ErrorComponent({ error, reset }: { error: unknown; reset: () => void })
   console.error(error);
   const router = useRouter();
   useEffect(() => {
-    reportLovableError(error instanceof Error ? error : new Error(String(error)), { boundary: "tanstack_root_error_component" });
+    reportAppError(error instanceof Error ? error : new Error(String(error)), { boundary: "tanstack_root_error_component" });
   }, [error]);
 
   return (

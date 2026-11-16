@@ -11,7 +11,7 @@
 1. A customer enters account, checkout, tracking, support or payment-proof information in the browser.
 2. The application is hosted by Vercel. The inspected production deployment is READY at `dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay`, on current `main` commit `de1b11f540bf1933dc78ec2487392a0024a15de2`, in region `iad1` (US East).
 3. Application data is sent to the connected Supabase project. Its observed project region is `ap-southeast-1` (Singapore); this is the evidenced region for the project's Postgres database, Auth and Storage services.
-4. Google OAuth is offered through the Lovable Cloud Auth wrapper. The precise OAuth claims, provider configuration and processing locations are not available in repository source.
+4. Google OAuth is offered through the hosted cloud-auth wrapper. The precise OAuth claims, provider configuration and processing locations are not available in repository source.
 5. Some external contact routes are user-initiated links (WhatsApp). There is no verified supplier API or automated bank/payment gateway integration in the current application source.
 
 **Location distinction:** Vercel's `iad1` is an observed application runtime region, not proof that every Vercel log or backup is stored there. Supabase's Singapore region is the observed project region, not proof of the location of every backup, replica or support access session.
@@ -20,15 +20,15 @@
 
 | Data and fields | Where captured or stored | Purpose | Known processor / recipient | Evidenced country or region |
 |---|---|---|---|---|
-| Account email; password credential; sign-up, confirmation, recovery and sign-in timestamps; account ID; optional phone; provider metadata | Sign-in/sign-up/reset forms; Supabase Auth `auth.users` | Create and secure an account, authenticate the customer, confirm email and recover access | Supabase Auth. Google is an OAuth provider through `@lovable.dev/cloud-auth-js` and the Lovable auth wrapper | Supabase: Singapore (`ap-southeast-1`). Google and Lovable: **UNKNOWN** |
+| Account email; password credential; sign-up, confirmation, recovery and sign-in timestamps; account ID; optional phone; provider metadata | Sign-in/sign-up/reset forms; Supabase Auth `auth.users` | Create and secure an account, authenticate the customer, confirm email and recover access | Supabase Auth. Google is an OAuth provider through the hosted cloud-auth package and wrapper | Supabase: Singapore (`ap-southeast-1`). Google and the auth-wrapper provider: **UNKNOWN** |
 | Password credential and authentication tokens | Supabase Auth `encrypted_password`, confirmation/recovery/email-change/reauthentication token columns, `auth.refresh_tokens` and `auth.sessions` | Password verification, account confirmation, recovery and session management | Supabase Auth | Singapore project region. Backup/replica location: **UNKNOWN** |
-| Google identity attributes, including provider ID, email and provider-supplied identity metadata | Supabase Auth `auth.identities` (`provider_id`, `provider`, `email`, `identity_data`) and `auth.users.raw_user_meta_data` | Link a Google identity to the MTDGC account | Google OAuth and Lovable Cloud Auth; Supabase Auth stores the resulting identity | Supabase: Singapore. Google/Lovable: **UNKNOWN** |
+| Google identity attributes, including provider ID, email and provider-supplied identity metadata | Supabase Auth `auth.identities` (`provider_id`, `provider`, `email`, `identity_data`) and `auth.users.raw_user_meta_data` | Link a Google identity to the MTDGC account | Google OAuth and the hosted cloud-auth wrapper; Supabase Auth stores the resulting identity | Supabase: Singapore. Google/auth-wrapper provider: **UNKNOWN** |
 | Session IP address and user-agent; session and refresh-token identifiers | Supabase Auth `auth.sessions` and `auth.refresh_tokens` | Maintain sessions, security and abuse investigation | Supabase Auth | Singapore. Additional provider log location/retention: **UNKNOWN** |
 | Display name, phone number and delivery email | Account profile form; `public.profiles.display_name`, `phone`, `delivery_email` | Account contact details and delivery defaults | Supabase Postgres | Singapore |
 | Profile preferences | `public.profiles.preferences` JSONB column exists; no current application write path was found in the inspected account code | Intended preference storage; actual current use was not inspected | Supabase Postgres if populated | Singapore; whether populated is **NOT VERIFIED** |
 | Account ID and role | `public.user_roles.user_id`, `role` | Authorise account and staff capabilities | Supabase Postgres/Auth | Singapore |
 
-The browser Supabase client persists authentication sessions. On the production custom domain the storage helper falls back to browser `localStorage`. On recognised Lovable preview hosts inside an editor frame, the helper can broker the session to the Lovable editor using validated `postMessage` origins. That preview-only session transfer is visible in source; the editor's country of access, storage and retention are **UNKNOWN**.
+The browser Supabase client persists authentication sessions. On the production custom domain the storage helper falls back to browser `localStorage`. On recognised editor preview hosts inside an editor frame, the helper can broker the session to the editor using validated `postMessage` origins. That preview-only session transfer is visible in source; the editor's country of access, storage and retention are **UNKNOWN**.
 
 ## 3. Checkout and order data
 
@@ -89,8 +89,8 @@ The support form does not currently upload a screenshot; the screenshot path is 
 
 | Component | Evidence and data potentially handled | Purpose | Processor / location |
 |---|---|---|---|
-| Application analytics | No analytics event call site was found in the inspected current-main source. The `track` member in the Lovable event type is only a type declaration in the inspected file | No active product-analytics collection is confirmed by this source audit | Active analytics provider and country: **NOT IDENTIFIED** |
-| Lovable error hooks | The React error reporter can call injected `window.__lovableEvents.captureException` with the error, route path and context. It also calls `window.__lovableReportRuntimeError`, documented in source as present only in the editor preview | Error diagnosis | Runtime event destination, data fields beyond the call context, country and retention: **UNKNOWN** |
+| Application analytics | No analytics event call site was found in the inspected current-main source. The `track` member in the editor event type is only a type declaration in the inspected file | No active product-analytics collection is confirmed by this source audit | Active analytics provider and country: **NOT IDENTIFIED** |
+| Editor error hooks | The React error reporter can call injected `window.__lovableEvents.captureException` with the error, route path and context. It also calls `window.__lovableReportRuntimeError`, documented in source as present only in the editor preview | Error diagnosis | Runtime event destination, data fields beyond the call context, country and retention: **UNKNOWN** |
 | Sentry configuration | Vercel environment metadata contains a public `VITE_SENTRY_DSN` entry for Production and Preview whose host indicates the US Sentry ingest service. The inspected current-main source has the Sentry package dependency but no `Sentry.init` or direct Sentry capture call | Potential error reporting configuration; active collection is **NOT VERIFIED** | If used, the configured ingest endpoint is in the United States. Actual runtime use and payload are **UNKNOWN** |
 | Hosting/request processing | Application requests and server-function payloads pass through Vercel; observed production deployment region is `iad1` | Host the website and run server-side handlers | Vercel runtime: US East. Vercel request-log contents, storage location, staff access and retention: **UNKNOWN** |
 
@@ -122,10 +122,10 @@ The following remain **UNKNOWN / OWNER OR PROVIDER EVIDENCE REQUIRED**:
 
 1. Actual supplier identities, product-specific data recipients, manual hand-off channel, access countries and supplier retention.
 2. Supabase Auth SMTP/email provider, sub-processors, region and message-retention details.
-3. Google OAuth/Lovable Cloud Auth data fields, processing locations and retention.
+3. Google OAuth/hosted cloud-auth data fields, processing locations and retention.
 4. WhatsApp/Meta account recipient, data-transfer locations and retention.
 5. Whether Sentry is initialised outside the inspected source, what payload is sent and what retention applies; the public DSN environment entry alone does not prove active collection.
-6. Lovable preview/editor telemetry destination, fields, region and retention.
+6. Editor preview telemetry destination, fields, region and retention.
 7. Vercel request/log retention, backup location and support-access countries.
 8. Supabase backup/replica locations and provider support-access countries.
 9. A business-approved retention/deletion schedule for orders, payment proof, support, account and operational notes.
@@ -137,9 +137,9 @@ These gaps belong to the relevant supplier, privacy, retention, security and cut
 Repository sources inspected on current `main` include:
 
 - [Account registration and recovery](./src/routes/auth.tsx)
-- [Lovable OAuth wrapper](./src/integrations/lovable/index.ts)
+- [Hosted OAuth wrapper](./src/integrations/lovable/index.ts)
 - [Browser Supabase client and session persistence](./src/integrations/supabase/client.ts)
-- [Lovable preview session broker](./src/integrations/supabase/previewAuthStorage.ts)
+- [Editor preview session broker](./src/integrations/supabase/previewAuthStorage.ts)
 - [Account profile, order and support reads](./src/routes/_authenticated/account.tsx)
 - [Product-required fields and browser persistence](./src/routes/products.$slug.tsx)
 - [Checkout, order creation, guest tracking and payment-proof submission](./src/lib/orders.functions.ts)
@@ -151,7 +151,7 @@ Repository sources inspected on current `main` include:
 - [Administrator payment-proof and payment-settings operations](./src/lib/admin.functions.ts)
 - [Administrator role confirmation](./src/lib/admin-access.ts)
 - [Supabase authentication middleware](./src/integrations/supabase/auth-middleware.ts)
-- [Lovable error-reporting hooks](./src/lib/lovable-error-reporting.ts)
+- [Editor error-reporting hooks](./src/lib/error-reporting.ts)
 - [In-memory server error capture](./src/lib/error-capture.ts)
 - [Privacy policy](./src/routes/policies/privacy.tsx)
 - [Supplier due-diligence register](./SUPPLIER_REGISTER.md)
@@ -202,7 +202,7 @@ This refresh used metadata-only queries. No row values were selected from custom
 - Supabase project: ACTIVE_HEALTHY, `ap-southeast-1` (Singapore), Postgres 17.11.0.003.
 - Vercel production: READY, `iad1` (US East), deployment `dpl_4njU9xzd9RmCkGuYeQBDTLZV9Nay`, deployed commit `de1b11f540bf1933dc78ec2487392a0024a15de2`.
 - `VITE_SENTRY_DSN` is configured for Preview and Production, but no `Sentry.init` or direct Sentry capture call was found in the inspected source. Active Sentry collection is not confirmed.
-- The optional Lovable error hooks can receive an error object, route/context, message, stack and filename. The downstream processor, access location and retention remain UNKNOWN.
+- The optional editor error hooks can receive an error object, route/context, message, stack and filename. The downstream processor, access location and retention remain UNKNOWN.
 - No active product analytics event call, transactional email sender, supplier API, automated WhatsApp API or bank-settlement gateway was found in the inspected application source. This does not rule out provider-side infrastructure logs or processing outside the repository.
 
 **Scope and safety:** This is a technical data-flow inventory, not legal advice or a compliance declaration. No customer/order/payment/auth-user values or Storage objects were read; no environment values were decrypted; no production schema, RLS, bucket, secret, hosting or billing setting was changed.

@@ -483,7 +483,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [ ] **MT-0303 · P0 · BLOCKED** — Complete the move to Boxont-controlled Supabase only after the target project, backup/restore, schema, data, auth, storage, RLS, grants, functions, secrets and migration-history plan are verified. Do not run the held migrations on the existing project.
 - [ ] **MT-0304 · P0 · BLOCKED** — Reconcile the held backend PR #1 against current `main` after the Supabase cutover; inspect migrations 0010–0017, regenerate Drizzle snapshots, validate migration order and permissions, and run full build and tests before merge or deployment.
 - [x] **MT-0305 · P1 · DONE** — Add explicit package scripts for the existing `src/lib/*.test.ts` tests and TypeScript checking; add a free GitHub Actions quality workflow for install, lint, test, typecheck and production build. Verified on 6 November 2026: GitHub Actions run `42205681370` passed lint, 12 tests across 4 files, `tsc --noEmit`, and the production Vite/Nitro build. The test/typecheck/build verification ran on the hosted CI runner; the agent's local container did not have Bun installed. Lint intentionally disables only the Prettier rule because the existing repository has widespread formatting drift; no mass reformat was applied.
-- [!] **MT-0306 · P1 · BLOCKED** — Protect `main` with pull-request review and required passing quality checks only after Lovable sync is proven. On 6 November 2026, the private-repository rulesets API returned an explicit GitHub Pro upgrade requirement; the GitHub branch-protection read endpoint was unavailable to the connected integration (403). GitHub's current documentation also lists GitHub Pro as required for protected branches in private repositories. The $0 additional-spend constraint rules out upgrading. Lovable's MTDGC project `latest_commit_sha` matched the inspected `main` HEAD `86eebd496b6f9a8d056fba890ea818eeab8af33f`, confirming the current direct-sync state is aligned, but no protected-branch bypass or sync test is available. Do not enable PR-only or required-review rules until a no-cost supported route and Lovable bypass behavior can be verified. No repository protection setting was changed.
+- [!] **MT-0306 · P1 · BLOCKED** — Protect `main` with pull-request review and required passing quality checks only after editor sync is proven. On 6 November 2026, the private-repository rulesets API returned an explicit GitHub Pro upgrade requirement; the GitHub branch-protection read endpoint was unavailable to the connected integration (403). GitHub's current documentation also lists GitHub Pro as required for protected branches in private repositories. The $0 additional-spend constraint rules out upgrading. The editor's MTDGC project `latest_commit_sha` matched the inspected `main` HEAD `86eebd496b6f9a8d056fba890ea818eeab8af33f`, confirming the current direct-sync state is aligned, but no protected-branch bypass or sync test is available. Do not enable PR-only or required-review rules until a no-cost supported route and editor bypass behavior can be verified. No repository protection setting was changed.
 - [x] **MT-0307 · P1 · DONE** — Audit `redesign-matrix`: Git comparison shows zero commits ahead of `main` and 129 behind, with no unique branch commits to salvage. Leave the stale branch untouched until deliberate branch cleanup is approved.
 - [x] **MT-0308 · P1 · DONE** — Make `MTDGC_MASTER_PLAN.md` the single active task/status source, document the roadmap as dated implementation history, and update the README to point to the canonical plan. Evidence: README commit `e4138f950db65b96265b8ade29a4880712164dc3`; roadmap navigation note recorded in the current audit update.
 
@@ -875,7 +875,7 @@ No dependencies were added and `bun.lock` was not changed. No production secrets
 
 ### Next independent engineering task
 
-MT-0306 was assessed on 6 November 2026 and is now BLOCKED: Lovable's current project SHA matches GitHub `main`, but private branch protection requires a paid GitHub plan and the connected integration cannot verify protection/bypass settings. See section 21. Do not change repository protection settings. The next independent P0 catalogue task, MT-0027, was completed in section 22.
+MT-0306 was assessed on 6 November 2026 and is now BLOCKED: the editor's current project SHA matches GitHub `main`, but private branch protection requires a paid GitHub plan and the connected integration cannot verify protection/bypass settings. See section 21. Do not change repository protection settings. The next independent P0 catalogue task, MT-0027, was completed in section 22.
 
 
 
@@ -921,23 +921,23 @@ No product records, supplier assignments, prices, variants, order records, datab
 
 
 
-## 21. Lovable sync / branch-protection assessment and variant display audit — 6 November 2026
+## 21. Editor sync / branch-protection assessment and variant display audit — 6 November 2026
 
 ### MT-0306 · P1 · BLOCKED — Branch protection
 
 **Current sync evidence**
 - GitHub repository: `eboxont-code/mtdgc`, default branch `main`.
 - GitHub `main` HEAD inspected from the recursive tree: `86eebd496b6f9a8d056fba890ea818eeab8af33f`.
-- Lovable project `Mtdgc` (project ID `f63ad948-8fb1-42cb-8c2e-7d2f017688e1`) reported `latest_commit_sha` as the exact same SHA. This confirms the connected project is currently aligned with the repository's `main` head.
-- `AGENTS.md` states that commits pushed to the connected branch sync back to Lovable and appear in the editor. The existing workflow therefore relies on pushes to the connected branch.
+- Editor project `Mtdgc` (project ID `f63ad948-8fb1-42cb-8c2e-7d2f017688e1`) reported `latest_commit_sha` as the exact same SHA. This confirms the connected project is currently aligned with the repository's `main` head.
+- `AGENTS.md` states that commits pushed to the connected branch sync back to the editor and appear in the editor. The existing workflow therefore relies on pushes to the connected branch.
 
 **Protection constraints**
 - The GitHub branch-protection read request returned HTTP 403 from the connected integration, so current protection settings and any app-specific bypass permissions could not be independently inspected.
 - The repository rulesets endpoint returned GitHub's explicit message: upgrade to GitHub Pro or make the repository public. GitHub's current protected-branch documentation says private-repository branch protection requires GitHub Pro, Team or Enterprise: https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches
 - MTDGC is private and the project constraint is $0 additional spend. No plan upgrade or paid service is acceptable without a change to that constraint.
-- Requiring pull requests/reviews or limiting direct pushes could interrupt Lovable's existing direct-sync workflow. No bypass behavior was proven.
+- Requiring pull requests/reviews or limiting direct pushes could interrupt the editor's existing direct-sync workflow. No bypass behavior was proven.
 
-**Decision:** Keep the current connected-branch workflow unchanged. Do not enable PR-only rules, mandatory reviews, or required checks on `main` unless a no-cost supported protection route and Lovable's bypass/sync behavior can first be verified. No GitHub settings were changed. This task remains BLOCKED rather than treating a paid upgrade or unverified protection configuration as complete.
+**Decision:** Keep the current connected-branch workflow unchanged. Do not enable PR-only rules, mandatory reviews, or required checks on `main` unless a no-cost supported protection route and the editor's bypass/sync behavior can first be verified. No GitHub settings were changed. This task remains BLOCKED rather than treating a paid upgrade or unverified protection configuration as complete.
 
 ### MT-0026 · P0 · DONE — Exact variant and amount across the order journey
 
@@ -976,7 +976,7 @@ No product records, supplier assignments, prices, variants, order records, datab
 - No checkout was submitted and no payment was made. No production database records, prices, supplier data, payment settings or deployment configuration were changed.
 - The first CI run (42216599904) caught a missing unit_price_minor field in the guest order-detail query. The nested select was corrected in follow-up commit 079722e9dae76ef278b1985dd4c428f334db8f57; the final GitHub Actions run 42216789779 passed lint, all 14 tests across 5 files, TypeScript typecheck and the production build.
 - Vercel production deployment dpl_EnJoRv11UhXsJBbpzJCJjM9HhUwg for commit 079722e9dae76ef278b1985dd4c428f334db8f57 reached READY with mtdgc.com, www.mtdgc.com and the project aliases attached. The public Roblox gift-card page returned HTTP 200 and its rendered HTML contained the Face value, MTDGC selling price and bank/payment-provider fee disclosure.
-- Vercel reported no runtime errors in the preceding 30-minute window. Lovable’s latest commit SHA matched the final GitHub main SHA.
+- Vercel reported no runtime errors in the preceding 30-minute window. The editor’s latest commit SHA matched the final GitHub main SHA.
 
 
 ## 23. Supplier credential rejection and customer-input safeguards — 6 November 2026
@@ -1005,7 +1005,7 @@ No product records, supplier assignments, prices, variants, order records, datab
 - The first CI attempt for the initial code commit (`42225067947`) failed in unit tests because the new regex word-boundary escapes were over-escaped. The matcher was corrected in commit `9dde237c722c1ed69db33342d7f59ebee78389d5`; the final code commit is `b5425b9873a23cba214412f5683fc932ee9abbcd`.
 - GitHub Actions run [`42225332691`](https://github.com/eboxont-code/mtdgc/actions/runs/42225332691) completed successfully: lint, unit tests, TypeScript typecheck and production build all passed.
 - Vercel production deployment [`dpl_CVTCqR2dQ6JtKyhHqAJaHKvQk6ch`](https://vercel.com/boxont/mtdgc/CVTCqR2dQ6JtKyhHqAJaHKvQk6ch) reached **READY** for commit `b5425b9873a23cba214412f5683fc932ee9abbcd`, with `mtdgc.com` and `www.mtdgc.com` assigned and no alias error.
-- Lovable's latest commit SHA matched GitHub `main` at `b5425b9873a23cba214412f5683fc932ee9abbcd`.
+- The editor's latest commit SHA matched GitHub `main` at `b5425b9873a23cba214412f5683fc932ee9abbcd`.
 - Vercel reported no runtime errors in the preceding 24-hour window.
 
 **Next P0 task:** MT-0083 — ensure payment proof is attached to the correct order and cannot be reassigned by another customer. MT-0081's payment-flow audit is complete; its control gaps remain assigned to the existing payment-proof, file-validation, access-control, payment-verification and duplicate-reference tasks. Supplier test transactions and supplier pricing tasks remain blocked by the evidence and owner-decision reasons recorded in the task register above.
@@ -1062,7 +1062,7 @@ No product records, supplier assignments, prices, variants, order records, datab
 - Vercel production deployment [`dpl_8Kn2vshSTuqgJXR6R5xVME4ccgvD`](https://vercel.com/boxont/mtdgc/8Kn2vshSTuqgJXR6R5xVME4ccgvD) was **READY**, sourced from the same `main` commit, with `mtdgc.com`, `www.mtdgc.com` and the project aliases assigned and no alias error.
 - Vercel's aggregated runtime-error check found no runtime errors in the preceding 24 hours; the most recent 50-minute production log query returned no error/fatal logs. Supabase's 24-hour log query contained no payment/proof/settings endpoint mentions. These are monitoring snapshots, not proof of a successful live payment.
 - No code, schema, migration, payment setting, order, payment-proof or storage object was changed. No order was created, no payment was made, and no supplier or third party was contacted.
-- Because this task was an audit/documentation task, no application source files or tests were changed. The documentation commit `380099fa08291870791cf104525974acb79c8e99` triggered GitHub Actions run [`42232921172`](https://github.com/eboxont-code/mtdgc/actions/runs/42232921172), which passed lint, unit tests, TypeScript typecheck and production build. Vercel production deployment [`dpl_2eGMLium1BZLEPAaprpjhEqnvyaR`](https://vercel.com/boxont/mtdgc/2eGMLium1BZLEPAaprpjhEqnvyaR) reached **READY** from the same commit with `mtdgc.com` and `www.mtdgc.com` assigned and no alias error. Lovable's `latest_commit_sha` also matched `main` at `380099fa08291870791cf104525974acb79c8e99`. Vercel's last-hour runtime-error check found no errors.
+- Because this task was an audit/documentation task, no application source files or tests were changed. The documentation commit `380099fa08291870791cf104525974acb79c8e99` triggered GitHub Actions run [`42232921172`](https://github.com/eboxont-code/mtdgc/actions/runs/42232921172), which passed lint, unit tests, TypeScript typecheck and production build. Vercel production deployment [`dpl_2eGMLium1BZLEPAaprpjhEqnvyaR`](https://vercel.com/boxont/mtdgc/2eGMLium1BZLEPAaprpjhEqnvyaR) reached **READY** from the same commit with `mtdgc.com` and `www.mtdgc.com` assigned and no alias error. The editor's `latest_commit_sha` also matched `main` at `380099fa08291870791cf104525974acb79c8e99`. Vercel's last-hour runtime-error check found no errors.
 
 **Next P0 task:** MT-0083 — ensure payment proof is attached to the correct order and cannot be reassigned by another customer. The payment-control findings above remain open under their existing tasks; do not mark them complete based solely on this audit.
 

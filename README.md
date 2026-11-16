@@ -2,8 +2,7 @@
 
 **Matrix Digital Goods & Commerce** is a digital-goods storefront for game top-ups, gift cards, subscriptions and software. The product strategy is to operate one brand with clearly separated purchase routes and honest region, availability and delivery information.
 
-**Live website:** https://mtdgc.com  
-**Live app preview:** https://mtdgc.lovable.app
+**Live website:** https://mtdgc.com
 
 ## Product and market direction
 
@@ -25,7 +24,7 @@ A product must not become orderable until its supplier, resale rights, region, v
 - [Data architecture](./MTDGC_DATA_ARCHITECTURE.md) — current order, payment, identity and access-control design.
 - [Personal data map](./MTDGC_DATA_MAP.md) — source-backed inventory of personal-data fields, known processors, evidenced locations and unresolved data-flow questions.
 - [Sensitive admin change audit](./MTDGC_ADMIN_CHANGE_AUDIT.md) — current actor, timestamp and reason coverage, plus the remaining audit-log gaps.
-- [Repository working rules](./AGENTS.md) — Lovable sync and code-boundary guidance.
+- [Repository working rules](./AGENTS.md) — editor sync and code-boundary guidance.
 
 Read the Master Plan before starting work. Update it with evidence when a task changes status. Do not maintain a competing TODO list.
 

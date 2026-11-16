@@ -42,7 +42,7 @@
 - [ ] Next U5-U22, then G1-G6; authorized private order/admin checks remain blocked by missing requester account.
 - [x] U5 partial: shared token-based EmptyState used by orders and wishlist, preserving their data reads and catalog action. Protected catalog/category/search surfaces skipped; admin lists deferred. Automatic validation pending; signed-in empty rows remain unverified without a requester account.
 - [ ] Numbered 40-42, then U2-U22 and G1-G6 in order. Protected-file conflicts remain skipped.
-- Starting credit balance: 5.00. Lovable manages revisions and item commit labels.
+- Starting credit balance: 5.00. The editor manages revisions and item commit labels.
 
 ## 30 Oct ordered pack (starting head 6e83441a)
 - [x] Numbered 27: additive global keyboard focus outline uses the existing primary token, 2px width and 2px offset, outside utility layers so outline-none cannot suppress it. Matrix palette and all protected layouts unchanged. Automatic build OK, revision 63f9845; computed focus verified at 390px with no overflow, desktop captured. Publishing requested.
@@ -55,7 +55,7 @@
 - [x] Numbered 38 partial: added missing delivery-location, renewal and activation-help answers using the existing accordion and shared FAQ/schema data. Unconditional prepaid renewal promise omitted because listing terms are not supplied. Existing payment, timing and guest-order answers preserved. Automatic validation pending.
 - [ ] Next is numbered 39-42, then U2-U22 and G1-G6; private order data and prior protected-file conflicts remain blocked as documented.
 - [ ] Next: numbered 29, 30, 32, 34, 35, 38-42, then U2-U22 and G1-G6. Numbered 28 dropped; 33 preserves final developer icons. Prior completed tasks are not reopened.
-- Starting credit balance: 5.00. Revisions and item commit labels are managed by Lovable; no manual Git operations.
+- Starting credit balance: 5.00. Revisions and item commit labels are managed by the editor; no manual Git operations.
 
 ## 28 Oct ordered pack (starting head 01687045)
 - [x] Numbered 26 (29 Oct): About contact block links Support and Track order, with a conditional support-only WhatsApp button using the existing helper. No contact details invented. Automatic validation pending.
@@ -76,18 +76,18 @@
 - [x] S7 partial: existing WebPage helpers on how-it-works, tracking and four policy pages and existing FAQPage/breadcrumbs preserved. Each has matching visible Home > Page breadcrumbs. Policies middle destination omitted because no Policies index exists; do not invent a breadcrumb URL to an unavailable page. No final developer JSON-LD redone.
 - [x] Numbered 2 and 3: skipped explicit protected cart route conflict; developer's rebuilt cart unchanged.
 - [x] Numbered 15 extraction: Catalog, Orders, Support and Reviews moved into focused panels, alongside existing Payments and Verify panels. Scrollable mobile tabs preserve actions, reads and staff access checks. Automatic build OK, revision f8830ed; publishing requested. Populated admin verification blocked: session minting confirms no app account matches the requester. Existing failed-action toasts retained; no protected files or server actions changed.
-- Publishing requested for green changes. Live check: both origins returned HTTP 200, but neither served the updated AboutPage schema at the time checked; mtdgc.com also lacked the new Deals link. Custom-domain deployment not confirmed. Latest publish schedules the current revision for https://mtdgc.lovable.app; no domain or hosting changes made.
+- Publishing requested for green changes. Live check: both origins returned HTTP 200, but neither served the updated AboutPage schema at the time checked; mtdgc.com also lacked the new Deals link. Custom-domain deployment not confirmed. Latest publish schedules the current revision for the editor preview URL; no domain or hosting changes made.
 - [ ] Next: finish numbered 15, then numbered 16-18, 22-23, 26-27, 29-30, 32, 34-35, 38-42, then U and G in order. Item 33 is already shipped by the developer's final icons and manifest links; preserve them. Protected-file conflicts above remain skipped, not implemented.
-- Revisions and commit labels are managed automatically by Lovable; no manual Git commits.
+- Revisions and commit labels are managed automatically by the editor; no manual Git commits.
 
 ## October 18 strict gate
-- [x] R0.8: Matrix tokens, glass surfaces and 44px controls applied to account, orders, wishlist, order, tracking and admin. Classes and markup only. Build OK; all six pages checked at 390px with no horizontal overflow. Private pages correctly redirect to sign-in. Tracking rejects missing contact; an order number alone stays locked. Auth redirect has existing 40px inputs and 20px text buttons, outside this styling unit. Private populated states were not checked. Publishing requested. Code revision: 2ad3d0e (automatic Lovable commit; custom commit labels unavailable).
+- [x] R0.8: Matrix tokens, glass surfaces and 44px controls applied to account, orders, wishlist, order, tracking and admin. Classes and markup only. Build OK; all six pages checked at 390px with no horizontal overflow. Private pages correctly redirect to sign-in. Tracking rejects missing contact; an order number alone stays locked. Auth redirect has existing 40px inputs and 20px text buttons, outside this styling unit. Private populated states were not checked. Publishing requested. Code revision: 2ad3d0e (automatic editor commit; custom commit labels unavailable).
 - [x] R0.9: measured current Matrix tokens using browser Canvas sRGB conversion and WCAG relative luminance, compositing glass over background. All table pairs meet 4.5:1. Destructive badge foreground was 3.50:1; only its lightness changed from 0.98 to 0.22, preserving hue and chroma. No palette or layout redesign. Build OK; code revision 7971d60; publishing requested. Placeholder opacity and hover compositing remain unverified.
 - [x] 0c: static sitemap matched current published category/product flags using a read-only data query; removed coming-soon Steam listing. 21 sitemap pages plus /products checked in server HTML: HTTP 200, self canonicals except /products -> /catalog, no duplicate titles or descriptions. Robots already has required disallows and sitemap URL, unchanged. Home metadata unchanged. Static snapshot requires updates when publication flags change; no backend generation added. Build OK; code revision 912f84d. Private metadata inheritance remains A16.
 - [x] A16: every route now emits its own twitter:title and twitter:description matching its og tags; root head keeps og:url from the leaf canonical. Verified in server HTML on /, /cart, /auth, /catalog. Build OK.
 - [x] A17: 120-200 word intros for subscriptions, gift-cards and game-top-ups below the category description, with a link to /how-it-works. Build OK.
 - [ ] A18-A20, F items, D2/D3, P/S items, numbered items, U2-U22, G1-G6: blocked until preceding item is checked and committed.
-- Git state and commit messages are managed by Lovable. Record each automatic code revision before advancing the gate.
+- Git state and commit messages are managed by the editor. Record each automatic code revision before advancing the gate.
 
 ## October 17 ordered UI pack
 - [x] R0: dark glass theme, cards, header, CSS grid hero, category tiles, search-to-catalog, reduced-motion reveals and bottom navigation; mobile home/search/cart/checkout checked, account checked signed out. Published revision requested.
@@ -102,7 +102,7 @@
 - [ ] Item 0c: added private-page canonicals; sitemap published-state verification not completed (files unchanged).
 - [x] T0: skipped; react-start is already 1.168.61
 - [x] P7: order detail slide-over using existing actions; signed-in verification blocked by unavailable account session
-- [x] A2: published Lovable badge hidden
+- [x] A2: published editor badge hidden
 - [x] A4: responsive CDN WebP product images
 - [x] A5: self-hosted fonts with preload and swap
 - [x] A6: reserved plan, availability and requirement space; stable price button width
@@ -122,7 +122,7 @@
 - [ ] Blocked: public catalog expansion awaits verified offers and fulfilment data
 
 ## Current launch pack
-- [ ] Force Lovable project display name to MTDGC and verify
+- [ ] Force editor project display name to MTDGC and verify
 - [x] Complete MTDGC identity sweep: manifest name/short_name now MTDGC; existing brand icons preserved and verified HTTP 200/sizes; 24 public pages verified with unique titles/descriptions and self canonicals; 390px About page has no overflow; not published.
 - [ ] Ship catalog, product detail, persistent cart, honest checkout, account/admin surfaces
 - [ ] Add sitemap.xml and verify HTTP 200
@@ -202,7 +202,7 @@ Body/input text and outline badges use foreground; muted text and inactive navig
 - [ ] F7 onward still open
 
 ## 25 Oct ordered pack (starting head f4364c73)
-- [x] F2-check: editor and mounting unchanged; automatic validation reports build OK. Revision 440f101. Manual builds/typechecks and custom Git commits are managed by Lovable, not shell commands.
+- [x] F2-check: editor and mounting unchanged; automatic validation reports build OK. Revision 440f101. Manual builds/typechecks and custom Git commits are managed by the editor, not shell commands.
 - [x] F3: dropped; final Matrix header preserved.
 - [x] F4: existing footer already has the requested Shop links except Deals, which waits for D2. Preserve the developer's final Nepal and Australia blurb instead of replacing it with older Nepal-only wording.
 - [ ] F7 onward: next ordered work. Preserve the developer's Nepal and Australia copy where older task wording conflicts.
@@ -232,7 +232,7 @@ Body/input text and outline badges use foreground; muted text and inactive navig
 ## 27 Oct ordered pack (starting head 55f1f6c5)
 - [x] F27: helpful FAQ wording and QR/bank payment, missing-details fallback, screenshot/reference verification. FAQPage continues to derive directly from the visible answers. Icons, manifest links, Sentry, checkout and cart untouched. Automatic build OK; payment accordion and matching schema checked at 390px and desktop without overflow or browser errors. Revision f51f601; publishing requested, not yet confirmed.
 - [ ] F28-F30, D2/D3, P/S, numbered, U and G remain in strict order.
-- Custom Git operations are unavailable: revisions and commit messages are managed by Lovable.
+- Custom Git operations are unavailable: revisions and commit messages are managed by the editor.
 - [x] D3: selected option reads the validated optional plan SKU; unknown SKUs fall back to the existing default. Option changes replace the URL without touching cart or checkout. Real option selection survived reload at 390px. Initial required-search typing corrected without editing protected callers; final automatic build pending.
 - [x] D2: added UI-only Deals route with requested empty state, existing Software/Subscriptions destinations, unique metadata, canonical and matching breadcrumbs. No sale prices or records invented. Automatic build OK, revision 04b449c; HTTP 200 and phone/desktop checks pass without overflow. Earlier Deals links remain follow-up work.
 - [x] F30 partial: empty/whitespace SEO title falls back to the product name plus price in Nepal, consistently across title and social titles. Existing product image and price hiding untouched. Category image fallback skipped because sharing tags must match the image actually shown, not a different category cover. Automatic build OK, revision 4ef799f; existing Free Fire title preserved consistently in rendered title/OG/Twitter. Empty-title branch not exercised against a real listing; no catalog records changed.

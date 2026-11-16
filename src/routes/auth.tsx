@@ -6,7 +6,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
+import { lovable as cloudAuth } from "@/integrations/lovable";
 import { SITE_URL } from "@/lib/format";
 
 function safePath(value: unknown): string | undefined {
@@ -115,7 +115,7 @@ function AuthPage() {
 
   const google = async () => {
     setError(null);
-    const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: `${window.location.origin}/auth${redirect ? `?redirect=${encodeURIComponent(redirect)}` : ""}` });
+    const result = await cloudAuth.auth.signInWithOAuth("google", { redirect_uri: `${window.location.origin}/auth${redirect ? `?redirect=${encodeURIComponent(redirect)}` : ""}` });
     if (result.error) setError("Google sign-in did not finish. Please try again.");
   };
 
