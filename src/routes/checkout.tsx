@@ -10,6 +10,9 @@ import { GIFT_CARD_PRICE_DISCLOSURE, isGiftCardCategory } from "@/lib/gift-card-
 import { supabase } from "@/integrations/supabase/client";
 import { getPaymentSettings, placeOrder } from "@/lib/orders.functions";
 import { PaymentProofForm } from "@/components/payment-proof-form";
+import { TopupWarning } from "@/components/topup-warning";
+import { isTopup, validateProductIdentifier } from "@/lib/topup-details";
+import { createSubmissionGuard } from "@/lib/submission-guard";
 
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { SiteFooter } from "@/components/site-footer";
@@ -78,6 +81,7 @@ function CheckoutPage() {
   const [placed, setPlaced] = useState<{ orderNumber: string; totalMinor: number; lines: CheckoutLine[] } | null>(null);
   const formRef = useRef<HTMLDivElement>(null);
   const restored = useRef(false);
+  const submissionGuard = useRef(createSubmissionGuard());
   const placeOrderFn = useServerFn(placeOrder);
   const loadPay = useServerFn(getPaymentSettings);
   const [pay, setPay] = useState<Awaited<ReturnType<typeof getPaymentSettings>> | null>(null);
@@ -135,7 +139,8 @@ function CheckoutPage() {
     const e: Errors = {};
     for (const line of lines) {
       for (const [key, value] of Object.entries(line.fields ?? {})) {
-        if (!value.trim()) e[fieldId(line.sku, key)] = `Please enter ${key.toLowerCase()}.`;
+        const error = validateProductIdentifier(key, value);
+        if (error) e[fieldId(line.sku, key)] = error;
       }
     }
     return e;
@@ -154,13 +159,14 @@ function CheckoutPage() {
   };
 
   const submitOrder = async (detailsConfirmed = false) => {
-    if (sending) return;
+    if (sending || submissionGuard.current.pending()) return;
     const e = { ...validateContact(), ...validateDelivery() };
     if (Object.keys(e).length) {
       setErrors(e);
       setStep(0);
       return focusFirst(e);
     }
+    if (!submissionGuard.current.begin()) return;
     setSending(true);
     setPlaceError(null);
     try {
@@ -211,6 +217,7 @@ function CheckoutPage() {
         setPlaceError("We could not save your order. Please check your connection and try again.");
       }
     } finally {
+      submissionGuard.current.end();
       setSending(false);
     }
   };
@@ -292,6 +299,13 @@ function CheckoutPage() {
   );
 
   const requestPlaceOrder = () => {
+    const validation = { ...validateContact(), ...validateDelivery() };
+    if (Object.keys(validation).length) {
+      setErrors(validation);
+      setStep(0);
+      focusFirst(validation);
+      return;
+    }
     if (requiresOrderDetailsConfirmation(lines)) {
       setConfirmationOpen(true);
       return;
@@ -403,7 +417,7 @@ function CheckoutPage() {
                               return (
                                 <label key={key} htmlFor={id} className="mt-1 block first:mt-0">
                                   <span className="font-display text-xs text-muted-foreground">{key}</span>
-                                  <input {...aria(id)} value={value} onChange={(e) => updateFields(line.sku, { ...line.fields, [key]: e.target.value })} />
+                                  <input {...aria(id)} maxLength={120} value={value} onChange={(e) => updateFields(line.sku, { ...line.fields, [key]: e.target.value })} />
                                   {err(id)}
                                 </label>
                               );
@@ -465,6 +479,7 @@ function CheckoutPage() {
                     {totals}
                     {note.trim() && <p className="mt-3 text-xs text-muted-foreground">Note: {note}</p>}
                     {placeError && <p role="alert" className="mt-3 text-sm text-destructive">{placeError}</p>}
+                    {lines.some((line) => isTopup(line.categorySlug)) && <div className="mt-3"><TopupWarning /></div>}
                     <Button size="lg" className="mt-4 hidden w-full md:flex" disabled={sending} onClick={requestPlaceOrder}>
                       {sending ? "Placing your order" : placeError ? "Try again" : "Place order"}
                     </Button>
@@ -517,6 +532,7 @@ function CheckoutPage() {
       {/* Sticky action bar on phones */}
       {hydrated && !placed && lines.length > 0 && primaryAction && (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-4 pb-[calc(env(safe-area-inset-bottom)+12px)] pt-3 backdrop-blur md:hidden">
+          {step === 2 && lines.some((line) => isTopup(line.categorySlug)) && <div className="mb-3"><TopupWarning /></div>}
           <div className="flex items-center gap-3">
             {step > 0 && (
               <Button variant="outline" className="h-11 shrink-0 px-4" onClick={() => setStep((s) => s - 1)}>Back</Button>
@@ -540,6 +556,7 @@ function CheckoutPage() {
               confirm payment settlement or supplier-specific reversibility.
             </AlertDialogDescription>
           </AlertDialogHeader>
+          {lines.some((line) => isTopup(line.categorySlug)) && <TopupWarning />}
           <div className="max-h-64 space-y-3 overflow-y-auto">
             {detailsToConfirm.map((line) => (
               <section key={line.sku} className="rounded-xl border border-border bg-background/50 p-3 text-sm">
