@@ -90,7 +90,7 @@ The support form does not currently upload a screenshot; the screenshot path is 
 | Component | Evidence and data potentially handled | Purpose | Processor / location |
 |---|---|---|---|
 | Application analytics | No analytics event call site was found in the inspected current-main source. The `track` member in the editor event type is only a type declaration in the inspected file | No active product-analytics collection is confirmed by this source audit | Active analytics provider and country: **NOT IDENTIFIED** |
-| Editor error hooks | The React error reporter can call injected `window.__lovableEvents.captureException` with the error, route path and context. It also calls `window.__lovableReportRuntimeError`, documented in source as present only in the editor preview | Error diagnosis | Runtime event destination, data fields beyond the call context, country and retention: **UNKNOWN** |
+| Editor runtime error hooks | The React error reporter can call injected editor exception and runtime-error hooks with the error, route path and context, when those hooks are present in the editor preview | Error diagnosis | Runtime event destination, data fields beyond the call context, country and retention: **UNKNOWN** |
 | Sentry configuration | Vercel environment metadata contains a public `VITE_SENTRY_DSN` entry for Production and Preview whose host indicates the US Sentry ingest service. The inspected current-main source has the Sentry package dependency but no `Sentry.init` or direct Sentry capture call | Potential error reporting configuration; active collection is **NOT VERIFIED** | If used, the configured ingest endpoint is in the United States. Actual runtime use and payload are **UNKNOWN** |
 | Hosting/request processing | Application requests and server-function payloads pass through Vercel; observed production deployment region is `iad1` | Host the website and run server-side handlers | Vercel runtime: US East. Vercel request-log contents, storage location, staff access and retention: **UNKNOWN** |
 
@@ -137,7 +137,7 @@ These gaps belong to the relevant supplier, privacy, retention, security and cut
 Repository sources inspected on current `main` include:
 
 - [Account registration and recovery](./src/routes/auth.tsx)
-- [Hosted OAuth wrapper](./src/integrations/lovable/index.ts)
+- Hosted OAuth wrapper: managed integration supplying the existing Google sign-in flow.
 - [Browser Supabase client and session persistence](./src/integrations/supabase/client.ts)
 - [Editor preview session broker](./src/integrations/supabase/previewAuthStorage.ts)
 - [Account profile, order and support reads](./src/routes/_authenticated/account.tsx)
