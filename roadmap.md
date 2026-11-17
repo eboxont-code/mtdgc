@@ -9,7 +9,7 @@
 - [ ] MT-0086, MT-0087, MT-0103, MT-0143, MT-0163, MT-0221, MT-0224, MT-0095, MT-0129, MT-0146, MT-0169, MT-0225, MT-0228, MT-0114, MT-0116, MT-0140, MT-0160, MT-0177: ordered batch in progress; status and blockers will be recorded in the Master Plan. No publication or database writes.
 
 ## 17 Nov 2026 daily batch
-- [~] Ordered batch: branding, landed-work reconciliation, payment/status guards, fulfilment records, policies, private evidence, recipient/currency review, reporting, market designs and support. Master Plan status lines will record exact remaining gaps; no database writes, orders, payments or deployment.
+- [x] Branding documentation cleanup completed; generated integrations untouched. Master Plan reconciled every requested item with dated evidence or exact remaining gaps, and section 10 refreshed. Tests: 209 passed / 1 failed (admin endpoint inventory omits existing dashboard export); preview diagnostic build OK. No fresh phone/desktop verification, database writes, orders, payments or deployment. Remaining implementation stopped because workspace credits ran out; see section 35 and individual IN PROGRESS/BLOCKED rows.
 
 ## 12 Nov ordered pack
 - [x] MT-0181 (14 Nov 2026): real PUBG Mobile UC / 325 UC journey passed home -> catalog -> option/required details -> add -> drawer -> /cart -> /checkout payment/review at 390px, then 360px, then 1280px; CSS-only fixes for 44px targets, 360px header/action clipping, checkout step wrapping and pinned bars during field focus; no horizontal overflow or runtime errors, 22 regression tests passed, build OK; 440px-height focused-field simulation passed (physical keyboard unverified); stopped before placing orders, no order/payment/database writes, protected files unchanged, not published.
