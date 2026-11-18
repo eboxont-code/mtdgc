@@ -13,7 +13,7 @@ type EditorEvents = {
   ) => void;
 };
 
-// The window hook names below are injected by the hosted editor runtime and must keep their exact names.
+// The window hook names below are injected by the editor preview runtime and must keep their exact names.
 declare global {
   interface Window {
     __lovableEvents?: EditorEvents;

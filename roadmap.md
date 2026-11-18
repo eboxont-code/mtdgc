@@ -5,6 +5,10 @@
 > This file is preserved as a dated implementation and verification history. Checkboxes below record the status claimed by each historical pack when it was written; they are not a second live TODO register. When an old pack conflicts with the Master Plan, use the Master Plan and refresh the implementation evidence before changing task status.
 
 ## 12 Nov ordered pack
+## 18 Nov 2026 daily batch
+- [ ] 1. Branding cleanup: editor-preview comment updated; generated integration text is protected by platform instructions and cannot be edited here. Required runtime identifiers remain unchanged.
+- [ ] 2-30. Ordered implementation pending; no database writes, test orders, emails or deployment permitted.
+
 ## 15 Nov 2026 daily batch
 - [ ] MT-0086, MT-0087, MT-0103, MT-0143, MT-0163, MT-0221, MT-0224, MT-0095, MT-0129, MT-0146, MT-0169, MT-0225, MT-0228, MT-0114, MT-0116, MT-0140, MT-0160, MT-0177: ordered batch in progress; status and blockers will be recorded in the Master Plan. No publication or database writes.
 
