@@ -31,3 +31,4 @@
 - Storefront loader presentation uses shared route pending/error components and existing EmptyState/Skeleton primitives; retries invalidate existing reads without changing server actions or eligibility.
 - Customer order details and guest tracking share browser-safe status-to-next-action guidance; it mirrors existing proof-upload eligibility without authorizing transitions or assuming settlement/delivery evidence.
 - Payment status guards reuse payment-verification helpers in the existing admin actions; reviewed proof/order/amount matching blocks unverified fulfilment, while duplicate-reference reads fail closed without claiming concurrency-safe database uniqueness.
+- Admin dashboard metrics use the authenticated paginated dashboard read, not the ten-row overview sample; missing owner thresholds disable overdue classification.

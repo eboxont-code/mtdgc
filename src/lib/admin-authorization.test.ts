@@ -140,6 +140,7 @@ function assertAdminGuardIsFailClosed(): boolean {
 const expectedAdminFunctions = [
   "updateOrderStatus",
   "addOrderNote",
+  "getAdminOrderDashboard",
   "approveReview",
   "saveProduct",
   "archiveProduct",
@@ -155,7 +156,7 @@ const expectedAdminFunctions = [
 ];
 
 describe("MT-0164 server-side administrator authorization contract", () => {
-  test("the admin module exposes exactly the audited 14 server functions", () => {
+  test("the admin module exposes exactly the audited server functions", () => {
     assert.equal(exportedVariables.length, expectedAdminFunctions.length,
       "review every new export in admin.functions.ts before updating the audited endpoint inventory");
     assert.deepEqual(adminServerFunctions.map((fn) => fn.name).sort(), [...expectedAdminFunctions].sort());

@@ -5,7 +5,7 @@ import { DASHBOARD_FILTERS, dashboardMetrics, matchesDashboardFilter, sortFulfil
 
 type Props = { orders: DashboardOrder[] | null; error: string; days: 0 | 7 | 30 | 90; onPeriodChange: (days: 0 | 7 | 30 | 90) => void; onSelectOrder: (id: string) => void };
 const rate = (value: number | null) => value === null ? "Not enough data" : `${value.toFixed(1)}%`;
-const duration = (value: number | null) => value === null ? "Not recorded" : `${Math.round(value / 60000)} minutes`;
+const duration = (value: number | null) => value === null ? "Not enough data" : `${Math.round(value / 60000)} minutes`;
 
 export function OrderDashboardPanel({ orders, error, days, onPeriodChange, onSelectOrder }: Props) {
   const [filter, setFilter] = useState<DashboardFilter>("All");
@@ -25,7 +25,7 @@ export function OrderDashboardPanel({ orders, error, days, onPeriodChange, onSel
     </div>
     {error ? <p role="alert" className="mt-3 text-sm text-destructive">{error}</p> : orders === null ? <p role="status" className="mt-3 text-sm text-muted-foreground">Loading order dashboard.</p> : <>
       <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-        {DASHBOARD_FILTERS.filter((item) => item !== "All").map((item) => <Button key={item} variant={filter === item ? "primary" : "outline"} disabled={item === "Overdue"} aria-pressed={filter === item} onClick={() => setFilter(item)} className="h-auto min-h-16 min-w-0 flex-col whitespace-normal py-3 text-center"><span>{item}</span><span className="font-display text-xl">{item === "Overdue" ? "Not stated" : orders.filter((order) => matchesDashboardFilter(order, item)).length}</span></Button>)}
+        {DASHBOARD_FILTERS.filter((item) => item !== "All").map((item) => <Button key={item} variant={filter === item ? "primary" : "outline"} disabled={item === "Overdue"} aria-pressed={filter === item} onClick={() => setFilter(item)} className="h-auto min-h-16 min-w-0 flex-col whitespace-normal py-3 text-center"><span>{item}</span><span className="font-display text-xl">{item === "Overdue" ? "Not set" : orders.filter((order) => matchesDashboardFilter(order, item)).length}</span></Button>)}
       </div>
       <p className="mt-2 text-xs text-muted-foreground">Paid includes recorded paid and verified orders. Overdue is not classified: no approved threshold is recorded.</p>
       {metrics && <>

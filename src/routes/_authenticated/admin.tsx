@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 
-import { approveReview as approveReviewServer, archiveProduct as archiveProductServer, updateOrderStatus as updateOrderStatusServer } from "@/lib/admin.functions";
+import { approveReview as approveReviewServer, archiveProduct as archiveProductServer, updateOrderStatus as updateOrderStatusServer, getAdminOrderDashboard } from "@/lib/admin.functions";
+import { OrderDashboardPanel } from "@/components/admin/order-dashboard-panel";
+import type { DashboardOrder } from "@/lib/order-dashboard";
 
 import { CatalogPanel } from "@/components/admin/catalog-panel";
 import { OrdersPanel } from "@/components/admin/orders-panel";
@@ -88,6 +90,19 @@ function AdminPage() {
   const [editing, setEditing] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [dashboardOrders, setDashboardOrders] = useState<DashboardOrder[] | null>(null);
+  const [dashboardError, setDashboardError] = useState("");
+  const [dashboardDays, setDashboardDays] = useState<0 | 7 | 30 | 90>(30);
+  const loadDashboard = useServerFn(getAdminOrderDashboard);
+  useEffect(() => {
+    if (!allowed) return;
+    let active = true;
+    setDashboardOrders(null); setDashboardError("");
+    loadDashboard({ data: { days: dashboardDays } }).then((rows) => {
+      if (active) setDashboardOrders(rows);
+    }).catch(() => { if (active) setDashboardError("Could not load order metrics. Refresh to try again."); });
+    return () => { active = false; };
+  }, [allowed, dashboardDays, reloadKey, loadDashboard]);
   const updateOrderStatusFn = useServerFn(updateOrderStatusServer);
   const archiveProductFn = useServerFn(archiveProductServer);
   const approveReviewFn = useServerFn(approveReviewServer);
@@ -235,6 +250,7 @@ function AdminPage() {
             {tab === "verify" && <div role="tabpanel" id="admin-verify" aria-labelledby="admin-tab-verify" className="mt-6"><VerifyPanel /></div>}
             {tab === "payments" && <div role="tabpanel" id="admin-payments" aria-labelledby="admin-tab-payments" className="mt-6"><PaymentsPanel /></div>}
             <div role="tabpanel" id="admin-overview" aria-labelledby="admin-tab-overview" hidden={tab !== "overview"}>
+            <OrderDashboardPanel orders={dashboardOrders} error={dashboardError} days={dashboardDays} onPeriodChange={setDashboardDays} onSelectOrder={setSelectedOrderId} />
             <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
               {[
                 ["Products", String(products.length)],
