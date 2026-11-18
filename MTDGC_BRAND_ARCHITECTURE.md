@@ -8,6 +8,12 @@ This document defines the existing name and catalogue hierarchy. It does not cre
 
 ## 1. Brand hierarchy
 
+### Canonical public description - 18 Nov 2026
+
+MTDGC (Matrix Digital Goods & Commerce) is the Nepal and Australia store for game top-ups, gift cards and subscriptions. Prices are in NPR, with an Australian dollar guide. You order on this site and receive your item after payment is verified.
+
+The existing `BRAND_DESCRIPTION` in `src/lib/brand.ts` is the single source for home and About metadata, root fallback/social descriptions, Organization/WebSite descriptions, and the visible About/footer blurb. This preserves the approved description unchanged; it does not approve a new market or settlement currency.
+
 ```text
 Matrix
 └── Matrix Digital Goods & Commerce (MTDGC)

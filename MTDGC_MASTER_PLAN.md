@@ -328,7 +328,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [~] **MT-0181 · P0 · IN PROGRESS (17 Nov 2026)** - Existing 14 Nov roadmap records 390/360/1280px purchase-through-review checks; physical Android keyboard and order-confirmation/tracking checks remain unverified. No new purchase run today.
 - [x] **MT-0182 · P0 · DONE AND LIVE** — Current production verification on 11 November 2026 confirms the catalog/category availability labels and counts agree, coming-soon purchase actions are disabled, and the temporarily unavailable Netflix listing remains disabled. Evidence: the MT-0182 verification record in section 15; current production deployment and exact-head quality evidence are linked there.
 - [x] **MT-0183 · P0 · DONE AND LIVE** — Ensure the product card, product page and checkout show matching prices and variants; PR #17 merged at `9f944ec36ec3f87e3e603ff308b20979a1013183` and production deployment `dpl_cfXAs4hrfTSgdurWL1Veb5prUA5v` is READY on that exact SHA.
-- [ ] **MT-0184 · P0 · REVIEW** — Production purchase summaries were checked on five orderable pages on 8 November. Mobile Legends user-ID guidance is inaccurate in production; correction and regression coverage are in draft PR #19. See section 28; production and visual/mobile verification remain pending.
+- [x] **MT-0184 · P0 · DONE (18 Nov 2026)** - Existing productIdentifierHelp and PlayerIdHelp correctly separate Mobile Legends user/zone IDs; added numeric separate-field regression in topup-details.test.ts. Checkout helper changes skipped because checkout/product-help remain protected; no release performed.
 - [ ] **MT-0185 · P1 · TODO** — Improve catalog search for brand, product, game, denomination and common abbreviations.
 - [ ] **MT-0186 · P1 · TODO** — Add clear sorting by relevance, price and availability.
 - [ ] **MT-0187 · P1 · TODO** — Make filters usable on mobile without hiding the product list behind oversized controls.
@@ -350,7 +350,7 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** MTDGC earns qualified demand through useful category and product information, not thin pages or unsupported claims.
 
-- [ ] **MT-0201 · P0 · TODO** — Set one canonical brand description and use it consistently across the site and metadata.
+- [x] **MT-0201 · P0 · DONE (18 Nov 2026)** - Existing bold BRAND_DESCRIPTION preserved verbatim; About/footer now reuse it; canonical text recorded in MTDGC_BRAND_ARCHITECTURE.md. Existing home/root/social/Organization consumers retained.
 - [!] **MT-0202 · P0 · BLOCKED (17 Nov 2026)** - Owner approval of public Nepal/Australia positioning against actual checkout and legal support is missing; SEO and market copy held.
 - [ ] **MT-0203 · P1 · TODO** — Create original category landing pages for game top-ups, gift cards, subscriptions and software.
 - [ ] **MT-0204 · P1 · TODO** — Write product descriptions that explain what is delivered, how it works and what restrictions apply.

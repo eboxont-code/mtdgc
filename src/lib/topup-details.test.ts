@@ -30,4 +30,8 @@ describe("top-up details", () => {
     assert.ok((productIdentifierHelp("Mobile Legends Diamonds", "Zone ID") ?? "").includes("without brackets"));
     assert.equal(productIdentifierHelp("PUBG Mobile UC", "Player ID"), null);
   });
+  test("Mobile Legends requires separate numeric user and zone values", () => {
+    assert.deepEqual(validateProductDetails(["User ID", "Zone ID"], { "User ID": "12345678", "Zone ID": "1234" }), {});
+    assert.deepEqual(Object.keys(validateProductDetails(["User ID", "Zone ID"], { "User ID": "12345678 (1234)", "Zone ID": "(1234)" })), ["User ID", "Zone ID"]);
+  });
 });

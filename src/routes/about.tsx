@@ -48,7 +48,7 @@ function AboutPage() {
 
         <section className="mt-6 space-y-4 text-sm leading-relaxed text-foreground/85">
           <p>
-            {BRAND_NAME} is {BRAND_FULL_NAME}. The name on the store is {BRAND_NAME}. It is the store for game top-ups, gift cards and subscriptions for customers in Nepal and Australia.
+            {BRAND_DESCRIPTION}
           </p>
           <p>
             You order on this website. Each listing shows the pack, the region and the delivery time to expect. Checkout gives you an order number and the NPR total. You pay that total by QR or bank transfer, upload your payment confirmation, and the top-up, code or subscription details are delivered after payment is verified.
