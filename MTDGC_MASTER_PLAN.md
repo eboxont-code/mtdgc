@@ -260,7 +260,7 @@ Do not set numerical targets until a reliable baseline exists.
 - [x] **MT-0126 · P0 · DONE** — Never request a customer's game password, subscription password, OTP or payment PIN. Merged to main on 13 Nov 2026 (PR #24); verify live after the production deploy.
 - [ ] **MT-0127 · P1 · TODO** — Define realistic delivery-time ranges per product based on measured fulfilment history.
 - [ ] **MT-0128 · P1 · TODO** — Pause new orders when a supplier is unavailable or a product cannot be delivered.
-- [~] **MT-0129 · P1 · IN PROGRESS (17 Nov 2026)** - Existing queue sorts paid/verified first, then oldest waiting and saved identifier-risk ties; helper tests pass. Dashboard mounting and owner-approved promised-window data remain missing.
+- [x] **MT-0129 · P1 · DONE (19 Nov 2026)** — Mounted fulfilment queue orders paid/verified first then oldest; order-dashboard.test.ts covers queue ordering. Owner overdue threshold remains absent: Overdue disabled as Not set.
 - [ ] **MT-0130 · P1 · TODO** — Track fulfilment time from payment verification to delivery.
 - [ ] **MT-0131 · P1 · TODO** — Add exception workflows for supplier failure, wrong details and delayed delivery.
 - [ ] **MT-0132 · P1 · TODO** — Create a customer notification for each meaningful status change.
@@ -377,11 +377,11 @@ Do not set numerical targets until a reliable baseline exists.
 
 **Definition of done:** The operator can manage the business from reliable dashboards and expand only when each market and category passes its launch gate.
 
-- [~] **MT-0221 · P0 · IN PROGRESS (17 Nov 2026)** - Dashboard helper and panel contain all seven requested buckets; helper tests pass. Panel is not mounted in admin; overdue threshold is owner-to-confirm; populated admin and mobile/desktop verification remain pending.
+- [x] **MT-0221 · P0 · DONE (19 Nov 2026)** — Seven buckets mounted in admin.tsx at 170f204; empty OrderDashboardPanel checked at 390px then 1280px: no overflow, all controls >=44px; no authenticated/live-data check.
 - [~] **MT-0222 · P0 · IN PROGRESS (17 Nov 2026)** - Daily reconciliation view not implemented; dashboard order totals exist, supplier costs/settled bank receipts and actual refund amounts are missing. Execution stopped when workspace credits ran out.
 - [!] **MT-0223 · P0 · BLOCKED (17 Nov 2026)** - Verified supplier unit costs, currency, payment/FX/fulfilment costs and attribution are absent; no margin values invented.
-- [~] **MT-0224 · P0 · IN PROGRESS (17 Nov 2026)** - Existing dashboardMetrics calculates status-based completion/failure/refund rates with missing-data handling; tests pass. Admin panel mounting and populated visual verification remain pending.
-- [~] **MT-0225 · P1 · IN PROGRESS (17 Nov 2026)** - Existing helper computes verification/delivery medians from recorded timestamps and excludes missing samples; tests pass. Admin mounting and populated verification remain pending.
+- [x] **MT-0224 · P0 · DONE (19 Nov 2026)** — Status-based rates covered by order-dashboard.test.ts; empty panel shows Not enough data at 390px/1280px.
+- [x] **MT-0225 · P1 · DONE (19 Nov 2026)** — Recorded-timestamp medians and missing samples covered by order-dashboard.test.ts; both empty medians checked at 390px/1280px.
 - [x] **MT-0226 · P1 · DONE** — Track support contacts per 100 orders and the most common issue categories. Merged to main on 13 Nov 2026 (branch automation/mt-0226-support-metrics-20261113-run11); verify live after the production deploy.
 - [ ] **MT-0227 · P1 · TODO** — Track product availability and supplier confirmation freshness.
 - [!] **MT-0228 · P1 · BLOCKED (17 Nov 2026)** - No approved overdue/SLA threshold or supplier outage source exists; current dashboard deliberately disables overdue classification. Owner must supply threshold and supplier availability evidence.
@@ -1486,3 +1486,5 @@ There is no complete transition graph enforced by the application: direct admini
 ## 36. 19 Nov 2026 ordered batch evidence
 
 - 1. DONE: `src/lib/topup-details.ts` now checks character codes rather than a control-character regex; exhaustive 0-31, markup, length and unchanged DEL behavior covered in `topup-details.test.ts`. Lint: 0 errors (15 existing warnings); all 212 tests passed; automatic preview build OK. Build setup and managed files unchanged.
+
+- 2. DONE: MT-0221/0224/0225/0129 existing mount reconciled with phone-first empty-panel screenshots, no overflow or sub-44px controls. BLOCKED: overdue classification requires owner-approved duration and start timestamp; authenticated populated rendering not exercised because live account access is not permitted for the configured backend.
