@@ -32,3 +32,5 @@
 - Customer order details and guest tracking share browser-safe status-to-next-action guidance; it mirrors existing proof-upload eligibility without authorizing transitions or assuming settlement/delivery evidence.
 - Payment status guards reuse payment-verification helpers in the existing admin actions; reviewed proof/order/amount matching blocks unverified fulfilment, while duplicate-reference reads fail closed without claiming concurrency-safe database uniqueness.
 - Admin dashboard metrics use the authenticated paginated dashboard read, not the ten-row overview sample; missing owner thresholds disable overdue classification.
+
+- Order creation validates current saved requirements through order-required-details before inserts; shared format checks prevent client-only validation bypass without claiming account existence.

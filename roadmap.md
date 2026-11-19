@@ -8,7 +8,8 @@
 ## 19 Nov 2026 daily batch
 - [x] 1. Repo health: replaced the identifier control-character regex with a character-code check; exhaustive 0-31 regression coverage added. Quality results recorded in Master Plan section 36.
 - [x] 2. MT-0221/0224/0225/0129: existing dashboard mount reconciled; isolated empty-state checks passed at 390px then 1280px, seven buckets, five missing-data metrics, 44px controls, no overflow; overdue threshold remains owner-blocked.
-- [ ] 3-30. Ordered work pending; no live writes, test orders or deployment permitted.
+- [x] 3. MT-0253/0030: saved-requirement server validation implemented with three focused tests; 215 tests, lint 0 errors and automatic build OK; no orders created.
+- [ ] 4-30. Ordered work pending; no live writes, test orders or deployment permitted.
 
 ## 18 Nov 2026 daily batch
 - [ ] 1. Branding cleanup: editor-preview comment updated; generated integration text is protected by platform instructions and cannot be edited here. Required runtime identifiers remain unchanged.

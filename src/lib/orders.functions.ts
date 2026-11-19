@@ -6,6 +6,7 @@ import { hasCheckoutPriceSnapshotChanges } from "@/lib/checkout-price-snapshot";
 import { findUnsafeCustomerRequirement, isSafeCustomerRequirements, UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE } from "@/lib/supplier-safety";
 import { generateOrderReference } from "@/lib/order-reference";
 import { assertOrderDetailsConfirmed } from "@/lib/order-confirmation";
+import { assertRequiredOrderDetails } from "@/lib/order-required-details";
 import { evaluateOrderLookupRateLimit } from "@/lib/order-lookup-rate-limit";
 import { buildOrderItemFieldsSnapshot, hasReservedOrderItemField } from "@/lib/pre-fulfilment";
 import { customerContactFields, hasCustomerContact } from "@/lib/customer-contact-schema";
@@ -104,6 +105,7 @@ export const placeOrder = createServerFn({ method: "POST" })
       if (v.currency !== "NPR" || p.currency !== "NPR") throw new Error("This item's price currency is not supported by checkout.");
       const requirements = p.requirements;
       if (!isSafeCustomerRequirements(requirements)) throw new Error(UNSAFE_CUSTOMER_REQUIREMENT_MESSAGE);
+      assertRequiredOrderDetails(requirements, line.fields);
       return {
         orderItem: {
           product_id: p.id,
