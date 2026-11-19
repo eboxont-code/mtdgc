@@ -4,13 +4,14 @@ import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { getPaymentProofUrl, listPaymentsToVerify, reviewPayment } from "@/lib/admin.functions";
 import { formatNpr } from "@/lib/format";
+import { DUPLICATE_REFERENCE_ERROR } from "@/lib/payment-verification";
 
 type Row = {
   id: string;
   order_number: string;
   total_minor: number;
   updated_at: string;
-  proof: { id: string; transaction_ref: string; created_at: string } | null;
+  proof: { id: string; transaction_ref: string; created_at: string; duplicateReference: boolean } | null;
 };
 
 export function VerifyPanel() {
@@ -75,14 +76,15 @@ export function VerifyPanel() {
       ) : (
         <ul className="mt-3 grid gap-3">
           {rows.map((row) => (
-            <li key={row.id} className="rounded-lg border border-glass-border bg-glass-bg p-3">
+            <li key={row.id} className="min-w-0 rounded-lg border border-glass-border bg-glass-bg p-3">
               <div className="flex flex-wrap justify-between gap-2 font-display text-sm">
                 <strong>{row.order_number}</strong>
                 <span>{formatNpr(row.total_minor)}</span>
               </div>
               {row.proof ? (
                 <>
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  {row.proof.duplicateReference && <p role="alert" className="mt-2 break-words text-sm text-destructive">{DUPLICATE_REFERENCE_ERROR}</p>}
+                  <p className="mt-1 break-words text-xs text-muted-foreground">
                     Reference {row.proof.transaction_ref} · Submitted {new Date(row.proof.created_at).toLocaleString()}
                   </p>
                   {urls[row.proof.id] ? (
@@ -90,17 +92,17 @@ export function VerifyPanel() {
                       <img src={urls[row.proof.id]} alt={`Payment screenshot for ${row.order_number}`} className="max-h-72 w-full rounded-md object-contain" />
                     </a>
                   ) : (
-                    <Button variant="outline" size="sm" className="mt-2 min-h-11" onClick={() => open(row.proof!.id)}>View screenshot</Button>
+                    <Button variant="outline" size="sm" className="mt-2 min-h-11" onClick={() => { if (row.proof) void open(row.proof.id); }}>View screenshot</Button>
                   )}
                   <label className="mt-3 block text-xs text-muted-foreground" htmlFor={`note-${row.proof.id}`}>Note (required to reject)</label>
-                  <textarea id={`note-${row.proof.id}`} rows={2} maxLength={500} value={notes[row.proof.id] ?? ""} onChange={(e) => setNotes((n) => ({ ...n, [row.proof!.id]: e.target.value }))} className="mt-1 w-full rounded-md border border-input bg-card p-2 text-sm" />
+                  <textarea id={`note-${row.proof.id}`} rows={2} maxLength={500} value={notes[row.proof.id] ?? ""} onChange={(e) => { const proof = row.proof; if (proof) setNotes((n) => ({ ...n, [proof.id]: e.target.value })); }} className="mt-1 min-h-11 w-full rounded-md border border-input bg-card p-2 text-base" />
                   <label className="mt-2 flex min-h-11 items-center gap-2 text-sm">
-                    <input type="checkbox" checked={!!askNew[row.proof.id]} onChange={(e) => setAskNew((a) => ({ ...a, [row.proof!.id]: e.target.checked }))} />
+                    <input type="checkbox" checked={!!askNew[row.proof.id]} onChange={(e) => { const proof = row.proof; if (proof) setAskNew((a) => ({ ...a, [proof.id]: e.target.checked })); }} />
                     Ask for a new proof
                   </label>
                   <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-                    <Button className="min-h-11" disabled={busy === row.proof.id} onClick={() => decide(row.proof!.id, "verify")}>Verify payment</Button>
-                    <Button className="min-h-11" variant="outline" disabled={busy === row.proof.id} onClick={() => decide(row.proof!.id, "reject")}>Reject</Button>
+                    <Button className="min-h-11" disabled={busy === row.proof.id || row.proof.duplicateReference} onClick={() => { if (row.proof) void decide(row.proof.id, "verify"); }}>Verify payment</Button>
+                    <Button className="min-h-11" variant="outline" disabled={busy === row.proof.id} onClick={() => { if (row.proof) void decide(row.proof.id, "reject"); }}>Reject</Button>
                   </div>
                 </>
               ) : (

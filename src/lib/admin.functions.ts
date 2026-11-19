@@ -236,9 +236,16 @@ export const listPaymentsToVerify = createServerFn({ method: "POST" })
     const proofs = ids.length
       ? (await supabaseAdmin.from("payment_proofs").select("id, order_id, transaction_ref, amount_minor, created_at, status").in("order_id", ids).eq("status", "submitted")).data ?? []
       : [];
+    const references: { order_id: string; transaction_ref: string }[] = [];
+    for (let offset = 0; ids.length; offset += 500) {
+      const { data: page, error: referenceError } = await supabaseAdmin.from("payment_proofs").select("order_id, transaction_ref").order("id").range(offset, offset + 499);
+      if (referenceError || !page) throw new Error("Could not check transaction references. Verification is unavailable.");
+      references.push(...page);
+      if (page.length < 500) break;
+    }
     return (orders ?? []).map((o) => {
       const proof = proofs.filter((p) => p.order_id === o.id).sort((a, b) => b.created_at.localeCompare(a.created_at))[0] ?? null;
-      return { ...o, proof: proof ? { id: proof.id, transaction_ref: proof.transaction_ref, created_at: proof.created_at } : null };
+      return { ...o, proof: proof ? { id: proof.id, transaction_ref: proof.transaction_ref, created_at: proof.created_at, duplicateReference: hasDuplicatePaymentReference(o.id, proof.transaction_ref, references) } : null };
     });
   });
 

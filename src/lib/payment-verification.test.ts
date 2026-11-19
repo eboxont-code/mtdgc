@@ -19,4 +19,10 @@ describe("15 Nov payment safeguards", () => {
     assert.equal(hasDuplicatePaymentReference("order-b", "TX-1234", proofs), false);
     assert.equal(hasDuplicatePaymentReference("order-a", "TX-1235", proofs), false);
   });
+  test("duplicate reference detection includes records after the first page and rejected references", () => {
+    const pages = Array.from({ length: 501 }, (_, index) => ({ order_id: `order-${index}`, transaction_ref: `ref-${index}` }));
+    pages[500] = { order_id: "other-order", transaction_ref: " TX-SECOND-PAGE " };
+    assert.equal(hasDuplicatePaymentReference("current-order", "tx-second-page", pages), true);
+    assert.equal(hasDuplicatePaymentReference("current-order", "", pages), false);
+  });
 });
