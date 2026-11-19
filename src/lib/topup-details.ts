@@ -9,7 +9,8 @@ export const TOPUP_DETAILS_WARNING = "Check your player ID, zone and server. Top
 export function validateProductIdentifier(label: string, input: string): string | null {
   const value = input.trim();
   if (!value) return `Please enter ${label.toLowerCase()}.`;
-  if (value.length > 120 || /[\u0000-\u001f<>]/.test(value)) return "Enter a valid detail using no more than 120 characters.";
+  const hasUnsafeCharacter = Array.from(value).some((character) => character.charCodeAt(0) < 32 || character === "<" || character === ">");
+  if (value.length > 120 || hasUnsafeCharacter) return "Enter a valid detail using no more than 120 characters.";
   if (/e-?mail/i.test(label) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return "Enter a valid recipient email.";
   if (/player tag/i.test(label) && !/^#?[A-Za-z0-9]+$/.test(value)) return "Enter the player tag from your game profile.";
   if (/player id|user id|\buid\b|zone id/i.test(label) && !/^\d+$/.test(value)) return "Enter digits only, copied from your game profile.";

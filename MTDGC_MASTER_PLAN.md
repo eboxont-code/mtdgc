@@ -1,5 +1,7 @@
 # MTDGC Master Plan
 
+<!-- Current ordered-batch evidence is in section 36. -->
+
 **Project:** Matrix Digital Goods & Commerce (MTDGC)
 **Domain:** https://mtdgc.com
 **Version:** 2.2 · 8 November 2026
@@ -1480,3 +1482,7 @@ There is no complete transition graph enforced by the application: direct admini
 - Preview diagnostic observed before edits: build OK. No manual build/typecheck, production deployment, authenticated admin/order flow or fresh 390px/desktop screenshot check completed in this run.
 - MT-0181 evidence is the existing 14 Nov roadmap pass, not a new run. Existing code findings are explicitly partial where visual, settlement, schema or supplier evidence is absent.
 - All items in the 17 Nov request have dated DONE, IN PROGRESS or BLOCKED register entries. Unfinished implementation is not called DONE; credit exhaustion is recorded separately from genuine external-fact blockers.
+
+## 36. 19 Nov 2026 ordered batch evidence
+
+- 1. DONE: `src/lib/topup-details.ts` now checks character codes rather than a control-character regex; exhaustive 0-31, markup, length and unchanged DEL behavior covered in `topup-details.test.ts`. Lint: 0 errors (15 existing warnings); all 212 tests passed; automatic preview build OK. Build setup and managed files unchanged.

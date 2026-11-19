@@ -3,6 +3,15 @@ import { strict as assert } from "node:assert";
 import { isTopup, productIdentifierHelp, validateProductDetails, validateProductIdentifier } from "./topup-details";
 
 describe("top-up details", () => {
+  test("control characters and markup remain rejected without a control regex", () => {
+    for (let code = 0; code < 32; code += 1) {
+      assert.notEqual(validateProductIdentifier("Region", `Nep${String.fromCharCode(code)}al`), null);
+    }
+    assert.notEqual(validateProductIdentifier("Region", "<Nepal>"), null);
+    assert.notEqual(validateProductIdentifier("Region", "a".repeat(121)), null);
+    assert.equal(validateProductIdentifier("Region", "Nepal"), null);
+    assert.equal(validateProductIdentifier("Region", `Nep${String.fromCharCode(127)}al`), null);
+  });
   test("only the existing top-up category qualifies", () => {
     assert.equal(isTopup("game-top-ups"), true);
     assert.equal(isTopup("gift-cards"), false);

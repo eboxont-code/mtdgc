@@ -5,6 +5,10 @@
 > This file is preserved as a dated implementation and verification history. Checkboxes below record the status claimed by each historical pack when it was written; they are not a second live TODO register. When an old pack conflicts with the Master Plan, use the Master Plan and refresh the implementation evidence before changing task status.
 
 ## 12 Nov ordered pack
+## 19 Nov 2026 daily batch
+- [x] 1. Repo health: replaced the identifier control-character regex with a character-code check; exhaustive 0-31 regression coverage added. Quality results recorded in Master Plan section 36.
+- [ ] 2-30. Ordered work pending; no live writes, test orders or deployment permitted.
+
 ## 18 Nov 2026 daily batch
 - [ ] 1. Branding cleanup: editor-preview comment updated; generated integration text is protected by platform instructions and cannot be edited here. Required runtime identifiers remain unchanged.
 - [ ] 2-30. Ordered implementation pending; no database writes, test orders, emails or deployment permitted.
